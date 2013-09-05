@@ -1,7 +1,7 @@
 /* TEAM */
 
 	Author: Jose Diaz-Gonzalez
-	Site: http://example.dev
+	Site: http://josediazgonzalez.com/
 	Github: josegonzalez
 	Twitter: @savant
 	From: New York, New York
