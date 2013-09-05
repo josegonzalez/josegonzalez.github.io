@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
- <link href="http://example.dev/atom.xml" rel="self"/>
- <link href="http://example.dev/"/>
- <updated>2013-04-30T02:58:16-04:00</updated>
- <id>http://example.dev/</id>
+ <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
+ <link href="http://josediazgonzalez.com/"/>
+ <updated>2013-09-05T04:59:13-07:00</updated>
+ <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
@@ -14,457 +14,457 @@
 
  <entry>
    <title type="html"><![CDATA[Using Beaver to ship log files to Redis/Logstash]]></title>
-   <link href="http://example.dev/2013/01/01/setting-up-beaver-for-use-with-logstash/"/>
-   <updated>2013-01-01T23:34:00-05:00</updated>
-   <id>http://example.dev/2013/01/01/setting-up-beaver-for-use-with-logstash/</id>
+   <link href="http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/"/>
+   <updated>2013-01-01T23:34:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/</id>
    <content type="html"><![CDATA[This post will guide you through a simple Beaver installation.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Why to Actually Choose CakePHP]]></title>
-   <link href="http://example.dev/2012/09/07/why-to-actually-choose-cakephp/"/>
-   <updated>2012-09-07T00:00:00-04:00</updated>
-   <id>http://example.dev/2012/09/07/why-to-actually-choose-cakephp/</id>
+   <link href="http://josediazgonzalez.com/2012/09/07/why-to-actually-choose-cakephp/"/>
+   <updated>2012-09-07T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2012/09/07/why-to-actually-choose-cakephp/</id>
    <content type="html"><![CDATA[Why I think CakePHP is a great framework option]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Why CakePHP?]]></title>
-   <link href="http://example.dev/2012/09/07/why-cakephp/"/>
-   <updated>2012-09-07T00:00:00-04:00</updated>
-   <id>http://example.dev/2012/09/07/why-cakephp/</id>
+   <link href="http://josediazgonzalez.com/2012/09/07/why-cakephp/"/>
+   <updated>2012-09-07T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2012/09/07/why-cakephp/</id>
    <content type="html"><![CDATA[Why choose CakePHP over any other framework?]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Upgrading from Lion to Mountain Lion]]></title>
-   <link href="http://example.dev/2012/07/25/upgrading-from-lion-to-mountain-lion/"/>
-   <updated>2012-07-25T00:00:00-04:00</updated>
-   <id>http://example.dev/2012/07/25/upgrading-from-lion-to-mountain-lion/</id>
+   <link href="http://josediazgonzalez.com/2012/07/25/upgrading-from-lion-to-mountain-lion/"/>
+   <updated>2012-07-25T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2012/07/25/upgrading-from-lion-to-mountain-lion/</id>
    <content type="html"><![CDATA[A guide to fixing all the breaking php and ruby packages in Mountain Lion]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Full Stack CakePHP Deployment With Chef and Capistrano - Part 4]]></title>
-   <link href="http://example.dev/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/"/>
-   <updated>2012-05-02T01:53:00-04:00</updated>
-   <id>http://example.dev/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/</id>
+   <link href="http://josediazgonzalez.com/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/"/>
+   <updated>2012-05-02T01:53:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/</id>
    <content type="html"><![CDATA[How to create a cookbook for the Chef Deployment Tool and an explanation of DNA.json files]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Server Monitoring Tools]]></title>
-   <link href="http://example.dev/2012/03/28/server-monitoring-tools/"/>
-   <updated>2012-03-28T00:00:00-04:00</updated>
-   <id>http://example.dev/2012/03/28/server-monitoring-tools/</id>
+   <link href="http://josediazgonzalez.com/2012/03/28/server-monitoring-tools/"/>
+   <updated>2012-03-28T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2012/03/28/server-monitoring-tools/</id>
    <content type="html"><![CDATA[An easy to install, maintain, and use tool for server monitoring doesn't exist, why is that?]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Full Stack CakePHP Deployment With Chef and Capistrano - Part 3]]></title>
-   <link href="http://example.dev/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/"/>
-   <updated>2012-01-17T00:00:00-05:00</updated>
-   <id>http://example.dev/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/</id>
+   <link href="http://josediazgonzalez.com/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/"/>
+   <updated>2012-01-17T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/</id>
    <content type="html"><![CDATA[Templating, Custom Resources, and Cookbook creation for the Chef Deployment Tool]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Full Stack CakePHP Deployment With Chef and Capistrano - Part 2]]></title>
-   <link href="http://example.dev/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/"/>
-   <updated>2011-10-26T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/</id>
+   <link href="http://josediazgonzalez.com/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/"/>
+   <updated>2011-10-26T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/</id>
    <content type="html"><![CDATA[What goes in a Chef Recipe, and how much do I really need to know about resources?]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Full Stack CakePHP Deployment With Chef and Capistrano - Part 1]]></title>
-   <link href="http://example.dev/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/"/>
-   <updated>2011-10-03T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/</id>
+   <link href="http://josediazgonzalez.com/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/"/>
+   <updated>2011-10-03T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/</id>
    <content type="html"><![CDATA[This text is the first in a long series to correct an extremely disastrous talk at CakeFest 2011. It will also hopefully apply to more than CakePHP.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[A CakePHP Book I can finally recommend]]></title>
-   <link href="http://example.dev/2011/06/19/a-cakephp-book-i-can-finally-recommend/"/>
-   <updated>2011-06-19T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/06/19/a-cakephp-book-i-can-finally-recommend/</id>
+   <link href="http://josediazgonzalez.com/2011/06/19/a-cakephp-book-i-can-finally-recommend/"/>
+   <updated>2011-06-19T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/06/19/a-cakephp-book-i-can-finally-recommend/</id>
    <content type="html"><![CDATA[Review of Mariano Iglesias' CakePHP 1.3 Application Development Cookbook]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[The Daily Dev Log - 5]]></title>
-   <link href="http://example.dev/2011/06/11/the-daily-dev-log-5/"/>
-   <updated>2011-06-11T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/06/11/the-daily-dev-log-5/</id>
+   <link href="http://josediazgonzalez.com/2011/06/11/the-daily-dev-log-5/"/>
+   <updated>2011-06-11T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/06/11/the-daily-dev-log-5/</id>
    <content type="html"><![CDATA[Writing a CakeRoute might be straightforward, and when used correctly, can really trim down the number of routes you connect in your routes.php file.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Daily Dev Log - 4]]></title>
-   <link href="http://example.dev/2011/06/02/the-daily-dev-log-4/"/>
-   <updated>2011-06-02T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/06/02/the-daily-dev-log-4/</id>
+   <link href="http://josediazgonzalez.com/2011/06/02/the-daily-dev-log-4/"/>
+   <updated>2011-06-02T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/06/02/the-daily-dev-log-4/</id>
    <content type="html"><![CDATA[On the subject of updating urls in a web framework that gives you access to a router, it's important to have flexibility in writing those routes.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[The Daily Dev Log 3]]></title>
-   <link href="http://example.dev/2011/05/27/the-daily-dev-log-3/"/>
-   <updated>2011-05-27T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/05/27/the-daily-dev-log-3/</id>
+   <link href="http://josediazgonzalez.com/2011/05/27/the-daily-dev-log-3/"/>
+   <updated>2011-05-27T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/05/27/the-daily-dev-log-3/</id>
    <content type="html"><![CDATA[Defining joins in CakePHP finds is simple, but can result in weird sql statements if used in conjunction with Containable.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[The Daily Dev Log 2]]></title>
-   <link href="http://example.dev/2011/05/25/the-daily-dev-log-2/"/>
-   <updated>2011-05-25T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/05/25/the-daily-dev-log-2/</id>
+   <link href="http://josediazgonzalez.com/2011/05/25/the-daily-dev-log-2/"/>
+   <updated>2011-05-25T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/05/25/the-daily-dev-log-2/</id>
    <content type="html"><![CDATA[Always remember to include the host in the protocol when using the EmailComponent]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[The Daily Dev Log - 1]]></title>
-   <link href="http://example.dev/2011/05/24/the-daily-dev-log-1/"/>
-   <updated>2011-05-24T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/05/24/the-daily-dev-log-1/</id>
+   <link href="http://josediazgonzalez.com/2011/05/24/the-daily-dev-log-1/"/>
+   <updated>2011-05-24T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/05/24/the-daily-dev-log-1/</id>
    <content type="html"><![CDATA[I spent around 7 hours putzing with History.js in cake_admin. While History.js should auto-ajax any web application, it doesn't quite play nice with CakePHP.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Using CakeAdmin to generate backend applications]]></title>
-   <link href="http://example.dev/2011/05/17/using-cakeadmin-to-generate-backend-applications/"/>
-   <updated>2011-05-17T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/05/17/using-cakeadmin-to-generate-backend-applications/</id>
+   <link href="http://josediazgonzalez.com/2011/05/17/using-cakeadmin-to-generate-backend-applications/"/>
+   <updated>2011-05-17T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/05/17/using-cakeadmin-to-generate-backend-applications/</id>
    <content type="html"><![CDATA[CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[My development setup]]></title>
-   <link href="http://example.dev/2011/04/13/my-development-setup/"/>
-   <updated>2011-04-13T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/04/13/my-development-setup/</id>
+   <link href="http://josediazgonzalez.com/2011/04/13/my-development-setup/"/>
+   <updated>2011-04-13T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/04/13/my-development-setup/</id>
    <content type="html"><![CDATA[For the purposes of archiving how I like to develop, I'll chronicle a few things here.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[A Standard Readme for your CakePHP Plugins]]></title>
-   <link href="http://example.dev/2011/04/05/a-standard-readme-for-your-cakephp-plugins/"/>
-   <updated>2011-04-05T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/04/05/a-standard-readme-for-your-cakephp-plugins/</id>
+   <link href="http://josediazgonzalez.com/2011/04/05/a-standard-readme-for-your-cakephp-plugins/"/>
+   <updated>2011-04-05T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/04/05/a-standard-readme-for-your-cakephp-plugins/</id>
    <content type="html"><![CDATA[Please stop using jank readmes for your CakePHP plugins, and use something like this instead.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Carl Sutton of Infinitas CMS]]></title>
-   <link href="http://example.dev/2011/03/27/carl-sutton-of-infinitas-cms/"/>
-   <updated>2011-03-27T00:00:00-04:00</updated>
-   <id>http://example.dev/2011/03/27/carl-sutton-of-infinitas-cms/</id>
+   <link href="http://josediazgonzalez.com/2011/03/27/carl-sutton-of-infinitas-cms/"/>
+   <updated>2011-03-27T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2011/03/27/carl-sutton-of-infinitas-cms/</id>
    <content type="html"><![CDATA[Infinitas CMS is a pretty well-built and performant CMS, and Carl Sutton has a few thoughts to share on CakePHP in general.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Embedding Custom Finds in Behaviors]]></title>
-   <link href="http://example.dev/2010/12/01/embedding-custom-finds-in-behaviors/"/>
-   <updated>2010-12-01T00:00:00-05:00</updated>
-   <id>http://example.dev/2010/12/01/embedding-custom-finds-in-behaviors/</id>
+   <link href="http://josediazgonzalez.com/2010/12/01/embedding-custom-finds-in-behaviors/"/>
+   <updated>2010-12-01T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2010/12/01/embedding-custom-finds-in-behaviors/</id>
    <content type="html"><![CDATA[Embedding custom finds in behaviors is extremely useful, but not the most straight-forward thing to do. Here's how.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Fahad Ibnay Heylaal, creator of Croogo CMS]]></title>
-   <link href="http://example.dev/2010/10/30/fahad-ibnay-heylaal-creator-of-croogo-cms/"/>
-   <updated>2010-10-30T00:00:00-04:00</updated>
-   <id>http://example.dev/2010/10/30/fahad-ibnay-heylaal-creator-of-croogo-cms/</id>
+   <link href="http://josediazgonzalez.com/2010/10/30/fahad-ibnay-heylaal-creator-of-croogo-cms/"/>
+   <updated>2010-10-30T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2010/10/30/fahad-ibnay-heylaal-creator-of-croogo-cms/</id>
    <content type="html"><![CDATA[What does Fahad think about Croogo, CakePHP, and the CakePHP community in general?]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Using loadModel() in the Model]]></title>
-   <link href="http://example.dev/2010/10/05/using-loadmodel-in-the-model/"/>
-   <updated>2010-10-05T00:00:00-04:00</updated>
-   <id>http://example.dev/2010/10/05/using-loadmodel-in-the-model/</id>
+   <link href="http://josediazgonzalez.com/2010/10/05/using-loadmodel-in-the-model/"/>
+   <updated>2010-10-05T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2010/10/05/using-loadmodel-in-the-model/</id>
    <content type="html"><![CDATA[How do you use loadModel() in the CakePHP Model? Hint, you don't. There are other ways though.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Ruby on Rails Web Developer positions available in Chicago, NYC, San Francisco]]></title>
-   <link href="http://example.dev/2010/09/23/ruby-on-rails-web-developer-positions-available-in-chicago-nyc-san-francisco/"/>
-   <updated>2010-09-23T00:00:00-04:00</updated>
-   <id>http://example.dev/2010/09/23/ruby-on-rails-web-developer-positions-available-in-chicago-nyc-san-francisco/</id>
+   <link href="http://josediazgonzalez.com/2010/09/23/ruby-on-rails-web-developer-positions-available-in-chicago-nyc-san-francisco/"/>
+   <updated>2010-09-23T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2010/09/23/ruby-on-rails-web-developer-positions-available-in-chicago-nyc-san-francisco/</id>
    <content type="html"><![CDATA[Clearly this person doesn't even know what I do. Also, grammar matters?]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Why CakePHP documentation sucks and what I'm doing about it]]></title>
-   <link href="http://example.dev/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/"/>
-   <updated>2010-09-13T00:00:00-04:00</updated>
-   <id>http://example.dev/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/</id>
+   <link href="http://josediazgonzalez.com/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/"/>
+   <updated>2010-09-13T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/</id>
    <content type="html"><![CDATA[When people complain about documentation, the solution is to write more, and better, documentation.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Cakefest Conference Notes]]></title>
-   <link href="http://example.dev/2010/09/04/cakefest-conference-notes/"/>
-   <updated>2010-09-04T00:00:00-04:00</updated>
-   <id>http://example.dev/2010/09/04/cakefest-conference-notes/</id>
+   <link href="http://josediazgonzalez.com/2010/09/04/cakefest-conference-notes/"/>
+   <updated>2010-09-04T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2010/09/04/cakefest-conference-notes/</id>
    <content type="html"><![CDATA[CakeFest 2010 Conference notes and links]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[CakePHP Plugins - A Biblical Retelling]]></title>
-   <link href="http://example.dev/2010/08/16/cakephp-plugins-a-biblical-retelling/"/>
-   <updated>2010-08-16T00:00:00-04:00</updated>
-   <id>http://example.dev/2010/08/16/cakephp-plugins-a-biblical-retelling/</id>
+   <link href="http://josediazgonzalez.com/2010/08/16/cakephp-plugins-a-biblical-retelling/"/>
+   <updated>2010-08-16T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2010/08/16/cakephp-plugins-a-biblical-retelling/</id>
    <content type="html"><![CDATA[A list of CakePHP plugins I use and abuse on a daily basis, as well as things I've discovered but haven't found a use for but seem to be cool.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Things to install or update on my mac when first installing]]></title>
-   <link href="http://example.dev/2010/02/10/things-to-install-or-update-on-my-mac-when-first-installing/"/>
-   <updated>2010-02-10T00:00:00-05:00</updated>
-   <id>http://example.dev/2010/02/10/things-to-install-or-update-on-my-mac-when-first-installing/</id>
+   <link href="http://josediazgonzalez.com/2010/02/10/things-to-install-or-update-on-my-mac-when-first-installing/"/>
+   <updated>2010-02-10T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2010/02/10/things-to-install-or-update-on-my-mac-when-first-installing/</id>
    <content type="html"><![CDATA[A list of things I install and do on my mac whenever I re-install or update it.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Drop-down select fields in CakePHP]]></title>
-   <link href="http://example.dev/2010/02/09/drop-down-select-fields-in-cakephp/"/>
-   <updated>2010-02-09T00:00:00-05:00</updated>
-   <id>http://example.dev/2010/02/09/drop-down-select-fields-in-cakephp/</id>
+   <link href="http://josediazgonzalez.com/2010/02/09/drop-down-select-fields-in-cakephp/"/>
+   <updated>2010-02-09T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2010/02/09/drop-down-select-fields-in-cakephp/</id>
    <content type="html"><![CDATA[For anyone wishing to make dropdown select fields in CakePHP forms happen automagically, here are some facts.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Your username/password should never be a lastname/uid]]></title>
-   <link href="http://example.dev/2010/02/05/your-username-password-should-never-be-a-lastname-uid/"/>
-   <updated>2010-02-05T00:00:00-05:00</updated>
-   <id>http://example.dev/2010/02/05/your-username-password-should-never-be-a-lastname-uid/</id>
+   <link href="http://josediazgonzalez.com/2010/02/05/your-username-password-should-never-be-a-lastname-uid/"/>
+   <updated>2010-02-05T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2010/02/05/your-username-password-should-never-be-a-lastname-uid/</id>
    <content type="html"><![CDATA[I'm developing an application where the client wants the username and password combination to be a lastname and member ID number. This is quite stupid.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[You want access? Well you no can has! - A CakePHP AccessComponent]]></title>
-   <link href="http://example.dev/2010/01/11/you-want-access-well-you-no-can-has-cakephp-access-component/"/>
-   <updated>2010-01-11T00:00:00-05:00</updated>
-   <id>http://example.dev/2010/01/11/you-want-access-well-you-no-can-has-cakephp-access-component/</id>
+   <link href="http://josediazgonzalez.com/2010/01/11/you-want-access-well-you-no-can-has-cakephp-access-component/"/>
+   <updated>2010-01-11T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2010/01/11/you-want-access-well-you-no-can-has-cakephp-access-component/</id>
    <content type="html"><![CDATA[One of the things I am working on is Authentication and Access Control. While Authsome Component takes care of authentication, we still need something more.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Clean up your Model data with Purifiable Behavior]]></title>
-   <link href="http://example.dev/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/"/>
-   <updated>2010-01-10T00:00:00-05:00</updated>
-   <id>http://example.dev/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/</id>
+   <link href="http://josediazgonzalez.com/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/"/>
+   <updated>2010-01-10T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/</id>
    <content type="html"><![CDATA[Sanitizing saved data when rendering the view is stupid, and it should be done when creating/updating records.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[How to Grow or A Look Back at 2009]]></title>
-   <link href="http://example.dev/2010/01/09/how-to-grow-or-a-look-back-at-2009/"/>
-   <updated>2010-01-09T00:00:00-05:00</updated>
-   <id>http://example.dev/2010/01/09/how-to-grow-or-a-look-back-at-2009/</id>
+   <link href="http://josediazgonzalez.com/2010/01/09/how-to-grow-or-a-look-back-at-2009/"/>
+   <updated>2010-01-09T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2010/01/09/how-to-grow-or-a-look-back-at-2009/</id>
    <content type="html"><![CDATA[2009 wasn't so bad, and here's how it owned face for me.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[The Chaw - A Wishlist]]></title>
-   <link href="http://example.dev/2009/12/19/thechaw-a-wishlist/"/>
-   <updated>2009-12-19T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/12/19/thechaw-a-wishlist/</id>
+   <link href="http://josediazgonzalez.com/2009/12/19/thechaw-a-wishlist/"/>
+   <updated>2009-12-19T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/12/19/thechaw-a-wishlist/</id>
    <content type="html"><![CDATA[]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[How CakePHP Automagic fails me (or How I failed at the FormHelper)]]></title>
-   <link href="http://example.dev/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/"/>
-   <updated>2009-12-10T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/</id>
+   <link href="http://josediazgonzalez.com/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/"/>
+   <updated>2009-12-10T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/</id>
    <content type="html"><![CDATA[Getting CakePHP form urls to generate correctly might be difficult if you don't know how the default url is created.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Quick Tip - Bring Out Yer Queries]]></title>
-   <link href="http://example.dev/2009/11/30/quick-tip-bring-out-yer-queries/"/>
-   <updated>2009-11-30T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/30/quick-tip-bring-out-yer-queries/</id>
+   <link href="http://josediazgonzalez.com/2009/11/30/quick-tip-bring-out-yer-queries/"/>
+   <updated>2009-11-30T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/30/quick-tip-bring-out-yer-queries/</id>
    <content type="html"><![CDATA[Log your queries to find out what CakePHP is doing when it has 9 million blobs or is taking 34234 years to process.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Quick Tip - Translating Model Variables]]></title>
-   <link href="http://example.dev/2009/11/28/quick-tip-translating-model-variables/"/>
-   <updated>2009-11-28T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/28/quick-tip-translating-model-variables/</id>
+   <link href="http://josediazgonzalez.com/2009/11/28/quick-tip-translating-model-variables/"/>
+   <updated>2009-11-28T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/28/quick-tip-translating-model-variables/</id>
    <content type="html"><![CDATA[Translating CakePHP Model variables and validation rules isn't straight-forward to new developers. However, it is possible through the use of the class constructor.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Inflect Shell - Inflect the heck out of your word(s)]]></title>
-   <link href="http://example.dev/2009/11/28/inflect-the-heck-out-of-your-words/"/>
-   <updated>2009-11-28T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/28/inflect-the-heck-out-of-your-words/</id>
+   <link href="http://josediazgonzalez.com/2009/11/28/inflect-the-heck-out-of-your-words/"/>
+   <updated>2009-11-28T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/28/inflect-the-heck-out-of-your-words/</id>
    <content type="html"><![CDATA[CakePHP provides us with a nice little Inflector class. It's quite useful in creating slugs, but can't be used for testing purposes without creating a dummy page.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Thoughts - An API for Plugin Installation]]></title>
-   <link href="http://example.dev/2009/11/27/thoughts-an-api-for-plugin-installation/"/>
-   <updated>2009-11-27T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/27/thoughts-an-api-for-plugin-installation/</id>
+   <link href="http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/"/>
+   <updated>2009-11-27T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/</id>
    <content type="html"><![CDATA[One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Quick Tip - Model::save() isn't Model::saveAll()]]></title>
-   <link href="http://example.dev/2009/11/27/quick-tip-save-isnt-saveall/"/>
-   <updated>2009-11-27T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/27/quick-tip-save-isnt-saveall/</id>
+   <link href="http://josediazgonzalez.com/2009/11/27/quick-tip-save-isnt-saveall/"/>
+   <updated>2009-11-27T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/27/quick-tip-save-isnt-saveall/</id>
    <content type="html"><![CDATA[A very small example on when to use Model::save() versus Model::saveAll()]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Rails-Style Error Messages in CakePHP]]></title>
-   <link href="http://example.dev/2009/11/26/rails-style-error-messages-in-cakephp/"/>
-   <updated>2009-11-26T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/26/rails-style-error-messages-in-cakephp/</id>
+   <link href="http://josediazgonzalez.com/2009/11/26/rails-style-error-messages-in-cakephp/"/>
+   <updated>2009-11-26T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/26/rails-style-error-messages-in-cakephp/</id>
    <content type="html"><![CDATA[A simple CakePHP helper for outputting grouped error messages as in the Ruby on Rails framework.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Trees Versus Graphs versus Vines]]></title>
-   <link href="http://example.dev/2009/11/22/trees-versus-graphs-versus-vines/"/>
-   <updated>2009-11-22T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/22/trees-versus-graphs-versus-vines/</id>
+   <link href="http://josediazgonzalez.com/2009/11/22/trees-versus-graphs-versus-vines/"/>
+   <updated>2009-11-22T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/22/trees-versus-graphs-versus-vines/</id>
    <content type="html"><![CDATA[Trees Versus Graphs versus Vines]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[CakePHP HABTM Relationships]]></title>
-   <link href="http://example.dev/2009/11/22/cakephp-habtm-relationships/"/>
-   <updated>2009-11-22T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/22/cakephp-habtm-relationships/</id>
+   <link href="http://josediazgonzalez.com/2009/11/22/cakephp-habtm-relationships/"/>
+   <updated>2009-11-22T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/22/cakephp-habtm-relationships/</id>
    <content type="html"><![CDATA[A slightly misguided post on CakePHP HABTM relationships]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[First Post]]></title>
-   <link href="http://example.dev/2009/11/21/first-post/"/>
-   <updated>2009-11-21T00:00:00-05:00</updated>
-   <id>http://example.dev/2009/11/21/first-post/</id>
+   <link href="http://josediazgonzalez.com/2009/11/21/first-post/"/>
+   <updated>2009-11-21T00:00:00-08:00</updated>
+   <id>http://josediazgonzalez.com/2009/11/21/first-post/</id>
    <content type="html"><![CDATA[my first post]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Allow Subdirectories Apache]]></title>
-   <link href="http://example.dev/2009/09/07/allow-subdirectories-apache/"/>
-   <updated>2009-09-07T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/09/07/allow-subdirectories-apache/</id>
+   <link href="http://josediazgonzalez.com/2009/09/07/allow-subdirectories-apache/"/>
+   <updated>2009-09-07T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/09/07/allow-subdirectories-apache/</id>
    <content type="html"><![CDATA[Example .htaccess file for allowing custom subdirectories in your CakePHP application under Apache]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Simple JSON Layout]]></title>
-   <link href="http://example.dev/2009/09/04/simple-json-layout/"/>
-   <updated>2009-09-04T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/09/04/simple-json-layout/</id>
+   <link href="http://josediazgonzalez.com/2009/09/04/simple-json-layout/"/>
+   <updated>2009-09-04T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/09/04/simple-json-layout/</id>
    <content type="html"><![CDATA[Extremely simple JSON Layout for your application]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Cacheable Behavior]]></title>
-   <link href="http://example.dev/2009/09/04/cacheable-behavior/"/>
-   <updated>2009-09-04T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/09/04/cacheable-behavior/</id>
+   <link href="http://josediazgonzalez.com/2009/09/04/cacheable-behavior/"/>
+   <updated>2009-09-04T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/09/04/cacheable-behavior/</id>
    <content type="html"><![CDATA[Cacheable Model behavior caches views pertaining to model records to the disk via a RequestAction hack.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[ResourceHelper]]></title>
-   <link href="http://example.dev/2009/09/03/resource-helper/"/>
-   <updated>2009-09-03T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/09/03/resource-helper/</id>
+   <link href="http://josediazgonzalez.com/2009/09/03/resource-helper/"/>
+   <updated>2009-09-03T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/09/03/resource-helper/</id>
    <content type="html"><![CDATA[A general purpose helper to support random functionality that need not be in it's own helper. Has BlueprintCSS support, jQuery ASM HABTM, File displaying, jQuery Error displaying and Google Maps support.]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Hide Plugin Prefixes in Routed Urls]]></title>
-   <link href="http://example.dev/2009/09/03/hide-plugin-prefixes-in-routed-urls/"/>
-   <updated>2009-09-03T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/09/03/hide-plugin-prefixes-in-routed-urls/</id>
+   <link href="http://josediazgonzalez.com/2009/09/03/hide-plugin-prefixes-in-routed-urls/"/>
+   <updated>2009-09-03T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/09/03/hide-plugin-prefixes-in-routed-urls/</id>
    <content type="html"><![CDATA[Hack on the CakePHP Router to hide the plugin prefix in connected routes]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Conditionally Load Javascript]]></title>
-   <link href="http://example.dev/2009/09/03/conditionally-load-js/"/>
-   <updated>2009-09-03T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/09/03/conditionally-load-js/</id>
+   <link href="http://josediazgonzalez.com/2009/09/03/conditionally-load-js/"/>
+   <updated>2009-09-03T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/09/03/conditionally-load-js/</id>
    <content type="html"><![CDATA[Example of loading javascript files in 1.2 based on the current controller/action path]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Conditional Loading of Helpers]]></title>
-   <link href="http://example.dev/2009/09/03/conditional-loading-of-helpers/"/>
-   <updated>2009-09-03T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/09/03/conditional-loading-of-helpers/</id>
+   <link href="http://josediazgonzalez.com/2009/09/03/conditional-loading-of-helpers/"/>
+   <updated>2009-09-03T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/09/03/conditional-loading-of-helpers/</id>
    <content type="html"><![CDATA[Example of conditionally loading helpers in a view]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Application Settings]]></title>
-   <link href="http://example.dev/2009/09/03/application-settings/"/>
-   <updated>2009-09-03T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/09/03/application-settings/</id>
+   <link href="http://josediazgonzalez.com/2009/09/03/application-settings/"/>
+   <updated>2009-09-03T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/09/03/application-settings/</id>
    <content type="html"><![CDATA[Snippet of code to load application-level settings from the database]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Auto-Building your ACOs table with Plugins]]></title>
-   <link href="http://example.dev/2009/08/26/autobuilding-your-acos-table-with-plugins/"/>
-   <updated>2009-08-26T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/08/26/autobuilding-your-acos-table-with-plugins/</id>
+   <link href="http://josediazgonzalez.com/2009/08/26/autobuilding-your-acos-table-with-plugins/"/>
+   <updated>2009-08-26T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/08/26/autobuilding-your-acos-table-with-plugins/</id>
    <content type="html"><![CDATA[Snippet of code that can automatically build CakePHP ACL ACOs for plugins]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Adding a Helper/Behavior/Component on the fly]]></title>
-   <link href="http://example.dev/2009/08/14/adding-a-helper-behavior-component-on-the-fly/"/>
-   <updated>2009-08-14T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/08/14/adding-a-helper-behavior-component-on-the-fly/</id>
+   <link href="http://josediazgonzalez.com/2009/08/14/adding-a-helper-behavior-component-on-the-fly/"/>
+   <updated>2009-08-14T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/08/14/adding-a-helper-behavior-component-on-the-fly/</id>
    <content type="html"><![CDATA[A short tutorial on adding behaviors/components/helpers to your application in a dynamic fashion]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Toggle Behavior]]></title>
-   <link href="http://example.dev/2009/08/13/toggle-behavior/"/>
-   <updated>2009-08-13T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/08/13/toggle-behavior/</id>
+   <link href="http://josediazgonzalez.com/2009/08/13/toggle-behavior/"/>
+   <updated>2009-08-13T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/08/13/toggle-behavior/</id>
    <content type="html"><![CDATA[Toggle CakePHP Behavior for toggling boolean model fields in CakePHP]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Trackable Behavior]]></title>
-   <link href="http://example.dev/2009/06/15/trackable-behavior/"/>
-   <updated>2009-06-15T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/06/15/trackable-behavior/</id>
+   <link href="http://josediazgonzalez.com/2009/06/15/trackable-behavior/"/>
+   <updated>2009-06-15T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/06/15/trackable-behavior/</id>
    <content type="html"><![CDATA[Trackable Behavior for CakePHP 1.2/1.3]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Commentable Behavior]]></title>
-   <link href="http://example.dev/2009/06/15/commentable-behavior/"/>
-   <updated>2009-06-15T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/06/15/commentable-behavior/</id>
+   <link href="http://josediazgonzalez.com/2009/06/15/commentable-behavior/"/>
+   <updated>2009-06-15T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/06/15/commentable-behavior/</id>
    <content type="html"><![CDATA[Commentable Behavior for CakePHP 1.2]]></content>
  </entry>
 
  <entry>
    <title type="html"><![CDATA[Yahoo Maps-based Geocoding]]></title>
-   <link href="http://example.dev/2009/06/14/yahoo-maps-based-geocoding/"/>
-   <updated>2009-06-14T00:00:00-04:00</updated>
-   <id>http://example.dev/2009/06/14/yahoo-maps-based-geocoding/</id>
+   <link href="http://josediazgonzalez.com/2009/06/14/yahoo-maps-based-geocoding/"/>
+   <updated>2009-06-14T00:00:00-07:00</updated>
+   <id>http://josediazgonzalez.com/2009/06/14/yahoo-maps-based-geocoding/</id>
    <content type="html"><![CDATA[Very crude integration of Yahoo Maps and CakePHP using CURL]]></content>
  </entry>
 

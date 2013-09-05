@@ -1,7 +1,7 @@
 /* TEAM */
 
 	Author: Jose Diaz-Gonzalez
-	Site: http://josediazgonzalez.com/
+	Site: http://josediazgonzalez.com
 	Github: josegonzalez
 	Twitter: @savant
 	From: New York, New York
@@ -15,6 +15,6 @@
 
 /* SITE */
 
-	Last update: 2013/04/30
+	Last update: 2013/09/05
 	Standards: HTML5
 	Software: Jekyll, Cimino
