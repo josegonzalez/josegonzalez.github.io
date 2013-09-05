@@ -1,0 +1,20 @@
+/* TEAM */
+
+	Author: Jose Diaz-Gonzalez
+	Site: http://example.dev
+	Github: josegonzalez
+	Twitter: @savant
+	From: New York, New York
+
+/* THANKS */
+
+	Tom Preston-Werner: http://tom.preston-werner.com/
+	Jose Diaz-Gonzalez: http://josediazgonzalez.com/
+
+	And many, many others
+
+/* SITE */
+
+	Last update: 2013/04/30
+	Standards: HTML5
+	Software: Jekyll, Cimino

@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>A CakePHP Book I can finally recommend</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="Review of Mariano Iglesias' CakePHP 1.3 Application Development Cookbook" />
+		<meta name="keywords" content="book, cakephp, application" />
+
+		<link rel="alternate" type="application/rss+xml" title="A CakePHP Book I can finally recommend » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+		
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					
+				</hgroup>
+
+				<nav class="main-navigation" role="navigation">
+					<h3 class="menu-toggle">Menu</h3>
+					<a class="assistive-text" href="#content" title="Skip to content">Skip to content</a>
+					<div class="nav-menu">
+						<ul class="nav-menu">
+							
+								<li class="page_item"><a href="/">Home</a></li>
+							
+								<li class="page_item"><a href="/categories/">Categories</a></li>
+							
+								<li class="page_item"><a href="/tags/">Tags</a></li>
+							
+								<li class="page_item"><a href="/about/">About</a></li>
+							
+						</ul>
+					</div>
+				</nav>
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+    
+      <h1 class="entry-title">
+        A CakePHP Book I can finally recommend
+      </h1>
+    
+    
+
+    
+      <div class="comments-link">
+        <a href="#comments" title="Comment on A CakePHP Book I can finally recommend!">
+          <span class="responses-number">0</span> Replies
+        </a>
+      </div>
+    
+  </header>
+
+  
+
+  
+
+  <div class="entry-content">
+    
+
+    
+
+
+    <blockquote>
+
+Note: This post was created a few weeks ago and in my idiocy I forgot to publish it. I blame Jekyll+GIT.
+
+</blockquote>
+
+<p>Since I am in the #cakephp IRC room constantly, I see the question <strong>&quot;What book should I buy to learn CakePHP?&quot;</strong> every so often. It's a painful question, since it sort of means that the documentation that has been contributed is lacking in some way, or that CakePHP is extremely hard to learn. Nevertheless, it's a valid question, and I've asked others similar questions when delving into a new language, framework, or tool-chain.</p>
+
+<p>I recently - read, a week ago - had a chance to read through <a href="http://www.packtpub.com/cakephp-1-3-application-development-cookbook/book">CakePHP 1.3 Application Development Cookbook</a> by Mariano Iglesias. I've read the other CakePHP books - Golding's was okay, Kai Chan's was terrible IMO - but I hadn't found anything I liked. There are two international books, one from the German Community and one in Japanese, but those have limited utility for obvious reasons. Mariano's book definitely fills a need that many CakePHP developers will have at some point.</p>
+
+<p>The book doesn't go through a large, end-to-end application. You won't see a Wordpress-like application built, nor is this like the Pragmatic Programmers Rails shopping cart. Rather, it focuses on specific needs that a developer will have, whether it be OpenID integration with the <code>AuthComponent</code>, datasource creation, or automated shell tasks. Each chapter can be thought of as a cookbook, with multiple recipes, each leading to the next in a logical progression. The breakup of the chapters was well-thought out, and it should be relatively simple for anyone to take bits and pieces from any chapter to construct an application.</p>
+
+<p>A few things stuck out while reading the book and going through examples:</p>
+
+<ul>
+<li>You should have some knowledge of MVC. The book doesn't do much handholding, which is both good and bad depending on your needs.</li>
+<li>While the code within the book is well-documented, code from GitHub is not. Fair warning if you have needs outside of the plugin's capabilities.</li>
+<li>The book does not have many performance enhancements. If thats what you needed, you shall not find them here.</li>
+</ul>
+
+<p>That said, I did find a few gems. For example, I'd never actually used a custom find as part of a <code>Model::find('count')</code>, and had not even considered that as a potential problem, yet here was the solution in plain sight. It did not even require overriding the <code>Model::find('count')</code> method, which was quite nice. Another gem was the token-based authorization for building an API, which I ended up using in my own work at a later date. I've already suggested the book to a few developers solely for the extensive chapter on Validation and Behaviors.</p>
+
+<p>One thing that irked was that some of the entries in the book would have been better suited as contributions to the CakePHP core. In particular, adding enhanced Transaction and Locking support to MySQL might have been better suited as a pull request, and his entry could have been the explanation of it's usage. As well, there were examples which completely skipped knowledge gleaned from previous examples; In introducing testing, wrapper methods around <code>Model::find()</code> were created, instead of using custom model finds as discussed in previous chapters.</p>
+
+<p>I'm quite pleased with the resulting book though. It's definitely the most up-to-date book, and has knowledge that can be passed doen to <strong>1.2</strong> developers, and much of the ideas are easily transferable to the upcoming <strong>2.0</strong> release. I look forward to implementing a few of the ideas in my own applications, and can honestly say that there is finally a book worth paying for if you're a CakePHP developer.</p>
+
+<blockquote>
+
+No, I wasn't paid for this. That would have been rad though.
+
+</blockquote>
+
+  </div>
+
+  
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://wp-themes.com/?p=1" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-06-19 00:00:00 -0400">19 Jun 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+  
+</article>
+
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+ 					<aside class="widget widget_archive">
+						<h3 class="widget-title">Archives</h3>
+						<ul>
+							
+								
+						  		<li>
+						  			<a href="/2013/01/" title="January 2013">
+						  				January 2013
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2012/09/" title="September 2012">
+						  				September 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/07/" title="July 2012">
+						  				July 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/05/" title="May 2012">
+						  				May 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/03/" title="March 2012">
+						  				March 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/01/" title="January 2012">
+						  				January 2012
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2011/10/" title="October 2011">
+						  				October 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/06/" title="June 2011">
+						  				June 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/05/" title="May 2011">
+						  				May 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/04/" title="April 2011">
+						  				April 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/03/" title="March 2011">
+						  				March 2011
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2010/12/" title="December 2010">
+						  				December 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/10/" title="October 2010">
+						  				October 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/09/" title="September 2010">
+						  				September 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/08/" title="August 2010">
+						  				August 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/02/" title="February 2010">
+						  				February 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/01/" title="January 2010">
+						  				January 2010
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2009/12/" title="December 2009">
+						  				December 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/11/" title="November 2009">
+						  				November 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/09/" title="September 2009">
+						  				September 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/08/" title="August 2009">
+						  				August 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/06/" title="June 2009">
+						  				June 2009
+						  			</a>
+						  		</li>
+					  		
+					  	
+						</ul>
+					</aside>
+
+					<aside class="widget widget_categories">
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+							
+								<li class="cat-item"><a href="/categories/authentication"title="View all posts filed under Authentication">Authentication</a></li>
+							
+								<li class="cat-item"><a href="/categories/authorization"title="View all posts filed under Authorization">Authorization</a></li>
+							
+								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
+							
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+							
+								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
+							
+								<li class="cat-item"><a href="/categories/datasources"title="View all posts filed under Datasources">Datasources</a></li>
+							
+								<li class="cat-item"><a href="/categories/deployment"title="View all posts filed under Deployment">Deployment</a></li>
+							
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+							
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+							
+								<li class="cat-item"><a href="/categories/forms"title="View all posts filed under Forms">Forms</a></li>
+							
+								<li class="cat-item"><a href="/categories/helpers"title="View all posts filed under Helpers">Helpers</a></li>
+							
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+							
+								<li class="cat-item"><a href="/categories/internationalization"title="View all posts filed under Internationalization">Internationalization</a></li>
+							
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+							
+								<li class="cat-item"><a href="/categories/models"title="View all posts filed under Models">Models</a></li>
+							
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+							
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+							
+								<li class="cat-item"><a href="/categories/routing"title="View all posts filed under Routing">Routing</a></li>
+							
+								<li class="cat-item"><a href="/categories/views"title="View all posts filed under Views">Views</a></li>
+							
+						</ul>
+					</aside>
+
+					<aside class="widget widget_recent_entries">
+						<h3 class="widget-title">Recent Posts</h3>
+						<ul>
+							
+								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
+							
+								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
+							
+								<li><a href="/2012/09/07/why-cakephp/" title="Why CakePHP?">Why CakePHP?</a></li>
+							
+								<li><a href="/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="Upgrading from Lion to Mountain Lion">Upgrading from Lion to Mountain Lion</a></li>
+							
+								<li><a href="/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 4">Full Stack CakePHP Deployment With Chef and Capistrano - Part 4</a></li>
+							
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+			
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2011/06/19/a-cakephp-book-i-can-finally-recommend/';
+				var disqus_url        = 'http://example.dev/2011/06/19/a-cakephp-book-i-can-finally-recommend/';
+				var disqus_title      = 'A CakePHP Book I can finally recommend';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+
+					var commentCount = setInterval(function() {
+						if ($('#dsq-num-posts').length) {
+							$('.responses-number').html($('#dsq-num-posts').html());
+							clearInterval(commentCount);
+						}
+					}, 1000);
+				})();
+			}
+			
+			
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			
+		</script>
+	</body>
+</html>

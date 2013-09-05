@@ -1,0 +1,926 @@
+
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>ResourceHelper</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="A general purpose helper to support random functionality that need not be in it's own helper. Has BlueprintCSS support, jQuery ASM HABTM, File displaying, jQuery Error displaying and Google Maps support." />
+		<meta name="keywords" content="cakephp, helpers, overload, quicktip, cakephp-1.2" />
+
+		<link rel="alternate" type="application/rss+xml" title="ResourceHelper » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+		
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					
+				</hgroup>
+
+				<nav class="main-navigation" role="navigation">
+					<h3 class="menu-toggle">Menu</h3>
+					<a class="assistive-text" href="#content" title="Skip to content">Skip to content</a>
+					<div class="nav-menu">
+						<ul class="nav-menu">
+							
+								<li class="page_item"><a href="/">Home</a></li>
+							
+								<li class="page_item"><a href="/categories/">Categories</a></li>
+							
+								<li class="page_item"><a href="/tags/">Tags</a></li>
+							
+								<li class="page_item"><a href="/about/">About</a></li>
+							
+						</ul>
+					</div>
+				</nav>
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+    
+      <h1 class="entry-title">
+        ResourceHelper
+      </h1>
+    
+    
+
+    
+      <div class="comments-link">
+        <a href="#comments" title="Comment on ResourceHelper!">
+          <span class="responses-number">0</span> Replies
+        </a>
+      </div>
+    
+  </header>
+
+  
+
+  
+
+  <div class="entry-content">
+    
+
+    
+
+
+    <pre class="rainbow-code"><code data-language="php">/**
+ * ResourceHelper class file.
+ *
+ * General Helper to support random functionality that need not be in it's own helper
+ * Has BlueprintCSS support, jQuert ASM HABTM, File displaying, jQuery Error displaying
+ * and Google Maps support
+ *
+ * @author Jose Diaz-Gonzalez
+ * @license http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @link http://josediazgonzalez/code/resourcehelper/
+ * @package app
+ * @subpackage app.views.helpers
+ * @version .2
+ */
+class ResourceHelper extends AppHelper {
+/**
+ * Array of helpers in use by the ResourceHelper
+ *
+ * @var array
+ **/
+    var $helpers = array('Form', 'Html');
+/**
+ * Types of images supported by the ResourceHelper::image() function
+ *
+ * @var array
+ */
+    var $_imageTypes = array('.jpg', '.jpeg', '.gif', '.bmp', '.png');
+
+/**
+ * Boolean containing whether ResourceHelper::habtm() has been invoked on
+ * the form or not
+ *
+ * @var boolean
+ */
+    var $_habtm = false;
+
+/**
+ * The value of the class attribute assigned to the wrapper div for every
+ * label in the format elementType => class
+ *
+ * @var array
+ */
+    var $_labelClass = array();
+
+/**
+ * The value of the class attribute assigned to the wrapper div for most
+ * elements
+ *
+ * @var string
+ */
+    var $_inputClass = array();
+
+/**
+ * The value of the class assigned outside the input element if necessary
+ *
+ * @var string
+ **/
+    var $_specialClass = array();
+
+/**
+ * Sets up Blueprint for inclusion in the header
+ *
+ * @param array $options Additional options to be set if the plugin settings need to be configured
+ * @return string
+ * @access public
+ * @author Jose Diaz-Gonzalez
+ **/
+    function setup($options = array()) {
+        $options = array_merge(array('screen' => 'blueprint/screen','print' => 'blueprint/print'), $options);
+        $head = $this->Html->css($options['screen'], 'stylesheet', array('media' => 'screen, projection'));
+        $head .= $this->Html->css($options['print'], 'stylesheet', array('media' => 'print'));
+        return $head;
+    }
+
+/**
+ * Sets up the IE stylesheet for the header
+ *
+ * @param array $options Additional options to be set if the plugin settings need to be configured
+ * @return string
+ * @access public
+ * @author Jose Diaz-Gonzalez
+ **/
+    function ie($options = array()) {
+        $options = array_merge(array('ie' => 'blueprint/ie'), $options);
+        $head = "<!--[if IE]>";
+        $head .= $this->Html->css($options['ie'], 'stylesheet', array('media' => 'screen'));
+        $head .= "<![endif]-->";
+        return $head;
+    }
+
+/**
+ * Wrapper for Html Helper that includes a plugin(s) in the header
+ *
+ * @param string $path This is the path within the blueprint plugins folder to the plugin(s)
+ *                      containing the plugin. Do not include "screen.css" or the trailing slash
+ * @param array $options Additional options to be set if the plugin settings need to be configured
+ * @return string
+ * @access public
+ * @author Jose Diaz-Gonzalez
+ **/
+    function plugins($path = NULL, $options = array()) {
+        $styles = '';
+        if (!empty($path)) {
+            $options = array_merge(array('blueprint' => 'blueprint/plugins','file' => 'screen', 'media' => 'screen, projection'), $options);
+            if (is_array($path)) {
+                foreach ($path as $plugin) {
+                    $styles .= $this->Html->css($options['blueprint'] . "//$plugin//" . $options['file'], 'stylesheet', array('media' => $options['media']));
+                }
+            } else {
+                $styles = $this->Html->css($options['blueprint'] . "//$path//" . $options['file'], 'stylesheet', array('media' => $options['media']));
+            }
+        }
+        return $styles;
+    }
+
+/**
+ * Caches the blueprintCSS markup needed for labels and form elements
+ *
+ * @param string $label The value assigned to the class attribute of the div wrapper
+ * @param string $input
+ * @access public
+ * @author Dave Mahon
+ */
+    function configure($elements, $label = '', $input = '', $special = '') {
+        if (is_array($elements)) {
+            foreach ($elements as $element){
+                $this->_labelClass[$element] = $label;
+                $this->_inputClass[$element] = $input;
+                if (!empty($special)) {
+                    $this->_specialClass[$element] = $special;
+                }
+            }
+        } else {
+            $this->_labelClass[$elements] = $label;
+            $this->_inputClass[$elements] = $input;
+            if (!empty($special)) {
+                $this->_specialClass[$elements] = $special;
+            }
+        }
+    }
+
+/**
+ * Wrapper for FormHelper->input that adds blueprintCSS markup
+ *
+ * @param string $fieldName This should be "Modelname.fieldname", "Modelname/fieldname" is deprecated
+ * @param array $options
+ * @param boolean $tagging if true
+ * @return string
+ * @access public
+ * @author Dave Mahon
+ */
+    function input($fieldName, $options = array(), $tagging = false) {
+        if (!isset($options['type'])) {
+            $options['type'] = 'text';
+        }
+
+        if (!empty($this->_specialClass[$options['type']])) {
+            $options = array_merge(array(
+                'before' => '<div class="' . $this->_labelClass[$options['type']] . '">',
+                'between' => '</div><div class="' . $this->_specialClass[$options['type']] . '"><div class="' . $this->_inputClass[$options['type']] . '">',
+                'after' => '</div></div>'
+                ), $options);
+        } else {
+            $options = array_merge(array(
+                'before' => '<div class="' . $this->_labelClass[$options['type']] . '">',
+                'between' => '</div><div class="' . $this->_inputClass[$options['type']] . '">',
+                'after' => '</div>'
+                ), $options);
+        }
+        if ($tagging) {
+            App::import('Helper', 'Tagging.Tagging');
+            return $this->Tagging->input($fieldName, $options);
+        }
+        return $this->Form->input($fieldName, $options);
+    }
+
+/**
+ * Wrapper for FormHelper->end that adds blueprintCSS markup
+ *
+ * If $options is set a form submit button will be created.
+ *
+ * @param mixed $options as a string will use $options as the value of button,
+ *                      array usage:
+ *                          array('label' => 'save'); value="save"
+ *                          array('label' => 'save', 'name' => 'Whatever'); value="save" name="Whatever"
+ *                          array('name' => 'Whatever'); value="Submit" name="Whatever"
+ *                          array('label' => 'save', 'name' => 'Whatever', 'div' => 'good') <div class="good"> value="save" name="Whatever"
+ *                          array('label' => 'save', 'name' => 'Whatever', 'div' => array('class' => 'good')); <div class="good"> value="save" name="Whatever"
+ *
+ * @return string a closing FORM tag optional submit button.
+ * @access public
+ * @author Dave Mahon
+ */
+    function end($options = null) {
+        if ($options !== null) {
+            if (is_string($options)) {
+                $options = array('label'=>$options);
+            }
+            if (isset($options['div'])) {
+                $options['div'] = $this->addClass($options['div'], 'clear');
+            } else {
+                $options['div'] = array('class' => 'clear');
+            }
+        }
+        return $this->Form->end($options);
+    }
+
+/**
+ * Wrapper for HtmlHelper->div that adds blueprintCSS markup for class clear
+ *
+ * @param string $fieldName This should be "Modelname.fieldname", "Modelname/fieldname" is deprecated
+ * @param string $class CSS class name of the div element.
+ * @param string $text String content that will appear inside the div element.
+ *                      If null, only a start tag will be printed
+ * @param array $attributes Additional HTML attributes of the DIV tag
+ * @param boolean $escape If true, $text will be HTML-escaped
+ * @return string The formatted DIV element
+ * @access public
+ * @author Dave Mahon
+ */
+    function clear($class = null, $text = null, $attributes = array(), $escape = false) {
+        if (strlen($class) > 0) {
+            $class .= ' clear';
+        } else {
+            $class = 'clear';
+        }
+        return $this->Html->div($class, $text, $attributes, $escape);
+    }
+
+/**
+ * Automatically wraps text(s) with classes/ids
+ *
+ * @param boolean $wrapAll whether or not to wrap each text with the same class. true by default
+ * @param string/array $texts string or array of text that should be wrapped
+ * @param string/array $classes string or array of classes to wrap the texts
+ * @param string/array $ids string or array of ids to wrap the texts
+ * @return void
+ * @author Jose Diaz-Gonzalez
+ **/
+    function span($wrapAll = true, $texts = NULL, $classes = NULL, $ids = null) {
+        $finalText = '';
+        if (is_array($texts)) {
+            if ($wrapAll) {
+                foreach ($texts as $text) {
+                    $finalText .= "<div";
+                    if (isset($ids)) {
+                        $finalText .= " id=\"$ids\"";
+                    }
+                    if (isset($classes)) {
+                        $finalText .= " class=\"$classes\"";
+                    }
+                    $finalText .= ">$text</div>";
+                }
+            } else {
+                $i = 0;
+                foreach($texts as $text) {
+                    $finalText .= "<div";
+                    if (isset($ids)) {
+                        $finalText .= " id=\"" . $ids[$i] . "\"";
+                    }
+                    if (isset($classes)) {
+                        $finalText .= " class=\"" . $classes[$i] . "\"";
+                    }
+                    $finalText .= ">$text</div>";
+                }
+            }
+        } else {
+            $finalText .= "<div";
+            if (isset($ids)) {
+                $finalText .= " id=\"" . $ids[$i] . "\"";
+            }
+            if (isset($classes)) {
+                $finalText .= " class=\"" . $classes[$i] . "\"";
+            }
+            $finalText .= ">$text</div>";
+        }
+        return $finalText;
+    }
+
+    function submit($title = 'Submit', $options = array()) {
+        $defaults = array('type' => 'submit');
+        $options = array_merge($defaults, $options);
+        if (isset($options['class'])) {
+            $options['class'] .= ' positive';
+        } else {
+            $options['class'] = ' positive';
+        }
+
+        $keys = array_keys($options);
+        $values = array_values($options);
+
+        $buttonOptions = '';
+        for ($i = 0; $i < count($keys); $i++) {
+            $buttonOptions .= " " . $keys[$i] . "=\"" . $values[$i] . "\"";
+        }
+
+        return "<div class=\"button\"><button{$buttonOptions}>{$title}</button></div>";
+    }
+
+    function habtm($field, $options = array()) {
+        $defaults = array('jsPath' => 'jquery/asm');
+        $options = array_merge($defaults, $options);
+
+        if ($this->_habtm) {
+            return $this->Form->input($field);
+        } else {
+            $this->_habtm = true;
+            return $this->Form->input($field) . $this->Html->script($options['jsPath'], false);
+        }
+    }
+
+    function file($value, $options = array()) {
+        if ($this->_isImage($value)) {
+            if ($this->_isUrl($value)) {
+                $options['url'] = $value;
+                return $this->Html->image("{$value}", $options);
+            } else {
+                return $this->Html->image("/{$value}", $options);
+            }
+        }
+        $link = Router::url("/{$value}", true);
+        return $this->Html->link("{$link}", "/{$value}", $options);
+    }
+
+    function image($value, $options = array(), $foptions = array()) {
+        $defaults = array();
+        $options = array_merge($defaults, $options);
+        $defoptions = array($path = null, $size = 'medium', 'url' => null);
+        $foptions = array_merge($defoptions, $foptions);
+
+        return $this->Html->image("../{$foptions['path']}/thumb/{$foptions['size']}/{$value}", $options);
+    }
+
+    function imageLink($value, $options = array()){
+        if ($this->_isImage($value)) {
+            if ($this->_isUrl($value)) {
+                $options['url'] = $value;
+                return $this->Html->image("{$value}", $options);
+            } else {
+                return $this->Html->image("/{$value}", $options);
+            }
+        }
+        return $value;
+    }
+
+    function value($value, $options = array()) {
+        $defaults = array('div' => true);
+        $options = array_merge($defaults, $options);
+        if (isset($value) and !empty($value) and ($value !== '')) {
+            if ($options['div']){
+                return "<div>{$value}</div>";
+            }
+            return "{$value}<br />";
+        }
+        return "{$value}";
+    }
+
+    function map($api, $options = array()) {
+        return
+            '<div id="map_container">
+                <div id="big_spinner" style="display:none"></div>
+                <div id="map"></div>
+                <div id="map_tooltip">
+                    drag marker to fix location
+                </div>
+            </div>' . $this->_mapSetup($api, $options);
+    }
+
+    function mapInput($value, $options = array()) {
+        $defaults = array('onchange' => 'widget.initMap()');
+        $options = array_merge($defaults, $options);
+        return $this->Form->input($value, $options);
+    }
+
+/**
+* Prints out a jQuery enhanced list of validation errors
+*
+* @param array $data Array of all possible errors for all models being validated
+* @param integer $type Integer indicating the css id of the error
+* @param boolean $flash Boolean indicating whether this is a flash message
+* @access public
+*/
+    function validationErrors($data, $id, $flash = false){
+        $errors = $this->_getArray($data);
+        if ($errors != array()){
+            echo $this->_jqueryList(array_values($errors), $id, $flash);
+        }
+    }
+
+/**
+* Prints out a jQuery enhanced list of validation errors
+*
+* @param array $data Array of all possible errors
+* @param integer $type Integer indicating the css id of the error
+* @param boolean $flash Boolean indicating whether this is a flash message
+* @return string String of Javascript/HTML containing list of errors
+* @access public
+*/
+    function _jqueryList($data, $type, $flash) {
+        $temp = $this->_getList($data, $flash);
+        $id = $this->_getType($type);
+        if ($flash){
+            $output = "<div id=\"". $id ."\" class=\"flash\"style=\"display: none\">Error Message:<br />{$temp}</div>
+                <script type=\"text/javascript\">
+                    jQuery(document).ready(function() {
+                        $ (\".flash\").fadeIn(\"slow\");
+                    });
+                </script>";
+        } else {
+            $output = "<div id=\"". $id ."\" class=\"flash\"style=\"display: none\">Reasons for error:<br />{$temp}</div>
+                <script type=\"text/javascript\">
+                    jQuery(document).ready(function() {
+                        $ (\".flash\").fadeIn(\"slow\");
+                    });
+                </script>";
+        }
+
+        return $output;
+    }
+
+/**
+* Used in conjunction with jQueryList
+* Returns the id of the notice
+*
+* @param integer $data Integer referencing an error type
+* @return string String assigned to an error
+* @access public
+*/
+    function _getType($data){
+        $output = "";
+        switch ($data) {
+            case 0:
+                $output = "error";
+                break;
+            case 1:
+                $output = "success";
+                break;
+            case 2:
+                $output = "notice";
+                break;
+            case 3:
+                $output = "reasons";
+                break;
+            default:
+                $output = "notice";
+                break;
+        }
+        return $output;
+    }
+
+/**
+* Returns a list of items, each wrapped in an <li></li>
+*
+* @param array $data Array of all possible items
+* @param boolean $flash Boolean indicating whether this is a flash message
+* @return string String containing a <li></li> wrapped list of items
+* @access public
+*/
+    function _getList($data, $flash){
+        $output = '';
+        if (is_array($data)){
+            if($flash){
+                $output .= "<li>{$data['0']}</li>";
+            } else {
+                foreach($data as $item){
+                    $output .= "<li>{$item}</li>";
+                }
+            }
+        }
+        else {
+            $output .= "<li>{$data}</li>";
+        }
+        return "<ul>".$output."</ul>";
+    }
+
+/**
+* Returns an Array of items that are nested within some other array
+*
+* @param array $data Array of items which may be arrays themselves
+* @return array Array of items which remove one layer of nesting
+* @access public
+*/
+    function _getArray($data){
+        $arrayValues = array_values($data);
+        $output = array();
+        foreach($arrayValues as $value){
+            $output += $value;
+        }
+        return $output;
+    }
+
+    function _endsWith($input = null, $query = null) {
+        // Get the length of the end string
+        $queryLength = strlen($query);
+        // Look at the end of input for the substring the size of query
+        $inputEnd = substr($input, strlen($input) - $queryLength);
+        // If it matches, it does end with query
+        return $inputEnd == $query;
+    }
+
+    function _isImage($input) {
+        foreach ($this->_imageTypes as $imageType) {
+            if ($this->_endsWith($input, $imageType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function _mapSetup($api = null, $options = array()) {
+        $defaults = array('proxy' => 'map/proxy', 'addresschooser' => 'map/addresschooser', 'display' => 'map/display');
+        $options = array_merge($defaults, $options);
+        $return = $this->Html->script('http://www.google.com/jsapi?key=' . $api, array('safe' => false));
+        $return .= $this->Html->script($options['proxy'], array('safe' => false));
+        $return .= $this->Html->script($options['addresschooser'], array('safe' => false));
+        $return .= $this->Html->script($options['display'], array('safe' => false));
+        return $return;
+    }
+
+/**
+ * Checks that a value is a valid URL according to http://www.w3.org/Addressing/URL/url-spec.txt
+ *
+ * The regex checks for the following component parts:
+ *  a valid, optional, scheme
+ *      a valid ip address OR
+ *      a valid domain name as defined by section 2.3.1 of http://www.ietf.org/rfc/rfc1035.txt
+ *    with an optional port number
+ *  an optional valid path
+ *  an optional query string (get parameters)
+ *  an optional fragment (anchor tag)
+ *
+ * @param string $check Value to check
+ * @param boolean $strict Require URL to be prefixed by a valid scheme (one of http(s)/ftp(s)/file/news/gopher)
+ * @return boolean Success
+ * @access public
+ */
+    function _isUrl($check, $strict = false) {
+        $_this =& Validation::getInstance();
+        $_this->check = $check;
+        $validChars = '([' . preg_quote('!"$&\'()*+,-.@_:;=') . '\/0-9a-z]|(%[0-9a-f]{2}))';
+        $_this->regex = '/^(?:(?:https?|ftps?|file|news|gopher):\/\/)' . ife($strict, '', '?') .
+            '(?:' . $_this->__pattern['ip'] . '|' . $_this->__pattern['hostname'] . ')(?::[1-9][0-9]{0,3})?' .
+            '(?:\/?|\/' . $validChars . '*)?' .
+            '(?:\?' . $validChars . '*)?' .
+            '(?:#' . $validChars . '*)?$/i';
+        return $_this->_check();
+    }
+}</code></pre>
+
+  </div>
+
+  
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/helpers" title="View all posts in Helpers" rel="category">Helpers</a> on <a href="http://wp-themes.com/?p=1" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-03 00:00:00 -0400">03 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+  
+</article>
+
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+ 					<aside class="widget widget_archive">
+						<h3 class="widget-title">Archives</h3>
+						<ul>
+							
+								
+						  		<li>
+						  			<a href="/2013/01/" title="January 2013">
+						  				January 2013
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2012/09/" title="September 2012">
+						  				September 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/07/" title="July 2012">
+						  				July 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/05/" title="May 2012">
+						  				May 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/03/" title="March 2012">
+						  				March 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/01/" title="January 2012">
+						  				January 2012
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2011/10/" title="October 2011">
+						  				October 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/06/" title="June 2011">
+						  				June 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/05/" title="May 2011">
+						  				May 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/04/" title="April 2011">
+						  				April 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/03/" title="March 2011">
+						  				March 2011
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2010/12/" title="December 2010">
+						  				December 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/10/" title="October 2010">
+						  				October 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/09/" title="September 2010">
+						  				September 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/08/" title="August 2010">
+						  				August 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/02/" title="February 2010">
+						  				February 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/01/" title="January 2010">
+						  				January 2010
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2009/12/" title="December 2009">
+						  				December 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/11/" title="November 2009">
+						  				November 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/09/" title="September 2009">
+						  				September 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/08/" title="August 2009">
+						  				August 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/06/" title="June 2009">
+						  				June 2009
+						  			</a>
+						  		</li>
+					  		
+					  	
+						</ul>
+					</aside>
+
+					<aside class="widget widget_categories">
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+							
+								<li class="cat-item"><a href="/categories/authentication"title="View all posts filed under Authentication">Authentication</a></li>
+							
+								<li class="cat-item"><a href="/categories/authorization"title="View all posts filed under Authorization">Authorization</a></li>
+							
+								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
+							
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+							
+								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
+							
+								<li class="cat-item"><a href="/categories/datasources"title="View all posts filed under Datasources">Datasources</a></li>
+							
+								<li class="cat-item"><a href="/categories/deployment"title="View all posts filed under Deployment">Deployment</a></li>
+							
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+							
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+							
+								<li class="cat-item"><a href="/categories/forms"title="View all posts filed under Forms">Forms</a></li>
+							
+								<li class="cat-item"><a href="/categories/helpers"title="View all posts filed under Helpers">Helpers</a></li>
+							
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+							
+								<li class="cat-item"><a href="/categories/internationalization"title="View all posts filed under Internationalization">Internationalization</a></li>
+							
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+							
+								<li class="cat-item"><a href="/categories/models"title="View all posts filed under Models">Models</a></li>
+							
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+							
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+							
+								<li class="cat-item"><a href="/categories/routing"title="View all posts filed under Routing">Routing</a></li>
+							
+								<li class="cat-item"><a href="/categories/views"title="View all posts filed under Views">Views</a></li>
+							
+						</ul>
+					</aside>
+
+					<aside class="widget widget_recent_entries">
+						<h3 class="widget-title">Recent Posts</h3>
+						<ul>
+							
+								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
+							
+								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
+							
+								<li><a href="/2012/09/07/why-cakephp/" title="Why CakePHP?">Why CakePHP?</a></li>
+							
+								<li><a href="/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="Upgrading from Lion to Mountain Lion">Upgrading from Lion to Mountain Lion</a></li>
+							
+								<li><a href="/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 4">Full Stack CakePHP Deployment With Chef and Capistrano - Part 4</a></li>
+							
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+			
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2009/09/03/resource-helper/';
+				var disqus_url        = 'http://example.dev/2009/09/03/resource-helper/';
+				var disqus_title      = 'ResourceHelper';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+
+					var commentCount = setInterval(function() {
+						if ($('#dsq-num-posts').length) {
+							$('.responses-number').html($('#dsq-num-posts').html());
+							clearInterval(commentCount);
+						}
+					}, 1000);
+				})();
+			}
+			
+			
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			
+		</script>
+	</body>
+</html>

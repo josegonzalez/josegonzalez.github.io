@@ -1,0 +1,482 @@
+
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Server Monitoring Tools</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="An easy to install, maintain, and use tool for server monitoring doesn't exist, why is that?" />
+		<meta name="keywords" content="deployment, tools, monitoring, devops" />
+
+		<link rel="alternate" type="application/rss+xml" title="Server Monitoring Tools » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+		
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					
+				</hgroup>
+
+				<nav class="main-navigation" role="navigation">
+					<h3 class="menu-toggle">Menu</h3>
+					<a class="assistive-text" href="#content" title="Skip to content">Skip to content</a>
+					<div class="nav-menu">
+						<ul class="nav-menu">
+							
+								<li class="page_item"><a href="/">Home</a></li>
+							
+								<li class="page_item"><a href="/categories/">Categories</a></li>
+							
+								<li class="page_item"><a href="/tags/">Tags</a></li>
+							
+								<li class="page_item"><a href="/about/">About</a></li>
+							
+						</ul>
+					</div>
+				</nav>
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+    
+      <h1 class="entry-title">
+        Server Monitoring Tools
+      </h1>
+    
+    
+
+    
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Server Monitoring Tools!">
+          <span class="responses-number">0</span> Replies
+        </a>
+      </div>
+    
+  </header>
+
+  
+
+  
+
+  <div class="entry-content">
+    
+
+    
+
+
+    <p>I've been recently doing a bit of devops work at SeatGeek, and it strikes me that much of the monitoring/alerting code there sucks for one or more of the following reasons:</p>
+
+<ul>
+<li>Ridiculous setup</li>
+<li>Costs money</li>
+<li>Is a service</li>
+<li>Terrible UI</li>
+<li>Terrible Codebase</li>
+<li>Requires a specific version of a library that I cannot get installed on a machine</li>
+</ul>
+
+<p>Here, let me show you them:</p>
+
+<h2>Existing Tools</h2>
+
+<h3>Cacti</h3>
+
+<p>Cacti is cool. It's supposed to be a real simple way of aggregating statistics about your installations. It uses RRDTool to store data - which is apparently super compressed and efficient at making graphs - with a periodic cron triggered to collect said data. It sucks for the following reasons:</p>
+
+<ul>
+<li>Codebase was written before they discovered programming patterns. Or actual programming. I honest to god don't know how they continue to fix bugs, it seems so error prone. I think the developers like spaghetti</li>
+<li>RRDTool <code>.rrd</code> files must be converted when used on other architectures, like 64-bit =&gt; 32-bit. Or Linux =&gt; Mac. Kind of annoying to debug the code if you have to convert a crap-ton of files to <code>.xml</code> and then back.</li>
+<li>No api to automate adding new services/nodes to Cacti. Bringing up a new webserver means re-adding like 30 items to cacti. You're fucked if this is a new backup machine</li>
+<li>Collecting new stats means writing all sorts of XML files. On top of the stats collection. Guess which one is the bigger pain in the ass.</li>
+<li>Can no longer easily upgrade from non-plugin architecture to the plugin architecture. Which means I can't use Thold for alerts.</li>
+<li>Plugins are out of date, or unmaintained.</li>
+<li>Docs are obtuse.</li>
+</ul>
+
+<p>You get the picture. It's a cool tool, and I totally respect what the folks behind Cacti are doing, but it's definitely not a tool I want to use going forward.</p>
+
+<h3>Nagios</h3>
+
+<p>Nagios is supposed to be enterprise. Super-duper enterprise. In fact, it's so enterprise that:</p>
+
+<ul>
+<li>There doesn't seem to be a straightforward way of installing it. Or at least the 90-million &quot;Install Nagios in 10 easy payments of your soul&quot; don't make it so</li>
+<li>Setting up new items to monitor seems... also not-straightforward. Why do you need a DSL for this? Aren't there UIs/APIs?</li>
+<li>They also sell a paid version. Great, now I know the version I have is not as awesome.</li>
+</ul>
+
+<p>I'd love for someone to prove me wrong, but I have a limited amount of time in the week to implement this stuff.</p>
+
+<h3>Ganglia</h3>
+
+<p>Looks like a glorified Cacti. Without something to grab stats. Woot.</p>
+
+<h3>All Paid Services</h3>
+
+<ul>
+<li>I hate paying over nine thousand dollars to get/store useful metrics.</li>
+<li>If your service gets bought, then I'm SOL if I cannot pay whatever the new rate will be</li>
+<li>Featureset/UI out of my control. Usually not a big deal, except when there is a small bug I can fix in 5 seconds/4 lines of javascript but can't because I don't have commit access</li>
+<li>If your repository for installing your code goes away, that breaks my chef cookbooks. Awesome.</li>
+</ul>
+
+<h2>What I'd like</h2>
+
+<p>Ideally the tool is easy to install and doesn't require a specific version of a language/library. This rules out <code>Python</code>/<code>Ruby</code> tools because they will either be built specifically for Ruby <code>1.8.7</code> or <code>1.9.2</code>, and my machine is not running that. As much as I'd love to use them, they are out simply because of deployment issues.</p>
+
+<p>That leaves PHP.</p>
+
+<p>Preferably not spaghetti PHP. So something built in a framework.</p>
+
+<p>I already have a system for storing data: <a href="http://graphite.wikidot.com/">Graphite</a> and <a href="https://github.com/seatgeek/statsd_rb">StatsD</a>. I already have the application tossing data at Graphite, but I also have existing Cacti data. What would be nice is a tool to migrate from an existing set of <code>.rrd</code> files to Graphite. I can back-date data in Graphite, so this should hopefully be straightforward. The data keys can be:</p>
+
+<pre class="rainbow-code"><code data-language="generic">hostname.service_name.metric</code></pre>
+
+<p>Grouping metrics is key. Because Graphite already stores non-devops related statistics, and also would store stats on a per-instance basis, I would like a way to track different sets of metrics somewhere. Because of how graphs are created, it would be useful to store information about each graph - who created the graph, usecase, a damned name - along with it. This data could change from graph to graph of course.</p>
+
+<p>Whenever I create a graph, it should be easy to share it with others. My boss may want to see how deploys affect conversions, or we may want to place one of these in a blog post about earthquakes. Sharing the url to a graph should be straightforward. It should also be possible for me to save a snapshot of a graph somewhere, although this can be a generic interface that can be extended as time goes on. Please note, we should be able to annotate the hell out of these stored graphs.</p>
+
+<p>Replacing Cacti is a big reason for building this tool, so it would be useful to build a simple interface wherein I can easily collect stats about different instances and shove them into graphite. It's not easy to figure out what is available for graphing in Cacti, so exploring the Graphite stats tree is an important feature, although not front and center.</p>
+
+<p>Alerts are important. How do we build alerts? You can retrieve raw data from graphite and somehow build some simple trending. Might be too much work for an initial build.</p>
+
+<p>As far as the UI is concerned, <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a> is cool. All it needs are some changes to the default color scheme to provide a bit of visual identity. Would be dope to be able to specify a logo so that your boss thinks you built some rad tool.</p>
+
+<p>So I want a system built on top of this. In an MVC framework. CakePHP/Lithium preferred, as that is what I am used to, but so long as it isn't terrible code, I don't care. The portions that control graph-creation from graphite should be separate from stats collection. Ideally someone could reimplement the app in their own PHP framework, still using whatever UI/PHP libraries I have with minimal changes.</p>
+
+<p>A recap?</p>
+
+<ul>
+<li>PHP-based tool, built in a framework</li>
+<li>Graphs should be easy to create, annotate and share. Bonus for embeddable graphs</li>
+<li>Must also collect stats about instances
+
+<ul>
+<li>Should be generic enough that it would be possible to write a one-liner to collect a new statistic</li>
+</ul></li>
+<li>Alerts are useful, but perhaps it would be better to leave alerts elsewhere.</li>
+<li>Some attention should be paid to UI. This is 2012, lets make devops easy on the eyes</li>
+<li>Graphing/UI should be fairly generic, and easy to move to another framework as necessary</li>
+</ul>
+
+<h2>Some thoughts</h2>
+
+<p>I don't have any goals for introducing logs into this. Would be nice to be able to overlay a graph onto a series of logs from instances.</p>
+
+<p>Feels like I would be rebuilding tools that exist. Or that the tools I'm comparing this theoretical system to are vastly different.</p>
+
+<p>Alerts are hard. Is there any easy way to do this with Graphite?</p>
+
+<p>Can this be built from existing tools quickly? Does this exist already somewhere?</p>
+
+  </div>
+
+  
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/rant" title="View all posts in Rant" rel="category">Rant</a> on <a href="http://wp-themes.com/?p=1" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-03-28 00:00:00 -0400">28 Mar 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+  
+</article>
+
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+ 					<aside class="widget widget_archive">
+						<h3 class="widget-title">Archives</h3>
+						<ul>
+							
+								
+						  		<li>
+						  			<a href="/2013/01/" title="January 2013">
+						  				January 2013
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2012/09/" title="September 2012">
+						  				September 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/07/" title="July 2012">
+						  				July 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/05/" title="May 2012">
+						  				May 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/03/" title="March 2012">
+						  				March 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/01/" title="January 2012">
+						  				January 2012
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2011/10/" title="October 2011">
+						  				October 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/06/" title="June 2011">
+						  				June 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/05/" title="May 2011">
+						  				May 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/04/" title="April 2011">
+						  				April 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/03/" title="March 2011">
+						  				March 2011
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2010/12/" title="December 2010">
+						  				December 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/10/" title="October 2010">
+						  				October 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/09/" title="September 2010">
+						  				September 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/08/" title="August 2010">
+						  				August 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/02/" title="February 2010">
+						  				February 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/01/" title="January 2010">
+						  				January 2010
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2009/12/" title="December 2009">
+						  				December 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/11/" title="November 2009">
+						  				November 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/09/" title="September 2009">
+						  				September 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/08/" title="August 2009">
+						  				August 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/06/" title="June 2009">
+						  				June 2009
+						  			</a>
+						  		</li>
+					  		
+					  	
+						</ul>
+					</aside>
+
+					<aside class="widget widget_categories">
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+							
+								<li class="cat-item"><a href="/categories/authentication"title="View all posts filed under Authentication">Authentication</a></li>
+							
+								<li class="cat-item"><a href="/categories/authorization"title="View all posts filed under Authorization">Authorization</a></li>
+							
+								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
+							
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+							
+								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
+							
+								<li class="cat-item"><a href="/categories/datasources"title="View all posts filed under Datasources">Datasources</a></li>
+							
+								<li class="cat-item"><a href="/categories/deployment"title="View all posts filed under Deployment">Deployment</a></li>
+							
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+							
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+							
+								<li class="cat-item"><a href="/categories/forms"title="View all posts filed under Forms">Forms</a></li>
+							
+								<li class="cat-item"><a href="/categories/helpers"title="View all posts filed under Helpers">Helpers</a></li>
+							
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+							
+								<li class="cat-item"><a href="/categories/internationalization"title="View all posts filed under Internationalization">Internationalization</a></li>
+							
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+							
+								<li class="cat-item"><a href="/categories/models"title="View all posts filed under Models">Models</a></li>
+							
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+							
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+							
+								<li class="cat-item"><a href="/categories/routing"title="View all posts filed under Routing">Routing</a></li>
+							
+								<li class="cat-item"><a href="/categories/views"title="View all posts filed under Views">Views</a></li>
+							
+						</ul>
+					</aside>
+
+					<aside class="widget widget_recent_entries">
+						<h3 class="widget-title">Recent Posts</h3>
+						<ul>
+							
+								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
+							
+								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
+							
+								<li><a href="/2012/09/07/why-cakephp/" title="Why CakePHP?">Why CakePHP?</a></li>
+							
+								<li><a href="/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="Upgrading from Lion to Mountain Lion">Upgrading from Lion to Mountain Lion</a></li>
+							
+								<li><a href="/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 4">Full Stack CakePHP Deployment With Chef and Capistrano - Part 4</a></li>
+							
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+			
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2012/03/28/server-monitoring-tools/';
+				var disqus_url        = 'http://example.dev/2012/03/28/server-monitoring-tools/';
+				var disqus_title      = 'Server Monitoring Tools';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+
+					var commentCount = setInterval(function() {
+						if ($('#dsq-num-posts').length) {
+							$('.responses-number').html($('#dsq-num-posts').html());
+							clearInterval(commentCount);
+						}
+					}, 1000);
+				})();
+			}
+			
+			
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			
+		</script>
+	</body>
+</html>

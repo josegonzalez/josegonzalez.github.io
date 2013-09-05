@@ -1,0 +1,557 @@
+
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Full Stack CakePHP Deployment With Chef and Capistrano - Part 4</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="How to create a cookbook for the Chef Deployment Tool and an explanation of DNA.json files" />
+		<meta name="keywords" content="deployment, chef, cakephp" />
+
+		<link rel="alternate" type="application/rss+xml" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 4 » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+		
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					
+				</hgroup>
+
+				<nav class="main-navigation" role="navigation">
+					<h3 class="menu-toggle">Menu</h3>
+					<a class="assistive-text" href="#content" title="Skip to content">Skip to content</a>
+					<div class="nav-menu">
+						<ul class="nav-menu">
+							
+								<li class="page_item"><a href="/">Home</a></li>
+							
+								<li class="page_item"><a href="/categories/">Categories</a></li>
+							
+								<li class="page_item"><a href="/tags/">Tags</a></li>
+							
+								<li class="page_item"><a href="/about/">About</a></li>
+							
+						</ul>
+					</div>
+				</nav>
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+    
+      <h1 class="entry-title">
+        Full Stack CakePHP Deployment With Chef and Capistrano - Part 4
+      </h1>
+    
+    
+
+    
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Full Stack CakePHP Deployment With Chef and Capistrano - Part 4!">
+          <span class="responses-number">0</span> Replies
+        </a>
+      </div>
+    
+  </header>
+
+  
+
+  
+
+  <div class="entry-content">
+    
+
+    
+
+
+    <p>Now that you've brushed up on how individual pieces of chef work, we're going to create our own chef cookbook and use it within a dna file.</p>
+
+<h2>Chef Cookbooks</h2>
+
+<p>As explained in <a href="/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/">part 2</a>, cookbooks can contain lots of bits to make up a single whole. At SeatGeek, we typically have very generic cookbooks along the lines of:</p>
+
+<ul>
+<li>elasticsearch: Installs the elasticsearch server and client, with recipes for both <code>0.18.7</code> and <code>0.19.3</code></li>
+<li>percona: Installs the percona mysql server and client, but also contains some handy definitions for ensuring users are properly created</li>
+<li>php: PHP, PHP with FCGI, a bunch of random modules, and a pear recipe/definition. Pretty handy since PHP is deployed everywhere</li>
+<li>rabbitmq: Rabbitmq, for message passing</li>
+<li>nginx: Customized nginx recipe that installs from source with a few extra modules, with some <code>nginx_site</code> definition magic</li>
+</ul>
+
+<p>You get the idea. Generic cookbooks are cool because you can extend them to build different types of servers:</p>
+
+<ul>
+<li><code>bee</code> instances: instances dedicated to running background processes. They use <code>percona::client</code>, <code>php</code> with modules, a custom <code>r</code> cookbook for our <code>r</code> dependencies</li>
+<li><code>www</code> instances: instances that run the live site. <code>nginx</code>, <code>php</code>, <code>python</code> and the <code>percona::client</code> are key here.</li>
+<li><code>admin</code> instances: For stuff like logging with logstash and various administrative stuff we use a combination of the <code>elasticsearch::server</code>, <code>nginx</code>, <code>php</code> and <code>logstash</code> recipes to get shit done.</li>
+</ul>
+
+<p>Each instance also has SeatGeek specific stuff, so we put that in a <code>seatgeek</code> cookbook. Occasionally we have side projects that become large enough to warrant their own repo on github, and I'll typically create a cookbook just for those projects.</p>
+
+<ul>
+<li><code>admin</code> recipe: Ties together some admin-specific configuration stuff</li>
+<li><code>users</code> recipe: All the devs need deploy access, so we give them access to that user here, as well as give certain devs sudo perms</li>
+<li><code>packages</code> recipe: SeatGeek depends upon certain system packages being installed, so we just do it wholesale within this recipe.</li>
+</ul>
+
+<p>By separating your cookbooks between generic and internal cookbooks, you can much more easily pick and choose from the community, contribute those recipes, and ensure your configuration isn't in 9 million places. Ops is tough enough without having to <code>awk</code> through your cookbooks to figure out where you setup master-master replication for MySQL.</p>
+
+<h2>My First Cookbook</h2>
+
+<p>I'm going to create a very simple cookbook, whose only job will be to setup users on the server with sudo permissions.</p>
+
+<h3>The deploy user</h3>
+
+<p>Each instance has a special <code>deploy</code> user, with access to the codebase in a special chroot jail for security. We won't worry about that jail for now, but we do need the <code>deploy</code> user. The following would be the beginning of our <code>users/recipes/default.rb</code> file:</p>
+
+<pre class="rainbow-code"><code data-language="ruby">user "deploy" do
+  comment "Deploy User"
+  home    "/home/deploy"
+  shell   "/bin/bash"
+  uid     1001
+  supports :manage_home => true
+  action [ :create, :manage ]
+end</code></pre>
+
+<p>The above will create a <code>deploy</code> user, with a home folder and a bash shell by default. We set our <code>uid</code> so that the <code>uid</code> for specific users is the same across boxes and we need not worry about permission issues when rsync'ing data. Pretty straightforward, but we need to setup ssh for the deploy user:</p>
+
+<pre class="rainbow-code"><code data-language="ruby">directory "/home/deploy/.ssh" do
+  owner "deploy"
+  group "deploy"
+  mode 0755
+  action :create
+  not_if { File.exists? "/home/deploy/.ssh" }
+end
+
+# Add deploy private and public key for GitHub
+cookbook_file "/home/deploy/.ssh/id_rsa" do
+  source "home/deploy/ssh/id_rsa"
+  owner "deploy"
+  group "deploy"
+  mode 0600
+  action :create
+end
+
+cookbook_file "/home/deploy/.ssh/id_rsa.pub" do
+  source "home/deploy/ssh/id_rsa.pub"
+  owner "deploy"
+  group "deploy"
+  mode  0600
+  action :create
+end
+
+# Set a custom ssh_config for the deploy user so we can ssh
+# without having to accept a known_host
+template "/home/deploy/.ssh/config" do
+  source "home/deploy/ssh/config.erb"
+  owner "deploy"
+  group "deploy"
+  mode 0600
+  action :create
+end</code></pre>
+
+<p>Here, we create the public/private key for Github from the <code>cookbook_file</code>s in the path specified. I like to mimic the path the file will be created on within my cookbooks as it makes it easy to figure out where a particular file is generated from when on the instance in question. In this case, we'll have <code>users/files/home/deploy/ssh/id_rsa</code> and <code>users/files/home/deploy/ssh/id_rsa.pub</code> files. You can guess what is within those files ;)</p>
+
+<p>We also create an ssh <code>config</code> file to manage ssh perms. This uses the <code>users/templates/default/home/deploy/ssh/config.erb</code> file. The <code>default</code> keyword is related to how Chef proposed managing multiple environments at one point, but for legacy reasons has to stick around. I recommend skipping over environments and just sticking to that <code>default</code> path, otherwise things get weird. Here is the template file I use in my own open sourced cookbooks:</p>
+
+<pre class="rainbow-code"><code data-language="ruby"># Autogenerated by Chef for <%= @node[:hostname] %>
+
+Host *
+  CheckHostIP yes
+  ControlMaster auto
+  ControlPath ~/.ssh/master-%r@%h:%p
+  SendEnv LANG LC_*
+  HashKnownHosts yes
+  GSSAPIAuthentication no
+  GSSAPIDelegateCredentials no
+  RSAAuthentication yes
+  PasswordAuthentication yes
+  StrictHostKeyChecking no</code></pre>
+
+<p>Now we just have to create our users:</p>
+
+<pre class="rainbow-code"><code data-language="ruby">first_uid   = 1002
+deploy_gid  = 1001
+ssh_keys    = []
+
+node['users'].each_with_index do |u, i|
+  u[:ssh_keys].each {|key| ssh_keys << key }
+end
+
+# Create an authorized key for every user we have for deploy
+template "/home/deploy/.ssh/authorized_keys" do
+  source "home/deploy/ssh/authorized_keys.erb"
+  variables(:keys => ssh_keys)
+  owner "deploy"
+  group "deploy"
+  mode 0600
+  action :create
+end</code></pre>
+
+<p>Here we simply collect the user's ssh keys and add them to the deploy user's <code>authorized_keys</code> file. The <code>node['users']</code> data comes from your dna file, which we will explain in a bit, but here is the gist:</p>
+
+<pre class="rainbow-code"><code data-language="javascript">"users": [
+  {
+    "username": "jose",
+    "fullname": "Jose Gonzalez",
+    "ssh_keys": ["SERPADERP"]
+  }
+]</code></pre>
+
+<p>We also would need that template file in <code>users/templates/default/home/deploy/ssh/authorized_keys.erb</code>:</p>
+
+<pre class="rainbow-code"><code data-language="ruby"><% @keys.each do |key| %>
+<%= key %>
+<% end %></code></pre>
+
+<p>Lots to learn, but we've just created our first cookbook which will setup the deploy user on our server. You can obviously do more complex things with different available resources, as well as your own custom resources, so I'll leave that as an exercise to you.</p>
+
+<p>One thing to note is that you should strive to ensure that the output of running your cookbook multiple times will not be non-deterministic. That is to say, if I kept running chef on the box with your cookbook, it better not flip-flop on created files, permissions, etc. If we do that, then we can always depend upon the boxes being in a certain state, which eliminates a lot of ridiculousness you'll deal with in the ops world.</p>
+
+<h2>DNA Files</h2>
+
+<p>DNA files are how we tell Chef what a server is like. We can specify server attributes, roles to be run, recipes to process, and packages to install. You can specify dna files as <code>ruby</code> or <code>json</code> files; <code>ruby</code> dna files are pre-processed into <code>json</code> before being run by chef, so keep them in <code>json</code> if you want absolute control on that part of the process.</p>
+
+<p>The following <code>www-ec2-01.json</code> file would run our newly minted cookbook:</p>
+
+<pre class="rainbow-code"><code data-language="javascript">{
+  "box_name": "www-ec2-01",
+  "run_list": [
+    "recipe[users::default]"
+  ]
+}</code></pre>
+
+<p>When specifying a recipe to run, you may omit <code>::default</code> if you mean to run the <code>default</code> recipe for a particular cookbook. Otherwise, it is required. In our case, the above is identical to the following dna file:</p>
+
+<pre class="rainbow-code"><code data-language="javascript">{
+  "box_name": "www-ec2-01",
+  "run_list": [
+    "recipe[users]"
+  ]
+}</code></pre>
+
+<p>I normally specify a <code>box_name</code> which sets the hostname for the instance in a separate recipe. Please note that this is usually done with <code>chef-solo</code>, and running a <code>chef</code> server will use another way to identify instances, so please consult that documentation to figure out the server setup.</p>
+
+<p>Running this dna file on the server - chef doesn't run on your machine! - would be done as follows:</p>
+
+<pre class="rainbow-code"><code data-language="shell">chef-solo -c path/to/chef/solo/config.rb -j path/to/dna/www-ec2-01.json</code></pre>
+
+<p>You can specify a config file to give it more options as to where to find recipes etc. Chef runs and gives some output, depending upon it's configured level of verbosity and your recipes.</p>
+
+<h2>Recap</h2>
+
+<p>Now that we've successfully run a non-trivial cookbook that actually does something useful - namely allow your developers to deploy to the instance - you're probably thinking that there should be tools to make running <code>chef-solo</code> easier. Or what <code>chef-solo</code> even is. We'll cover both of those in the next installment in the series, as well as a brief overview of other tools available to you as a chef user.</p>
+
+<p><strong>To Be Continued</strong></p>
+
+  </div>
+
+  
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/deployment" title="View all posts in Deployment" rel="category">Deployment</a> on <a href="http://wp-themes.com/?p=1" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-05-02 01:53:00 -0400">02 May 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+  
+</article>
+
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+ 					<aside class="widget widget_archive">
+						<h3 class="widget-title">Archives</h3>
+						<ul>
+							
+								
+						  		<li>
+						  			<a href="/2013/01/" title="January 2013">
+						  				January 2013
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2012/09/" title="September 2012">
+						  				September 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/07/" title="July 2012">
+						  				July 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/05/" title="May 2012">
+						  				May 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/03/" title="March 2012">
+						  				March 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/01/" title="January 2012">
+						  				January 2012
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2011/10/" title="October 2011">
+						  				October 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/06/" title="June 2011">
+						  				June 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/05/" title="May 2011">
+						  				May 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/04/" title="April 2011">
+						  				April 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/03/" title="March 2011">
+						  				March 2011
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2010/12/" title="December 2010">
+						  				December 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/10/" title="October 2010">
+						  				October 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/09/" title="September 2010">
+						  				September 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/08/" title="August 2010">
+						  				August 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/02/" title="February 2010">
+						  				February 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/01/" title="January 2010">
+						  				January 2010
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2009/12/" title="December 2009">
+						  				December 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/11/" title="November 2009">
+						  				November 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/09/" title="September 2009">
+						  				September 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/08/" title="August 2009">
+						  				August 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/06/" title="June 2009">
+						  				June 2009
+						  			</a>
+						  		</li>
+					  		
+					  	
+						</ul>
+					</aside>
+
+					<aside class="widget widget_categories">
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+							
+								<li class="cat-item"><a href="/categories/authentication"title="View all posts filed under Authentication">Authentication</a></li>
+							
+								<li class="cat-item"><a href="/categories/authorization"title="View all posts filed under Authorization">Authorization</a></li>
+							
+								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
+							
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+							
+								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
+							
+								<li class="cat-item"><a href="/categories/datasources"title="View all posts filed under Datasources">Datasources</a></li>
+							
+								<li class="cat-item"><a href="/categories/deployment"title="View all posts filed under Deployment">Deployment</a></li>
+							
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+							
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+							
+								<li class="cat-item"><a href="/categories/forms"title="View all posts filed under Forms">Forms</a></li>
+							
+								<li class="cat-item"><a href="/categories/helpers"title="View all posts filed under Helpers">Helpers</a></li>
+							
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+							
+								<li class="cat-item"><a href="/categories/internationalization"title="View all posts filed under Internationalization">Internationalization</a></li>
+							
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+							
+								<li class="cat-item"><a href="/categories/models"title="View all posts filed under Models">Models</a></li>
+							
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+							
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+							
+								<li class="cat-item"><a href="/categories/routing"title="View all posts filed under Routing">Routing</a></li>
+							
+								<li class="cat-item"><a href="/categories/views"title="View all posts filed under Views">Views</a></li>
+							
+						</ul>
+					</aside>
+
+					<aside class="widget widget_recent_entries">
+						<h3 class="widget-title">Recent Posts</h3>
+						<ul>
+							
+								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
+							
+								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
+							
+								<li><a href="/2012/09/07/why-cakephp/" title="Why CakePHP?">Why CakePHP?</a></li>
+							
+								<li><a href="/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="Upgrading from Lion to Mountain Lion">Upgrading from Lion to Mountain Lion</a></li>
+							
+								<li><a href="/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 4">Full Stack CakePHP Deployment With Chef and Capistrano - Part 4</a></li>
+							
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+			
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/';
+				var disqus_url        = 'http://example.dev/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/';
+				var disqus_title      = 'Full Stack CakePHP Deployment With Chef and Capistrano - Part 4';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+
+					var commentCount = setInterval(function() {
+						if ($('#dsq-num-posts').length) {
+							$('.responses-number').html($('#dsq-num-posts').html());
+							clearInterval(commentCount);
+						}
+					}, 1000);
+				})();
+			}
+			
+			
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			
+		</script>
+	</body>
+</html>

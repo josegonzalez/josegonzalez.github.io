@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Rails-Style Error Messages in CakePHP</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="A simple CakePHP helper for outputting grouped error messages as in the Ruby on Rails framework." />
+		<meta name="keywords" content="cakephp, rails, helpers, errors, errorhelper, cakephp-1.2, cakephp-1.3" />
+
+		<link rel="alternate" type="application/rss+xml" title="Rails-Style Error Messages in CakePHP » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+		
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					
+				</hgroup>
+
+				<nav class="main-navigation" role="navigation">
+					<h3 class="menu-toggle">Menu</h3>
+					<a class="assistive-text" href="#content" title="Skip to content">Skip to content</a>
+					<div class="nav-menu">
+						<ul class="nav-menu">
+							
+								<li class="page_item"><a href="/">Home</a></li>
+							
+								<li class="page_item"><a href="/categories/">Categories</a></li>
+							
+								<li class="page_item"><a href="/tags/">Tags</a></li>
+							
+								<li class="page_item"><a href="/about/">About</a></li>
+							
+						</ul>
+					</div>
+				</nav>
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+    
+      <h1 class="entry-title">
+        Rails-Style Error Messages in CakePHP
+      </h1>
+    
+    
+
+    
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Rails-Style Error Messages in CakePHP!">
+          <span class="responses-number">0</span> Replies
+        </a>
+      </div>
+    
+  </header>
+
+  
+
+  
+
+  <div class="entry-content">
+    
+
+    
+
+
+    <p>I've had a bit of code tucked away in various files for a while. It was code to deal with error messages.</p>
+
+<p>In CakePHP, error messages are wrapped around the FormHelper::method() that created it. So if you create an error and you did the following:</p>
+
+<pre class="rainbow-code"><code data-language="php">echo $form->input('Post.title');</code></pre>
+
+<p>You'd probably get the error message appended below that particular FormHelper::input() call. If you have the default stylesheet, it looks good. And you can still make it look good without the default by specifying your own styles. The correct item to style is &quot;.error-message&quot;, for the record.</p>
+
+<p>It's annoying to have to view a form and figure out what you messed up sometimes, and maybe you don't want it to break your beautifully laid out form. In the latter case, you could just set the following:</p>
+
+<pre class="rainbow-code"><code data-language="css">.error-message {
+    display: none
+}</code></pre>
+
+<p>And presto chango, you are done. NOT. You forgot about actually outputting the errors. And this also doesn't cover when you have the former case. It might actually be a Section 508 requirement, I would have to get back to you.</p>
+
+<p>Anywho, I built an ErrorsHelper months ago that kind of did this in a backwards fashion. It wasn't very automatic though. Had to echo the buggers manually where I needed it, and it also was kinda weird (as in I used it to list flash messages as well... but thats another story).</p>
+
+<p>So while I was building out a <a href="http://github.com/josegonzalez/marcyavenue">now defunct cms</a>, noticed I was at a point where I might want to handle, oh, idk, the error messages, and decided to clean up that piece of my ResourceHelper. It was going well, and I realize that others might want to use it someday, so I have packaged it up a bit.</p>
+
+<p>Usage is quite simple. Simply add the helper to the controller you need it to be in. In my example, I will attach it to the AppController (I also included the way to add it in one place specifically, such as the Controller::beforeRender() callback):</p>
+
+<pre class="rainbow-code"><code data-language="php">class AppController extends Appcontroller {
+    public $helpers = array('Errors');
+
+    public function beforeRender() {
+        $this->helpers[] = 'Errors';
+    }
+}</code></pre>
+
+<p>Then in your layout, simply do the follow:</p>
+
+<pre class="rainbow-code"><code data-language="php">echo $errors_for_layout;</code></pre>
+
+<p>It works via the Helper::beforeRender() callback. For the moment, it is called automatically in the beforeRender, but in the future I will add some helpful configuration for you to use. You can also manually call the following:</p>
+
+<pre class="rainbow-code"><code data-language="php">echo $errors->for_layout();</code></pre>
+
+<p>It also takes care of echoing Session messages, both the default and the Authentication message. That will also be configurable in the near future. ErrorHelper requires jQuery, which is something I will ALSO make configurable (jeez, seems like I was being lazy, no?). I just wanted to get it out for you people, give me a break. I'll remove these warnings when I get them done...</p>
+
+<p><a href="https://github.com/josegonzalez/stylish_errors">FYI, you can grab the stylish_errors plugin by clicking this delicious text. Feel free to &quot;fork&quot; it and make it better.</a></p>
+
+  </div>
+
+  
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/helpers" title="View all posts in Helpers" rel="category">Helpers</a> on <a href="http://wp-themes.com/?p=1" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-11-26 00:00:00 -0500">26 Nov 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+  
+</article>
+
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+ 					<aside class="widget widget_archive">
+						<h3 class="widget-title">Archives</h3>
+						<ul>
+							
+								
+						  		<li>
+						  			<a href="/2013/01/" title="January 2013">
+						  				January 2013
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2012/09/" title="September 2012">
+						  				September 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/07/" title="July 2012">
+						  				July 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/05/" title="May 2012">
+						  				May 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/03/" title="March 2012">
+						  				March 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/01/" title="January 2012">
+						  				January 2012
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2011/10/" title="October 2011">
+						  				October 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/06/" title="June 2011">
+						  				June 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/05/" title="May 2011">
+						  				May 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/04/" title="April 2011">
+						  				April 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/03/" title="March 2011">
+						  				March 2011
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2010/12/" title="December 2010">
+						  				December 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/10/" title="October 2010">
+						  				October 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/09/" title="September 2010">
+						  				September 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/08/" title="August 2010">
+						  				August 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/02/" title="February 2010">
+						  				February 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/01/" title="January 2010">
+						  				January 2010
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2009/12/" title="December 2009">
+						  				December 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/11/" title="November 2009">
+						  				November 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/09/" title="September 2009">
+						  				September 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/08/" title="August 2009">
+						  				August 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/06/" title="June 2009">
+						  				June 2009
+						  			</a>
+						  		</li>
+					  		
+					  	
+						</ul>
+					</aside>
+
+					<aside class="widget widget_categories">
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+							
+								<li class="cat-item"><a href="/categories/authentication"title="View all posts filed under Authentication">Authentication</a></li>
+							
+								<li class="cat-item"><a href="/categories/authorization"title="View all posts filed under Authorization">Authorization</a></li>
+							
+								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
+							
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+							
+								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
+							
+								<li class="cat-item"><a href="/categories/datasources"title="View all posts filed under Datasources">Datasources</a></li>
+							
+								<li class="cat-item"><a href="/categories/deployment"title="View all posts filed under Deployment">Deployment</a></li>
+							
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+							
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+							
+								<li class="cat-item"><a href="/categories/forms"title="View all posts filed under Forms">Forms</a></li>
+							
+								<li class="cat-item"><a href="/categories/helpers"title="View all posts filed under Helpers">Helpers</a></li>
+							
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+							
+								<li class="cat-item"><a href="/categories/internationalization"title="View all posts filed under Internationalization">Internationalization</a></li>
+							
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+							
+								<li class="cat-item"><a href="/categories/models"title="View all posts filed under Models">Models</a></li>
+							
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+							
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+							
+								<li class="cat-item"><a href="/categories/routing"title="View all posts filed under Routing">Routing</a></li>
+							
+								<li class="cat-item"><a href="/categories/views"title="View all posts filed under Views">Views</a></li>
+							
+						</ul>
+					</aside>
+
+					<aside class="widget widget_recent_entries">
+						<h3 class="widget-title">Recent Posts</h3>
+						<ul>
+							
+								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
+							
+								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
+							
+								<li><a href="/2012/09/07/why-cakephp/" title="Why CakePHP?">Why CakePHP?</a></li>
+							
+								<li><a href="/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="Upgrading from Lion to Mountain Lion">Upgrading from Lion to Mountain Lion</a></li>
+							
+								<li><a href="/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 4">Full Stack CakePHP Deployment With Chef and Capistrano - Part 4</a></li>
+							
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+			
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2009/11/26/rails-style-error-messages-in-cakephp/';
+				var disqus_url        = 'http://example.dev/2009/11/26/rails-style-error-messages-in-cakephp/';
+				var disqus_title      = 'Rails-Style Error Messages in CakePHP';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+
+					var commentCount = setInterval(function() {
+						if ($('#dsq-num-posts').length) {
+							$('.responses-number').html($('#dsq-num-posts').html());
+							clearInterval(commentCount);
+						}
+					}, 1000);
+				})();
+			}
+			
+			
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			
+		</script>
+	</body>
+</html>

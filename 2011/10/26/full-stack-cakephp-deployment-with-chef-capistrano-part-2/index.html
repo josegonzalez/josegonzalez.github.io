@@ -1,0 +1,513 @@
+
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Full Stack CakePHP Deployment With Chef and Capistrano - Part 2</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="What goes in a Chef Recipe, and how much do I really need to know about resources?" />
+		<meta name="keywords" content="deployment, chef, cakephp" />
+
+		<link rel="alternate" type="application/rss+xml" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 2 » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+		
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					
+				</hgroup>
+
+				<nav class="main-navigation" role="navigation">
+					<h3 class="menu-toggle">Menu</h3>
+					<a class="assistive-text" href="#content" title="Skip to content">Skip to content</a>
+					<div class="nav-menu">
+						<ul class="nav-menu">
+							
+								<li class="page_item"><a href="/">Home</a></li>
+							
+								<li class="page_item"><a href="/categories/">Categories</a></li>
+							
+								<li class="page_item"><a href="/tags/">Tags</a></li>
+							
+								<li class="page_item"><a href="/about/">About</a></li>
+							
+						</ul>
+					</div>
+				</nav>
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+    
+      <h1 class="entry-title">
+        Full Stack CakePHP Deployment With Chef and Capistrano - Part 2
+      </h1>
+    
+    
+
+    
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Full Stack CakePHP Deployment With Chef and Capistrano - Part 2!">
+          <span class="responses-number">0</span> Replies
+        </a>
+      </div>
+    
+  </header>
+
+  
+
+  
+
+  <div class="entry-content">
+    
+
+    
+
+
+    <blockquote>
+
+This text is the second in a long series to correct an extremely disastrous talk at CakeFest 2011. It will also hopefully apply to more than CakePHP.
+
+</blockquote>
+
+<h2>Chef Cookbooks</h2>
+
+<p>What is a Cookbook really?</p>
+
+<blockquote>
+
+Cookbooks are the fundamental units of distribution in Chef.
+
+</blockquote>
+
+<p>Yes, I had a blank face when I read this as well. A Cookbook can be thought of as a set of bundled files that do a particular task, like install/setup Apache, or install the proper iptables etc. Cookbooks can be thought of as plugins, and can be reused across multiple server setups.</p>
+
+<p>I personally use the <a href="http://community.opscode.com/cookbooks">official cookbooks repository</a> as a guide to creating my own, custom cookbooks.</p>
+
+<p>Cookbooks have the following:</p>
+
+<ul>
+<li><a href="http://wiki.opscode.com/display/chef/Attributes">Attributes</a>: Basically a set of defaults for your recipe. If creating a custom recipe, you can use these defaults as a base and let users override in their <code>DNA</code> on a case-by-case basis.</li>
+<li><a href="http://wiki.opscode.com/display/chef/Definitions">Definitions</a>: Definitions create new Resources. This is an incredibly powerful tool, as a resource is a group of tasks that should be performed in concert, and being able to reference these DRY-ly is the holy grail of server deployment :)</li>
+<li><a href="http://wiki.opscode.com/display/chef/File+Distribution">Files</a>: Usually config files that need to be copied in to a directory and left alone. <code>init.d</code> scripts fit well in this category.</li>
+<li><a href="http://wiki.opscode.com/display/chef/Recipes">Recipes</a>: Sets of instructions that use up the rest of the cookbook in a programmatic fashion to actually <em>DO</em> things. Recipes are the hearts and souls of cookbooks.</li>
+<li><a href="http://wiki.opscode.com/display/chef/Templates">Templates</a>: Templates allow you to do exactly as you think. Template out files, like apache virtualhosts, by filling out variables set from the Recipe. Pretty easy to use, and even allow some embedded ruby via <code>erb</code></li>
+</ul>
+
+<p>The most interesting of these is the Recipe, for obvious reasons</p>
+
+<h2>A Simple Recipe</h2>
+
+<p>The following is a very simple recipe meant to show off a few things in Chef.</p>
+
+<pre class="rainbow-code"><code data-language="ruby">node[:static_applications].each do |hostname, sites|
+
+  sites.each do |base, info|
+
+    directory "#{node[:server][:production][:dir]}/#{hostname}/#{base}" do
+      owner "deploy"
+      group "deploy"
+      mode "0755"
+      recursive true
+    end
+
+    git "#{node[:server][:production][:dir]}/#{hostname}/#{base}/public" do
+      repository info[:repository]
+      user "deploy"
+      group "deploy"
+    end
+
+    nginx_up "#{node[:nginx][:dir]}/sites-available/#{hostname}.#{base}" do
+      hostname "#{base}.#{hostname}"
+      variables(info)
+    end
+
+  end
+
+end</code></pre>
+
+<p>If you'll notice, I'm referencing <code>node</code> quite a few times. <code>node</code> is a reference to the configuration in your <code>DNA</code> file. I normally use <code>json</code> files, so <code>node[:static_applications]</code> is simply a key in that json file. In this case, I'm iterating over all the <code>:static_applications</code> which is a set of hostnames mapping to site configurations. Each one of these is actually a base path mapping to some configuration info as follows:</p>
+
+<pre class="rainbow-code"><code data-language="javascript">{
+  "static_applications": {
+    "josediazgonzalez.com": {
+      "archives": {
+        "repository": "git://github.com/josegonzalez/archives.josediazgonzalez.com.git",
+        "subdomain": "archives.",
+        "path": ""
+      },
+      "default": {
+        "repository": "git://github.com/josegonzalez/josediazgonzalez.com.git",
+        "subdomain": "",
+        "path": "/_site"
+      }
+    },
+    "areyousmokingcrack.com": {
+      "default": {
+        "repository": "git://github.com/josegonzalez/areyousmokingcrack.com.git",
+        "subdomain": "",
+        "path": ""
+      }
+    }
+  }
+}</code></pre>
+
+<p>So we iterate over some configuration. Cool. But whats the stuff inside the loops do?</p>
+
+<h3>Built-in Resources</h3>
+
+<p>There are quite a few built-in resources in Chef. The ones I use most often are <code>Directory</code>, <code>Git</code>, and <code>Template</code>, and some of these are actually in my example above (not template).</p>
+
+<p>The <code>Directory</code> resource merely creates a directory in a desired path with the desired config, such as directory owner and permissions.</p>
+
+<p>The <code>Git</code> resource is interesting because it's actually a provider of the <code>SCM</code> resource. This means it provides some configuration, and a bit of magic, on top of the <code>SCM</code> resource to provide an implementation specific to Git, but that can be moved to, say, <code>SVN</code> with minimal work. If you're coming from the CakePHP world, it's akin to how <code>DboMysql</code> extends <code>DboSource</code> to provide <code>MySQL</code> specific interfaces.</p>
+
+<p>The <code>Template</code> resource allows you to template out files by passing it variables.</p>
+
+<h3>Back to the Loops</h3>
+
+<p>So in my loop, I do the following:</p>
+
+<h4>Create a directory in the servers production directory for the given static_app</h4>
+
+<pre class="rainbow-code"><code data-language="ruby">directory "#{node[:server][:production][:dir]}/#{hostname}/#{base}" do
+  owner "deploy"
+  group "deploy"
+  mode "0755"
+  recursive true
+end</code></pre>
+
+<h4>Clone the application from github to the aforementioned directory</h4>
+
+<pre class="rainbow-code"><code data-language="ruby">git "#{node[:server][:production][:dir]}/#{hostname}/#{base}/public" do
+  repository info[:repository]
+  user "deploy"
+  group "deploy"
+end</code></pre>
+
+<h4>Use a custom defined Resource to tell nginx to turn on this static_app</h4>
+
+<pre class="rainbow-code"><code data-language="ruby">nginx_up "#{node[:nginx][:dir]}/sites-available/#{hostname}.#{base}" do
+  hostname "#{base}.#{hostname}"
+  variables(info)
+end</code></pre>
+
+<h2>Recap</h2>
+
+<p>That may have seemed like a lot of information, but it should set the stage for pulling cookbooks together to build cogent deployments. We defined a short recipe, combined a few built-in resources with a custom resource, and configured the whole thing in our <code>dna.json</code>. If we had run this, assuming <code>nginx</code> and <code>git</code> were installed on the server, we would have three static applications deployed on our instance.</p>
+
+<p>Making a recipe isn't very hard, as we found out above, but creating custom resources might seem a bit daunting. We'll go over that, as well as templating and how to best use attributes in the next post.</p>
+
+<p><strong>To Be Continued</strong></p>
+
+  </div>
+
+  
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/deployment" title="View all posts in Deployment" rel="category">Deployment</a> on <a href="http://wp-themes.com/?p=1" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-10-26 00:00:00 -0400">26 Oct 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+  
+</article>
+
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+ 					<aside class="widget widget_archive">
+						<h3 class="widget-title">Archives</h3>
+						<ul>
+							
+								
+						  		<li>
+						  			<a href="/2013/01/" title="January 2013">
+						  				January 2013
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2012/09/" title="September 2012">
+						  				September 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/07/" title="July 2012">
+						  				July 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/05/" title="May 2012">
+						  				May 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/03/" title="March 2012">
+						  				March 2012
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2012/01/" title="January 2012">
+						  				January 2012
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2011/10/" title="October 2011">
+						  				October 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/06/" title="June 2011">
+						  				June 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/05/" title="May 2011">
+						  				May 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/04/" title="April 2011">
+						  				April 2011
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2011/03/" title="March 2011">
+						  				March 2011
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2010/12/" title="December 2010">
+						  				December 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/10/" title="October 2010">
+						  				October 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/09/" title="September 2010">
+						  				September 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/08/" title="August 2010">
+						  				August 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/02/" title="February 2010">
+						  				February 2010
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2010/01/" title="January 2010">
+						  				January 2010
+						  			</a>
+						  		</li>
+					  		
+					  	
+								
+						  		<li>
+						  			<a href="/2009/12/" title="December 2009">
+						  				December 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/11/" title="November 2009">
+						  				November 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/09/" title="September 2009">
+						  				September 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/08/" title="August 2009">
+						  				August 2009
+						  			</a>
+						  		</li>
+					  		
+						  		<li>
+						  			<a href="/2009/06/" title="June 2009">
+						  				June 2009
+						  			</a>
+						  		</li>
+					  		
+					  	
+						</ul>
+					</aside>
+
+					<aside class="widget widget_categories">
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+							
+								<li class="cat-item"><a href="/categories/authentication"title="View all posts filed under Authentication">Authentication</a></li>
+							
+								<li class="cat-item"><a href="/categories/authorization"title="View all posts filed under Authorization">Authorization</a></li>
+							
+								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
+							
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+							
+								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
+							
+								<li class="cat-item"><a href="/categories/datasources"title="View all posts filed under Datasources">Datasources</a></li>
+							
+								<li class="cat-item"><a href="/categories/deployment"title="View all posts filed under Deployment">Deployment</a></li>
+							
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+							
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+							
+								<li class="cat-item"><a href="/categories/forms"title="View all posts filed under Forms">Forms</a></li>
+							
+								<li class="cat-item"><a href="/categories/helpers"title="View all posts filed under Helpers">Helpers</a></li>
+							
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+							
+								<li class="cat-item"><a href="/categories/internationalization"title="View all posts filed under Internationalization">Internationalization</a></li>
+							
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+							
+								<li class="cat-item"><a href="/categories/models"title="View all posts filed under Models">Models</a></li>
+							
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+							
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+							
+								<li class="cat-item"><a href="/categories/routing"title="View all posts filed under Routing">Routing</a></li>
+							
+								<li class="cat-item"><a href="/categories/views"title="View all posts filed under Views">Views</a></li>
+							
+						</ul>
+					</aside>
+
+					<aside class="widget widget_recent_entries">
+						<h3 class="widget-title">Recent Posts</h3>
+						<ul>
+							
+								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
+							
+								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
+							
+								<li><a href="/2012/09/07/why-cakephp/" title="Why CakePHP?">Why CakePHP?</a></li>
+							
+								<li><a href="/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="Upgrading from Lion to Mountain Lion">Upgrading from Lion to Mountain Lion</a></li>
+							
+								<li><a href="/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 4">Full Stack CakePHP Deployment With Chef and Capistrano - Part 4</a></li>
+							
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+			
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/';
+				var disqus_url        = 'http://example.dev/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/';
+				var disqus_title      = 'Full Stack CakePHP Deployment With Chef and Capistrano - Part 2';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+
+					var commentCount = setInterval(function() {
+						if ($('#dsq-num-posts').length) {
+							$('.responses-number').html($('#dsq-num-posts').html());
+							clearInterval(commentCount);
+						}
+					}, 1000);
+				})();
+			}
+			
+			
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			
+		</script>
+	</body>
+</html>
