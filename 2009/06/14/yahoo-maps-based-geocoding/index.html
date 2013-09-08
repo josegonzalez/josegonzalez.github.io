@@ -101,7 +101,7 @@
     
 
 
-    <p>I recently had to create online maps for an art gallery, specifically for their exhibits. So I decided to use the Yahoo API to grab the coordinates based upon the data that was being sent to the model and save this to the database. Here's how I did it.</p>
+    <p>I recently had to create online maps for an art gallery, specifically for their exhibits. So I decided to use the Yahoo API to grab the coordinates based upon the data that was being sent to the model and save this to the database. Here&#39;s how I did it.</p>
 
 <p>First, the model has to be aware of the Yahoo AppID. I set this as a variable within the model itself, but you can set it in the url.</p>
 
@@ -122,7 +122,7 @@
   PRIMARY KEY  (`id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;</code></pre>
 
-<p>Now that you have the proper fields, we'll REALLY get the Latitude and Longitude. Below is the entire Model class relating to Exhibits:</p>
+<p>Now that you have the proper fields, we&#39;ll REALLY get the Latitude and Longitude. Below is the entire Model class relating to Exhibits:</p>
 
 <pre class="rainbow-code"><code data-language="php">class Exhibit extends AppModel {
     function beforeValidate() {
@@ -131,20 +131,20 @@
         // Start constructing the URL
         $q = 'http://local.yahooapis.com/MapsService/V1/geocode?appid=';
         // Adding apiid
-        $q .= $this->yahooApiID;
+        $q .= $this-&gt;yahooApiID;
         // Adding Street
-        $q .= '&street='.$this->data['Exhibit']['address'];
+        $q .= '&amp;street='.$this-&gt;data['Exhibit']['address'];
         // Adding City
-        $q .= '&city='.$this->data['Exhibit']['city'];
+        $q .= '&amp;city='.$this-&gt;data['Exhibit']['city'];
         // Adding State
-        //ClassRegistry::init('State')->getState($this->data['Exhibit']['state_id'])
-        $q .= '&state='.ClassRegistry::init('State')->getState($this->data['Exhibit']['state_id']);
+        //ClassRegistry::init('State')-&gt;getState($this-&gt;data['Exhibit']['state_id'])
+        $q .= '&amp;state='.ClassRegistry::init('State')-&gt;getState($this-&gt;data['Exhibit']['state_id']);
         // Adding Zip
-        $q .= '&zip='.$this->data['Exhibit']['zipcode'];
+        $q .= '&amp;zip='.$this-&gt;data['Exhibit']['zipcode'];
         // If We had a location, we would do the following instead:
-        // $q .= '&location='.rawurlencode($this->data['Exhibit']['location']);
+        // $q .= '&amp;location='.rawurlencode($this-&gt;data['Exhibit']['location']);
         // Setting Output to xml
-        $q .= '&output=php';
+        $q .= '&amp;output=php';
         $q = str_replace(' ', '%20', $q);
 
         //Using cURL or file_get_contents
@@ -159,24 +159,24 @@
         }
         $phpContent = unserialize($phpContent);
 
-        $this->data['Exhibit']['lattitude'] = $phpContent['ResultSet']['Result']['Latitude'];
-        $this->data['Exhibit']['longitude'] = $phpContent['ResultSet']['Result']['Longitude'];
+        $this-&gt;data['Exhibit']['lattitude'] = $phpContent['ResultSet']['Result']['Latitude'];
+        $this-&gt;data['Exhibit']['longitude'] = $phpContent['ResultSet']['Result']['Longitude'];
     }
 }</code></pre>
 
-<p>I have allowed you to use either cURL or fopen. For cURL, you need to have that installed on your server, and for fopen, you need to have <code>allow_url_fopen</code> set to true in php.ini. Just giving options in case you can't do one or the other :)</p>
+<p>I have allowed you to use either cURL or fopen. For cURL, you need to have that installed on your server, and for fopen, you need to have <code>allow_url_fopen</code> set to true in php.ini. Just giving options in case you can&#39;t do one or the other :)</p>
 
-<p>You'll notice that when I get the State for this location, I initialize the model via <code>ClassRegistry</code>. Just out of habit. I also don't have a relationship to the State in my model, which is why I did this. Read about <code>Containable</code> (and <code>BindModel</code> for extra points!) for more information. The code for that call in the State model is as follows:</p>
+<p>You&#39;ll notice that when I get the State for this location, I initialize the model via <code>ClassRegistry</code>. Just out of habit. I also don&#39;t have a relationship to the State in my model, which is why I did this. Read about <code>Containable</code> (and <code>BindModel</code> for extra points!) for more information. The code for that call in the State model is as follows:</p>
 
 <pre class="rainbow-code"><code data-language="generic">class State extends AppModel{
     function getState($state = null){
-        $state = $this->find('first',
+        $state = $this-&gt;find('first',
             array(
-                'recursive' => -1,
-                'fields' => array(
+                'recursive' =&gt; -1,
+                'fields' =&gt; array(
                     'State.title'
                 ),
-                'conditions' => array('State.id' => $state)
+                'conditions' =&gt; array('State.id' =&gt; $state)
             )
         );
         return $state['State']['title'];
@@ -195,13 +195,13 @@
 
 <p>You can now use the Latitude and Longitude in the views just as any other model data.</p>
 
-<p>I realize that you might be thinking &quot;This should be a behavior or something, I'll end up replicating this several times!&quot; Well good. You make the behavior and I'll take credit! In all seriousness though, there is already a Geocode Model on the bakery that should be made into a behavior. This was just a quick fix before I converted it into a Behavior for my own usage :)</p>
+<p>I realize that you might be thinking &quot;This should be a behavior or something, I&#39;ll end up replicating this several times!&quot; Well good. You make the behavior and I&#39;ll take credit! In all seriousness though, there is already a Geocode Model on the bakery that should be made into a behavior. This was just a quick fix before I converted it into a Behavior for my own usage :)</p>
 
   </div>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/models" title="View all posts in Models" rel="category">Models</a> on <a href="http://josediazgonzalez.com/2009/06/14/yahoo-maps-based-geocoding/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-06-14 00:00:00 -0700">14 Jun 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/models" title="View all posts in Models" rel="category">Models</a> on <a href="http://josediazgonzalez.com/2009/06/14/yahoo-maps-based-geocoding/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-06-14 00:00:00 -0400">14 Jun 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -377,7 +377,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

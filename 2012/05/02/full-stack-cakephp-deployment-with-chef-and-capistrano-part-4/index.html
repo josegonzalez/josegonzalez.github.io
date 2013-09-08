@@ -101,7 +101,7 @@
     
 
 
-    <p>Now that you've brushed up on how individual pieces of chef work, we're going to create our own chef cookbook and use it within a dna file.</p>
+    <p>Now that you&#39;ve brushed up on how individual pieces of chef work, we&#39;re going to create our own chef cookbook and use it within a dna file.</p>
 
 <h2>Chef Cookbooks</h2>
 
@@ -123,7 +123,7 @@
 <li><code>admin</code> instances: For stuff like logging with logstash and various administrative stuff we use a combination of the <code>elasticsearch::server</code>, <code>nginx</code>, <code>php</code> and <code>logstash</code> recipes to get shit done.</li>
 </ul>
 
-<p>Each instance also has SeatGeek specific stuff, so we put that in a <code>seatgeek</code> cookbook. Occasionally we have side projects that become large enough to warrant their own repo on github, and I'll typically create a cookbook just for those projects.</p>
+<p>Each instance also has SeatGeek specific stuff, so we put that in a <code>seatgeek</code> cookbook. Occasionally we have side projects that become large enough to warrant their own repo on github, and I&#39;ll typically create a cookbook just for those projects.</p>
 
 <ul>
 <li><code>admin</code> recipe: Ties together some admin-specific configuration stuff</li>
@@ -131,67 +131,67 @@
 <li><code>packages</code> recipe: SeatGeek depends upon certain system packages being installed, so we just do it wholesale within this recipe.</li>
 </ul>
 
-<p>By separating your cookbooks between generic and internal cookbooks, you can much more easily pick and choose from the community, contribute those recipes, and ensure your configuration isn't in 9 million places. Ops is tough enough without having to <code>awk</code> through your cookbooks to figure out where you setup master-master replication for MySQL.</p>
+<p>By separating your cookbooks between generic and internal cookbooks, you can much more easily pick and choose from the community, contribute those recipes, and ensure your configuration isn&#39;t in 9 million places. Ops is tough enough without having to <code>awk</code> through your cookbooks to figure out where you setup master-master replication for MySQL.</p>
 
 <h2>My First Cookbook</h2>
 
-<p>I'm going to create a very simple cookbook, whose only job will be to setup users on the server with sudo permissions.</p>
+<p>I&#39;m going to create a very simple cookbook, whose only job will be to setup users on the server with sudo permissions.</p>
 
 <h3>The deploy user</h3>
 
-<p>Each instance has a special <code>deploy</code> user, with access to the codebase in a special chroot jail for security. We won't worry about that jail for now, but we do need the <code>deploy</code> user. The following would be the beginning of our <code>users/recipes/default.rb</code> file:</p>
+<p>Each instance has a special <code>deploy</code> user, with access to the codebase in a special chroot jail for security. We won&#39;t worry about that jail for now, but we do need the <code>deploy</code> user. The following would be the beginning of our <code>users/recipes/default.rb</code> file:</p>
 
-<pre class="rainbow-code"><code data-language="ruby">user "deploy" do
-  comment "Deploy User"
-  home    "/home/deploy"
-  shell   "/bin/bash"
+<pre class="rainbow-code"><code data-language="ruby">user &quot;deploy&quot; do
+  comment &quot;Deploy User&quot;
+  home    &quot;/home/deploy&quot;
+  shell   &quot;/bin/bash&quot;
   uid     1001
-  supports :manage_home => true
+  supports :manage_home =&gt; true
   action [ :create, :manage ]
 end</code></pre>
 
-<p>The above will create a <code>deploy</code> user, with a home folder and a bash shell by default. We set our <code>uid</code> so that the <code>uid</code> for specific users is the same across boxes and we need not worry about permission issues when rsync'ing data. Pretty straightforward, but we need to setup ssh for the deploy user:</p>
+<p>The above will create a <code>deploy</code> user, with a home folder and a bash shell by default. We set our <code>uid</code> so that the <code>uid</code> for specific users is the same across boxes and we need not worry about permission issues when rsync&#39;ing data. Pretty straightforward, but we need to setup ssh for the deploy user:</p>
 
-<pre class="rainbow-code"><code data-language="ruby">directory "/home/deploy/.ssh" do
-  owner "deploy"
-  group "deploy"
+<pre class="rainbow-code"><code data-language="ruby">directory &quot;/home/deploy/.ssh&quot; do
+  owner &quot;deploy&quot;
+  group &quot;deploy&quot;
   mode 0755
   action :create
-  not_if { File.exists? "/home/deploy/.ssh" }
+  not_if { File.exists? &quot;/home/deploy/.ssh&quot; }
 end
 
 # Add deploy private and public key for GitHub
-cookbook_file "/home/deploy/.ssh/id_rsa" do
-  source "home/deploy/ssh/id_rsa"
-  owner "deploy"
-  group "deploy"
+cookbook_file &quot;/home/deploy/.ssh/id_rsa&quot; do
+  source &quot;home/deploy/ssh/id_rsa&quot;
+  owner &quot;deploy&quot;
+  group &quot;deploy&quot;
   mode 0600
   action :create
 end
 
-cookbook_file "/home/deploy/.ssh/id_rsa.pub" do
-  source "home/deploy/ssh/id_rsa.pub"
-  owner "deploy"
-  group "deploy"
+cookbook_file &quot;/home/deploy/.ssh/id_rsa.pub&quot; do
+  source &quot;home/deploy/ssh/id_rsa.pub&quot;
+  owner &quot;deploy&quot;
+  group &quot;deploy&quot;
   mode  0600
   action :create
 end
 
 # Set a custom ssh_config for the deploy user so we can ssh
 # without having to accept a known_host
-template "/home/deploy/.ssh/config" do
-  source "home/deploy/ssh/config.erb"
-  owner "deploy"
-  group "deploy"
+template &quot;/home/deploy/.ssh/config&quot; do
+  source &quot;home/deploy/ssh/config.erb&quot;
+  owner &quot;deploy&quot;
+  group &quot;deploy&quot;
   mode 0600
   action :create
 end</code></pre>
 
-<p>Here, we create the public/private key for Github from the <code>cookbook_file</code>s in the path specified. I like to mimic the path the file will be created on within my cookbooks as it makes it easy to figure out where a particular file is generated from when on the instance in question. In this case, we'll have <code>users/files/home/deploy/ssh/id_rsa</code> and <code>users/files/home/deploy/ssh/id_rsa.pub</code> files. You can guess what is within those files ;)</p>
+<p>Here, we create the public/private key for Github from the <code>cookbook_file</code>s in the path specified. I like to mimic the path the file will be created on within my cookbooks as it makes it easy to figure out where a particular file is generated from when on the instance in question. In this case, we&#39;ll have <code>users/files/home/deploy/ssh/id_rsa</code> and <code>users/files/home/deploy/ssh/id_rsa.pub</code> files. You can guess what is within those files ;)</p>
 
 <p>We also create an ssh <code>config</code> file to manage ssh perms. This uses the <code>users/templates/default/home/deploy/ssh/config.erb</code> file. The <code>default</code> keyword is related to how Chef proposed managing multiple environments at one point, but for legacy reasons has to stick around. I recommend skipping over environments and just sticking to that <code>default</code> path, otherwise things get weird. Here is the template file I use in my own open sourced cookbooks:</p>
 
-<pre class="rainbow-code"><code data-language="ruby"># Autogenerated by Chef for <%= @node[:hostname] %>
+<pre class="rainbow-code"><code data-language="ruby"># Autogenerated by Chef for &lt;%= @node[:hostname] %&gt;
 
 Host *
   CheckHostIP yes
@@ -212,38 +212,38 @@ deploy_gid  = 1001
 ssh_keys    = []
 
 node['users'].each_with_index do |u, i|
-  u[:ssh_keys].each {|key| ssh_keys << key }
+  u[:ssh_keys].each {|key| ssh_keys &lt;&lt; key }
 end
 
 # Create an authorized key for every user we have for deploy
-template "/home/deploy/.ssh/authorized_keys" do
-  source "home/deploy/ssh/authorized_keys.erb"
-  variables(:keys => ssh_keys)
-  owner "deploy"
-  group "deploy"
+template &quot;/home/deploy/.ssh/authorized_keys&quot; do
+  source &quot;home/deploy/ssh/authorized_keys.erb&quot;
+  variables(:keys =&gt; ssh_keys)
+  owner &quot;deploy&quot;
+  group &quot;deploy&quot;
   mode 0600
   action :create
 end</code></pre>
 
-<p>Here we simply collect the user's ssh keys and add them to the deploy user's <code>authorized_keys</code> file. The <code>node['users']</code> data comes from your dna file, which we will explain in a bit, but here is the gist:</p>
+<p>Here we simply collect the user&#39;s ssh keys and add them to the deploy user&#39;s <code>authorized_keys</code> file. The <code>node[&#39;users&#39;]</code> data comes from your dna file, which we will explain in a bit, but here is the gist:</p>
 
-<pre class="rainbow-code"><code data-language="javascript">"users": [
+<pre class="rainbow-code"><code data-language="javascript">&quot;users&quot;: [
   {
-    "username": "jose",
-    "fullname": "Jose Gonzalez",
-    "ssh_keys": ["SERPADERP"]
+    &quot;username&quot;: &quot;jose&quot;,
+    &quot;fullname&quot;: &quot;Jose Gonzalez&quot;,
+    &quot;ssh_keys&quot;: [&quot;SERPADERP&quot;]
   }
 ]</code></pre>
 
 <p>We also would need that template file in <code>users/templates/default/home/deploy/ssh/authorized_keys.erb</code>:</p>
 
-<pre class="rainbow-code"><code data-language="ruby"><% @keys.each do |key| %>
-<%= key %>
-<% end %></code></pre>
+<pre class="rainbow-code"><code data-language="ruby">&lt;% @keys.each do |key| %&gt;
+&lt;%= key %&gt;
+&lt;% end %&gt;</code></pre>
 
-<p>Lots to learn, but we've just created our first cookbook which will setup the deploy user on our server. You can obviously do more complex things with different available resources, as well as your own custom resources, so I'll leave that as an exercise to you.</p>
+<p>Lots to learn, but we&#39;ve just created our first cookbook which will setup the deploy user on our server. You can obviously do more complex things with different available resources, as well as your own custom resources, so I&#39;ll leave that as an exercise to you.</p>
 
-<p>One thing to note is that you should strive to ensure that the output of running your cookbook multiple times will not be non-deterministic. That is to say, if I kept running chef on the box with your cookbook, it better not flip-flop on created files, permissions, etc. If we do that, then we can always depend upon the boxes being in a certain state, which eliminates a lot of ridiculousness you'll deal with in the ops world.</p>
+<p>One thing to note is that you should strive to ensure that the output of running your cookbook multiple times will not be non-deterministic. That is to say, if I kept running chef on the box with your cookbook, it better not flip-flop on created files, permissions, etc. If we do that, then we can always depend upon the boxes being in a certain state, which eliminates a lot of ridiculousness you&#39;ll deal with in the ops world.</p>
 
 <h2>DNA Files</h2>
 
@@ -252,32 +252,32 @@ end</code></pre>
 <p>The following <code>www-ec2-01.json</code> file would run our newly minted cookbook:</p>
 
 <pre class="rainbow-code"><code data-language="javascript">{
-  "box_name": "www-ec2-01",
-  "run_list": [
-    "recipe[users::default]"
+  &quot;box_name&quot;: &quot;www-ec2-01&quot;,
+  &quot;run_list&quot;: [
+    &quot;recipe[users::default]&quot;
   ]
 }</code></pre>
 
 <p>When specifying a recipe to run, you may omit <code>::default</code> if you mean to run the <code>default</code> recipe for a particular cookbook. Otherwise, it is required. In our case, the above is identical to the following dna file:</p>
 
 <pre class="rainbow-code"><code data-language="javascript">{
-  "box_name": "www-ec2-01",
-  "run_list": [
-    "recipe[users]"
+  &quot;box_name&quot;: &quot;www-ec2-01&quot;,
+  &quot;run_list&quot;: [
+    &quot;recipe[users]&quot;
   ]
 }</code></pre>
 
 <p>I normally specify a <code>box_name</code> which sets the hostname for the instance in a separate recipe. Please note that this is usually done with <code>chef-solo</code>, and running a <code>chef</code> server will use another way to identify instances, so please consult that documentation to figure out the server setup.</p>
 
-<p>Running this dna file on the server - chef doesn't run on your machine! - would be done as follows:</p>
+<p>Running this dna file on the server - chef doesn&#39;t run on your machine! - would be done as follows:</p>
 
 <pre class="rainbow-code"><code data-language="shell">chef-solo -c path/to/chef/solo/config.rb -j path/to/dna/www-ec2-01.json</code></pre>
 
-<p>You can specify a config file to give it more options as to where to find recipes etc. Chef runs and gives some output, depending upon it's configured level of verbosity and your recipes.</p>
+<p>You can specify a config file to give it more options as to where to find recipes etc. Chef runs and gives some output, depending upon it&#39;s configured level of verbosity and your recipes.</p>
 
 <h2>Recap</h2>
 
-<p>Now that we've successfully run a non-trivial cookbook that actually does something useful - namely allow your developers to deploy to the instance - you're probably thinking that there should be tools to make running <code>chef-solo</code> easier. Or what <code>chef-solo</code> even is. We'll cover both of those in the next installment in the series, as well as a brief overview of other tools available to you as a chef user.</p>
+<p>Now that we&#39;ve successfully run a non-trivial cookbook that actually does something useful - namely allow your developers to deploy to the instance - you&#39;re probably thinking that there should be tools to make running <code>chef-solo</code> easier. Or what <code>chef-solo</code> even is. We&#39;ll cover both of those in the next installment in the series, as well as a brief overview of other tools available to you as a chef user.</p>
 
 <p><strong>To Be Continued</strong></p>
 
@@ -285,7 +285,7 @@ end</code></pre>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/deployment" title="View all posts in Deployment" rel="category">Deployment</a> on <a href="http://josediazgonzalez.com/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-05-02 01:53:00 -0700">02 May 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/deployment" title="View all posts in Deployment" rel="category">Deployment</a> on <a href="http://josediazgonzalez.com/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-05-02 01:53:00 -0400">02 May 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -461,7 +461,7 @@ end</code></pre>
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

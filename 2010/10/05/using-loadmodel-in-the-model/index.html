@@ -103,9 +103,9 @@
 
     <p>In IRC, a frequently asked question is how to use unrelated models in both controllers and models.</p>
 
-<p>The standard answer for controllers is to use <code>Controller::loadModel()</code> in the Controller, as this can be used in combination with <code>Controller::$persistModel</code>, as well as other features, to quickly cache the model for faster loading later. It's a pretty neat trick.</p>
+<p>The standard answer for controllers is to use <code>Controller::loadModel()</code> in the Controller, as this can be used in combination with <code>Controller::$persistModel</code>, as well as other features, to quickly cache the model for faster loading later. It&#39;s a pretty neat trick.</p>
 
-<p>In the Model, however, the answer has been to use <code>ClassRegistry::init()</code> to load models. It works, but it returns an instance of the model, where most developers might expect it to create a class variable like <code>Controller::loadModel()</code> does. Because it returns an instance, it also uses more memory and developers use it in all sorts of crazy ways. It's a mess.</p>
+<p>In the Model, however, the answer has been to use <code>ClassRegistry::init()</code> to load models. It works, but it returns an instance of the model, where most developers might expect it to create a class variable like <code>Controller::loadModel()</code> does. Because it returns an instance, it also uses more memory and developers use it in all sorts of crazy ways. It&#39;s a mess.</p>
 
 <p>Last night, someone asked about what they should use in a Model, so instead of repeating the same tired answers, I came up with a <code>Model::loadModel()</code> method of my own.</p>
 
@@ -126,64 +126,64 @@
  * @access public
  */
     function loadModel($modelName, $options = array()) {
-        if (is_string($options)) $options = array('alias' => $options);
+        if (is_string($options)) $options = array('alias' =&gt; $options);
         $options = array_merge(array(
-            'datasource'  => 'default',
-            'alias'       => false,
-            'id'          => false,
+            'datasource'  =&gt; 'default',
+            'alias'       =&gt; false,
+            'id'          =&gt; false,
         ), $options);
 
         list($plugin, $className) = pluginSplit($modelName, true, null);
         if (empty($options['alias'])) $options['alias'] = $className;
 
-        if (!isset($this->{$options['alias']}) || $this->{$options['alias']}->name !== $className) {
+        if (!isset($this-&gt;{$options['alias']}) || $this-&gt;{$options['alias']}-&gt;name !== $className) {
             if (!class_exists($className)) {
-                if ($plugin) $plugin = "{$plugin}.";
-                App::import('Model', "{$plugin}{$modelClass}");
+                if ($plugin) $plugin = &quot;{$plugin}.&quot;;
+                App::import('Model', &quot;{$plugin}{$modelClass}&quot;);
             }
             $table = Inflector::tableize($className);
 
             if (PHP5) {
-                $this->{$options['alias']} = new $className($options['id'], $table, $options['datasource']);
+                $this-&gt;{$options['alias']} = new $className($options['id'], $table, $options['datasource']);
             } else {
-                $this->{$options['alias']} =& new $className($options['id'], $table, $options['datasource']);
+                $this-&gt;{$options['alias']} =&amp; new $className($options['id'], $table, $options['datasource']);
             }
-            if (!$this->{$options['alias']}) {
-                return $this->cakeError('missingModel', array(array(
-                    'className' => $className, 'code' => 500
+            if (!$this-&gt;{$options['alias']}) {
+                return $this-&gt;cakeError('missingModel', array(array(
+                    'className' =&gt; $className, 'code' =&gt; 500
                 )));
             }
-            $this->{$options['alias']}->alias = $options['alias'];
+            $this-&gt;{$options['alias']}-&gt;alias = $options['alias'];
         }
 
-        $this->{$options['alias']}->create();
+        $this-&gt;{$options['alias']}-&gt;create();
         return true;
     }
 
 }</code></pre>
 
-<p>I think it's pretty nifty. Usage is simple:</p>
+<p>I think it&#39;s pretty nifty. Usage is simple:</p>
 
 <pre class="rainbow-code"><code data-language="php">class User extends AppModel {
 
     function getPosts($limit = 10) {
-        $this->loadModel('Post');
-        return $this->Post->find('all', array('limit' => $limit));
+        $this-&gt;loadModel('Post');
+        return $this-&gt;Post-&gt;find('all', array('limit' =&gt; $limit));
     }
 
     function getTags($limit = 10) {
         // Tag is really just an alias for a Category, we can then
         // load up separate instances of the model for things like
         // attaching behaviors etc.
-        $this->loadModel('Tag', 'Category');
-        return $this->Category->find('all', array('limit' => $limit));
+        $this-&gt;loadModel('Tag', 'Category');
+        return $this-&gt;Category-&gt;find('all', array('limit' =&gt; $limit));
     }
 
 }</code></pre>
 
 <p>Of course, once you call <code>Model::loadModel()</code>, the loaded model is available for the length of the entire request, so long as it is called from that same initial model. It would be useful in cases where, for example, one needs to call an internal, unrelated Api Model repeatedly across multiple model methods.</p>
 
-<p>Calling <code>Model::loadModel()</code> multiple times doesn't even create a new instance, merely clears it's internal state.</p>
+<p>Calling <code>Model::loadModel()</code> multiple times doesn&#39;t even create a new instance, merely clears it&#39;s internal state.</p>
 
 <p>Feel free to use and abuse this. It is currently untested, and would do well to go into a behavior.</p>
 
@@ -191,7 +191,7 @@
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/models" title="View all posts in Models" rel="category">Models</a> on <a href="http://josediazgonzalez.com/2010/10/05/using-loadmodel-in-the-model/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2010-10-05 00:00:00 -0700">05 Oct 2010</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/models" title="View all posts in Models" rel="category">Models</a> on <a href="http://josediazgonzalez.com/2010/10/05/using-loadmodel-in-the-model/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2010-10-05 00:00:00 -0400">05 Oct 2010</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -367,7 +367,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

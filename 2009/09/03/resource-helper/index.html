@@ -139,7 +139,7 @@ class ResourceHelper extends AppHelper {
 
 /**
  * The value of the class attribute assigned to the wrapper div for every
- * label in the format elementType => class
+ * label in the format elementType =&gt; class
  *
  * @var array
  */
@@ -169,9 +169,9 @@ class ResourceHelper extends AppHelper {
  * @author Jose Diaz-Gonzalez
  **/
     function setup($options = array()) {
-        $options = array_merge(array('screen' => 'blueprint/screen','print' => 'blueprint/print'), $options);
-        $head = $this->Html->css($options['screen'], 'stylesheet', array('media' => 'screen, projection'));
-        $head .= $this->Html->css($options['print'], 'stylesheet', array('media' => 'print'));
+        $options = array_merge(array('screen' =&gt; 'blueprint/screen','print' =&gt; 'blueprint/print'), $options);
+        $head = $this-&gt;Html-&gt;css($options['screen'], 'stylesheet', array('media' =&gt; 'screen, projection'));
+        $head .= $this-&gt;Html-&gt;css($options['print'], 'stylesheet', array('media' =&gt; 'print'));
         return $head;
     }
 
@@ -184,10 +184,10 @@ class ResourceHelper extends AppHelper {
  * @author Jose Diaz-Gonzalez
  **/
     function ie($options = array()) {
-        $options = array_merge(array('ie' => 'blueprint/ie'), $options);
-        $head = "<!--[if IE]>";
-        $head .= $this->Html->css($options['ie'], 'stylesheet', array('media' => 'screen'));
-        $head .= "<![endif]-->";
+        $options = array_merge(array('ie' =&gt; 'blueprint/ie'), $options);
+        $head = &quot;&lt;!--[if IE]&gt;&quot;;
+        $head .= $this-&gt;Html-&gt;css($options['ie'], 'stylesheet', array('media' =&gt; 'screen'));
+        $head .= &quot;&lt;![endif]--&gt;&quot;;
         return $head;
     }
 
@@ -195,7 +195,7 @@ class ResourceHelper extends AppHelper {
  * Wrapper for Html Helper that includes a plugin(s) in the header
  *
  * @param string $path This is the path within the blueprint plugins folder to the plugin(s)
- *                      containing the plugin. Do not include "screen.css" or the trailing slash
+ *                      containing the plugin. Do not include &quot;screen.css&quot; or the trailing slash
  * @param array $options Additional options to be set if the plugin settings need to be configured
  * @return string
  * @access public
@@ -204,13 +204,13 @@ class ResourceHelper extends AppHelper {
     function plugins($path = NULL, $options = array()) {
         $styles = '';
         if (!empty($path)) {
-            $options = array_merge(array('blueprint' => 'blueprint/plugins','file' => 'screen', 'media' => 'screen, projection'), $options);
+            $options = array_merge(array('blueprint' =&gt; 'blueprint/plugins','file' =&gt; 'screen', 'media' =&gt; 'screen, projection'), $options);
             if (is_array($path)) {
                 foreach ($path as $plugin) {
-                    $styles .= $this->Html->css($options['blueprint'] . "//$plugin//" . $options['file'], 'stylesheet', array('media' => $options['media']));
+                    $styles .= $this-&gt;Html-&gt;css($options['blueprint'] . &quot;//$plugin//&quot; . $options['file'], 'stylesheet', array('media' =&gt; $options['media']));
                 }
             } else {
-                $styles = $this->Html->css($options['blueprint'] . "//$path//" . $options['file'], 'stylesheet', array('media' => $options['media']));
+                $styles = $this-&gt;Html-&gt;css($options['blueprint'] . &quot;//$path//&quot; . $options['file'], 'stylesheet', array('media' =&gt; $options['media']));
             }
         }
         return $styles;
@@ -227,25 +227,25 @@ class ResourceHelper extends AppHelper {
     function configure($elements, $label = '', $input = '', $special = '') {
         if (is_array($elements)) {
             foreach ($elements as $element){
-                $this->_labelClass[$element] = $label;
-                $this->_inputClass[$element] = $input;
+                $this-&gt;_labelClass[$element] = $label;
+                $this-&gt;_inputClass[$element] = $input;
                 if (!empty($special)) {
-                    $this->_specialClass[$element] = $special;
+                    $this-&gt;_specialClass[$element] = $special;
                 }
             }
         } else {
-            $this->_labelClass[$elements] = $label;
-            $this->_inputClass[$elements] = $input;
+            $this-&gt;_labelClass[$elements] = $label;
+            $this-&gt;_inputClass[$elements] = $input;
             if (!empty($special)) {
-                $this->_specialClass[$elements] = $special;
+                $this-&gt;_specialClass[$elements] = $special;
             }
         }
     }
 
 /**
- * Wrapper for FormHelper->input that adds blueprintCSS markup
+ * Wrapper for FormHelper-&gt;input that adds blueprintCSS markup
  *
- * @param string $fieldName This should be "Modelname.fieldname", "Modelname/fieldname" is deprecated
+ * @param string $fieldName This should be &quot;Modelname.fieldname&quot;, &quot;Modelname/fieldname&quot; is deprecated
  * @param array $options
  * @param boolean $tagging if true
  * @return string
@@ -257,38 +257,38 @@ class ResourceHelper extends AppHelper {
             $options['type'] = 'text';
         }
 
-        if (!empty($this->_specialClass[$options['type']])) {
+        if (!empty($this-&gt;_specialClass[$options['type']])) {
             $options = array_merge(array(
-                'before' => '<div class="' . $this->_labelClass[$options['type']] . '">',
-                'between' => '</div><div class="' . $this->_specialClass[$options['type']] . '"><div class="' . $this->_inputClass[$options['type']] . '">',
-                'after' => '</div></div>'
+                'before' =&gt; '&lt;div class=&quot;' . $this-&gt;_labelClass[$options['type']] . '&quot;&gt;',
+                'between' =&gt; '&lt;/div&gt;&lt;div class=&quot;' . $this-&gt;_specialClass[$options['type']] . '&quot;&gt;&lt;div class=&quot;' . $this-&gt;_inputClass[$options['type']] . '&quot;&gt;',
+                'after' =&gt; '&lt;/div&gt;&lt;/div&gt;'
                 ), $options);
         } else {
             $options = array_merge(array(
-                'before' => '<div class="' . $this->_labelClass[$options['type']] . '">',
-                'between' => '</div><div class="' . $this->_inputClass[$options['type']] . '">',
-                'after' => '</div>'
+                'before' =&gt; '&lt;div class=&quot;' . $this-&gt;_labelClass[$options['type']] . '&quot;&gt;',
+                'between' =&gt; '&lt;/div&gt;&lt;div class=&quot;' . $this-&gt;_inputClass[$options['type']] . '&quot;&gt;',
+                'after' =&gt; '&lt;/div&gt;'
                 ), $options);
         }
         if ($tagging) {
             App::import('Helper', 'Tagging.Tagging');
-            return $this->Tagging->input($fieldName, $options);
+            return $this-&gt;Tagging-&gt;input($fieldName, $options);
         }
-        return $this->Form->input($fieldName, $options);
+        return $this-&gt;Form-&gt;input($fieldName, $options);
     }
 
 /**
- * Wrapper for FormHelper->end that adds blueprintCSS markup
+ * Wrapper for FormHelper-&gt;end that adds blueprintCSS markup
  *
  * If $options is set a form submit button will be created.
  *
  * @param mixed $options as a string will use $options as the value of button,
  *                      array usage:
- *                          array('label' => 'save'); value="save"
- *                          array('label' => 'save', 'name' => 'Whatever'); value="save" name="Whatever"
- *                          array('name' => 'Whatever'); value="Submit" name="Whatever"
- *                          array('label' => 'save', 'name' => 'Whatever', 'div' => 'good') <div class="good"> value="save" name="Whatever"
- *                          array('label' => 'save', 'name' => 'Whatever', 'div' => array('class' => 'good')); <div class="good"> value="save" name="Whatever"
+ *                          array('label' =&gt; 'save'); value=&quot;save&quot;
+ *                          array('label' =&gt; 'save', 'name' =&gt; 'Whatever'); value=&quot;save&quot; name=&quot;Whatever&quot;
+ *                          array('name' =&gt; 'Whatever'); value=&quot;Submit&quot; name=&quot;Whatever&quot;
+ *                          array('label' =&gt; 'save', 'name' =&gt; 'Whatever', 'div' =&gt; 'good') &lt;div class=&quot;good&quot;&gt; value=&quot;save&quot; name=&quot;Whatever&quot;
+ *                          array('label' =&gt; 'save', 'name' =&gt; 'Whatever', 'div' =&gt; array('class' =&gt; 'good')); &lt;div class=&quot;good&quot;&gt; value=&quot;save&quot; name=&quot;Whatever&quot;
  *
  * @return string a closing FORM tag optional submit button.
  * @access public
@@ -297,21 +297,21 @@ class ResourceHelper extends AppHelper {
     function end($options = null) {
         if ($options !== null) {
             if (is_string($options)) {
-                $options = array('label'=>$options);
+                $options = array('label'=&gt;$options);
             }
             if (isset($options['div'])) {
-                $options['div'] = $this->addClass($options['div'], 'clear');
+                $options['div'] = $this-&gt;addClass($options['div'], 'clear');
             } else {
-                $options['div'] = array('class' => 'clear');
+                $options['div'] = array('class' =&gt; 'clear');
             }
         }
-        return $this->Form->end($options);
+        return $this-&gt;Form-&gt;end($options);
     }
 
 /**
- * Wrapper for HtmlHelper->div that adds blueprintCSS markup for class clear
+ * Wrapper for HtmlHelper-&gt;div that adds blueprintCSS markup for class clear
  *
- * @param string $fieldName This should be "Modelname.fieldname", "Modelname/fieldname" is deprecated
+ * @param string $fieldName This should be &quot;Modelname.fieldname&quot;, &quot;Modelname/fieldname&quot; is deprecated
  * @param string $class CSS class name of the div element.
  * @param string $text String content that will appear inside the div element.
  *                      If null, only a start tag will be printed
@@ -322,12 +322,12 @@ class ResourceHelper extends AppHelper {
  * @author Dave Mahon
  */
     function clear($class = null, $text = null, $attributes = array(), $escape = false) {
-        if (strlen($class) > 0) {
+        if (strlen($class) &gt; 0) {
             $class .= ' clear';
         } else {
             $class = 'clear';
         }
-        return $this->Html->div($class, $text, $attributes, $escape);
+        return $this-&gt;Html-&gt;div($class, $text, $attributes, $escape);
     }
 
 /**
@@ -345,43 +345,43 @@ class ResourceHelper extends AppHelper {
         if (is_array($texts)) {
             if ($wrapAll) {
                 foreach ($texts as $text) {
-                    $finalText .= "<div";
+                    $finalText .= &quot;&lt;div&quot;;
                     if (isset($ids)) {
-                        $finalText .= " id=\"$ids\"";
+                        $finalText .= &quot; id=\&quot;$ids\&quot;&quot;;
                     }
                     if (isset($classes)) {
-                        $finalText .= " class=\"$classes\"";
+                        $finalText .= &quot; class=\&quot;$classes\&quot;&quot;;
                     }
-                    $finalText .= ">$text</div>";
+                    $finalText .= &quot;&gt;$text&lt;/div&gt;&quot;;
                 }
             } else {
                 $i = 0;
                 foreach($texts as $text) {
-                    $finalText .= "<div";
+                    $finalText .= &quot;&lt;div&quot;;
                     if (isset($ids)) {
-                        $finalText .= " id=\"" . $ids[$i] . "\"";
+                        $finalText .= &quot; id=\&quot;&quot; . $ids[$i] . &quot;\&quot;&quot;;
                     }
                     if (isset($classes)) {
-                        $finalText .= " class=\"" . $classes[$i] . "\"";
+                        $finalText .= &quot; class=\&quot;&quot; . $classes[$i] . &quot;\&quot;&quot;;
                     }
-                    $finalText .= ">$text</div>";
+                    $finalText .= &quot;&gt;$text&lt;/div&gt;&quot;;
                 }
             }
         } else {
-            $finalText .= "<div";
+            $finalText .= &quot;&lt;div&quot;;
             if (isset($ids)) {
-                $finalText .= " id=\"" . $ids[$i] . "\"";
+                $finalText .= &quot; id=\&quot;&quot; . $ids[$i] . &quot;\&quot;&quot;;
             }
             if (isset($classes)) {
-                $finalText .= " class=\"" . $classes[$i] . "\"";
+                $finalText .= &quot; class=\&quot;&quot; . $classes[$i] . &quot;\&quot;&quot;;
             }
-            $finalText .= ">$text</div>";
+            $finalText .= &quot;&gt;$text&lt;/div&gt;&quot;;
         }
         return $finalText;
     }
 
     function submit($title = 'Submit', $options = array()) {
-        $defaults = array('type' => 'submit');
+        $defaults = array('type' =&gt; 'submit');
         $options = array_merge($defaults, $options);
         if (isset($options['class'])) {
             $options['class'] .= ' positive';
@@ -393,86 +393,86 @@ class ResourceHelper extends AppHelper {
         $values = array_values($options);
 
         $buttonOptions = '';
-        for ($i = 0; $i < count($keys); $i++) {
-            $buttonOptions .= " " . $keys[$i] . "=\"" . $values[$i] . "\"";
+        for ($i = 0; $i &lt; count($keys); $i++) {
+            $buttonOptions .= &quot; &quot; . $keys[$i] . &quot;=\&quot;&quot; . $values[$i] . &quot;\&quot;&quot;;
         }
 
-        return "<div class=\"button\"><button{$buttonOptions}>{$title}</button></div>";
+        return &quot;&lt;div class=\&quot;button\&quot;&gt;&lt;button{$buttonOptions}&gt;{$title}&lt;/button&gt;&lt;/div&gt;&quot;;
     }
 
     function habtm($field, $options = array()) {
-        $defaults = array('jsPath' => 'jquery/asm');
+        $defaults = array('jsPath' =&gt; 'jquery/asm');
         $options = array_merge($defaults, $options);
 
-        if ($this->_habtm) {
-            return $this->Form->input($field);
+        if ($this-&gt;_habtm) {
+            return $this-&gt;Form-&gt;input($field);
         } else {
-            $this->_habtm = true;
-            return $this->Form->input($field) . $this->Html->script($options['jsPath'], false);
+            $this-&gt;_habtm = true;
+            return $this-&gt;Form-&gt;input($field) . $this-&gt;Html-&gt;script($options['jsPath'], false);
         }
     }
 
     function file($value, $options = array()) {
-        if ($this->_isImage($value)) {
-            if ($this->_isUrl($value)) {
+        if ($this-&gt;_isImage($value)) {
+            if ($this-&gt;_isUrl($value)) {
                 $options['url'] = $value;
-                return $this->Html->image("{$value}", $options);
+                return $this-&gt;Html-&gt;image(&quot;{$value}&quot;, $options);
             } else {
-                return $this->Html->image("/{$value}", $options);
+                return $this-&gt;Html-&gt;image(&quot;/{$value}&quot;, $options);
             }
         }
-        $link = Router::url("/{$value}", true);
-        return $this->Html->link("{$link}", "/{$value}", $options);
+        $link = Router::url(&quot;/{$value}&quot;, true);
+        return $this-&gt;Html-&gt;link(&quot;{$link}&quot;, &quot;/{$value}&quot;, $options);
     }
 
     function image($value, $options = array(), $foptions = array()) {
         $defaults = array();
         $options = array_merge($defaults, $options);
-        $defoptions = array($path = null, $size = 'medium', 'url' => null);
+        $defoptions = array($path = null, $size = 'medium', 'url' =&gt; null);
         $foptions = array_merge($defoptions, $foptions);
 
-        return $this->Html->image("../{$foptions['path']}/thumb/{$foptions['size']}/{$value}", $options);
+        return $this-&gt;Html-&gt;image(&quot;../{$foptions['path']}/thumb/{$foptions['size']}/{$value}&quot;, $options);
     }
 
     function imageLink($value, $options = array()){
-        if ($this->_isImage($value)) {
-            if ($this->_isUrl($value)) {
+        if ($this-&gt;_isImage($value)) {
+            if ($this-&gt;_isUrl($value)) {
                 $options['url'] = $value;
-                return $this->Html->image("{$value}", $options);
+                return $this-&gt;Html-&gt;image(&quot;{$value}&quot;, $options);
             } else {
-                return $this->Html->image("/{$value}", $options);
+                return $this-&gt;Html-&gt;image(&quot;/{$value}&quot;, $options);
             }
         }
         return $value;
     }
 
     function value($value, $options = array()) {
-        $defaults = array('div' => true);
+        $defaults = array('div' =&gt; true);
         $options = array_merge($defaults, $options);
         if (isset($value) and !empty($value) and ($value !== '')) {
             if ($options['div']){
-                return "<div>{$value}</div>";
+                return &quot;&lt;div&gt;{$value}&lt;/div&gt;&quot;;
             }
-            return "{$value}<br />";
+            return &quot;{$value}&lt;br /&gt;&quot;;
         }
-        return "{$value}";
+        return &quot;{$value}&quot;;
     }
 
     function map($api, $options = array()) {
         return
-            '<div id="map_container">
-                <div id="big_spinner" style="display:none"></div>
-                <div id="map"></div>
-                <div id="map_tooltip">
+            '&lt;div id=&quot;map_container&quot;&gt;
+                &lt;div id=&quot;big_spinner&quot; style=&quot;display:none&quot;&gt;&lt;/div&gt;
+                &lt;div id=&quot;map&quot;&gt;&lt;/div&gt;
+                &lt;div id=&quot;map_tooltip&quot;&gt;
                     drag marker to fix location
-                </div>
-            </div>' . $this->_mapSetup($api, $options);
+                &lt;/div&gt;
+            &lt;/div&gt;' . $this-&gt;_mapSetup($api, $options);
     }
 
     function mapInput($value, $options = array()) {
-        $defaults = array('onchange' => 'widget.initMap()');
+        $defaults = array('onchange' =&gt; 'widget.initMap()');
         $options = array_merge($defaults, $options);
-        return $this->Form->input($value, $options);
+        return $this-&gt;Form-&gt;input($value, $options);
     }
 
 /**
@@ -484,9 +484,9 @@ class ResourceHelper extends AppHelper {
 * @access public
 */
     function validationErrors($data, $id, $flash = false){
-        $errors = $this->_getArray($data);
+        $errors = $this-&gt;_getArray($data);
         if ($errors != array()){
-            echo $this->_jqueryList(array_values($errors), $id, $flash);
+            echo $this-&gt;_jqueryList(array_values($errors), $id, $flash);
         }
     }
 
@@ -500,22 +500,22 @@ class ResourceHelper extends AppHelper {
 * @access public
 */
     function _jqueryList($data, $type, $flash) {
-        $temp = $this->_getList($data, $flash);
-        $id = $this->_getType($type);
+        $temp = $this-&gt;_getList($data, $flash);
+        $id = $this-&gt;_getType($type);
         if ($flash){
-            $output = "<div id=\"". $id ."\" class=\"flash\"style=\"display: none\">Error Message:<br />{$temp}</div>
-                <script type=\"text/javascript\">
+            $output = &quot;&lt;div id=\&quot;&quot;. $id .&quot;\&quot; class=\&quot;flash\&quot;style=\&quot;display: none\&quot;&gt;Error Message:&lt;br /&gt;{$temp}&lt;/div&gt;
+                &lt;script type=\&quot;text/javascript\&quot;&gt;
                     jQuery(document).ready(function() {
-                        $ (\".flash\").fadeIn(\"slow\");
+                        $ (\&quot;.flash\&quot;).fadeIn(\&quot;slow\&quot;);
                     });
-                </script>";
+                &lt;/script&gt;&quot;;
         } else {
-            $output = "<div id=\"". $id ."\" class=\"flash\"style=\"display: none\">Reasons for error:<br />{$temp}</div>
-                <script type=\"text/javascript\">
+            $output = &quot;&lt;div id=\&quot;&quot;. $id .&quot;\&quot; class=\&quot;flash\&quot;style=\&quot;display: none\&quot;&gt;Reasons for error:&lt;br /&gt;{$temp}&lt;/div&gt;
+                &lt;script type=\&quot;text/javascript\&quot;&gt;
                     jQuery(document).ready(function() {
-                        $ (\".flash\").fadeIn(\"slow\");
+                        $ (\&quot;.flash\&quot;).fadeIn(\&quot;slow\&quot;);
                     });
-                </script>";
+                &lt;/script&gt;&quot;;
         }
 
         return $output;
@@ -530,50 +530,50 @@ class ResourceHelper extends AppHelper {
 * @access public
 */
     function _getType($data){
-        $output = "";
+        $output = &quot;&quot;;
         switch ($data) {
             case 0:
-                $output = "error";
+                $output = &quot;error&quot;;
                 break;
             case 1:
-                $output = "success";
+                $output = &quot;success&quot;;
                 break;
             case 2:
-                $output = "notice";
+                $output = &quot;notice&quot;;
                 break;
             case 3:
-                $output = "reasons";
+                $output = &quot;reasons&quot;;
                 break;
             default:
-                $output = "notice";
+                $output = &quot;notice&quot;;
                 break;
         }
         return $output;
     }
 
 /**
-* Returns a list of items, each wrapped in an <li></li>
+* Returns a list of items, each wrapped in an &lt;li&gt;&lt;/li&gt;
 *
 * @param array $data Array of all possible items
 * @param boolean $flash Boolean indicating whether this is a flash message
-* @return string String containing a <li></li> wrapped list of items
+* @return string String containing a &lt;li&gt;&lt;/li&gt; wrapped list of items
 * @access public
 */
     function _getList($data, $flash){
         $output = '';
         if (is_array($data)){
             if($flash){
-                $output .= "<li>{$data['0']}</li>";
+                $output .= &quot;&lt;li&gt;{$data['0']}&lt;/li&gt;&quot;;
             } else {
                 foreach($data as $item){
-                    $output .= "<li>{$item}</li>";
+                    $output .= &quot;&lt;li&gt;{$item}&lt;/li&gt;&quot;;
                 }
             }
         }
         else {
-            $output .= "<li>{$data}</li>";
+            $output .= &quot;&lt;li&gt;{$data}&lt;/li&gt;&quot;;
         }
-        return "<ul>".$output."</ul>";
+        return &quot;&lt;ul&gt;&quot;.$output.&quot;&lt;/ul&gt;&quot;;
     }
 
 /**
@@ -602,8 +602,8 @@ class ResourceHelper extends AppHelper {
     }
 
     function _isImage($input) {
-        foreach ($this->_imageTypes as $imageType) {
-            if ($this->_endsWith($input, $imageType)) {
+        foreach ($this-&gt;_imageTypes as $imageType) {
+            if ($this-&gt;_endsWith($input, $imageType)) {
                 return true;
             }
         }
@@ -611,12 +611,12 @@ class ResourceHelper extends AppHelper {
     }
 
     function _mapSetup($api = null, $options = array()) {
-        $defaults = array('proxy' => 'map/proxy', 'addresschooser' => 'map/addresschooser', 'display' => 'map/display');
+        $defaults = array('proxy' =&gt; 'map/proxy', 'addresschooser' =&gt; 'map/addresschooser', 'display' =&gt; 'map/display');
         $options = array_merge($defaults, $options);
-        $return = $this->Html->script('http://www.google.com/jsapi?key=' . $api, array('safe' => false));
-        $return .= $this->Html->script($options['proxy'], array('safe' => false));
-        $return .= $this->Html->script($options['addresschooser'], array('safe' => false));
-        $return .= $this->Html->script($options['display'], array('safe' => false));
+        $return = $this-&gt;Html-&gt;script('http://www.google.com/jsapi?key=' . $api, array('safe' =&gt; false));
+        $return .= $this-&gt;Html-&gt;script($options['proxy'], array('safe' =&gt; false));
+        $return .= $this-&gt;Html-&gt;script($options['addresschooser'], array('safe' =&gt; false));
+        $return .= $this-&gt;Html-&gt;script($options['display'], array('safe' =&gt; false));
         return $return;
     }
 
@@ -638,15 +638,15 @@ class ResourceHelper extends AppHelper {
  * @access public
  */
     function _isUrl($check, $strict = false) {
-        $_this =& Validation::getInstance();
-        $_this->check = $check;
-        $validChars = '([' . preg_quote('!"$&\'()*+,-.@_:;=') . '\/0-9a-z]|(%[0-9a-f]{2}))';
-        $_this->regex = '/^(?:(?:https?|ftps?|file|news|gopher):\/\/)' . ife($strict, '', '?') .
-            '(?:' . $_this->__pattern['ip'] . '|' . $_this->__pattern['hostname'] . ')(?::[1-9][0-9]{0,3})?' .
+        $_this =&amp; Validation::getInstance();
+        $_this-&gt;check = $check;
+        $validChars = '([' . preg_quote('!&quot;$&amp;\'()*+,-.@_:;=') . '\/0-9a-z]|(%[0-9a-f]{2}))';
+        $_this-&gt;regex = '/^(?:(?:https?|ftps?|file|news|gopher):\/\/)' . ife($strict, '', '?') .
+            '(?:' . $_this-&gt;__pattern['ip'] . '|' . $_this-&gt;__pattern['hostname'] . ')(?::[1-9][0-9]{0,3})?' .
             '(?:\/?|\/' . $validChars . '*)?' .
             '(?:\?' . $validChars . '*)?' .
             '(?:#' . $validChars . '*)?$/i';
-        return $_this->_check();
+        return $_this-&gt;_check();
     }
 }</code></pre>
 
@@ -654,7 +654,7 @@ class ResourceHelper extends AppHelper {
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/helpers" title="View all posts in Helpers" rel="category">Helpers</a> on <a href="http://josediazgonzalez.com/2009/09/03/resource-helper/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-03 00:00:00 -0700">03 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/helpers" title="View all posts in Helpers" rel="category">Helpers</a> on <a href="http://josediazgonzalez.com/2009/09/03/resource-helper/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-03 00:00:00 -0400">03 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -830,7 +830,7 @@ class ResourceHelper extends AppHelper {
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

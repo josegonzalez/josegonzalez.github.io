@@ -101,7 +101,7 @@
     
 
 
-    <p>I've been recently doing a bit of devops work at SeatGeek, and it strikes me that much of the monitoring/alerting code there sucks for one or more of the following reasons:</p>
+    <p>I&#39;ve been recently doing a bit of devops work at SeatGeek, and it strikes me that much of the monitoring/alerting code there sucks for one or more of the following reasons:</p>
 
 <ul>
 <li>Ridiculous setup</li>
@@ -118,31 +118,31 @@
 
 <h3>Cacti</h3>
 
-<p>Cacti is cool. It's supposed to be a real simple way of aggregating statistics about your installations. It uses RRDTool to store data - which is apparently super compressed and efficient at making graphs - with a periodic cron triggered to collect said data. It sucks for the following reasons:</p>
+<p>Cacti is cool. It&#39;s supposed to be a real simple way of aggregating statistics about your installations. It uses RRDTool to store data - which is apparently super compressed and efficient at making graphs - with a periodic cron triggered to collect said data. It sucks for the following reasons:</p>
 
 <ul>
-<li>Codebase was written before they discovered programming patterns. Or actual programming. I honest to god don't know how they continue to fix bugs, it seems so error prone. I think the developers like spaghetti</li>
+<li>Codebase was written before they discovered programming patterns. Or actual programming. I honest to god don&#39;t know how they continue to fix bugs, it seems so error prone. I think the developers like spaghetti</li>
 <li>RRDTool <code>.rrd</code> files must be converted when used on other architectures, like 64-bit =&gt; 32-bit. Or Linux =&gt; Mac. Kind of annoying to debug the code if you have to convert a crap-ton of files to <code>.xml</code> and then back.</li>
-<li>No api to automate adding new services/nodes to Cacti. Bringing up a new webserver means re-adding like 30 items to cacti. You're fucked if this is a new backup machine</li>
+<li>No api to automate adding new services/nodes to Cacti. Bringing up a new webserver means re-adding like 30 items to cacti. You&#39;re fucked if this is a new backup machine</li>
 <li>Collecting new stats means writing all sorts of XML files. On top of the stats collection. Guess which one is the bigger pain in the ass.</li>
-<li>Can no longer easily upgrade from non-plugin architecture to the plugin architecture. Which means I can't use Thold for alerts.</li>
+<li>Can no longer easily upgrade from non-plugin architecture to the plugin architecture. Which means I can&#39;t use Thold for alerts.</li>
 <li>Plugins are out of date, or unmaintained.</li>
 <li>Docs are obtuse.</li>
 </ul>
 
-<p>You get the picture. It's a cool tool, and I totally respect what the folks behind Cacti are doing, but it's definitely not a tool I want to use going forward.</p>
+<p>You get the picture. It&#39;s a cool tool, and I totally respect what the folks behind Cacti are doing, but it&#39;s definitely not a tool I want to use going forward.</p>
 
 <h3>Nagios</h3>
 
-<p>Nagios is supposed to be enterprise. Super-duper enterprise. In fact, it's so enterprise that:</p>
+<p>Nagios is supposed to be enterprise. Super-duper enterprise. In fact, it&#39;s so enterprise that:</p>
 
 <ul>
-<li>There doesn't seem to be a straightforward way of installing it. Or at least the 90-million &quot;Install Nagios in 10 easy payments of your soul&quot; don't make it so</li>
-<li>Setting up new items to monitor seems... also not-straightforward. Why do you need a DSL for this? Aren't there UIs/APIs?</li>
+<li>There doesn&#39;t seem to be a straightforward way of installing it. Or at least the 90-million &quot;Install Nagios in 10 easy payments of your soul&quot; don&#39;t make it so</li>
+<li>Setting up new items to monitor seems... also not-straightforward. Why do you need a DSL for this? Aren&#39;t there UIs/APIs?</li>
 <li>They also sell a paid version. Great, now I know the version I have is not as awesome.</li>
 </ul>
 
-<p>I'd love for someone to prove me wrong, but I have a limited amount of time in the week to implement this stuff.</p>
+<p>I&#39;d love for someone to prove me wrong, but I have a limited amount of time in the week to implement this stuff.</p>
 
 <h3>Ganglia</h3>
 
@@ -152,14 +152,14 @@
 
 <ul>
 <li>I hate paying over nine thousand dollars to get/store useful metrics.</li>
-<li>If your service gets bought, then I'm SOL if I cannot pay whatever the new rate will be</li>
-<li>Featureset/UI out of my control. Usually not a big deal, except when there is a small bug I can fix in 5 seconds/4 lines of javascript but can't because I don't have commit access</li>
+<li>If your service gets bought, then I&#39;m SOL if I cannot pay whatever the new rate will be</li>
+<li>Featureset/UI out of my control. Usually not a big deal, except when there is a small bug I can fix in 5 seconds/4 lines of javascript but can&#39;t because I don&#39;t have commit access</li>
 <li>If your repository for installing your code goes away, that breaks my chef cookbooks. Awesome.</li>
 </ul>
 
-<h2>What I'd like</h2>
+<h2>What I&#39;d like</h2>
 
-<p>Ideally the tool is easy to install and doesn't require a specific version of a language/library. This rules out <code>Python</code>/<code>Ruby</code> tools because they will either be built specifically for Ruby <code>1.8.7</code> or <code>1.9.2</code>, and my machine is not running that. As much as I'd love to use them, they are out simply because of deployment issues.</p>
+<p>Ideally the tool is easy to install and doesn&#39;t require a specific version of a language/library. This rules out <code>Python</code>/<code>Ruby</code> tools because they will either be built specifically for Ruby <code>1.8.7</code> or <code>1.9.2</code>, and my machine is not running that. As much as I&#39;d love to use them, they are out simply because of deployment issues.</p>
 
 <p>That leaves PHP.</p>
 
@@ -173,13 +173,13 @@
 
 <p>Whenever I create a graph, it should be easy to share it with others. My boss may want to see how deploys affect conversions, or we may want to place one of these in a blog post about earthquakes. Sharing the url to a graph should be straightforward. It should also be possible for me to save a snapshot of a graph somewhere, although this can be a generic interface that can be extended as time goes on. Please note, we should be able to annotate the hell out of these stored graphs.</p>
 
-<p>Replacing Cacti is a big reason for building this tool, so it would be useful to build a simple interface wherein I can easily collect stats about different instances and shove them into graphite. It's not easy to figure out what is available for graphing in Cacti, so exploring the Graphite stats tree is an important feature, although not front and center.</p>
+<p>Replacing Cacti is a big reason for building this tool, so it would be useful to build a simple interface wherein I can easily collect stats about different instances and shove them into graphite. It&#39;s not easy to figure out what is available for graphing in Cacti, so exploring the Graphite stats tree is an important feature, although not front and center.</p>
 
 <p>Alerts are important. How do we build alerts? You can retrieve raw data from graphite and somehow build some simple trending. Might be too much work for an initial build.</p>
 
 <p>As far as the UI is concerned, <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a> is cool. All it needs are some changes to the default color scheme to provide a bit of visual identity. Would be dope to be able to specify a logo so that your boss thinks you built some rad tool.</p>
 
-<p>So I want a system built on top of this. In an MVC framework. CakePHP/Lithium preferred, as that is what I am used to, but so long as it isn't terrible code, I don't care. The portions that control graph-creation from graphite should be separate from stats collection. Ideally someone could reimplement the app in their own PHP framework, still using whatever UI/PHP libraries I have with minimal changes.</p>
+<p>So I want a system built on top of this. In an MVC framework. CakePHP/Lithium preferred, as that is what I am used to, but so long as it isn&#39;t terrible code, I don&#39;t care. The portions that control graph-creation from graphite should be separate from stats collection. Ideally someone could reimplement the app in their own PHP framework, still using whatever UI/PHP libraries I have with minimal changes.</p>
 
 <p>A recap?</p>
 
@@ -198,9 +198,9 @@
 
 <h2>Some thoughts</h2>
 
-<p>I don't have any goals for introducing logs into this. Would be nice to be able to overlay a graph onto a series of logs from instances.</p>
+<p>I don&#39;t have any goals for introducing logs into this. Would be nice to be able to overlay a graph onto a series of logs from instances.</p>
 
-<p>Feels like I would be rebuilding tools that exist. Or that the tools I'm comparing this theoretical system to are vastly different.</p>
+<p>Feels like I would be rebuilding tools that exist. Or that the tools I&#39;m comparing this theoretical system to are vastly different.</p>
 
 <p>Alerts are hard. Is there any easy way to do this with Graphite?</p>
 
@@ -210,7 +210,7 @@
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/rant" title="View all posts in Rant" rel="category">Rant</a> on <a href="http://josediazgonzalez.com/2012/03/28/server-monitoring-tools/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-03-28 00:00:00 -0700">28 Mar 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/rant" title="View all posts in Rant" rel="category">Rant</a> on <a href="http://josediazgonzalez.com/2012/03/28/server-monitoring-tools/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-03-28 00:00:00 -0400">28 Mar 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -386,7 +386,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

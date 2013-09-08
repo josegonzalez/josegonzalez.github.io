@@ -103,7 +103,7 @@
 
     <p>Beaver is a lightweight python log file shipper that is used to send logs to an intermediate broker for further processing by Logstash. Brokers are simply middlemen that hold one or more log lines in josn_event format. I like to think of them as a staging area from which one or more logstash-indexers can retrieve events for further processing.</p>
 
-<p>Beaver's explicit goal is to provide a shipper that can be used in environments where one or more of the following is true:</p>
+<p>Beaver&#39;s explicit goal is to provide a shipper that can be used in environments where one or more of the following is true:</p>
 
 <ul>
 <li>Operations cannot support the JVM on an instance</li>
@@ -120,7 +120,7 @@
 
 <pre class="rainbow-code"><code data-language="shell">pip install --update Beaver</code></pre>
 
-<p>This will retrieve the latest version of Beaver - version 18 as of this writing - via pip. It's possible to install via <code>easy_install</code>, but pip will ensure requirements are set.</p>
+<p>This will retrieve the latest version of Beaver - version 18 as of this writing - via pip. It&#39;s possible to install via <code>easy_install</code>, but pip will ensure requirements are set.</p>
 
 <blockquote>
 
@@ -132,7 +132,7 @@ Please note that while I specify `Python 2.7`, you *may* actually be able to get
 
 <pre class="rainbow-code"><code data-language="shell">beaver -c /etc/beaver/beaver.conf</code></pre>
 
-<p>In the above example, I tell beaver to run using a configuration file located at <code>/etc/beaver/beaver.conf</code>. Beaver takes configuration via arguments as well as via a configuration file, though I've found using a configuration file is much more flexible. Certain options can only be set via configuration file, so the above is how I recommend running beaver.</p>
+<p>In the above example, I tell beaver to run using a configuration file located at <code>/etc/beaver/beaver.conf</code>. Beaver takes configuration via arguments as well as via a configuration file, though I&#39;ve found using a configuration file is much more flexible. Certain options can only be set via configuration file, so the above is how I recommend running beaver.</p>
 
 <p>Once running, it will read your configuration from that file. An example for an api running under varnish is as follows:</p>
 
@@ -151,85 +151,85 @@ type: cache:production</code></pre>
 
 <p>My configuration file has two stanzas. The first is a general configuration stanza. Beaver supports optional ssh tunneling, which is useful if you are going across datacenters. Those options are prefixed with <code>ssh_</code>. I also specify the url for redis, in this case using the tunnel port.</p>
 
-<p>Note that for most transports that preserve some state, you can configure the exchange/namespace used. I've set a namespace of <code>logstash:cache:production</code> for this application, and use a different namespace for other apps. This is very useful for multiline logs that need to be later parsed by logstash as a single event.</p>
+<p>Note that for most transports that preserve some state, you can configure the exchange/namespace used. I&#39;ve set a namespace of <code>logstash:cache:production</code> for this application, and use a different namespace for other apps. This is very useful for multiline logs that need to be later parsed by logstash as a single event.</p>
 
-<p>I also have a stanza for a particular glob path for beaver to follow. In this case, it's following any logfile in <code>/mnt/varnish/log</code>. I can also specify tags and the type for the logs that fall under this globpath, which is quite useful when later processing in logstash.</p>
+<p>I also have a stanza for a particular glob path for beaver to follow. In this case, it&#39;s following any logfile in <code>/mnt/varnish/log</code>. I can also specify tags and the type for the logs that fall under this globpath, which is quite useful when later processing in logstash.</p>
 
 <p>Once started, beaver will ship my logs via a redis <code>pipeline</code> to my redis instance, where logstash picks up the work quite easily. The following is my logstash <code>indexer.conf</code>:</p>
 
 <pre class="rainbow-code"><code data-language="generic">input {
   # Read from the redis list
   redis {
-    host => 'redis-internal'
-    data_type => 'list'
-    key => 'logstash:cache:production'
-    type => 'cache:production'
-    threads => 2
+    host =&gt; 'redis-internal'
+    data_type =&gt; 'list'
+    key =&gt; 'logstash:cache:production'
+    type =&gt; 'cache:production'
+    threads =&gt; 2
   }
 }
 
 filter {
   # Pull out my varnish logs in combined apache log format
   grok {
-    patterns_dir => "/etc/logstash/patterns"
-    tags => ["cache"]
-    pattern => "%{COMBINEDAPACHELOG}"
+    patterns_dir =&gt; &quot;/etc/logstash/patterns&quot;
+    tags =&gt; [&quot;cache&quot;]
+    pattern =&gt; &quot;%{COMBINEDAPACHELOG}&quot;
   }
 
   # Override the beaver provided timestamp info in favor of a more correct one
   date {
-    tags => ["cache"]
-    timestamp => "dd/MMM/yyyy:HH:mm:ss Z"
+    tags =&gt; [&quot;cache&quot;]
+    timestamp =&gt; &quot;dd/MMM/yyyy:HH:mm:ss Z&quot;
   }
 
   # Properly parse the request uri as a url
   grok {
-    patterns_dir => "/etc/logstash/patterns"
-    tags => ["cache"]
-    match => [
-      "request", "%{URIPROTO:uriproto}://(?:%{USER:user}(?::[^@]*)?@)?(?:%{URIHOST:urihost})?(?:%{URIPATHPARAM:querystring})?"
+    patterns_dir =&gt; &quot;/etc/logstash/patterns&quot;
+    tags =&gt; [&quot;cache&quot;]
+    match =&gt; [
+      &quot;request&quot;, &quot;%{URIPROTO:uriproto}://(?:%{USER:user}(?::[^@]*)?@)?(?:%{URIHOST:urihost})?(?:%{URIPATHPARAM:querystring})?&quot;
     ]
   }
 
   # Remove unneeded fields and fix up the querystring a bit
   mutate {
-    tags => ["cache"]
-    remove => [ "agent", "auth", "bytes", "httpversion", "ident", "referrer", "timestamp", "verb" ]
-    gsub => [
-      "querystring", "&", " ",
-      "querystring", "/events\?", ""
+    tags =&gt; [&quot;cache&quot;]
+    remove =&gt; [ &quot;agent&quot;, &quot;auth&quot;, &quot;bytes&quot;, &quot;httpversion&quot;, &quot;ident&quot;, &quot;referrer&quot;, &quot;timestamp&quot;, &quot;verb&quot; ]
+    gsub =&gt; [
+      &quot;querystring&quot;, &quot;&amp;&quot;, &quot; &quot;,
+      &quot;querystring&quot;, &quot;/events\?&quot;, &quot;&quot;
     ]
   }
 
-  # Parse out the querystring as a key => value hash so that we can analyze this later
+  # Parse out the querystring as a key =&gt; value hash so that we can analyze this later
   kv {
-    tags => ["cache"]
-    fields => ["querystring"]
+    tags =&gt; [&quot;cache&quot;]
+    fields =&gt; [&quot;querystring&quot;]
   }
 
   # Url Decode the query. Would be nice to be able to specify this on a glob of fields, but whatever
   urldecode {
-    tags => ["jerry", "varnish"]
-    field => "q"
+    tags =&gt; [&quot;jerry&quot;, &quot;varnish&quot;]
+    field =&gt; &quot;q&quot;
   }
 
   # Remove some unneeded apache log info, as well as the duplicative @source field
   # Also add a q_analyzed field so that we have both an analyzed and non-analyzed version of the search query
   mutate {
-    tags => ["cache"]
-    remove => [ "port", "querystring", "request", "urihost", "uriproto", "@source" ]
-    replace => [ "q_analyzed", "%{q}", ]
+    tags =&gt; [&quot;cache&quot;]
+    remove =&gt; [ &quot;port&quot;, &quot;querystring&quot;, &quot;request&quot;, &quot;urihost&quot;, &quot;uriproto&quot;, &quot;@source&quot; ]
+    replace =&gt; [ &quot;q_analyzed&quot;, &quot;%{q}&quot;, ]
   }
 }
 
 output {
   # Output everything to my logstash cluster sitting behind haproxy
   elasticsearch {
-    host => "localhost:1337"
+    host =&gt; &quot;localhost:1337&quot;
   }
 }</code></pre>
 
-<p>I've documented everything above, and it's fairly straightforward as to whats happening. There are some gotchas with creating key-value pairs - I had to replace the <code>&amp;</code> characters in the querystring with space <code></code> characters - but nothing that won't be fixed in logstash in the future.</p>
+<p>I&#39;ve documented everything above, and it&#39;s fairly straightforward as to whats happening. There are some gotchas with creating key-value pairs - I had to replace the <code>&amp;</code> characters in the querystring with space <code></code> characters - but nothing that won&#39;t be fixed in logstash in the future.</p>
 
 <p>For those looking to get into grok, there is a <a href="http://grokdebug.herokuapp.com/">grokdebug heroku app</a> for testing grok filters. Note that sometimes the patterns shipped with your version of logstash will be out of date with <code>grokdebug</code>, and so I recommend retrieving the patterns from the logstash repo and placing them in <code>/etc/logstash/patterns</code>. I do so and you can see I specified a pattern directory above in my grok usage.</p>
 
@@ -239,7 +239,7 @@ output {
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/devops" title="View all posts in Devops" rel="category">Devops</a> on <a href="http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-01-01 23:34:00 -0800">01 Jan 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/devops" title="View all posts in Devops" rel="category">Devops</a> on <a href="http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-01-01 23:34:00 -0500">01 Jan 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -415,7 +415,7 @@ output {
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

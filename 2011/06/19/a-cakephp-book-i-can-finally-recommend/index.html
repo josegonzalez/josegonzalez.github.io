@@ -107,25 +107,25 @@ Note: This post was created a few weeks ago and in my idiocy I forgot to publish
 
 </blockquote>
 
-<p>Since I am in the #cakephp IRC room constantly, I see the question <strong>&quot;What book should I buy to learn CakePHP?&quot;</strong> every so often. It's a painful question, since it sort of means that the documentation that has been contributed is lacking in some way, or that CakePHP is extremely hard to learn. Nevertheless, it's a valid question, and I've asked others similar questions when delving into a new language, framework, or tool-chain.</p>
+<p>Since I am in the #cakephp IRC room constantly, I see the question <strong>&quot;What book should I buy to learn CakePHP?&quot;</strong> every so often. It&#39;s a painful question, since it sort of means that the documentation that has been contributed is lacking in some way, or that CakePHP is extremely hard to learn. Nevertheless, it&#39;s a valid question, and I&#39;ve asked others similar questions when delving into a new language, framework, or tool-chain.</p>
 
-<p>I recently - read, a week ago - had a chance to read through <a href="http://www.packtpub.com/cakephp-1-3-application-development-cookbook/book">CakePHP 1.3 Application Development Cookbook</a> by Mariano Iglesias. I've read the other CakePHP books - Golding's was okay, Kai Chan's was terrible IMO - but I hadn't found anything I liked. There are two international books, one from the German Community and one in Japanese, but those have limited utility for obvious reasons. Mariano's book definitely fills a need that many CakePHP developers will have at some point.</p>
+<p>I recently - read, a week ago - had a chance to read through <a href="http://www.packtpub.com/cakephp-1-3-application-development-cookbook/book">CakePHP 1.3 Application Development Cookbook</a> by Mariano Iglesias. I&#39;ve read the other CakePHP books - Golding&#39;s was okay, Kai Chan&#39;s was terrible IMO - but I hadn&#39;t found anything I liked. There are two international books, one from the German Community and one in Japanese, but those have limited utility for obvious reasons. Mariano&#39;s book definitely fills a need that many CakePHP developers will have at some point.</p>
 
-<p>The book doesn't go through a large, end-to-end application. You won't see a Wordpress-like application built, nor is this like the Pragmatic Programmers Rails shopping cart. Rather, it focuses on specific needs that a developer will have, whether it be OpenID integration with the <code>AuthComponent</code>, datasource creation, or automated shell tasks. Each chapter can be thought of as a cookbook, with multiple recipes, each leading to the next in a logical progression. The breakup of the chapters was well-thought out, and it should be relatively simple for anyone to take bits and pieces from any chapter to construct an application.</p>
+<p>The book doesn&#39;t go through a large, end-to-end application. You won&#39;t see a Wordpress-like application built, nor is this like the Pragmatic Programmers Rails shopping cart. Rather, it focuses on specific needs that a developer will have, whether it be OpenID integration with the <code>AuthComponent</code>, datasource creation, or automated shell tasks. Each chapter can be thought of as a cookbook, with multiple recipes, each leading to the next in a logical progression. The breakup of the chapters was well-thought out, and it should be relatively simple for anyone to take bits and pieces from any chapter to construct an application.</p>
 
 <p>A few things stuck out while reading the book and going through examples:</p>
 
 <ul>
-<li>You should have some knowledge of MVC. The book doesn't do much handholding, which is both good and bad depending on your needs.</li>
-<li>While the code within the book is well-documented, code from GitHub is not. Fair warning if you have needs outside of the plugin's capabilities.</li>
+<li>You should have some knowledge of MVC. The book doesn&#39;t do much handholding, which is both good and bad depending on your needs.</li>
+<li>While the code within the book is well-documented, code from GitHub is not. Fair warning if you have needs outside of the plugin&#39;s capabilities.</li>
 <li>The book does not have many performance enhancements. If thats what you needed, you shall not find them here.</li>
 </ul>
 
-<p>That said, I did find a few gems. For example, I'd never actually used a custom find as part of a <code>Model::find('count')</code>, and had not even considered that as a potential problem, yet here was the solution in plain sight. It did not even require overriding the <code>Model::find('count')</code> method, which was quite nice. Another gem was the token-based authorization for building an API, which I ended up using in my own work at a later date. I've already suggested the book to a few developers solely for the extensive chapter on Validation and Behaviors.</p>
+<p>That said, I did find a few gems. For example, I&#39;d never actually used a custom find as part of a <code>Model::find(&#39;count&#39;)</code>, and had not even considered that as a potential problem, yet here was the solution in plain sight. It did not even require overriding the <code>Model::find(&#39;count&#39;)</code> method, which was quite nice. Another gem was the token-based authorization for building an API, which I ended up using in my own work at a later date. I&#39;ve already suggested the book to a few developers solely for the extensive chapter on Validation and Behaviors.</p>
 
-<p>One thing that irked was that some of the entries in the book would have been better suited as contributions to the CakePHP core. In particular, adding enhanced Transaction and Locking support to MySQL might have been better suited as a pull request, and his entry could have been the explanation of it's usage. As well, there were examples which completely skipped knowledge gleaned from previous examples; In introducing testing, wrapper methods around <code>Model::find()</code> were created, instead of using custom model finds as discussed in previous chapters.</p>
+<p>One thing that irked was that some of the entries in the book would have been better suited as contributions to the CakePHP core. In particular, adding enhanced Transaction and Locking support to MySQL might have been better suited as a pull request, and his entry could have been the explanation of it&#39;s usage. As well, there were examples which completely skipped knowledge gleaned from previous examples; In introducing testing, wrapper methods around <code>Model::find()</code> were created, instead of using custom model finds as discussed in previous chapters.</p>
 
-<p>I'm quite pleased with the resulting book though. It's definitely the most up-to-date book, and has knowledge that can be passed doen to <strong>1.2</strong> developers, and much of the ideas are easily transferable to the upcoming <strong>2.0</strong> release. I look forward to implementing a few of the ideas in my own applications, and can honestly say that there is finally a book worth paying for if you're a CakePHP developer.</p>
+<p>I&#39;m quite pleased with the resulting book though. It&#39;s definitely the most up-to-date book, and has knowledge that can be passed doen to <strong>1.2</strong> developers, and much of the ideas are easily transferable to the upcoming <strong>2.0</strong> release. I look forward to implementing a few of the ideas in my own applications, and can honestly say that there is finally a book worth paying for if you&#39;re a CakePHP developer.</p>
 
 <blockquote>
 
@@ -137,7 +137,7 @@ No, I wasn't paid for this. That would have been rad though.
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2011/06/19/a-cakephp-book-i-can-finally-recommend/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-06-19 00:00:00 -0700">19 Jun 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2011/06/19/a-cakephp-book-i-can-finally-recommend/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-06-19 00:00:00 -0400">19 Jun 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -313,7 +313,7 @@ No, I wasn't paid for this. That would have been rad though.
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

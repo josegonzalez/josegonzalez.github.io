@@ -113,22 +113,22 @@ is it possible to remove the pages/ on the url?
 <p>The hard way is to specify each in your <code>app/config/routes.php</code> one as follows:</p>
 
 <pre class="rainbow-code"><code data-language="php">Router::connect('/about', array(
-    'controller' => 'pages',
-    'action' => 'display'
+    'controller' =&gt; 'pages',
+    'action' =&gt; 'display'
     'about'
 ));
 Router::connect('/legal', array(
-    'controller' => 'pages',
-    'action' => 'display'
+    'controller' =&gt; 'pages',
+    'action' =&gt; 'display'
     'legal'
 ));
 Router::connect('/policy', array(
-    'controller' => 'pages',
-    'action' => 'display'
+    'controller' =&gt; 'pages',
+    'action' =&gt; 'display'
     'policy'
 ));</code></pre>
 
-<p>This is incredibly inefficient for several reasons. One, we have to add another route each and every time we add a new page. Or remove it once the page has been deleted. Two, it both clutters up the <code>app/config/routes.php</code> file, as well as uses increasingly more and more memory each time we add a new route. This can be mitigated by using the following technique (from <a href="http://nuts-and-bolts-of-cakephp.com/2011/03/15/dealing-with-static-pages-v2-or-3/">teknoid's post</a>):</p>
+<p>This is incredibly inefficient for several reasons. One, we have to add another route each and every time we add a new page. Or remove it once the page has been deleted. Two, it both clutters up the <code>app/config/routes.php</code> file, as well as uses increasingly more and more memory each time we add a new route. This can be mitigated by using the following technique (from <a href="http://nuts-and-bolts-of-cakephp.com/2011/03/15/dealing-with-static-pages-v2-or-3/">teknoid&#39;s post</a>):</p>
 
 <pre class="rainbow-code"><code data-language="php">$staticPages = array(
     'about',
@@ -139,15 +139,15 @@ Router::connect('/policy', array(
 $staticList = implode('|', $staticPages);
 
 Router::connect('/:static', array(
-    'controller' => 'pages',
-    'action' => 'display'), array(
-            'static' => $staticList,
-            'pass' => array('static')
+    'controller' =&gt; 'pages',
+    'action' =&gt; 'display'), array(
+            'static' =&gt; $staticList,
+            'pass' =&gt; array('static')
         )
     );
-?></code></pre>
+?&gt;</code></pre>
 
-<p>So now we only have one extra route, but we also have to ensure that we update the <code>$staticPages</code> variable each time we add a new page. I'm too lazy for that.</p>
+<p>So now we only have one extra route, but we also have to ensure that we update the <code>$staticPages</code> variable each time we add a new page. I&#39;m too lazy for that.</p>
 
 <p>Fortunately someone came up with a brilliant idea around this. Geoffrey Gabbers has a <a href="http://garbers.co.za/2011/06/01/static-pages-in-cakephp/">blog post</a> that utilizes some fancy <code>glob()</code> footwork to figure out if that page should be routed:</p>
 
@@ -156,8 +156,8 @@ if ($availablePages) {
     $extensions = array_pad(array(), count($availablePages), '.ctp');
     $availablePages = array_map('basename', $availablePages, $extensions);
     Router::connect('/:page',
-        array('controller' => 'pages', 'action' => 'display'),
-        array('page' => implode('|', $availablePages), 'pass' => array('page'))
+        array('controller' =&gt; 'pages', 'action' =&gt; 'display'),
+        array('page' =&gt; implode('|', $availablePages), 'pass' =&gt; array('page'))
     );
 }</code></pre>
 
@@ -169,15 +169,15 @@ CakeRoute classes are available as of 1.3, and will be available in the upcoming
 
 <p>Cool, but now my routes look fugly as sin. Which is the opposite of I want. So with the help of CakePHP 1.3, I came up with a solution using <code>CakeRoutes</code>.</p>
 
-<p><code>CakeRoute</code> classes are small classes that extend the router in some non-trivial way. <a href="http://mark-story.com/posts/view/using-custom-route-classes-in-cakephp">Mark Story introduced them</a> in a blog post about a year and a half ago, and I haven't seen too much done with them. The basic premise is that with a CakeRoute, it is possible to extend the Regex magic and Reverse Routing in order to match urls to a specific route that would otherwise be impossible. For example, Miles Johnson has a <a href="https://github.com/milesj/cake-redirect_route">RedirecRoute</a> class that handles routing legacy routing to new urls in a clean way.</p>
+<p><code>CakeRoute</code> classes are small classes that extend the router in some non-trivial way. <a href="http://mark-story.com/posts/view/using-custom-route-classes-in-cakephp">Mark Story introduced them</a> in a blog post about a year and a half ago, and I haven&#39;t seen too much done with them. The basic premise is that with a CakeRoute, it is possible to extend the Regex magic and Reverse Routing in order to match urls to a specific route that would otherwise be impossible. For example, Miles Johnson has a <a href="https://github.com/milesj/cake-redirect_route">RedirecRoute</a> class that handles routing legacy routing to new urls in a clean way.</p>
 
-<p>I figured I'd take a stab at my issue by writing a small routing class. A can of soda and a few minutes later, I had a working implementation of <a href="https://github.com/josegonzalez/page_route">PageRoute</a>.</p>
+<p>I figured I&#39;d take a stab at my issue by writing a small routing class. A can of soda and a few minutes later, I had a working implementation of <a href="https://github.com/josegonzalez/page_route">PageRoute</a>.</p>
 
 <p>CakeRoute classes need only define the <code>match()</code> and <code>parse()</code> methods. In my case, to make it even more automagic, I override the PHP4-style constructor - which seems to be called over the PHP5-style constructor even though <code>CakeRoute</code> the classes do not extend the CakePHP <code>Object</code> class - to provide some consistent defaults. Now setting up new <code>/:page</code> style routes is as simple as adding the following to your <code>app/config/routes.php</code> file:</p>
 
 <pre class="rainbow-code"><code data-language="php">App::import('Lib', 'PageRoute.PageRoute');
-Router::connect('/:page', array('controller' => 'pages', 'action' => 'display'),
-    array('routeClass' => 'PageRoute')
+Router::connect('/:page', array('controller' =&gt; 'pages', 'action' =&gt; 'display'),
+    array('routeClass' =&gt; 'PageRoute')
 );</code></pre>
 
 <p>Thats all that is needed. No need for any further configuration, although my <a href="https://github.com/josegonzalez/page_route">plugin</a> does allow it if necessary. Feel free to catch it on Github :)</p>
@@ -186,7 +186,7 @@ Router::connect('/:page', array('controller' => 'pages', 'action' => 'display'),
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/dev-log" title="View all posts in Dev Log" rel="category">Dev Log</a> on <a href="http://josediazgonzalez.com/2011/06/11/the-daily-dev-log-5/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-06-11 00:00:00 -0700">11 Jun 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/dev-log" title="View all posts in Dev Log" rel="category">Dev Log</a> on <a href="http://josediazgonzalez.com/2011/06/11/the-daily-dev-log-5/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-06-11 00:00:00 -0400">11 Jun 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -362,7 +362,7 @@ Router::connect('/:page', array('controller' => 'pages', 'action' => 'display'),
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

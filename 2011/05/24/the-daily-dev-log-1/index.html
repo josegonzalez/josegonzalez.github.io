@@ -139,7 +139,7 @@
     });
 })(window);</code></pre>
 
-<p>What that does is prevents the link from firing it's normal event and <em>changes</em> the page. By changing, I mean it fires an ajax request to the server for the contents of <code>#content</code> - for CakePHP that's whatever would normally be in <code>$content_for_layout</code> - pushes this state into the History in a cross-browser compatible way, and then inserts the requested content into <code>#content</code>. Neat, huh?</p>
+<p>What that does is prevents the link from firing it&#39;s normal event and <em>changes</em> the page. By changing, I mean it fires an ajax request to the server for the contents of <code>#content</code> - for CakePHP that&#39;s whatever would normally be in <code>$content_for_layout</code> - pushes this state into the History in a cross-browser compatible way, and then inserts the requested content into <code>#content</code>. Neat, huh?</p>
 
 <p>The problem occurs when you request a non-ajax link. This does a full-page reload of the new page (cool), but selecting the <code>back-button</code> or pushing the <code>backspace</code> will cause the browser to load only the contents served via that previous ajax request (not so cool). Since it was only the inner contents, it was both unexpected and unstyled. Going back was broken in general, regardless of whether the current page was an ajax request or not, so I modified the above to read as follows:</p>
 
@@ -154,7 +154,7 @@
 
     var history_hack = false;
 
-    $(window).bind("statechange", function() {
+    $(window).bind(&quot;statechange&quot;, function() {
         if (history_hack === true) {
             history_hack = false;
             return;
@@ -205,15 +205,15 @@
 
 <p>So now I have this nice <code>history_hack</code> that fixes the <code>back-button</code> for ajax requests, but not so much for non-ajax requests. At this point, I had to look at how the History.js example works.</p>
 
-<p>History.js' <a href="https://gist.github.com/854622">example</a> actually requests the full page and parses out the parts we aren't going to put into the page. This is good because sometimes the sidebar links don't change, or maybe we want a specific section to be ajax'ed in.</p>
+<p>History.js&#39; <a href="https://gist.github.com/854622">example</a> actually requests the full page and parses out the parts we aren&#39;t going to put into the page. This is good because sometimes the sidebar links don&#39;t change, or maybe we want a specific section to be ajax&#39;ed in.</p>
 
-<p>CakePHP, however, is a bit more devious. You normally use the <code>RequestHandlerComponent</code> to do Ajax in conjunction with the <code>JsHelper</code> (my JS is actually based on the real duplicated code the <code>JsHelper</code> creates). <code>RequestHandler::startup()</code> sets the layout to be false, meaning I can't take the path of <code>History.js</code>. Bummer. I was going to try and be devious by setting a different <code>dataType</code> in the <code>jQuery.ajax()</code> call and then putzing around in my <code>AppController::beforeFilter()</code> or <code>AppController::beforeRender()</code>, but there don't appear to be a good dataType to use that <code>jQuery.ajax()</code> won't choke on. This would also break my existing Js (not a big deal), and I would have to rewrite/extend the <code>RequestHandler</code> (big deal), but I can live with that.</p>
+<p>CakePHP, however, is a bit more devious. You normally use the <code>RequestHandlerComponent</code> to do Ajax in conjunction with the <code>JsHelper</code> (my JS is actually based on the real duplicated code the <code>JsHelper</code> creates). <code>RequestHandler::startup()</code> sets the layout to be false, meaning I can&#39;t take the path of <code>History.js</code>. Bummer. I was going to try and be devious by setting a different <code>dataType</code> in the <code>jQuery.ajax()</code> call and then putzing around in my <code>AppController::beforeFilter()</code> or <code>AppController::beforeRender()</code>, but there don&#39;t appear to be a good dataType to use that <code>jQuery.ajax()</code> won&#39;t choke on. This would also break my existing Js (not a big deal), and I would have to rewrite/extend the <code>RequestHandler</code> (big deal), but I can live with that.</p>
 
   </div>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/dev-log" title="View all posts in Dev Log" rel="category">Dev Log</a> on <a href="http://josediazgonzalez.com/2011/05/24/the-daily-dev-log-1/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-05-24 00:00:00 -0700">24 May 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/dev-log" title="View all posts in Dev Log" rel="category">Dev Log</a> on <a href="http://josediazgonzalez.com/2011/05/24/the-daily-dev-log-1/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-05-24 00:00:00 -0400">24 May 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -389,7 +389,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

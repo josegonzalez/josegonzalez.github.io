@@ -101,22 +101,24 @@
     
 
 
-    <p>The following should get you up and running with Commentable Behavior. Note that I've only tested it with a &quot;Post&quot; model, but it should work fine otherwise.</p>
+    <p>The following should get you up and running with Commentable Behavior. Note that I&#39;ve only tested it with a &quot;Post&quot; model, but it should work fine otherwise.</p>
 
-<p>Follow the instructions at the following repo and you'll be up and running in no time :)</p>
+<p>Follow the instructions at the following repo and you&#39;ll be up and running in no time :)</p>
 
 <p><a href="http://github.com/josegonzalez/cakephp-commentable-behavior">http://github.com/josegonzalez/cakephp-commentable-behavior</a></p>
 
-<p>To use the behavior, include it in your model. Please note that if it is not using the standard &quot;Post&quot; model, then you'll have to configure the options array. Take a look at the behavior above for the types of options it will take.
+<p>To use the behavior, include it in your model. Please note that if it is not using the standard &quot;Post&quot; model, then you&#39;ll have to configure the options array. Take a look at the behavior above for the types of options it will take.
 Model Class:</p>
 
-<pre class="rainbow-code"><code data-language="php">class Post extends AppModel {
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+class Post extends AppModel {
     public $actsAs = array('Commentable');
-}</code></pre>
+}
+?&gt;</code></pre>
 
-<p>You don't need to create a model for 'Comment', unless you plan on doing something special. By default, CakePHP will build a model for tables that don't explicitly have them created. If you name your Comment table something other than comments, however, or would like to do some extra validation/have cool model methods, go right ahead and create a model called comment.php. Otherwise, keep reading.</p>
+<p>You don&#39;t need to create a model for &#39;Comment&#39;, unless you plan on doing something special. By default, CakePHP will build a model for tables that don&#39;t explicitly have them created. If you name your Comment table something other than comments, however, or would like to do some extra validation/have cool model methods, go right ahead and create a model called comment.php. Otherwise, keep reading.</p>
 
-<p>You'll also need a SQL table to store all your comments. The following will work with the defaults:
+<p>You&#39;ll also need a SQL table to store all your comments. The following will work with the defaults:
 SQL:</p>
 
 <pre class="rainbow-code"><code data-language="sql">CREATE TABLE `comments` (
@@ -131,56 +133,58 @@ SQL:</p>
     PRIMARY KEY  (`id`)
 )</code></pre>
 
-<p>You'll need a controller action such as the following:
+<p>You&#39;ll need a controller action such as the following:
 Controller Class:</p>
 
-<pre class="rainbow-code"><code data-language="php">class PostsController extends AppController {
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+class PostsController extends AppController {
     public function comment($id = null) {
-        $post = $this->Post->findById($id);
+        $post = $this-&gt;Post-&gt;findById($id);
 
         if (empty($post)) {
-            throw new InvalidArgumentException("Invalid post")
+            throw new InvalidArgumentException(&quot;Invalid post&quot;)
         }
 
-        if (!empty($this->data['Comment'])) {
-            if ($this->Post->createComment($id, $this->data)){
-                $this->Session->setFlash(__('Post was commented on', true), 'messages/success');
-                $this->redirect(array('action' => 'view', $id), 200, true);
+        if (!empty($this-&gt;data['Comment'])) {
+            if ($this-&gt;Post-&gt;createComment($id, $this-&gt;data)){
+                $this-&gt;Session-&gt;setFlash(__('Post was commented on', true), 'messages/success');
+                $this-&gt;redirect(array('action' =&gt; 'view', $id), 200, true);
             } else {
-                $this->Session->setFlash(__('Post could not be commented on. Perhaps you left a field empty?', true), 'messages/error');
-                $this->redirect(array('action' => 'view', $id), 400, true);
+                $this-&gt;Session-&gt;setFlash(__('Post could not be commented on. Perhaps you left a field empty?', true), 'messages/error');
+                $this-&gt;redirect(array('action' =&gt; 'view', $id), 400, true);
             }
         }
 
-        if (empty($this->data)) {
-            $this->data = $this->Post->read(null, $id);
+        if (empty($this-&gt;data)) {
+            $this-&gt;data = $post;
         }
     }
-}</code></pre>
+}
+?&gt;</code></pre>
 
 <p>And this view will work wonders when posting to the preceding action
 View file:</p>
 
-<pre class="rainbow-code"><code data-language="php"><h2><?php __('Post a Comment');?></h2>
-<?php echo $form->create('Post', array('url' => $this->here));?>
-    <fieldset>
-        <legend><?php __('Add Comment');?></legend>
-        <?php
-            echo $form->input('Post.id');
-            echo $form->input('Comment.name');
-            echo $form->input('Comment.email');
-            echo $form->input('Comment.body');
-        ?>
-    </fieldset>
-<?php echo $form->end('Submit');?></code></pre>
+<pre class="rainbow-code"><code data-language="php">&lt;h2&gt;&lt;?php echo __('Post a Comment'); ?&gt;&lt;/h2&gt;
+&lt;?php echo $this-&gt;Form-&gt;create('Post'); ?&gt;
+    &lt;fieldset&gt;
+        &lt;legend&gt;&lt;?php echo __('Add Comment'); ?&gt;&lt;/legend&gt;
+        &lt;?php
+            echo $this-&gt;Form-&gt;input('Post.id');
+            echo $this-&gt;Form-&gt;input('Comment.name');
+            echo $this-&gt;Form-&gt;input('Comment.email');
+            echo $this-&gt;Form-&gt;input('Comment.body');
+        ?&gt;
+    &lt;/fieldset&gt;
+&lt;?php echo $this-&gt;Form-&gt;end(__('Submit')); ?&gt;</code></pre>
 
-<p>I'm 95% sure that's all that I needed to get everything up and running. If there are any bugs in my code anywhere, drop me a line. I'm also interested in hearing about potential enhancements to the behavior, as it is very basic and doesn't include stuff I'd like such as field validation or associating the comment with a logged in user. Have fun!</p>
+<p>I&#39;m 95% sure that&#39;s all that I needed to get everything up and running. If there are any bugs in my code anywhere, drop me a line. I&#39;m also interested in hearing about potential enhancements to the behavior, as it is very basic and doesn&#39;t include stuff I&#39;d like such as field validation or associating the comment with a logged in user. Have fun!</p>
 
   </div>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2009/06/15/commentable-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-06-15 00:00:00 -0700">15 Jun 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2009/06/15/commentable-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-06-15 00:00:00 -0400">15 Jun 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -356,7 +360,7 @@ View file:</p>
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

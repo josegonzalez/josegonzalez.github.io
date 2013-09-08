@@ -102,47 +102,47 @@
 
 
     <pre class="rainbow-code"><code data-language="php">$includeScripts = array(
-    "jquery/jquery",
-    "jquery/jquery.easing.1.3",
-    "jquery/jquery.easing.compatibility",
+    &quot;jquery/jquery&quot;,
+    &quot;jquery/jquery.easing.1.3&quot;,
+    &quot;jquery/jquery.easing.compatibility&quot;,
 );
 
-$layoutScript = sprintf('%sviews/layouts/%s.js', JS, $this->layout);
+$layoutScript = sprintf('%sviews/layouts/%s.js', JS, $this-&gt;layout);
 if (file_exists($layoutScript)) {
     $includeScripts[] = substr($layoutScript, strlen(JS));
 }
 
 $action = (isset($viewElement))
     ? $viewElement
-    : $this->params['action'];
+    : $this-&gt;params['action'];
 
-$controllerScript = sprintf('%sviews/%s/default.js', JS, $this->params['controller']);
+$controllerScript = sprintf('%sviews/%s/default.js', JS, $this-&gt;params['controller']);
 if (file_exists($controllerScript)) {
     $includeScripts[] = substr($controllerScript, strlen(JS));
 }
 
 
-$viewScript = sprintf('%sviews/%s/%s.js', JS, $this->params['controller'], $action);
+$viewScript = sprintf('%sviews/%s/%s.js', JS, $this-&gt;params['controller'], $action);
 if (file_exists($viewScript)) {
     $includeScripts[] = substr($viewScript, strlen(JS));
 }
 
-if ($this->params['pass'] && preg_match('/^\w+$/', $this->params['pass'][0])) {
-    $viewScript = sprintf('%sviews/%s/%s.js', JS, $this->params['controller'], $action . '_' . $this->params['pass'][0]);
+if ($this-&gt;params['pass'] &amp;&amp; preg_match('/^\w+$/', $this-&gt;params['pass'][0])) {
+    $viewScript = sprintf('%sviews/%s/%s.js', JS, $this-&gt;params['controller'], $action . '_' . $this-&gt;params['pass'][0]);
     if (file_exists($viewScript)) {
         $includeScripts[] = substr($viewScript, strlen(JS));
     }
 }
 
 foreach ($includeScripts as $script) {
-    echo $html->script($script);
+    echo $html-&gt;script($script);
 }</code></pre>
 
   </div>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/views" title="View all posts in Views" rel="category">Views</a> on <a href="http://josediazgonzalez.com/2009/09/03/conditionally-load-js/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-03 00:00:00 -0700">03 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/views" title="View all posts in Views" rel="category">Views</a> on <a href="http://josediazgonzalez.com/2009/09/03/conditionally-load-js/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-03 00:00:00 -0400">03 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -318,7 +318,7 @@ foreach ($includeScripts as $script) {
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

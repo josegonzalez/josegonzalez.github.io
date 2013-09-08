@@ -103,9 +103,9 @@
 
     <h2>UPDATE: Fixed link to latest revision of ToggleBehavior</h2>
 
-<p>There is apparently already something out there that does this, but here is my &quot;ToggleBehavior&quot;. Does not really do callbacks, but it works well otherwise. I'll try to fix the callbacks sometime soon.</p>
+<p>There is apparently already something out there that does this, but here is my &quot;ToggleBehavior&quot;. Does not really do callbacks, but it works well otherwise. I&#39;ll try to fix the callbacks sometime soon.</p>
 
-<p>It's a study on how to build a usable feature in CakePHP, this time being a behavior. Each revision is stored on the <a href="http://bin.cakephp.org">CakePHP Bin</a>, and you'll see a slow progression from something quick and dirty to a behavior that follows most CakePHP conventions. About the only convention not followed is the non-use of the Ternary Operator. I use it as I think it is neat, but you can make a new revision that doesn't.</p>
+<p>It&#39;s a study on how to build a usable feature in CakePHP, this time being a behavior. Each revision is stored on the <a href="http://bin.cakephp.org">CakePHP Bin</a>, and you&#39;ll see a slow progression from something quick and dirty to a behavior that follows most CakePHP conventions. About the only convention not followed is the non-use of the Ternary Operator. I use it as I think it is neat, but you can make a new revision that doesn&#39;t.</p>
 
 <p>Cheers if it works for you, and feedback is always welcome!</p>
 
@@ -129,8 +129,8 @@ class ToggleBehavior extends ModelBehavior {
  * @access protected
  */
     protected $_settings = array(
-        'fields' => array('active'),
-        'callbacks' => false
+        'fields' =&gt; array('active'),
+        'callbacks' =&gt; false
     );
 /**
  * Initiate behaviour for the model using settings.
@@ -139,11 +139,11 @@ class ToggleBehavior extends ModelBehavior {
  * @param array $config Settings to override for model.
  * @access public
  */
-    function setup(&$model, $config = array()) {
-        $this->settings[$model->alias] = $this->_settings;
+    function setup(&amp;$model, $config = array()) {
+        $this-&gt;settings[$model-&gt;alias] = $this-&gt;_settings;
 
         //merge custom config with default settings
-        $this->settings[$model->alias] = array_merge($this->settings[$model->alias], (array)$config);
+        $this-&gt;settings[$model-&gt;alias] = array_merge($this-&gt;settings[$model-&gt;alias], (array)$config);
     }
 
 /**
@@ -155,8 +155,8 @@ class ToggleBehavior extends ModelBehavior {
  * @return mixed Array of non-existing fields, saved data/true if everything went well, or false if saving failed
  * @author Jose Diaz-Gonzalez
  **/
-    function toggle(&$model, $fieldNames = array(), $id = null) {
-        return $this->_turnFields($model, $fieldNames, 'toggle', $id);
+    function toggle(&amp;$model, $fieldNames = array(), $id = null) {
+        return $this-&gt;_turnFields($model, $fieldNames, 'toggle', $id);
     }
 
 /**
@@ -168,8 +168,8 @@ class ToggleBehavior extends ModelBehavior {
  * @return mixed Array of non-existing fields, saved data/true if everything went well, or false if saving failed
  * @author Jose Diaz-Gonzalez
  **/
-    function turnOn(&$model, $fieldNames = array(), $id = null) {
-        return $this->_turnFields($model, $fieldNames, 1, $id);
+    function turnOn(&amp;$model, $fieldNames = array(), $id = null) {
+        return $this-&gt;_turnFields($model, $fieldNames, 1, $id);
     }
 
 /**
@@ -181,8 +181,8 @@ class ToggleBehavior extends ModelBehavior {
  * @return mixed Array of non-existing fields, saved data/true if everything went well, or false if saving failed
  * @author Jose Diaz-Gonzalez
  **/
-    function turnOff(&$model, $fieldNames = array(), $id = null) {
-        return $this->_turnFields($model, $fieldNames, 0, $id);
+    function turnOff(&amp;$model, $fieldNames = array(), $id = null) {
+        return $this-&gt;_turnFields($model, $fieldNames, 0, $id);
     }
 
 /**
@@ -190,19 +190,19 @@ class ToggleBehavior extends ModelBehavior {
  *
  * @param AppModel $Model Model instance
  * @param array $fieldNames name of fields to be toggled
- * @param mixed $type Either the string "toggle" or the value to save
+ * @param mixed $type Either the string &quot;toggle&quot; or the value to save
  * @param mixed $id Optional The ID of the record to read
  * @return mixed Array of non-existing fields, saved data/true if everything went well, or false if saving failed
  * @author Jose Diaz-Gonzalez
  **/
-    function _turnFields(&$model, $fieldNames = array(), $type = null, $id = null) {
+    function _turnFields(&amp;$model, $fieldNames = array(), $type = null, $id = null) {
         if (!is_null($id) and !empty($id)) {
             $id;
         } else {
-            if (is_array($this->id)) {
-                $id = $this->id[0];
+            if (is_array($this-&gt;id)) {
+                $id = $this-&gt;id[0];
             } else {
-                $id = $this->id;
+                $id = $this-&gt;id;
             }
         }
 
@@ -210,11 +210,11 @@ class ToggleBehavior extends ModelBehavior {
         if (!empty($fields)) {
             $fields = $fieldNames;
         } else {
-            $fields = $this->settings[$model->alias]['fields'];
+            $fields = $this-&gt;settings[$model-&gt;alias]['fields'];
         }
-        $model->id = $id;
+        $model-&gt;id = $id;
 
-        $arr = $this->_checkFields($model, $fields);
+        $arr = $this-&gt;_checkFields($model, $fields);
         $errors = $arr['errors'];
         $fields = $arr['fields'];
         if (!empty($errors)) {var_dump($errors);die;
@@ -224,7 +224,7 @@ class ToggleBehavior extends ModelBehavior {
         switch ($type) {
             case 'toggle' :
                 foreach ($fields as $field) {
-                    $field = $model->escapeField($field);
+                    $field = $model-&gt;escapeField($field);
                     $toSave[$field] = 'NOT ' . $field;
                 }
                 break;
@@ -235,13 +235,13 @@ class ToggleBehavior extends ModelBehavior {
                 break;
         }
 
-        if ($this->settings[$model->alias]['callbacks']) {
-            $model->beforeSave();
-            $data = $model->updateAll($toSave, array($model->escapeField() => $id));
-            $model->afterSave();
+        if ($this-&gt;settings[$model-&gt;alias]['callbacks']) {
+            $model-&gt;beforeSave();
+            $data = $model-&gt;updateAll($toSave, array($model-&gt;escapeField() =&gt; $id));
+            $model-&gt;afterSave();
 
         } else {
-            $data = $model->updateAll($toSave, array($model->escapeField() => $id));
+            $data = $model-&gt;updateAll($toSave, array($model-&gt;escapeField() =&gt; $id));
         }
         return $data;
     }
@@ -254,17 +254,17 @@ class ToggleBehavior extends ModelBehavior {
  * @return array Fields and Errors in a single array
  * @author Jose Diaz-Gonzalez
  **/
-    function _checkFields(&$model, $fields) {
+    function _checkFields(&amp;$model, $fields) {
         $errors = array();
 
-        foreach ($fields as $key => $field) {
-            if(!$model->hasField($field)) {
+        foreach ($fields as $key =&gt; $field) {
+            if(!$model-&gt;hasField($field)) {
                 unset($fields[$key]);
                 $errors[] = $field;
             }
         }
 
-        return array('fields' => $fields, 'errors' => $errors);
+        return array('fields' =&gt; $fields, 'errors' =&gt; $errors);
     }
 }</code></pre>
 
@@ -272,7 +272,7 @@ class ToggleBehavior extends ModelBehavior {
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2009/08/13/toggle-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-08-13 00:00:00 -0700">13 Aug 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2009/08/13/toggle-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-08-13 00:00:00 -0400">13 Aug 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -448,7 +448,7 @@ class ToggleBehavior extends ModelBehavior {
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

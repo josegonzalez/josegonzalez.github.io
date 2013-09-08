@@ -122,7 +122,7 @@ class CacheableBehavior extends ModelBehavior {
  * @return void
  * @access public
  */
-    function setup(&$model, $config = array()) {
+    function setup(&amp;$model, $config = array()) {
     }
 
 /**
@@ -133,7 +133,7 @@ class CacheableBehavior extends ModelBehavior {
  * @access public
  * @return boolean True if the operation succeeded, false otherwise
  */
-    function afterSave(&$model, $created) {
+    function afterSave(&amp;$model, $created) {
         $pluginName = get_parent_class($model);
         if ($pluginName == 'AppModel') {
             $pluginName = null;
@@ -142,19 +142,19 @@ class CacheableBehavior extends ModelBehavior {
             $pluginName = strtolower(Inflector::camelize($pluginName));
         }
         $requestPath = array(
-            'plugin' => $pluginName,
-            'controller' => Inflector::tableize($model->alias),
-            'action' => 'view',
-            'admin' => false,
-            $model->id,
-            Inflector::slug($model->data[$model->alias][$model->displayField])
+            'plugin' =&gt; $pluginName,
+            'controller' =&gt; Inflector::tableize($model-&gt;alias),
+            'action' =&gt; 'view',
+            'admin' =&gt; false,
+            $model-&gt;id,
+            Inflector::slug($model-&gt;data[$model-&gt;alias][$model-&gt;displayField])
         );
 
         $stops = array('published', 'approved');
         $stopped = false;
-        $arr = array_keys($model->data[$model->alias]);
+        $arr = array_keys($model-&gt;data[$model-&gt;alias]);
         foreach ($stops as $stop) {
-            if (in_array($stop, $arr) and ($model->data[$model->alias][$stop] == 0)) {
+            if (in_array($stop, $arr) and ($model-&gt;data[$model-&gt;alias][$stop] == 0)) {
                 $stopped = true;
                 break;
             }
@@ -162,11 +162,11 @@ class CacheableBehavior extends ModelBehavior {
 
         if (!$stopped) {
             $cachePath = Router::url($requestPath, false);
-            $surrenderOuput = $this->requestAction($cachePath, array('return', 'cacheableRequest' => true));
-            $path = WWW_ROOT . "cache" . $cachePath . "/" . 'index.html';
+            $surrenderOuput = $this-&gt;requestAction($cachePath, array('return', 'cacheableRequest' =&gt; true));
+            $path = WWW_ROOT . &quot;cache&quot; . $cachePath . &quot;/&quot; . 'index.html';
             $file = new File($path, true);
-            $file->write($surrenderOuput);
-            $file->close();
+            $file-&gt;write($surrenderOuput);
+            $file-&gt;close();
         }
 
         return true;
@@ -178,12 +178,12 @@ class CacheableBehavior extends ModelBehavior {
  * @return void
  * @author Jose Diaz-Gonzalez
  **/
-    function resetCache(&$model, $primaryKey = null, $displayField = null) {
-        $path = '/' . Inflector::tableize($model->alias) . '/' . 'view' . '/' . $primaryKey . "/" . Inflector::slug($displayField);
-        $path = WWW_ROOT . "cache" . $path . "/" . 'index.html';
+    function resetCache(&amp;$model, $primaryKey = null, $displayField = null) {
+        $path = '/' . Inflector::tableize($model-&gt;alias) . '/' . 'view' . '/' . $primaryKey . &quot;/&quot; . Inflector::slug($displayField);
+        $path = WWW_ROOT . &quot;cache&quot; . $path . &quot;/&quot; . 'index.html';
         $file = new File($path, true);
-        $file->delete();
-        $file->close();
+        $file-&gt;delete();
+        $file-&gt;close();
     }
 }</code></pre>
 
@@ -191,7 +191,7 @@ class CacheableBehavior extends ModelBehavior {
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2009/09/04/cacheable-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-04 00:00:00 -0700">04 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2009/09/04/cacheable-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-04 00:00:00 -0400">04 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -367,7 +367,7 @@ class CacheableBehavior extends ModelBehavior {
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

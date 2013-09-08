@@ -101,15 +101,15 @@
     
 
 
-    <p>For those that didn't know, you can specify a custom join in CakePHP by doing the following:</p>
+    <p>For those that didn&#39;t know, you can specify a custom join in CakePHP by doing the following:</p>
 
-<pre class="rainbow-code"><code data-language="php">$this->Category->find('list', array(
-     'fields' => array('id', 'name'),
-     'joins' => array(array(
-             'table' => 'header_categories',
-             'alias' => 'HeaderCategory',
-             'type' => 'inner',
-             'conditions'=> array(
+<pre class="rainbow-code"><code data-language="php">$this-&gt;Category-&gt;find('list', array(
+     'fields' =&gt; array('id', 'name'),
+     'joins' =&gt; array(array(
+             'table' =&gt; 'header_categories',
+             'alias' =&gt; 'HeaderCategory',
+             'type' =&gt; 'inner',
+             'conditions'=&gt; array(
                      'HeaderCategory.category_id = Category.id',
              )
      ))
@@ -117,9 +117,9 @@
 
 <p>You can also specify the <code>contains</code> to use:</p>
 
-<pre class="rainbow-code"><code data-language="php">$this->Category->find('list', array(
-     'fields' => array('id', 'name'),
-     'contain' => array('FooterCategory')
+<pre class="rainbow-code"><code data-language="php">$this-&gt;Category-&gt;find('list', array(
+     'fields' =&gt; array('id', 'name'),
+     'contain' =&gt; array('FooterCategory')
 ));</code></pre>
 
 <p>What you cannot do is use them in conjunction, as the <code>contain</code> key is evaluated before the <code>joins</code> key. That breaks the following type of code:</p>
@@ -127,12 +127,12 @@
 <pre class="rainbow-code"><code data-language="php">class Item extends AppModel {
 
     public $hasOne = array(
-        'SearchItemTag' => array(
-            'table' => 'items_tags',
-            'className' => 'ItemsTag',
-            'type' => 'INNER',
-            'foreignKey' => false,
-            'conditions'=> array('SearchItemTag.item_id = Item.id')
+        'SearchItemTag' =&gt; array(
+            'table' =&gt; 'items_tags',
+            'className' =&gt; 'ItemsTag',
+            'type' =&gt; 'INNER',
+            'foreignKey' =&gt; false,
+            'conditions'=&gt; array('SearchItemTag.item_id = Item.id')
         ),
     );
 
@@ -150,18 +150,18 @@
                 $query['conditions'] = array();
             }
 
-            $query['conditions'][$this->alias . '.user_id'] = Authsome::get('id'))
+            $query['conditions'][$this-&gt;alias . '.user_id'] = Authsome::get('id'))
 
             if (!empty($query['filters'])) {
                 $query['group'] = array('Item.id');
                 $query['joins'] = array(array(
-                    'table' => 'tags',
-                    'alias' => 'Tag',
-                    'type' => 'inner',
-                    'foreignKey' => false,
-                    'conditions'=> array('and' => array(
+                    'table' =&gt; 'tags',
+                    'alias' =&gt; 'Tag',
+                    'type' =&gt; 'inner',
+                    'foreignKey' =&gt; false,
+                    'conditions'=&gt; array('and' =&gt; array(
                         'Tag.id = SearchItemTag.tag_id',
-                        'Tag.id' => $query['filters']
+                        'Tag.id' =&gt; $query['filters']
                     )
                 )));
                 $query['contain'] = array('SearchItemTag', 'Tag');
@@ -169,16 +169,16 @@
                 $query['contain'] = array('Tag');
             }
 
-            $query['order'] = array($this->alias . '.created DESC');
+            $query['order'] = array($this-&gt;alias . '.created DESC');
 
             if (!empty($query['operation'])) {
                 unset($query['contain']);
-                return $this->_findPaginatecount($state, $query, $results);
+                return $this-&gt;_findPaginatecount($state, $query, $results);
             }
             return $query;
         } elseif ($state == 'after') {
             if (!empty($query['operation'])) {
-                return $this->_findPaginatecount($state, $query, $results);
+                return $this-&gt;_findPaginatecount($state, $query, $results);
             }
 
             return $results;
@@ -186,13 +186,13 @@
     }
 }</code></pre>
 
-<p>That breaks hysterically, since the query produced throws the following error in MySQL: <code>Unknown column 'SearchItemTag.tag_id' in 'on clause'</code>. Rewriting the query such that the <code>SearchItemTag</code> join comes before the one specified in <code>joins</code> fixes the issue, so you'll either need to specify that <code>join</code> as a relation or specify the <code>contain</code> as a <code>join</code>. Just a quick tip, in case anyone was wondering why this occurs.</p>
+<p>That breaks hysterically, since the query produced throws the following error in MySQL: <code>Unknown column &#39;SearchItemTag.tag_id&#39; in &#39;on clause&#39;</code>. Rewriting the query such that the <code>SearchItemTag</code> join comes before the one specified in <code>joins</code> fixes the issue, so you&#39;ll either need to specify that <code>join</code> as a relation or specify the <code>contain</code> as a <code>join</code>. Just a quick tip, in case anyone was wondering why this occurs.</p>
 
   </div>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/dev-log" title="View all posts in Dev Log" rel="category">Dev Log</a> on <a href="http://josediazgonzalez.com/2011/05/27/the-daily-dev-log-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-05-27 00:00:00 -0700">27 May 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/dev-log" title="View all posts in Dev Log" rel="category">Dev Log</a> on <a href="http://josediazgonzalez.com/2011/05/27/the-daily-dev-log-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-05-27 00:00:00 -0400">27 May 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -368,7 +368,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

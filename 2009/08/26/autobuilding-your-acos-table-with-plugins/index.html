@@ -101,9 +101,9 @@
     
 
 
-    <p>I was fed up with the implementation that is on the Cookbook as far as plugin support goes, so I modified the AuthComponent to recognize things such as controllers/Plugin.Controller/action. Worked well enough, except for the fact that this means that my AuthComponent was simply a patch and therefore unlikely to be merged into the core. I'm also doing a lot of work with making plugin usage in your application seamless, so I guess it was high-time the Cookbook's implementation kicked it up a notch. And since I'm currently idling overnight at JFK (long story :P), here is a present from my delirium to you.</p>
+    <p>I was fed up with the implementation that is on the Cookbook as far as plugin support goes, so I modified the AuthComponent to recognize things such as controllers/Plugin.Controller/action. Worked well enough, except for the fact that this means that my AuthComponent was simply a patch and therefore unlikely to be merged into the core. I&#39;m also doing a lot of work with making plugin usage in your application seamless, so I guess it was high-time the Cookbook&#39;s implementation kicked it up a notch. And since I&#39;m currently idling overnight at JFK (long story :P), here is a present from my delirium to you.</p>
 
-<p>I personally have a 'Core' plugin that has a 'DashboardsController' where I place this code, but you can place it in your AppController and run it as you wish:</p>
+<p>I personally have a &#39;Core&#39; plugin that has a &#39;DashboardsController&#39; where I place this code, but you can place it in your AppController and run it as you wish:</p>
 
 <p>Controller Class:</p>
 
@@ -144,12 +144,12 @@ class DashboardsController extends AppController {
         if (Configure::read('debug') != 0) {
             $log = array();
 
-            $aco =& $this->Acl->Aco;
-            $root = $aco->node('controllers');
+            $aco =&amp; $this-&gt;Acl-&gt;Aco;
+            $root = $aco-&gt;node('controllers');
             if (!$root) {
-                $aco->create(array('parent_id' => null, 'model' => null, 'alias' => 'controllers'));
-                $root = $aco->save();
-                $root['Aco']['id'] = $aco->id;
+                $aco-&gt;create(array('parent_id' =&gt; null, 'model' =&gt; null, 'alias' =&gt; 'controllers'));
+                $root = $aco-&gt;save();
+                $root['Aco']['id'] = $aco-&gt;id;
                 $log[] = 'Created Aco node for controllers';
             } else {
                 $root = $root[0];
@@ -164,36 +164,36 @@ class DashboardsController extends AppController {
             $baseMethods = get_class_methods('Controller');
             $baseMethods[] = 'buildAcl';
 
-            $Plugins = $this->_getPluginControllerNames();
+            $Plugins = $this-&gt;_getPluginControllerNames();
             $Controllers = array_merge($Controllers, $Plugins);
 
             // look at each controller in app/controllers
             foreach ($Controllers as $ctrlName) {
-                $methods = $this->_getClassMethods($this->_getPluginControllerPath($ctrlName));
+                $methods = $this-&gt;_getClassMethods($this-&gt;_getPluginControllerPath($ctrlName));
 
                 // Do all Plugins First
-                if ($this->_isPlugin($ctrlName)){
-                    $pluginNode = $aco->node('controllers/'.$this->_getPluginName($ctrlName));
+                if ($this-&gt;_isPlugin($ctrlName)){
+                    $pluginNode = $aco-&gt;node('controllers/'.$this-&gt;_getPluginName($ctrlName));
                     if (!$pluginNode) {
-                        $aco->create(array('parent_id' => $root['Aco']['id'], 'model' => null, 'alias' => $this->_getPluginName($ctrlName)));
-                        $pluginNode = $aco->save();
-                        $pluginNode['Aco']['id'] = $aco->id;
-                        $log[] = 'Created Aco node for ' . $this->_getPluginName($ctrlName) . ' Plugin';
+                        $aco-&gt;create(array('parent_id' =&gt; $root['Aco']['id'], 'model' =&gt; null, 'alias' =&gt; $this-&gt;_getPluginName($ctrlName)));
+                        $pluginNode = $aco-&gt;save();
+                        $pluginNode['Aco']['id'] = $aco-&gt;id;
+                        $log[] = 'Created Aco node for ' . $this-&gt;_getPluginName($ctrlName) . ' Plugin';
                     }
                 }
                 // find / make controller node
-                $controllerNode = $aco->node('controllers/'.$ctrlName);
+                $controllerNode = $aco-&gt;node('controllers/'.$ctrlName);
                 if (!$controllerNode) {
-                    if ($this->_isPlugin($ctrlName)){
-                        $pluginNode = $aco->node('controllers/' . $this->_getPluginName($ctrlName));
-                        $aco->create(array('parent_id' => $pluginNode['0']['Aco']['id'], 'model' => null, 'alias' => $this->_getPluginControllerName($ctrlName)));
-                        $controllerNode = $aco->save();
-                        $controllerNode['Aco']['id'] = $aco->id;
-                        $log[] = 'Created Aco node for ' . $this->_getPluginControllerName($ctrlName) . ' ' . $this->_getPluginName($ctrlName) . ' Plugin Controller';
+                    if ($this-&gt;_isPlugin($ctrlName)){
+                        $pluginNode = $aco-&gt;node('controllers/' . $this-&gt;_getPluginName($ctrlName));
+                        $aco-&gt;create(array('parent_id' =&gt; $pluginNode['0']['Aco']['id'], 'model' =&gt; null, 'alias' =&gt; $this-&gt;_getPluginControllerName($ctrlName)));
+                        $controllerNode = $aco-&gt;save();
+                        $controllerNode['Aco']['id'] = $aco-&gt;id;
+                        $log[] = 'Created Aco node for ' . $this-&gt;_getPluginControllerName($ctrlName) . ' ' . $this-&gt;_getPluginName($ctrlName) . ' Plugin Controller';
                     } else {
-                        $aco->create(array('parent_id' => $root['Aco']['id'], 'model' => null, 'alias' => $ctrlName));
-                        $controllerNode = $aco->save();
-                        $controllerNode['Aco']['id'] = $aco->id;
+                        $aco-&gt;create(array('parent_id' =&gt; $root['Aco']['id'], 'model' =&gt; null, 'alias' =&gt; $ctrlName));
+                        $controllerNode = $aco-&gt;save();
+                        $controllerNode['Aco']['id'] = $aco-&gt;id;
                         $log[] = 'Created Aco node for ' . $ctrlName;
                     }
                 } else {
@@ -201,7 +201,7 @@ class DashboardsController extends AppController {
                 }
 
                 //clean the methods. to remove those in Controller and private actions.
-                foreach ($methods as $k => $method) {
+                foreach ($methods as $k =&gt; $method) {
                     if (strpos($method, '_', 0) === 0) {
                         unset($methods[$k]);
                         continue;
@@ -210,15 +210,15 @@ class DashboardsController extends AppController {
                         unset($methods[$k]);
                         continue;
                     }
-                    $methodNode = $aco->node('controllers/'.$ctrlName.'/'.$method);
+                    $methodNode = $aco-&gt;node('controllers/'.$ctrlName.'/'.$method);
                     if (!$methodNode) {
-                        $aco->create(array('parent_id' => $controllerNode['Aco']['id'], 'model' => null, 'alias' => $method));
-                        $methodNode = $aco->save();
+                        $aco-&gt;create(array('parent_id' =&gt; $controllerNode['Aco']['id'], 'model' =&gt; null, 'alias' =&gt; $method));
+                        $methodNode = $aco-&gt;save();
                         $log[] = 'Created Aco node for '. $method;
                     }
                 }
             }
-            if(count($log)>0) {
+            if(count($log)&gt;0) {
                 debug($log);
             }
         }
@@ -233,7 +233,7 @@ class DashboardsController extends AppController {
  */
     function _getClassMethods($ctrlName = null) {
         App::import('Controller', $ctrlName);
-        if (strlen(strstr($ctrlName, '.')) > 0) {
+        if (strlen(strstr($ctrlName, '.')) &gt; 0) {
             // plugin's controller
             $num = strpos($ctrlName, '.');
             $ctrlName = substr($ctrlName, $num+1);
@@ -251,7 +251,7 @@ class DashboardsController extends AppController {
  */
     function _isPlugin($ctrlName = null) {
         $arr = String::tokenize($ctrlName, '/');
-        if (count($arr) > 1) {
+        if (count($arr) &gt; 1) {
             return true;
         } else {
             return false;
@@ -319,21 +319,21 @@ class DashboardsController extends AppController {
     function _getPluginControllerNames() {
         App::import('Core', 'File', 'Folder');
         $paths = Configure::getInstance();
-        $folder =& new Folder();
-        $folder->cd(APP . 'plugins');
+        $folder =&amp; new Folder();
+        $folder-&gt;cd(APP . 'plugins');
 
         // Get the list of plugins
-        $Plugins = $folder->ls();
+        $Plugins = $folder-&gt;ls();
         $Plugins = $Plugins[0];
         $arr = array();
 
         // Loop through the plugins
         foreach($Plugins as $pluginName) {
             // Change directory to the plugin
-            $didCD = $folder->cd(APP . 'plugins/' . $pluginName);
+            $didCD = $folder-&gt;cd(APP . 'plugins/' . $pluginName);
             // Get a list of the files that have a file name that ends
             // with controller.php
-            $files = $folder->findRecursive('.*_controller\.php');
+            $files = $folder-&gt;findRecursive('.*_controller\.php');
 
             // Loop through the controllers we found in the plugins directory
             foreach($files as $fileName) {
@@ -348,7 +348,7 @@ class DashboardsController extends AppController {
                     } else {
                         /// Now prepend the Plugin name ...
                         // This is required to allow us to fetch the method names.
-                        $arr[] = Inflector::humanize($pluginName) . "/" . $file;
+                        $arr[] = Inflector::humanize($pluginName) . &quot;/&quot; . $file;
                     }
                 }
             }
@@ -361,7 +361,7 @@ class DashboardsController extends AppController {
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/authorization" title="View all posts in Authorization" rel="category">Authorization</a> on <a href="http://josediazgonzalez.com/2009/08/26/autobuilding-your-acos-table-with-plugins/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-08-26 00:00:00 -0700">26 Aug 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/authorization" title="View all posts in Authorization" rel="category">Authorization</a> on <a href="http://josediazgonzalez.com/2009/08/26/autobuilding-your-acos-table-with-plugins/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-08-26 00:00:00 -0400">26 Aug 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -537,7 +537,7 @@ class DashboardsController extends AppController {
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

@@ -105,7 +105,7 @@
 
 <pre class="rainbow-code"><code data-language="php">function _findEditprofile($state, $query, $results = array()) {
     if ($state == 'before') {
-        $query['conditions'] = array("{$this->alias}.{$this->primaryKey}" => User::get('id'));
+        $query['conditions'] = array(&quot;{$this-&gt;alias}.{$this-&gt;primaryKey}&quot; =&gt; User::get('id'));
         $query['contain'] = false;
         $query['fields'] = array(
             'id', 'first_name', 'last_name', 'email',
@@ -124,73 +124,73 @@
 <p>And I have an action, UsersController::profile(), with the following structure:</p>
 
 <pre class="rainbow-code"><code data-language="php">function profile() {
-    if (!empty($this->data)) {
-        $this->data['User']['id'] = User::get('id');
-        if ($this->User->save($this->data, true, array(
+    if (!empty($this-&gt;data)) {
+        $this-&gt;data['User']['id'] = User::get('id');
+        if ($this-&gt;User-&gt;save($this-&gt;data, true, array(
                 'id', 'first_name', 'last_name', 'email', 'job_title', 'phone_number',
                 'password', 'new_password', 'new_password_confirm'))) {
-            $this->Session->setFlash(__('Your profile has been saved', true));
-            $this->redirect(array('action' => 'index'));
+            $this-&gt;Session-&gt;setFlash(__('Your profile has been saved', true));
+            $this-&gt;redirect(array('action' =&gt; 'index'));
         } else {
-            $this->data = $this->User->resetDataForRegistration($this->data);
-            $this->Session->setFlash(__('Your profile could not be saved. Please, try again.', true));
+            $this-&gt;data = $this-&gt;User-&gt;resetDataForRegistration($this-&gt;data);
+            $this-&gt;Session-&gt;setFlash(__('Your profile could not be saved. Please, try again.', true));
         }
     }
-    if (empty($this->data)) {
-        $this->data = $this->User->find('editprofile');
+    if (empty($this-&gt;data)) {
+        $this-&gt;data = $this-&gt;User-&gt;find('editprofile');
     }
 }</code></pre>
 
 <p>and has the following form:</p>
 
-<pre class="rainbow-code"><code data-language="php"><div>
-    <?php $session->flash(); ?>
-    <?php echo $form->create('User', array(
-                    'url' => array('controller' => 'users', 'action' => 'profile'))); ?>
-        <fieldset>
-            <legend><?php echo __('Edit Profile', true); ?></legend>
-            <?php
-                echo $form->input('User.first_name', array(
-                    'div' => 'input text required',
-                    'label' => __('First Name', true),
-                    'type' => 'text'));
-                echo $form->input('User.last_name', array(
-                    'div' => 'input text required',
-                    'label' => __('Last Name', true),
-                    'type' => 'text'));
-                echo $form->input('User.email', array(
-                    'div' => 'input text required',
-                    'label' => __('Email Address', true),
-                    'type' => 'text'));
-                echo $form->input('User.job_title', array(
-                    'div' => 'input text required',
-                    'label' => __('Job Title', true),
-                    'type' => 'text'));
-                echo $form->input('User.phone_number', array(
-                    'div' => 'input text required',
-                    'label' => __('Phone Number', true),
-                    'type' => 'text'));
-                echo $form->input('User.photo', array(
-                    'div' => 'input file',
-                    'label' => __('Personal Photo', true),
-                    'type' => 'file'));
-            ?>
-        </fieldset>
-    <?php echo $form->submit(); ?>
-    <?php echo $form->end(); ?>
-</div></code></pre>
+<pre class="rainbow-code"><code data-language="php">&lt;div&gt;
+    &lt;?php $session-&gt;flash(); ?&gt;
+    &lt;?php echo $form-&gt;create('User', array(
+                    'url' =&gt; array('controller' =&gt; 'users', 'action' =&gt; 'profile'))); ?&gt;
+        &lt;fieldset&gt;
+            &lt;legend&gt;&lt;?php echo __('Edit Profile', true); ?&gt;&lt;/legend&gt;
+            &lt;?php
+                echo $form-&gt;input('User.first_name', array(
+                    'div' =&gt; 'input text required',
+                    'label' =&gt; __('First Name', true),
+                    'type' =&gt; 'text'));
+                echo $form-&gt;input('User.last_name', array(
+                    'div' =&gt; 'input text required',
+                    'label' =&gt; __('Last Name', true),
+                    'type' =&gt; 'text'));
+                echo $form-&gt;input('User.email', array(
+                    'div' =&gt; 'input text required',
+                    'label' =&gt; __('Email Address', true),
+                    'type' =&gt; 'text'));
+                echo $form-&gt;input('User.job_title', array(
+                    'div' =&gt; 'input text required',
+                    'label' =&gt; __('Job Title', true),
+                    'type' =&gt; 'text'));
+                echo $form-&gt;input('User.phone_number', array(
+                    'div' =&gt; 'input text required',
+                    'label' =&gt; __('Phone Number', true),
+                    'type' =&gt; 'text'));
+                echo $form-&gt;input('User.photo', array(
+                    'div' =&gt; 'input file',
+                    'label' =&gt; __('Personal Photo', true),
+                    'type' =&gt; 'file'));
+            ?&gt;
+        &lt;/fieldset&gt;
+    &lt;?php echo $form-&gt;submit(); ?&gt;
+    &lt;?php echo $form-&gt;end(); ?&gt;
+&lt;/div&gt;</code></pre>
 
 <p>I also have the following route setup</p>
 
-<pre class="rainbow-code"><code data-language="php">Router::connect('/profile', array('controller' => 'users', 'action' => 'profile'));</code></pre>
+<pre class="rainbow-code"><code data-language="php">Router::connect('/profile', array('controller' =&gt; 'users', 'action' =&gt; 'profile'));</code></pre>
 
 <p>Tell me why CakePHP thought it was a good idea to have the form submit to <code>/users/profile/1</code> ?</p>
 
-<p>Because I have configured the FormHelper to submit to default to the <code>User</code> model, and <code>$this-&gt;data['User']['id']</code> is set! Either modify the find to remove the <code>id</code>, or modify the form to not submit with the <code>User</code> as default. Below are the examples in the order I proposed them:</p>
+<p>Because I have configured the FormHelper to submit to default to the <code>User</code> model, and <code>$this-&gt;data[&#39;User&#39;][&#39;id&#39;]</code> is set! Either modify the find to remove the <code>id</code>, or modify the form to not submit with the <code>User</code> as default. Below are the examples in the order I proposed them:</p>
 
 <pre class="rainbow-code"><code data-language="php">function _findEditprofile($state, $query, $results = array()) {
     if ($state == 'before') {
-        $query['conditions'] = array("{$this->alias}.{$this->primaryKey}" => User::get('id'));
+        $query['conditions'] = array(&quot;{$this-&gt;alias}.{$this-&gt;primaryKey}&quot; =&gt; User::get('id'));
         $query['contain'] = false;
         $query['fields'] = array(
             'first_name', 'last_name', 'email',
@@ -200,8 +200,8 @@
         return $query;
     } else if ($state == 'after') {
         if (isset($results[0])) {
-            if (isset($results[0][$this->alias][$this->primaryKey])) {
-                unset($results[0][$this->alias][$this->primaryKey]);
+            if (isset($results[0][$this-&gt;alias][$this-&gt;primaryKey])) {
+                unset($results[0][$this-&gt;alias][$this-&gt;primaryKey]);
             }
             return $results[0];
         }
@@ -209,7 +209,7 @@
     }
 }</code></pre>
 
-<pre class="rainbow-code"><code data-language="php"><?php echo $form->create('', array('url' => array('controller' => 'users', 'action' => 'profile'))); ?></code></pre>
+<pre class="rainbow-code"><code data-language="php">&lt;?php echo $form-&gt;create('', array('url' =&gt; array('controller' =&gt; 'users', 'action' =&gt; 'profile'))); ?&gt;</code></pre>
 
 <p>I used the first example to get the job done, but you can swat the flies or find cows that eat trees in Brooklyn for all I care ;)</p>
 
@@ -217,7 +217,7 @@
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-12-10 00:00:00 -0800">10 Dec 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-12-10 00:00:00 -0500">10 Dec 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -393,7 +393,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

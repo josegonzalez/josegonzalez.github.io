@@ -101,20 +101,20 @@
     
 
 
-    <p>As always, I like taking code and trying to improve it. It's an exercise for me, sort of like dissecting a pig in high school. I try to understand what it is I am working with as much as I can before actually using it.</p>
+    <p>As always, I like taking code and trying to improve it. It&#39;s an exercise for me, sort of like dissecting a pig in high school. I try to understand what it is I am working with as much as I can before actually using it.</p>
 
 <p>In this case, I had been thinking about how to track who created a record, and who last modified said record. There is <a href="http://bakery.cakephp.org/articles/view/logablebehavior">Logable Behavior</a> at the Bakery, but I thought it was a bit overkill for my needs. So I went with <a href="http://bakery.cakephp.org/articles/view/whodidit-behavior-automagic-created_by-and-modified_by-fields">WhoDidIt Behavior</a> by Daniel Vecchiato.</p>
 
-<p>The implementation was still a bit messy, but I understood it well enough. Then I read Matt Curry's <a href="http://www.pseudocoder.com/free-cakephp-book/">Super Awesome Advanced CakePHP Tips eBook</a> and saw a slightly varied implementation of WhoDidIt, except using his yummy <code>User::get()</code> syntax. Since this still required adding the model association on what you were tracking, it wasn't self-contained and a bit messier than WhoDidIt.</p>
+<p>The implementation was still a bit messy, but I understood it well enough. Then I read Matt Curry&#39;s <a href="http://www.pseudocoder.com/free-cakephp-book/">Super Awesome Advanced CakePHP Tips eBook</a> and saw a slightly varied implementation of WhoDidIt, except using his yummy <code>User::get()</code> syntax. Since this still required adding the model association on what you were tracking, it wasn&#39;t self-contained and a bit messier than WhoDidIt.</p>
 
-<p>So at the end of the day, I decided to combine the two and produce this (hopefully) equally yummy Behavior. I believe it's a small improvement on both behavior's in that it:</p>
+<p>So at the end of the day, I decided to combine the two and produce this (hopefully) equally yummy Behavior. I believe it&#39;s a small improvement on both behavior&#39;s in that it:</p>
 
 <ul>
 <li>Uses Yummy Syntax</li>
 <li>Does not make me type more in the tracked model</li>
 </ul>
 
-<p>Remember to implement Matt Curry's <code>User::get()</code> syntax, or this won't work. It's in his eBook, which I highly recommend.</p>
+<p>Remember to implement Matt Curry&#39;s <code>User::get()</code> syntax, or this won&#39;t work. It&#39;s in his eBook, which I highly recommend.</p>
 
 <p>Enhancements, Bug Fixes, Questions and Comments are welcome.</p>
 
@@ -124,7 +124,7 @@
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2009/06/15/trackable-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-06-15 00:00:00 -0700">15 Jun 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2009/06/15/trackable-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-06-15 00:00:00 -0400">15 Jun 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -300,7 +300,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

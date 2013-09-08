@@ -141,21 +141,21 @@ Cookbooks are the fundamental units of distribution in Chef.
 
   sites.each do |base, info|
 
-    directory "#{node[:server][:production][:dir]}/#{hostname}/#{base}" do
-      owner "deploy"
-      group "deploy"
-      mode "0755"
+    directory &quot;#{node[:server][:production][:dir]}/#{hostname}/#{base}&quot; do
+      owner &quot;deploy&quot;
+      group &quot;deploy&quot;
+      mode &quot;0755&quot;
       recursive true
     end
 
-    git "#{node[:server][:production][:dir]}/#{hostname}/#{base}/public" do
+    git &quot;#{node[:server][:production][:dir]}/#{hostname}/#{base}/public&quot; do
       repository info[:repository]
-      user "deploy"
-      group "deploy"
+      user &quot;deploy&quot;
+      group &quot;deploy&quot;
     end
 
-    nginx_up "#{node[:nginx][:dir]}/sites-available/#{hostname}.#{base}" do
-      hostname "#{base}.#{hostname}"
+    nginx_up &quot;#{node[:nginx][:dir]}/sites-available/#{hostname}.#{base}&quot; do
+      hostname &quot;#{base}.#{hostname}&quot;
       variables(info)
     end
 
@@ -163,27 +163,27 @@ Cookbooks are the fundamental units of distribution in Chef.
 
 end</code></pre>
 
-<p>If you'll notice, I'm referencing <code>node</code> quite a few times. <code>node</code> is a reference to the configuration in your <code>DNA</code> file. I normally use <code>json</code> files, so <code>node[:static_applications]</code> is simply a key in that json file. In this case, I'm iterating over all the <code>:static_applications</code> which is a set of hostnames mapping to site configurations. Each one of these is actually a base path mapping to some configuration info as follows:</p>
+<p>If you&#39;ll notice, I&#39;m referencing <code>node</code> quite a few times. <code>node</code> is a reference to the configuration in your <code>DNA</code> file. I normally use <code>json</code> files, so <code>node[:static_applications]</code> is simply a key in that json file. In this case, I&#39;m iterating over all the <code>:static_applications</code> which is a set of hostnames mapping to site configurations. Each one of these is actually a base path mapping to some configuration info as follows:</p>
 
 <pre class="rainbow-code"><code data-language="javascript">{
-  "static_applications": {
-    "josediazgonzalez.com": {
-      "archives": {
-        "repository": "git://github.com/josegonzalez/archives.josediazgonzalez.com.git",
-        "subdomain": "archives.",
-        "path": ""
+  &quot;static_applications&quot;: {
+    &quot;josediazgonzalez.com&quot;: {
+      &quot;archives&quot;: {
+        &quot;repository&quot;: &quot;git://github.com/josegonzalez/archives.josediazgonzalez.com.git&quot;,
+        &quot;subdomain&quot;: &quot;archives.&quot;,
+        &quot;path&quot;: &quot;&quot;
       },
-      "default": {
-        "repository": "git://github.com/josegonzalez/josediazgonzalez.com.git",
-        "subdomain": "",
-        "path": "/_site"
+      &quot;default&quot;: {
+        &quot;repository&quot;: &quot;git://github.com/josegonzalez/josediazgonzalez.com.git&quot;,
+        &quot;subdomain&quot;: &quot;&quot;,
+        &quot;path&quot;: &quot;/_site&quot;
       }
     },
-    "areyousmokingcrack.com": {
-      "default": {
-        "repository": "git://github.com/josegonzalez/areyousmokingcrack.com.git",
-        "subdomain": "",
-        "path": ""
+    &quot;areyousmokingcrack.com&quot;: {
+      &quot;default&quot;: {
+        &quot;repository&quot;: &quot;git://github.com/josegonzalez/areyousmokingcrack.com.git&quot;,
+        &quot;subdomain&quot;: &quot;&quot;,
+        &quot;path&quot;: &quot;&quot;
       }
     }
   }
@@ -197,7 +197,7 @@ end</code></pre>
 
 <p>The <code>Directory</code> resource merely creates a directory in a desired path with the desired config, such as directory owner and permissions.</p>
 
-<p>The <code>Git</code> resource is interesting because it's actually a provider of the <code>SCM</code> resource. This means it provides some configuration, and a bit of magic, on top of the <code>SCM</code> resource to provide an implementation specific to Git, but that can be moved to, say, <code>SVN</code> with minimal work. If you're coming from the CakePHP world, it's akin to how <code>DboMysql</code> extends <code>DboSource</code> to provide <code>MySQL</code> specific interfaces.</p>
+<p>The <code>Git</code> resource is interesting because it&#39;s actually a provider of the <code>SCM</code> resource. This means it provides some configuration, and a bit of magic, on top of the <code>SCM</code> resource to provide an implementation specific to Git, but that can be moved to, say, <code>SVN</code> with minimal work. If you&#39;re coming from the CakePHP world, it&#39;s akin to how <code>DboMysql</code> extends <code>DboSource</code> to provide <code>MySQL</code> specific interfaces.</p>
 
 <p>The <code>Template</code> resource allows you to template out files by passing it variables.</p>
 
@@ -207,25 +207,25 @@ end</code></pre>
 
 <h4>Create a directory in the servers production directory for the given static_app</h4>
 
-<pre class="rainbow-code"><code data-language="ruby">directory "#{node[:server][:production][:dir]}/#{hostname}/#{base}" do
-  owner "deploy"
-  group "deploy"
-  mode "0755"
+<pre class="rainbow-code"><code data-language="ruby">directory &quot;#{node[:server][:production][:dir]}/#{hostname}/#{base}&quot; do
+  owner &quot;deploy&quot;
+  group &quot;deploy&quot;
+  mode &quot;0755&quot;
   recursive true
 end</code></pre>
 
 <h4>Clone the application from github to the aforementioned directory</h4>
 
-<pre class="rainbow-code"><code data-language="ruby">git "#{node[:server][:production][:dir]}/#{hostname}/#{base}/public" do
+<pre class="rainbow-code"><code data-language="ruby">git &quot;#{node[:server][:production][:dir]}/#{hostname}/#{base}/public&quot; do
   repository info[:repository]
-  user "deploy"
-  group "deploy"
+  user &quot;deploy&quot;
+  group &quot;deploy&quot;
 end</code></pre>
 
 <h4>Use a custom defined Resource to tell nginx to turn on this static_app</h4>
 
-<pre class="rainbow-code"><code data-language="ruby">nginx_up "#{node[:nginx][:dir]}/sites-available/#{hostname}.#{base}" do
-  hostname "#{base}.#{hostname}"
+<pre class="rainbow-code"><code data-language="ruby">nginx_up &quot;#{node[:nginx][:dir]}/sites-available/#{hostname}.#{base}&quot; do
+  hostname &quot;#{base}.#{hostname}&quot;
   variables(info)
 end</code></pre>
 
@@ -233,7 +233,7 @@ end</code></pre>
 
 <p>That may have seemed like a lot of information, but it should set the stage for pulling cookbooks together to build cogent deployments. We defined a short recipe, combined a few built-in resources with a custom resource, and configured the whole thing in our <code>dna.json</code>. If we had run this, assuming <code>nginx</code> and <code>git</code> were installed on the server, we would have three static applications deployed on our instance.</p>
 
-<p>Making a recipe isn't very hard, as we found out above, but creating custom resources might seem a bit daunting. We'll go over that, as well as templating and how to best use attributes in the next post.</p>
+<p>Making a recipe isn&#39;t very hard, as we found out above, but creating custom resources might seem a bit daunting. We&#39;ll go over that, as well as templating and how to best use attributes in the next post.</p>
 
 <p><strong>To Be Continued</strong></p>
 
@@ -241,7 +241,7 @@ end</code></pre>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/deployment" title="View all posts in Deployment" rel="category">Deployment</a> on <a href="http://josediazgonzalez.com/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-10-26 00:00:00 -0700">26 Oct 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/deployment" title="View all posts in Deployment" rel="category">Deployment</a> on <a href="http://josediazgonzalez.com/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-10-26 00:00:00 -0400">26 Oct 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -417,7 +417,7 @@ end</code></pre>
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

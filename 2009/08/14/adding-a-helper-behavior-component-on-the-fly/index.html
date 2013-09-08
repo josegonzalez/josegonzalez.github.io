@@ -112,7 +112,7 @@
     var $helpers = array('Text');
 
     function index() {
-        $this->helpers[] = 'Time';
+        $this-&gt;helpers[] = 'Time';
     }
 
     function add() {
@@ -121,14 +121,14 @@
 
 <p>In the above example, the TextHelper can be used everywhere. Note that the FormHelper is always available, as is the <code>HtmlHelper</code> and the <code>XmlHelper</code> (depending upon the type of request). The <code>TimeHelper</code> would ONLY be available at the <code>PostsController::index()</code> action. Good way to decrease the memory usage in an app, as some helpers are rarely always needed.</p>
 
-<p>Behaviors are a bit trickier. You need to attach it to the Model's BehaviorCollection
+<p>Behaviors are a bit trickier. You need to attach it to the Model&#39;s BehaviorCollection
 Model Class:</p>
 
 <pre class="rainbow-code"><code data-language="php">class Post extends AppModel {
     public $actsAs = array('Cacheable');
 
     public function beforeSave() {
-        $this->Behaviors->attach('Twitterable');
+        $this-&gt;Behaviors-&gt;attach('Twitterable');
     }
 }</code></pre>
 
@@ -136,9 +136,9 @@ Model Class:</p>
 
 <pre class="rainbow-code"><code data-language="php">class PostsController extends Appcontroller {
     public function index() {
-        $this->Post->Behaviors->attach('Trim.Trim');
+        $this-&gt;Post-&gt;Behaviors-&gt;attach('Trim.Trim');
         // Some model stuff goes on here, with TrimBehavior in play
-        $this->Post->Behaviors->detach('Trim.Trim');
+        $this-&gt;Post-&gt;Behaviors-&gt;detach('Trim.Trim');
         // No more TrimBehavior :(
     }
 
@@ -146,59 +146,59 @@ Model Class:</p>
     }
 }</code></pre>
 
-<p>In the above example, I use my custom CacheableBehavior (might be on my http://github.com account...) in all interactions with my Post Model. On the beforeSave, I attached the <code>TwitterableBehavior</code> (another custom thing, works at the <code>Model::afterSave()</code> level). <code>TwitterableBehavior</code> is therefore never loaded in my <code>PostsController::index()</code> action, but it IS loaded in my <code>PostsController::add()</code> action (I've omitted the code for brevity). I also load <code>TrimBehavior</code> from my <code>TrimPlugin</code>, which creates a tinyurl for the current resource, and detach it when I am done (you do not have to detach a behavior). Nifty way of saving on memory usage.</p>
+<p>In the above example, I use my custom CacheableBehavior (might be on my http://github.com account...) in all interactions with my Post Model. On the beforeSave, I attached the <code>TwitterableBehavior</code> (another custom thing, works at the <code>Model::afterSave()</code> level). <code>TwitterableBehavior</code> is therefore never loaded in my <code>PostsController::index()</code> action, but it IS loaded in my <code>PostsController::add()</code> action (I&#39;ve omitted the code for brevity). I also load <code>TrimBehavior</code> from my <code>TrimPlugin</code>, which creates a tinyurl for the current resource, and detach it when I am done (you do not have to detach a behavior). Nifty way of saving on memory usage.</p>
 
 <p>For Components, we are in a whole other ballgame. We could try the same trick as the one used for Helpers, but that will give you an error</p>
 
 <pre class="rainbow-code"><code data-language="php">class PostsController extends AppController {
     function mail() {
-        $this->components[] = 'Email';
+        $this-&gt;components[] = 'Email';
         // Some email-fu here
-        $this->Post->Email->send();
+        $this-&gt;Post-&gt;Email-&gt;send();
         # Call to undefined method stdClass::send()
     }
 }</code></pre>
 
 <p>FAIL
-There is no ComponentCollection, so don't even think of attempting the following:</p>
+There is no ComponentCollection, so don&#39;t even think of attempting the following:</p>
 
 <pre class="rainbow-code"><code data-language="php">class PostsController extends AppController {
     function mail() {
-        $this->Post->Components->attach('Email');
+        $this-&gt;Post-&gt;Components-&gt;attach('Email');
         // Some email-fu here
-        $this->Post->Email->send();
+        $this-&gt;Post-&gt;Email-&gt;send();
         # Call to undefined method stdClass::send()
     }
 }</code></pre>
 
-<p>Basically, since Components are loaded at startup (or at least before the <code>Controller::beforeFilter()</code> as far as I know), <code>App::import()</code> cannot be used as is. The loading of the Components runs <code>Component::initialize()</code> and <code>Component::startup()</code>, and therefore simply trying the Helper trick won't work. So instead, we must ALSO do what the loading does</p>
+<p>Basically, since Components are loaded at startup (or at least before the <code>Controller::beforeFilter()</code> as far as I know), <code>App::import()</code> cannot be used as is. The loading of the Components runs <code>Component::initialize()</code> and <code>Component::startup()</code>, and therefore simply trying the Helper trick won&#39;t work. So instead, we must ALSO do what the loading does</p>
 
-<p>Below is the Component attached to that particular ticket in it's entirety. I'd probably add it to my AppController and then use it wherever I need a component. But that's just me :P
+<p>Below is the Component attached to that particular ticket in it&#39;s entirety. I&#39;d probably add it to my AppController and then use it wherever I need a component. But that&#39;s just me :P
 Component Class:</p>
 
 <pre class="rainbow-code"><code data-language="php">class ComponentLoaderComponent extends Object {
 
     public $controller = null;
 
-    public function initialize(&$controller) {
+    public function initialize(&amp;$controller) {
         // saving the controller reference for later use
-        $this->controller =& $controller;
+        $this-&gt;controller =&amp; $controller;
     }
 
     public function load($component_name) {
         App::import('Component', $component_name);
         $component2 = $component_name.'Component';
-        $component =& new $component2(null);
+        $component =&amp; new $component2(null);
 
         if (method_exists($component, 'initialize')) {
-            $component->initialize($this->controller);
+            $component-&gt;initialize($this-&gt;controller);
         }
 
         if (method_exists($component, 'startup')) {
-            $component->startup($this->controller);
+            $component-&gt;startup($this-&gt;controller);
         }
 
-        $this->controller->{$component_name} = &$component;
+        $this-&gt;controller-&gt;{$component_name} = &amp;$component;
     }
 }</code></pre>
 
@@ -213,7 +213,7 @@ Component Class:</p>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2009/08/14/adding-a-helper-behavior-component-on-the-fly/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-08-14 00:00:00 -0700">14 Aug 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2009/08/14/adding-a-helper-behavior-component-on-the-fly/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-08-14 00:00:00 -0400">14 Aug 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -389,7 +389,7 @@ Component Class:</p>
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

@@ -101,23 +101,23 @@
     
 
 
-    <p>On the subject of updating urls in a web framework that gives you access to a router, it's important to have flexibility in writing those routes.</p>
+    <p>On the subject of updating urls in a web framework that gives you access to a router, it&#39;s important to have flexibility in writing those routes.</p>
 
 <p>In CakePHP, the following is possible:</p>
 
 <pre class="rainbow-code"><code data-language="php">Router::connect('/:date/:category/:id-:slug',
-    array('controller' => 'posts', 'action' => 'view'),
-    array('id' => '[0-9]+', 'category' => '[\w_-]+', 'slug' => '[\w_-]+', 'date' => '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+    array('controller' =&gt; 'posts', 'action' =&gt; 'view'),
+    array('id' =&gt; '[0-9]+', 'category' =&gt; '[\w_-]+', 'slug' =&gt; '[\w_-]+', 'date' =&gt; '[0-9]{4}-[0-9]{2}-[0-9]{2}')
 );</code></pre>
 
-<p>It's pretty easy to constrain each section as necessary using regular expressions. CakePHP also allows the usage of Router Classes that can use PHP to figure out whether a particular rule maps to a request, and how to map that request.</p>
+<p>It&#39;s pretty easy to constrain each section as necessary using regular expressions. CakePHP also allows the usage of Router Classes that can use PHP to figure out whether a particular rule maps to a request, and how to map that request.</p>
 
 <p>In Symfony, most routes are defined in a yml file:</p>
 
 <pre class="rainbow-code"><code data-language="yaml">post_view_seo:
   url:   /:date/:category/:id/:slug/
   param: { module: posts, action: view }
-  requirements: { id: "[\d]+", category: "[\w_-]+", slug: "[\w_-]+", date: "[0-9]{4}-[0-9]{2}-[0-9]{2}" }</code></pre>
+  requirements: { id: &quot;[\d]+&quot;, category: &quot;[\w_-]+&quot;, slug: &quot;[\w_-]+&quot;, date: &quot;[0-9]{4}-[0-9]{2}-[0-9]{2}&quot; }</code></pre>
 
 <p>You can also define routes in a php file. But it feels icky to do that and combine it with yml routing.</p>
 
@@ -125,7 +125,7 @@
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/dev-log" title="View all posts in Dev Log" rel="category">Dev Log</a> on <a href="http://josediazgonzalez.com/2011/06/02/the-daily-dev-log-4/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-06-02 00:00:00 -0700">02 Jun 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/dev-log" title="View all posts in Dev Log" rel="category">Dev Log</a> on <a href="http://josediazgonzalez.com/2011/06/02/the-daily-dev-log-4/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-06-02 00:00:00 -0400">02 Jun 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -301,7 +301,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

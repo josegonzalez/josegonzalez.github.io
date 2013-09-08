@@ -117,23 +117,23 @@ cake i18n extract</code></pre>
 <pre class="rainbow-code"><code data-language="php">class Category extends AppModel {
     var $name = 'Category';
     function __construct() {
-        $this->validate = array(
-            'title' => array(
-                'notempty' => array(
-                    'rule' => array('notempty'),
-                    'message' => __('cannot be left empty', true)
+        $this-&gt;validate = array(
+            'title' =&gt; array(
+                'notempty' =&gt; array(
+                    'rule' =&gt; array('notempty'),
+                    'message' =&gt; __('cannot be left empty', true)
                 ),
             ),
         );
-        $this->visibilities = array(
-            'published' => __('Published', true),
-            'private' => __('Private', true),
-            'password' => __('Password Protected', true),
+        $this-&gt;visibilities = array(
+            'published' =&gt; __('Published', true),
+            'private' =&gt; __('Private', true),
+            'password' =&gt; __('Password Protected', true),
         );
     }
 }</code></pre>
 
-<p><em>Don't do that! It will break the entire application!</em> The error message will be something like the following:</p>
+<p><em>Don&#39;t do that! It will break the entire application!</em> The error message will be something like the following:</p>
 
 <pre class="rainbow-code"><code data-language="generic">Fatal error: Call to a member function trigger() on a non-object in cake/libs/model/model.php on line 2057</code></pre>
 
@@ -144,31 +144,31 @@ cake i18n extract</code></pre>
 <pre class="rainbow-code"><code data-language="php">class Category extends AppModel {
     var $name = 'Category';
     function __construct($id = false, $table = null, $ds = null) {
-        $this->validate = array(
-            'title' => array(
-                'notempty' => array(
-                    'rule' => array('notempty'),
-                    'message' => __('cannot be left empty', true)
+        $this-&gt;validate = array(
+            'title' =&gt; array(
+                'notempty' =&gt; array(
+                    'rule' =&gt; array('notempty'),
+                    'message' =&gt; __('cannot be left empty', true)
                 ),
             ),
         );
-        $this->visibilities = array(
-            'published' => __('Published', true),
-            'private' => __('Private', true),
-            'password' => __('Password Protected', true),
+        $this-&gt;visibilities = array(
+            'published' =&gt; __('Published', true),
+            'private' =&gt; __('Private', true),
+            'password' =&gt; __('Password Protected', true),
         );
 
         parent::__construct($id, $table, $ds);
     }
 }</code></pre>
 
-<p>Note that you do not need to do  <code>var $validate = array();</code> before the constructor. You can also place any other variables that you would like to translate in the constructor, like I do with my $visibilities variable. Then you'll no longer get that silly <code>trigger()</code> error message. And your app will work again. Hurray! Whoagies unite!</p>
+<p>Note that you do not need to do  <code>var $validate = array();</code> before the constructor. You can also place any other variables that you would like to translate in the constructor, like I do with my $visibilities variable. Then you&#39;ll no longer get that silly <code>trigger()</code> error message. And your app will work again. Hurray! Whoagies unite!</p>
 
   </div>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/internationalization" title="View all posts in Internationalization" rel="category">Internationalization</a> on <a href="http://josediazgonzalez.com/2009/11/28/quick-tip-translating-model-variables/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-11-28 00:00:00 -0800">28 Nov 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/internationalization" title="View all posts in Internationalization" rel="category">Internationalization</a> on <a href="http://josediazgonzalez.com/2009/11/28/quick-tip-translating-model-variables/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-11-28 00:00:00 -0500">28 Nov 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -344,7 +344,7 @@ cake i18n extract</code></pre>
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

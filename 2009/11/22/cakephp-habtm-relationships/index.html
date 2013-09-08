@@ -101,25 +101,25 @@
     
 
 
-    <p>I'm working with a startup at the moment and am attempting to add a simple counterCache to a <a href="hasAndBelongsToMany">http://book.cakephp.org/view/83/hasAndBelongsToMany-HABTM</a> (HABTM) relationship. Let me briefly define the HABTM relationship before I move on and go insane...</p>
+    <p>I&#39;m working with a startup at the moment and am attempting to add a simple counterCache to a <a href="hasAndBelongsToMany">http://book.cakephp.org/view/83/hasAndBelongsToMany-HABTM</a> (HABTM) relationship. Let me briefly define the HABTM relationship before I move on and go insane...</p>
 
-<p>An habtm relationship consists of two different objects. Normally it is something like Tag HABTM Post, or Post HABTM Category. These are relatively simple and CakePHP gives a number of options for one to use. A common mistake is that CakePHP sets the 'unique' key on the HABTM relationship to true, and then people forget to pass the existing relationships in when saving new ones. This can be mitigated through:</p>
+<p>An habtm relationship consists of two different objects. Normally it is something like Tag HABTM Post, or Post HABTM Category. These are relatively simple and CakePHP gives a number of options for one to use. A common mistake is that CakePHP sets the &#39;unique&#39; key on the HABTM relationship to true, and then people forget to pass the existing relationships in when saving new ones. This can be mitigated through:</p>
 
 <ol>
-<li>simply setting the 'unique' key to false.</li>
+<li>simply setting the &#39;unique&#39; key to false.</li>
 <li>behaviors to insert directly into the table</li>
 <li>using a HasMany&lt;-&gt;BelongsTo relationship between the models and the join Table</li>
 </ol>
 
-<p>You might even want to do something like Post HABTM User, if you wanted to track the users that have modified a specific record. This isn't very efficient, but <a href="http://carsonified.com/blog/carsonified/features/why-50-isnt-good-enough/">&quot;...scaling issues are the best issues to have. You should be so lucky.&quot;</a> I actually make use of Alkemann's <a href="http://github.com/alkemann/CakePHP-Assets/blob/master/models/behaviors/logable.php">Logable Behavior</a> for this, but you can do what you want.</p>
+<p>You might even want to do something like Post HABTM User, if you wanted to track the users that have modified a specific record. This isn&#39;t very efficient, but <a href="http://carsonified.com/blog/carsonified/features/why-50-isnt-good-enough/">&quot;...scaling issues are the best issues to have. You should be so lucky.&quot;</a> I actually make use of Alkemann&#39;s <a href="http://github.com/alkemann/CakePHP-Assets/blob/master/models/behaviors/logable.php">Logable Behavior</a> for this, but you can do what you want.</p>
 
-<p>Solution number 1 is cool, except that you'll definitely have fun when CakePHP inserts multiple of the exact same relationship. Have fun if you don't have a Primary Key on that table :)</p>
+<p>Solution number 1 is cool, except that you&#39;ll definitely have fun when CakePHP inserts multiple of the exact same relationship. Have fun if you don&#39;t have a Primary Key on that table :)</p>
 
-<p>Solution number 2 has been <a href="http://bakery.cakephp.org/articles/view/add-delete-habtm-behavior">spoken</a> <a href="http://stackoverflow.com/questions/1588318/cakephp-habtm-relationship-saving-data">about</a> <a href="http://www.jamesfairhurst.co.uk/posts/view/full%5Fcakephp%5Fapplication%5Fpart%5F5/">before</a>. Funstuff. Don't really need to explain how it works.</p>
+<p>Solution number 2 has been <a href="http://bakery.cakephp.org/articles/view/add-delete-habtm-behavior">spoken</a> <a href="http://stackoverflow.com/questions/1588318/cakephp-habtm-relationship-saving-data">about</a> <a href="http://www.jamesfairhurst.co.uk/posts/view/full%5Fcakephp%5Fapplication%5Fpart%5F5/">before</a>. Funstuff. Don&#39;t really need to explain how it works.</p>
 
 <p>If you made a HasMany&lt;-&gt;BelongsTo relationship, then you can just do whatever you want. Treat the table as if it were a regular model. Post HasMany PostsTags BelongsTo Post and Tag HasMany PostsTags BelongsTo Tag. Think about that for a second and treat it kindly. You can just pump things into the join table and everything will be hunky dory.</p>
 
-<p>Now for my problem. The last solution provides built-in support for counterCache. It's incredibly easy to do it (Post and Tag tables can have their own little <code>posts_tags_count</code> field). Suppose you don't want to do that one though? Well, then there are two behaviors out there to do what we need.</p>
+<p>Now for my problem. The last solution provides built-in support for counterCache. It&#39;s incredibly easy to do it (Post and Tag tables can have their own little <code>posts_tags_count</code> field). Suppose you don&#39;t want to do that one though? Well, then there are two behaviors out there to do what we need.</p>
 
 <ul>
 <li><a href="http://bakery.cakephp.org/articles/view/counter-cache-behavior-for-habtm-relations">http://bakery.cakephp.org/articles/view/counter-cache-behavior-for-habtm-relations</a></li>
@@ -132,15 +132,15 @@
 
 <p>:-\</p>
 
-<p>This is wrong. Clearly wrong. Why? Because there should be, ideally, a <code>business_users</code> table that tracks ownership (you can name it <code>owners</code> if you really want to show the relationship in the database), and a <code>favorites</code> table to track the favoriting aspect. This would remove the need for a type, and allow the app to use CakePHP's built-ins for adding HABTM relations between records. Then I would be able to use any of the two previous HABTM CounterCache solutions. Instead, they add directly to the table, as if it were a HasMany&lt;-&gt;BelongsTo relationship, when it most clearly is not (even in the models). This is very upsetting, as now I have to do an updateAll manually.</p>
+<p>This is wrong. Clearly wrong. Why? Because there should be, ideally, a <code>business_users</code> table that tracks ownership (you can name it <code>owners</code> if you really want to show the relationship in the database), and a <code>favorites</code> table to track the favoriting aspect. This would remove the need for a type, and allow the app to use CakePHP&#39;s built-ins for adding HABTM relations between records. Then I would be able to use any of the two previous HABTM CounterCache solutions. Instead, they add directly to the table, as if it were a HasMany&lt;-&gt;BelongsTo relationship, when it most clearly is not (even in the models). This is very upsetting, as now I have to do an updateAll manually.</p>
 
-<p>Please, when modeling your relationships in a table, think of the whoagies. Don't stuff two relationships into one table because they track the same kinds of records. The relationships are different, so mark them as such.</p>
+<p>Please, when modeling your relationships in a table, think of the whoagies. Don&#39;t stuff two relationships into one table because they track the same kinds of records. The relationships are different, so mark them as such.</p>
 
   </div>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/models" title="View all posts in Models" rel="category">Models</a> on <a href="http://josediazgonzalez.com/2009/11/22/cakephp-habtm-relationships/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-11-22 00:00:00 -0800">22 Nov 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/models" title="View all posts in Models" rel="category">Models</a> on <a href="http://josediazgonzalez.com/2009/11/22/cakephp-habtm-relationships/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-11-22 00:00:00 -0500">22 Nov 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -316,7 +316,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

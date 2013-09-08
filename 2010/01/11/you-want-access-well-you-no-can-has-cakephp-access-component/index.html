@@ -101,9 +101,9 @@
     
 
 
-    <p>My latest side-project is an app for managing file uploads - you might even be able to guess what it is by checking my latest updates on Github - which has some pretty specific requirements. It therefore has some functionality that might be pretty useful in other applications, so over the next few days I'll be releasing some of the more interesting ones as gists (and forking existing projects where necessary).</p>
+    <p>My latest side-project is an app for managing file uploads - you might even be able to guess what it is by checking my latest updates on Github - which has some pretty specific requirements. It therefore has some functionality that might be pretty useful in other applications, so over the next few days I&#39;ll be releasing some of the more interesting ones as gists (and forking existing projects where necessary).</p>
 
-<p>One of the things I am working on is Authentication and Access Control. The <a href="http://github.com/felixge/cakephp-authsome">CakePHP Authsome Plugin</a> by the <a href="http://debuggable.com/">Debuggable Folks - Felix Geisendörfer and Tim Koschützki</a> - handles application EXTREMELY well. It's a heck of a lot simpler to setup than the built-in <a href="http://api.cakephp.org/class/auth-component">AuthComponent</a> for certain apps, although it does require me to handle stuff that the AuthComponent does for me. Like allowed and denied actions.</p>
+<p>One of the things I am working on is Authentication and Access Control. The <a href="http://github.com/felixge/cakephp-authsome">CakePHP Authsome Plugin</a> by the <a href="http://debuggable.com/">Debuggable Folks - Felix Geisendörfer and Tim Koschützki</a> - handles application EXTREMELY well. It&#39;s a heck of a lot simpler to setup than the built-in <a href="http://api.cakephp.org/class/auth-component">AuthComponent</a> for certain apps, although it does require me to handle stuff that the AuthComponent does for me. Like allowed and denied actions.</p>
 
 <p>To setup AuthComponent, you might do something similar to the following:</p>
 
@@ -113,31 +113,31 @@
 
     public function beforeFilter() {
         parent::beforeFilter();
-        $this->Auth->loginAction = array('admin' => false, 'controller' => 'users', 'action' => 'login');
+        $this-&gt;Auth-&gt;loginAction = array('admin' =&gt; false, 'controller' =&gt; 'users', 'action' =&gt; 'login');
     }
 
     public function isAuthorized() {
-        if ($this->Auth->user()) {
-            $this->Auth->deny('login', 'register', 'success', 'forgot_password', 'reset_password');
+        if ($this-&gt;Auth-&gt;user()) {
+            $this-&gt;Auth-&gt;deny('login', 'register', 'success', 'forgot_password', 'reset_password');
         } else {
-            $this->Auth->deny('dashboard', 'logout', 'change_password');
+            $this-&gt;Auth-&gt;deny('dashboard', 'logout', 'change_password');
         }
     }
 }</code></pre>
 
-<p>This is pretty self-explanatory, but it takes a bit of thinking to setup. Since this is a fairly simple application - or at least I don't want to make stuff like Authentication and Authorization complex - I went with the  <a href="http://github.com/felixge/cakephp-authsome">Authsome Plugin</a> instead though. Here it is, pretending to emulate the AuthComponent as best it can:</p>
+<p>This is pretty self-explanatory, but it takes a bit of thinking to setup. Since this is a fairly simple application - or at least I don&#39;t want to make stuff like Authentication and Authorization complex - I went with the  <a href="http://github.com/felixge/cakephp-authsome">Authsome Plugin</a> instead though. Here it is, pretending to emulate the AuthComponent as best it can:</p>
 
 <pre class="rainbow-code"><code data-language="php">class AppController extends Controller {
     public $components = array(
-        'Authsome.Authsome' => array(
-            'model' => 'User',
-            'configureKey' => 'Auth',
-            'sessionKey' => 'Auth',
-            'cookieKey' => 'Auth',
+        'Authsome.Authsome' =&gt; array(
+            'model' =&gt; 'User',
+            'configureKey' =&gt; 'Auth',
+            'sessionKey' =&gt; 'Auth',
+            'cookieKey' =&gt; 'Auth',
         )
     );</code></pre>
 
-<p>Isn't it neat? Unfortunately, it does not handle Authorization. Sucks as my requirements are really simple.</p>
+<p>Isn&#39;t it neat? Unfortunately, it does not handle Authorization. Sucks as my requirements are really simple.</p>
 
 <ul>
 <li>You need to be an administrator to access a resource</li>
@@ -150,11 +150,11 @@
 
 <script src="http://gist.github.com/276000.js"></script>
 
-<p>It's pretty simple, am I right? It will likely be refactored in the coming days to support access by group, but the API isn't terrible at the moment. Here it is in use:</p>
+<p>It&#39;s pretty simple, am I right? It will likely be refactored in the coming days to support access by group, but the API isn&#39;t terrible at the moment. Here it is in use:</p>
 
 <pre class="rainbow-code"><code data-language="php">class ModerationsController extends AppController {
     public $name = 'Moderations';
-    public $components = array('Access' => array('admin_required' => array('*')));
+    public $components = array('Access' =&gt; array('admin_required' =&gt; array('*')));
 
     public function index() { /* SNIP */ }
     public function user_queue() { /* SNIP */ }
@@ -167,7 +167,7 @@
 <pre class="rainbow-code"><code data-language="php">class MailsController extends AppController {
     public $name = 'Mails';
     public $components = array(
-        'Access' => array('denied' => array('*'))
+        'Access' =&gt; array('denied' =&gt; array('*'))
         'SwiftMailer');
     public $uses = array();
 }</code></pre>
@@ -178,9 +178,9 @@
     public $name = 'Users';
     public $helpers = array('Gravatar');
     public $components = array(
-        'Access' => array(
-            'auth_denied' => array('login', 'register', 'success', 'forgot_password', 'reset_password'),
-            'auth_required' => array('dashboard', 'logout', 'change_password')));
+        'Access' =&gt; array(
+            'auth_denied' =&gt; array('login', 'register', 'success', 'forgot_password', 'reset_password'),
+            'auth_required' =&gt; array('dashboard', 'logout', 'change_password')));
 
     public function index() { /* SNIP */ }
     public function login() { /* SNIP */ }
@@ -196,9 +196,9 @@
 
 <p>You can even mix and match whether or not you need to be un-authenticated or authenticated to perform an action. Or anything else for that matter.</p>
 
-<p>So far, the component works pretty well for my use-case, and I figure others might have similar use-cases, where they would like to use AuthSome Authentication, have a very simple user/group setup, but would need to worry about Authorization. I know I've built apps that were pretty much like this, where there isn't a need for ACL and I found myself screwing around with <code>Controller::beforeFilter()</code> methods.</p>
+<p>So far, the component works pretty well for my use-case, and I figure others might have similar use-cases, where they would like to use AuthSome Authentication, have a very simple user/group setup, but would need to worry about Authorization. I know I&#39;ve built apps that were pretty much like this, where there isn&#39;t a need for ACL and I found myself screwing around with <code>Controller::beforeFilter()</code> methods.</p>
 
-<p><em>NOTE: By default, this component works on the initialization of the application, meaning that it works before the <code>Controller::beforeFilter()</code> action. This means that if you don't set the callback parameter to &quot;startup&quot;, then it CANNOT be used in the AppController. You can still set it to &quot;startup&quot; even if using it in a specific Controller in case you have some <code>Controller::beforeFilter()</code> that needs to occur though.</em></p>
+<p><em>NOTE: By default, this component works on the initialization of the application, meaning that it works before the <code>Controller::beforeFilter()</code> action. This means that if you don&#39;t set the callback parameter to &quot;startup&quot;, then it CANNOT be used in the AppController. You can still set it to &quot;startup&quot; even if using it in a specific Controller in case you have some <code>Controller::beforeFilter()</code> that needs to occur though.</em></p>
 
 <p>A possible road to go down is to match actions via regular expressions, meaning that one COULD then support multiple groups of users with Prefixed Routes (a feature of 1.3) extremely easily. Anyone want to jump in and add that for me? :)</p>
 
@@ -208,7 +208,7 @@
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/authorization" title="View all posts in Authorization" rel="category">Authorization</a> on <a href="http://josediazgonzalez.com/2010/01/11/you-want-access-well-you-no-can-has-cakephp-access-component/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2010-01-11 00:00:00 -0800">11 Jan 2010</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/authorization" title="View all posts in Authorization" rel="category">Authorization</a> on <a href="http://josediazgonzalez.com/2010/01/11/you-want-access-well-you-no-can-has-cakephp-access-component/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2010-01-11 00:00:00 -0500">11 Jan 2010</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -384,7 +384,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

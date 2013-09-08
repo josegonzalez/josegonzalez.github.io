@@ -101,9 +101,9 @@
     
 
 
-    <p>For the purposes of archiving how I like to develop, I'll chronicle a few things here.</p>
+    <p>For the purposes of archiving how I like to develop, I&#39;ll chronicle a few things here.</p>
 
-<p>First things first. You'll want to ensure that your login/non-login terminal sessions have the same environment. On OS X, non-login sessions use the <code>~/.bashrc</code>, while login sessions use <code>~/.bash_profile</code>. Most terminal emulators follow this rule, but lets ensure this is always the case by modifying our non-existent <code>~/.bash_profile</code> as follows:</p>
+<p>First things first. You&#39;ll want to ensure that your login/non-login terminal sessions have the same environment. On OS X, non-login sessions use the <code>~/.bashrc</code>, while login sessions use <code>~/.bash_profile</code>. Most terminal emulators follow this rule, but lets ensure this is always the case by modifying our non-existent <code>~/.bash_profile</code> as follows:</p>
 
 <pre class="rainbow-code"><code data-language="shell">if [ -f ~/.bashrc ]; then
   source ~/.bashrc
@@ -117,17 +117,17 @@ fi</code></pre>
 
 <p>Once that is complete, install homebrew - the proper way, to <code>/usr/local/</code>, with no sudo enabled:</p>
 
-<pre class="rainbow-code"><code data-language="shell">/usr/bin/ruby -e "$(/usr/bin/curl -fksSL https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb)"
+<pre class="rainbow-code"><code data-language="shell">/usr/bin/ruby -e &quot;$(/usr/bin/curl -fksSL https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb)&quot;
 brew update
 brew install bash-completion</code></pre>
 
-<p>Then you'll want to have RVM installed:</p>
+<p>Then you&#39;ll want to have RVM installed:</p>
 
-<pre class="rainbow-code"><code data-language="shell">bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)</code></pre>
+<pre class="rainbow-code"><code data-language="shell">bash -s stable &lt; &lt;(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)</code></pre>
 
 <p>The following will ensure <code>rvm</code> is always loaded. And add the following to the bottom of your <code>.bashrc</code>:</p>
 
-<pre class="rainbow-code"><code data-language="shell">[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"  # This loads RVM</code></pre>
+<pre class="rainbow-code"><code data-language="shell">[[ -s &quot;$HOME/.rvm/scripts/rvm&quot; ]] &amp;&amp; . &quot;$HOME/.rvm/scripts/rvm&quot;  # This loads RVM</code></pre>
 
 <p>Then source your <code>~/.bash_profile</code></p>
 
@@ -153,7 +153,7 @@ rvm use --default 1.9.2</code></pre>
 
 <pre class="rainbow-code"><code data-language="shell">brew install bash-completion git subversion bazaar mercurial mysql mongodb redis elasticsearch ack python nodejs imagemagick</code></pre>
 
-<p>Sometimes <code>subversion</code> installation freezes - haven't investigated this yet - so you can either install it separately, skip it, or just rerun the command. I generally kill it if it's been running for what seems to be 45 minutes.</p>
+<p>Sometimes <code>subversion</code> installation freezes - haven&#39;t investigated this yet - so you can either install it separately, skip it, or just rerun the command. I generally kill it if it&#39;s been running for what seems to be 45 minutes.</p>
 
 <p>I personally install <code>gsl</code>, so I can use <code>LSI</code> to generate related posts within <a href="https://github.com/mojombo/jekyll">Jekyll</a> in conjunction with <a href="http://rb-gsl.rubyforge.org/">Ruby-GSL</a>. Homebrew comes in handy.</p>
 
@@ -164,20 +164,20 @@ rvm use --default 1.9.2</code></pre>
 <pre class="rainbow-code"><code data-language="shell">brew remove gsl
 brew install https://raw.github.com/mxcl/homebrew/83ed49411f076e30ced04c2cbebb054b2645a431/Library/Formula/gsl.rb</code></pre>
 
-<p>If you are using nodejs, you'll also want to install <code>npm</code>:</p>
+<p>If you are using nodejs, you&#39;ll also want to install <code>npm</code>:</p>
 
 <pre class="rainbow-code"><code data-language="shell">curl http://npmjs.org/install.sh | sh</code></pre>
 
-<p>If you've installed <code>python</code> using homebrew, I suggest doing the following so that installing python packages uses the right python:</p>
+<p>If you&#39;ve installed <code>python</code> using homebrew, I suggest doing the following so that installing python packages uses the right python:</p>
 
 <pre class="rainbow-code"><code data-language="shell"># install pip
 /usr/local/share/python/easy_install pip
 
 # modify PATH in ~/.bashrc to have the following
-export PATH="$(brew --prefix python)/bin:$PATH"
-export PATH="/usr/local/share/python:$PATH"</code></pre>
+export PATH=&quot;$(brew --prefix python)/bin:$PATH&quot;
+export PATH=&quot;/usr/local/share/python:$PATH&quot;</code></pre>
 
-<p>Next comes the customization of PHP. I use PHP for most of my development - well, anything that has nothing to do with DevOps at least - so it's very useful to have an up to date version with a few different extensions. I've recently begun managing <a href="https://github.com/josegonzalez/homebrew-php/">Homebrew-PHP</a>, so I have the process down pat - again, follow any instructions for each brew, like enabling the homebrew <code>php</code> in Apache:</p>
+<p>Next comes the customization of PHP. I use PHP for most of my development - well, anything that has nothing to do with DevOps at least - so it&#39;s very useful to have an up to date version with a few different extensions. I&#39;ve recently begun managing <a href="https://github.com/josegonzalez/homebrew-php/">Homebrew-PHP</a>, so I have the process down pat - again, follow any instructions for each brew, like enabling the homebrew <code>php</code> in Apache:</p>
 
 <pre class="rainbow-code"><code data-language="shell">brew tap josegonzalez/homebrew-php
 brew install php --with-mysql
@@ -194,27 +194,27 @@ brew install xdebug-php</code></pre>
 
 <p>I no longer use <a href="http://macromates.com/">Textmate</a> religiously. I recommend using <a href="http://www.sublimetext.com/2">Sublime Text 2</a> with whatever your favorite setup is. Someday I shall post mine. I did run the following command to make it easier to call <code>Sublime Text</code> from the terminal:</p>
 
-<pre class="rainbow-code"><code data-language="shell">ln -s "/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl" $(brew --prefix)/bin/subl</code></pre>
+<pre class="rainbow-code"><code data-language="shell">ln -s &quot;/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl&quot; $(brew --prefix)/bin/subl</code></pre>
 
 <p>For those still using Textmate, I recommend installing the <a href="https://github.com/jcf/git-tmbundle">Git-Bundle</a>, and customizing the hotkeys. The <a href="https://github.com/cakephp/cakephp-tmbundle">CakePHP bundle</a> is up next, as is the <a href="https://github.com/drnic/github-tmbundle">GitHub bundle</a>. I use <a href="http://peepcode.com/products/peepopen">PeepOpen</a> to find files in my projects - supports regular expression lookups - which is developed by the awesome guys at PeepCode.</p>
 
-<p>I'll then make sure all my projects are installed in their proper directories (under ~/Sites). Once that is through, I'll install <a href="http://clickontyler.com/virtualhostx/">VirtualHostX</a>, which I use to configure Apache VirtualHosts. At this point, once the default Apache setup is enabled in the <code>Sharing</code> panel of <code>System Preferences</code>, I have all my sites ready and rearing to go (assuming I've imported a backup of my virtualhosts).</p>
+<p>I&#39;ll then make sure all my projects are installed in their proper directories (under ~/Sites). Once that is through, I&#39;ll install <a href="http://clickontyler.com/virtualhostx/">VirtualHostX</a>, which I use to configure Apache VirtualHosts. At this point, once the default Apache setup is enabled in the <code>Sharing</code> panel of <code>System Preferences</code>, I have all my sites ready and rearing to go (assuming I&#39;ve imported a backup of my virtualhosts).</p>
 
-<p>Now I need all the browsers ever. Install the latest versions of <a href="http://www.google.com/chrome/">Chrome</a>, <a href="http://www.mozilla.com/en-US/firefox/new/">Firefox</a>, Safari, <a href="http://www.opera.com/">Opera</a>. Get <a href="http://www.marketcircle.com/iphoney/">iPhoney</a>, which lets you test mobile sites on an iPhone-like browser. My <a href="http://www.parallels.com/products/desktop/">Parallels</a> vms get rsync'ed over, and I go through a very painful install of Parallels (gotta download their app from their panel). Test to ensure that all my vhosts are getting passed into my VMs, and then onto the next step.</p>
+<p>Now I need all the browsers ever. Install the latest versions of <a href="http://www.google.com/chrome/">Chrome</a>, <a href="http://www.mozilla.com/en-US/firefox/new/">Firefox</a>, Safari, <a href="http://www.opera.com/">Opera</a>. Get <a href="http://www.marketcircle.com/iphoney/">iPhoney</a>, which lets you test mobile sites on an iPhone-like browser. My <a href="http://www.parallels.com/products/desktop/">Parallels</a> vms get rsync&#39;ed over, and I go through a very painful install of Parallels (gotta download their app from their panel). Test to ensure that all my vhosts are getting passed into my VMs, and then onto the next step.</p>
 
 <p><a href="http://www.skype.com">Skype</a> and Adium are a must for chatting. Everyone has a different Adium setup - just copy your old profile for that ;) - but for Skype I use <a href="http://www.skype.com/intl/en/get-skype/on-your-computer/macosx/2-8/">version 2.8</a>. <a href="http://www.atebits.com/tweetie-mac/">Tweetie</a> also deserves a mention here. The new Twitter for Mac is lame in that it follows me on every single workspace, but they may have fixed that since I last checked.</p>
 
-<p>I also install <a href="http://totalfinder.binaryage.com/">TotalFinder</a> and <a href="http://visor.binaryage.com/">Visor</a>. TotalFinder is like Finder but more boss, with tabs and everything. If you've ever played Quake, you'll know what Visor is. Drop-down terminal. Makes life easy.</p>
+<p>I also install <a href="http://totalfinder.binaryage.com/">TotalFinder</a> and <a href="http://visor.binaryage.com/">Visor</a>. TotalFinder is like Finder but more boss, with tabs and everything. If you&#39;ve ever played Quake, you&#39;ll know what Visor is. Drop-down terminal. Makes life easy.</p>
 
-<p>I'll also install <a href="http://www.dropbox.com/">Dropbox</a> for the 5 times I use it ever, as well as <a href="http://getcloudapp.com/">CloudApp</a>. CloudApp makes file-sharing easy, and I use it on a regular database to share screenshots with other developers.</p>
+<p>I&#39;ll also install <a href="http://www.dropbox.com/">Dropbox</a> for the 5 times I use it ever, as well as <a href="http://getcloudapp.com/">CloudApp</a>. CloudApp makes file-sharing easy, and I use it on a regular database to share screenshots with other developers.</p>
 
-<p>I install <a href="http://www.pixelmator.com/">Pixelmator</a> for quick and dirty image-editing, and Photoshop for things that my boss needs to be pixel-perfect. If Pixelmator could fully support Photoshop images, that would be sweet, but I guess we can't have everything. <a href="http://store.shinywhitebox.com/ishowuhd/main.html">iShowU HD</a> is good for screencasting, and I'll also install <a href="http://silverbackapp.com/">Silverback</a> for recording user interaction with a site/screencasting.</p>
+<p>I install <a href="http://www.pixelmator.com/">Pixelmator</a> for quick and dirty image-editing, and Photoshop for things that my boss needs to be pixel-perfect. If Pixelmator could fully support Photoshop images, that would be sweet, but I guess we can&#39;t have everything. <a href="http://store.shinywhitebox.com/ishowuhd/main.html">iShowU HD</a> is good for screencasting, and I&#39;ll also install <a href="http://silverbackapp.com/">Silverback</a> for recording user interaction with a site/screencasting.</p>
 
-<p>For Git tooling, I'll install <a href="http://www.git-tower.com/">Git Tower</a>, which is sort of like <a href="http://versionsapp.com/">Versions</a> is for SVN. I'll also install GitX - use <a href="https://github.com/brotherbard/gitx">Brotherbard's branch</a> from github - and <a href="https://github.com/Caged/gitnub">GitNub</a>, which provide some of the Git Tower features, but with a less-polished UI. Definitely an alternative for those not wishing to spend money. <a href="http://www.kaleidoscopeapp.com/">Kaleidoscope</a> also works well for file diffing. I haven't checked out alternatives in that space, but there should be something roughly equivalent for free.</p>
+<p>For Git tooling, I&#39;ll install <a href="http://www.git-tower.com/">Git Tower</a>, which is sort of like <a href="http://versionsapp.com/">Versions</a> is for SVN. I&#39;ll also install GitX - use <a href="https://github.com/brotherbard/gitx">Brotherbard&#39;s branch</a> from github - and <a href="https://github.com/Caged/gitnub">GitNub</a>, which provide some of the Git Tower features, but with a less-polished UI. Definitely an alternative for those not wishing to spend money. <a href="http://www.kaleidoscopeapp.com/">Kaleidoscope</a> also works well for file diffing. I haven&#39;t checked out alternatives in that space, but there should be something roughly equivalent for free.</p>
 
 <p>I typically need access to productivity software, so I grab my copies of iWorks and Office for Mac.</p>
 
-<p>As far as utilities, I use <a href="http://www.panic.com/transmit/">Transmit</a> for FTP, <a href="http://www.yazsoft.com/">Speed Download</a> for downloading many files at once, <a href="http://www.unrarx.com/">UnRarX</a> for rar files, <a href="http://www.xs4all.nl/~loekjehe/Split&Concat/">Split&amp;Concat</a> for concatenating large files I've downloaded off the internet (typically zips of large binary image files spanning several hundred megabytes), <a href="http://www.utorrent.com/">uTorrent</a> so I can quickly get ISOs of Linux distributions - <a href="http://vagrantup.com/">Vagrant</a> is a nice tool I'm playing around with - and <a href="http://www.sequelpro.com/">Sequel Pro</a> for interacting with MySQL databases. <a href="http://www.omnigroup.com/products/omnigraffle/">Omnigraffle Professional</a> deserves a mention, simply for the 7 or 8 times a month I use it when creating a schema for something I'd like feedback on.</p>
+<p>As far as utilities, I use <a href="http://www.panic.com/transmit/">Transmit</a> for FTP, <a href="http://www.yazsoft.com/">Speed Download</a> for downloading many files at once, <a href="http://www.unrarx.com/">UnRarX</a> for rar files, <a href="http://www.xs4all.nl/%7Eloekjehe/Split&amp;Concat/">Split&amp;Concat</a> for concatenating large files I&#39;ve downloaded off the internet (typically zips of large binary image files spanning several hundred megabytes), <a href="http://www.utorrent.com/">uTorrent</a> so I can quickly get ISOs of Linux distributions - <a href="http://vagrantup.com/">Vagrant</a> is a nice tool I&#39;m playing around with - and <a href="http://www.sequelpro.com/">Sequel Pro</a> for interacting with MySQL databases. <a href="http://www.omnigroup.com/products/omnigraffle/">Omnigraffle Professional</a> deserves a mention, simply for the 7 or 8 times a month I use it when creating a schema for something I&#39;d like feedback on.</p>
 
 <p>What are you using?</p>
 
@@ -222,7 +222,7 @@ brew install xdebug-php</code></pre>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/other" title="View all posts in Other" rel="category">Other</a> on <a href="http://josediazgonzalez.com/2011/04/13/my-development-setup/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-04-13 00:00:00 -0700">13 Apr 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/other" title="View all posts in Other" rel="category">Other</a> on <a href="http://josediazgonzalez.com/2011/04/13/my-development-setup/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-04-13 00:00:00 -0400">13 Apr 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -398,7 +398,7 @@ brew install xdebug-php</code></pre>
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

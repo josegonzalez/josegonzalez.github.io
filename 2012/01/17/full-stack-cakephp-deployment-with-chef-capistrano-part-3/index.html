@@ -111,36 +111,36 @@ This text is the third in a long series to correct an extremely disastrous talk 
 
 <p>Templating in Chef is much like templating in any other framework. Chef templates use ERB - eRuby - which is a templating system that embeds Ruby into a document. If you know any Ruby, this should be a fairly trivial thing to learn. For CakePHP developers, think <code>ctp</code> files :)</p>
 
-<p>For PHP developers, the big difference is that it uses short-syntax - <code>&lt;? ?&gt;</code> - and the question marks are replaced with percent signs - <code>&lt;% %&gt;</code>. Along with the short syntax, there isn't an <code>echo</code> statement, so if you want to <code>echo</code> a variable, <code>&lt;%= var %&gt;</code> will do it.</p>
+<p>For PHP developers, the big difference is that it uses short-syntax - <code>&lt;? ?&gt;</code> - and the question marks are replaced with percent signs - <code>&lt;% %&gt;</code>. Along with the short syntax, there isn&#39;t an <code>echo</code> statement, so if you want to <code>echo</code> a variable, <code>&lt;%= var %&gt;</code> will do it.</p>
 
 <p>Another key change is in variable output within strings. In PHP, we can do:</p>
 
 <pre class="rainbow-code"><code data-language="php">$foo = 'bar';
-    $baz = "{$foo}";
+    $baz = &quot;{$foo}&quot;;
     echo $baz; // outputs: bar</code></pre>
 
 <p>In Ruby, we might do the following:</p>
 
 <pre class="rainbow-code"><code data-language="ruby">foo = 'bar'
-    baz = "#{foo}"
+    baz = &quot;#{foo}&quot;
     puts baz # outputs: bar</code></pre>
 
-<p>That's pretty neat I think, not that big of a change.</p>
+<p>That&#39;s pretty neat I think, not that big of a change.</p>
 
-<p>Templates alone aren't very useful, but they are normally used in conjunction with the <code>Template</code> resource in Chef as follows:</p>
+<p>Templates alone aren&#39;t very useful, but they are normally used in conjunction with the <code>Template</code> resource in Chef as follows:</p>
 
-<pre class="rainbow-code"><code data-language="ruby">template "/path/to/where/template/should/be/written/to" do
-  source "some_template.erb"
-  owner "root"
-  group "root"
+<pre class="rainbow-code"><code data-language="ruby">template &quot;/path/to/where/template/should/be/written/to&quot; do
+  source &quot;some_template.erb&quot;
+  owner &quot;root&quot;
+  group &quot;root&quot;
   mode 0644
   variables(
-    :var_name   => "value"
-    :an_array   => [ "of", "values" ]
+    :var_name   =&gt; &quot;value&quot;
+    :an_array   =&gt; [ &quot;of&quot;, &quot;values&quot; ]
   )
 end</code></pre>
 
-<p>In the above example, we are creating the file <code>/path/to/where/template/should/be/written/to</code> from the <code>some_template.erb</code> file. We're also setting the owner, group and the permissions of the file. The variables <code>var_name</code> and <code>an_array</code> would be available as variables in the view.</p>
+<p>In the above example, we are creating the file <code>/path/to/where/template/should/be/written/to</code> from the <code>some_template.erb</code> file. We&#39;re also setting the owner, group and the permissions of the file. The variables <code>var_name</code> and <code>an_array</code> would be available as variables in the view.</p>
 
 <p>Pretty straight-forward I think.</p>
 
@@ -149,12 +149,12 @@ end</code></pre>
 <p>Attributes are fairly straight-forward. They allow you to set defaults for a particular cookbook by setting/modifying the variables in your <code>DNA</code> config.</p>
 
 <pre class="rainbow-code"><code data-language="ruby"># Deploy settings
-default[:server][:production][:dir] = "/apps/production"
-default[:server][:production][:hostname] = "example.com"
-default[:server][:staging][:dir] = "/apps/staging"
-default[:server][:staging][:hostname] = "example.net"
+default[:server][:production][:dir] = &quot;/apps/production&quot;
+default[:server][:production][:hostname] = &quot;example.com&quot;
+default[:server][:staging][:dir] = &quot;/apps/staging&quot;
+default[:server][:staging][:hostname] = &quot;example.net&quot;
 
-if node.nginx.attribute?("varnish")
+if node.nginx.attribute?(&quot;varnish&quot;)
   # ... do stuff on NGINX varnish stuff
 end
 
@@ -166,11 +166,11 @@ override[:server][:extensions][:gzip] = true</code></pre>
 
 <pre class="rainbow-code"><code data-language="ruby"># Platform specific settings
 case platform
-when "redhat","centos","fedora","suse"
+when &quot;redhat&quot;,&quot;centos&quot;,&quot;fedora&quot;,&quot;suse&quot;
   # Some settings here
-when "debian","ubuntu"
+when &quot;debian&quot;,&quot;ubuntu&quot;
   # Debian-related configuration
-when "windows"
+when &quot;windows&quot;
   # Windows-specific defaults
 else
   # When all else fails...
@@ -178,25 +178,25 @@ end</code></pre>
 
 <p>Attributes are a good way of providing simple, cross-platform compatible defaults that can be later tweaked by way of <code>DNA</code> files. They allow you to provide a baseline configuration that might be modified in cases where we have more memory, lower disk throughput, or some other deviation from the norm.</p>
 
-<p>If you find that you're constantly setting the same settings in your <code>DNA</code> file, feel free to modify the defaults to keep your setups DRY.</p>
+<p>If you find that you&#39;re constantly setting the same settings in your <code>DNA</code> file, feel free to modify the defaults to keep your setups DRY.</p>
 
 <h2>Custom Resources</h2>
 
-<p>We're going to fake out Custom Resources because the real way is a definite PITA. You can read about it in the Chef docs if you want.</p>
+<p>We&#39;re going to fake out Custom Resources because the real way is a definite PITA. You can read about it in the Chef docs if you want.</p>
 
 <p>Definitions are the <del>poor</del> smart mans way of creating resources. Definitions are cool because you can import them across projects, and are very simple to understand by all. I would create a definition when you have a large amount of code you are executing multiple times, maybe in a loop, that really only varies by two or three variables.</p>
 
 <p>A good candidate is bringing up a new virtualhost for nginx.</p>
 
 <pre class="rainbow-code"><code data-language="ruby"># Definition
-define :nginx_up, :enable => true do
+define :nginx_up, :enable =&gt; true do
 
-  name = "#{node[:nginx][:dir]}/sites-available/#{params[:name]}"
+  name = &quot;#{node[:nginx][:dir]}/sites-available/#{params[:name]}&quot;
 
   template name do
-    source "html.erb"
-    owner "deploy"
-    group "deploy"
+    source &quot;html.erb&quot;
+    owner &quot;deploy&quot;
+    group &quot;deploy&quot;
     mode 0644
     variables(params[:variables])
   end
@@ -206,12 +206,12 @@ define :nginx_up, :enable => true do
   end
 end</code></pre>
 
-<p>The above definition creates a templated virtualhost file and then enables it using nginx. While it is simple, it only displays a small portion of what you can do with definitions. You could simply bring up a virtualhost, or automatically create EBS-mounted volumes with 2 partitions, each having certain folders. That's merely up to your imagination. Personally, I like the beauty of typing the following into my cookbooks:</p>
+<p>The above definition creates a templated virtualhost file and then enables it using nginx. While it is simple, it only displays a small portion of what you can do with definitions. You could simply bring up a virtualhost, or automatically create EBS-mounted volumes with 2 partitions, each having certain folders. That&#39;s merely up to your imagination. Personally, I like the beauty of typing the following into my cookbooks:</p>
 
 <pre class="rainbow-code"><code data-language="ruby"># info is an array of data
 
-nginx_up "#{info[:hostname]}.#{info[:base]}" do
-  hostname "#{info[:hostname]}.#{info[:base]}"
+nginx_up &quot;#{info[:hostname]}.#{info[:base]}&quot; do
+  hostname &quot;#{info[:hostname]}.#{info[:base]}&quot;
   variables(info[:variables])
 end</code></pre>
 
@@ -223,23 +223,23 @@ end</code></pre>
 
 <p>We can specify that an entire cookbook depends upon another cookbook (or recipe) in the metadata file (json or ruby, I prefer ruby):</p>
 
-<pre class="rainbow-code"><code data-language="ruby">maintainer        "Jose Diaz-Gonzalez"
-maintainer_email  "support@savant.be"
-license           "MIT"
-description       "Installs and maintains php and php modules"
+<pre class="rainbow-code"><code data-language="ruby">maintainer        &quot;Jose Diaz-Gonzalez&quot;
+maintainer_email  &quot;support@savant.be&quot;
+license           &quot;MIT&quot;
+description       &quot;Installs and maintains php and php modules&quot;
 
-depends           "nginx"
-depends           "mysql::client"</code></pre>
+depends           &quot;nginx&quot;
+depends           &quot;mysql::client&quot;</code></pre>
 
 <p>If we conditionally need it for a particular recipe/definition, we just include the recipe as follows:</p>
 
-<pre class="rainbow-code"><code data-language="ruby">define :pear_module, :module => nil, :enable => true do
+<pre class="rainbow-code"><code data-language="ruby">define :pear_module, :module =&gt; nil, :enable =&gt; true do
 
-  include_recipe "php::pear"
+  include_recipe &quot;php::pear&quot;
 
   if params[:enable]
-    execute "/usr/bin/pear install -a #{params[:module]}" do
-      only_if "/bin/sh -c '! /usr/bin/pear info #{params[:module]} 2>&1 1>/dev/null"
+    execute &quot;/usr/bin/pear install -a #{params[:module]}&quot; do
+      only_if &quot;/bin/sh -c '! /usr/bin/pear info #{params[:module]} 2&gt;&amp;1 1&gt;/dev/null&quot;
     end
   end
 
@@ -249,24 +249,24 @@ end</code></pre>
 
 <h2>Cookbook Creation</h2>
 
-<p>Cookbooks are an amalgamation of recipes, definitions, templates, files etc. You should always have a <code>metadata.rb</code> or <code>metadata.json</code> file, which contains metadata about the file. If it is a complicated cookbook, feel free to include a <code>README</code> as well, in your preferred markup language (<code>markdown</code> is winning, fyi). You'll also have one of several other filetypes, usually a recipe and a template, although they are all optional.</p>
+<p>Cookbooks are an amalgamation of recipes, definitions, templates, files etc. You should always have a <code>metadata.rb</code> or <code>metadata.json</code> file, which contains metadata about the file. If it is a complicated cookbook, feel free to include a <code>README</code> as well, in your preferred markup language (<code>markdown</code> is winning, fyi). You&#39;ll also have one of several other filetypes, usually a recipe and a template, although they are all optional.</p>
 
-<p>Once you've put together a template, it's usually quite easy to integrate it with your other cookbooks. Just name the cookbook <code>lower_under_score</code> and shove it in your <code>cookbooks</code> directory. If you are feeling especially helpful, you can also upload it to the <a href="http://community.opscode.com/">Opscore Community Site</a>. Please run your cookbook before sharing, and also clearly state what other cookbooks they depend upon.</p>
+<p>Once you&#39;ve put together a template, it&#39;s usually quite easy to integrate it with your other cookbooks. Just name the cookbook <code>lower_under_score</code> and shove it in your <code>cookbooks</code> directory. If you are feeling especially helpful, you can also upload it to the <a href="http://community.opscode.com/">Opscore Community Site</a>. Please run your cookbook before sharing, and also clearly state what other cookbooks they depend upon.</p>
 
-<p>One last consideration is to make sure as much of your cookbook is configurable as possible, but with sane defaults. In this way, you'll please the most users, while also encouraging &quot;best&quot; practices.</p>
+<p>One last consideration is to make sure as much of your cookbook is configurable as possible, but with sane defaults. In this way, you&#39;ll please the most users, while also encouraging &quot;best&quot; practices.</p>
 
 <h2>Recap</h2>
 
-<p>We now have a pretty awesome <code>nginx_up</code> resource that can be used across multiple cookbooks. We could go further and make an abstracted <code>server_up</code> resource, but I'm pretty happy with our progress for now.</p>
+<p>We now have a pretty awesome <code>nginx_up</code> resource that can be used across multiple cookbooks. We could go further and make an abstracted <code>server_up</code> resource, but I&#39;m pretty happy with our progress for now.</p>
 
-<p>So what's next? Well, we have yet to deploy an entire server, and there is still the matter of what a <code>DNA</code> file actually is. As well, it would be useful to know how to actually push all of these files onto the server, and maintain the server as we move ahead. So the next post will cover the following:</p>
+<p>So what&#39;s next? Well, we have yet to deploy an entire server, and there is still the matter of what a <code>DNA</code> file actually is. As well, it would be useful to know how to actually push all of these files onto the server, and maintain the server as we move ahead. So the next post will cover the following:</p>
 
 <ul>
 <li>Create a full-fledged cookbook</li>
 <li><code>DNA</code> files, how do they work?</li>
 </ul>
 
-<p>We'll get to the rest at a later date.</p>
+<p>We&#39;ll get to the rest at a later date.</p>
 
 <p><strong>To Be Continued</strong></p>
 
@@ -274,7 +274,7 @@ end</code></pre>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/deployment" title="View all posts in Deployment" rel="category">Deployment</a> on <a href="http://josediazgonzalez.com/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-01-17 00:00:00 -0800">17 Jan 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/deployment" title="View all posts in Deployment" rel="category">Deployment</a> on <a href="http://josediazgonzalez.com/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-01-17 00:00:00 -0500">17 Jan 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -450,7 +450,7 @@ end</code></pre>
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

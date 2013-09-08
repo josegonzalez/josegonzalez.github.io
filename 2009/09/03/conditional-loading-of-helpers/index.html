@@ -104,7 +104,7 @@
     <pre class="rainbow-code"><code data-language="php">class TumblesController extends TumbleAppController {
     function beforeRender() {
         parent::beforeRender()
-        $this->_configureHelpers($this->params['action']);
+        $this-&gt;_configureHelpers($this-&gt;params['action']);
     }
 
 /**
@@ -115,20 +115,20 @@
     function _configureHelpers($action) {
         switch ($action) {
             case 'index' :
-                $this->helpers[] = 'Text';
-                $this->helpers[] = 'Time';
+                $this-&gt;helpers[] = 'Text';
+                $this-&gt;helpers[] = 'Time';
                 break;
             case 'view' :
-                $this->helpers[] = 'HtmlCache.HtmlCache';
-                $this->helpers[] = 'Text';
-                $this->helpers[] = 'Time';
+                $this-&gt;helpers[] = 'HtmlCache.HtmlCache';
+                $this-&gt;helpers[] = 'Text';
+                $this-&gt;helpers[] = 'Time';
                 break;
             case 'admin_add' :
-                $this->helpers[] = 'Tagging.Tagging';
-                $this->helpers = array_merge($this->helpers, array('Wysiwyg.Wysiwyg' => array('editor' => Configure::read('AppSettings.application.editor'))));
+                $this-&gt;helpers[] = 'Tagging.Tagging';
+                $this-&gt;helpers = array_merge($this-&gt;helpers, array('Wysiwyg.Wysiwyg' =&gt; array('editor' =&gt; Configure::read('AppSettings.application.editor'))));
                 break;
             case 'admin_preview' :
-                $this->helpers = array_merge($this->helpers, array('Wysiwyg.Wysiwyg' => array('editor' => Configure::read('AppSettings.application.editor'))));
+                $this-&gt;helpers = array_merge($this-&gt;helpers, array('Wysiwyg.Wysiwyg' =&gt; array('editor' =&gt; Configure::read('AppSettings.application.editor'))));
                 break;
         }
     }
@@ -138,7 +138,7 @@
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/helpers" title="View all posts in Helpers" rel="category">Helpers</a> on <a href="http://josediazgonzalez.com/2009/09/03/conditional-loading-of-helpers/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-03 00:00:00 -0700">03 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/helpers" title="View all posts in Helpers" rel="category">Helpers</a> on <a href="http://josediazgonzalez.com/2009/09/03/conditional-loading-of-helpers/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-09-03 00:00:00 -0400">03 Sep 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -314,7 +314,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							

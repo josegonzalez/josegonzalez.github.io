@@ -113,7 +113,7 @@
 
 <pre class="rainbow-code"><code data-language="php">class Post extends Model {
     function __construct($id = false, $table = null, $ds = null) {
-        $this->_findMethods['custom'] = true;
+        $this-&gt;_findMethods['custom'] = true;
 
         parent::__construct($id, $table, $ds);
     }
@@ -125,14 +125,14 @@
 
 <pre class="rainbow-code"><code data-language="php">class Post extends Model {
     function __construct($id = false, $table = null, $ds = null) {
-        $this->_findMethods['custom'] = true;
+        $this-&gt;_findMethods['custom'] = true;
 
         parent::__construct($id, $table, $ds);
     }
 
     function _findCustom($state, $query, $results = array()) {
         if ($state == 'before') {
-            $this->log('using custom find method');
+            $this-&gt;log('using custom find method');
             return $query;
         }
         return $results;
@@ -145,14 +145,14 @@
 
 <hr>
 
-<p>Unfortunately, this doesn't quite work as I thought it would by doing similarly in the <code>ModelBehavior::setup()</code> method. Usually methods are passed through to the behaviors via <code>Model::call__()</code>, but they are not when the method begins with the underscore (<code>_</code>) character. Lame.</p>
+<p>Unfortunately, this doesn&#39;t quite work as I thought it would by doing similarly in the <code>ModelBehavior::setup()</code> method. Usually methods are passed through to the behaviors via <code>Model::call__()</code>, but they are not when the method begins with the underscore (<code>_</code>) character. Lame.</p>
 
 <p>So a work-around is to use the oft-forgotten <code>$mapMethods</code> method. Lets define a simple behavior:</p>
 
 <pre class="rainbow-code"><code data-language="php">class CustomBehavior extends ModelBehavior {
     var $mapMethods = array();
 
-    function setup(&$model, $settings = array()) {
+    function setup(&amp;$model, $settings = array()) {
     }
 }</code></pre>
 
@@ -163,12 +163,12 @@
 <pre class="rainbow-code"><code data-language="php">class CustomBehavior extends ModelBehavior {
     var $mapMethods = array();
 
-    function setup(&$model, $settings = array()) {
+    function setup(&amp;$model, $settings = array()) {
     }
 
     function _findCustom($state, $query, $results = array()) {
         if ($state == 'before') {
-            $this->log('using custom find method');
+            $this-&gt;log('using custom find method');
             return $query;
         }
         return $results;
@@ -182,13 +182,13 @@
 <pre class="rainbow-code"><code data-language="php">class CustomBehavior extends ModelBehavior {
     var $mapMethods = array();
 
-    function setup(&$model, $settings = array()) {
-        $model->_findMethods['custom'] = true;
+    function setup(&amp;$model, $settings = array()) {
+        $model-&gt;_findMethods['custom'] = true;
     }
 
     function _findCustom($state, $query, $results = array()) {
         if ($state == 'before') {
-            $this->log('using custom find method');
+            $this-&gt;log('using custom find method');
             return $query;
         }
         return $results;
@@ -200,15 +200,15 @@
 </ul>
 
 <pre class="rainbow-code"><code data-language="php">class CustomBehavior extends ModelBehavior {
-    var $mapMethods = array('/\b_findCustom\b/' => '_findCustom');
+    var $mapMethods = array('/\b_findCustom\b/' =&gt; '_findCustom');
 
-    function setup(&$model, $settings = array()) {
-        $model->_findMethods['custom'] = true;
+    function setup(&amp;$model, $settings = array()) {
+        $model-&gt;_findMethods['custom'] = true;
     }
 
     function _findCustom($state, $query, $results = array()) {
         if ($state == 'before') {
-            $this->log('using custom find method');
+            $this-&gt;log('using custom find method');
             return $query;
         }
         return $results;
@@ -216,19 +216,19 @@
 }</code></pre>
 
 <ul>
-<li>Ensure that the arguments in your <code>_findCustom()</code> method don't overlap with how <code>ModelBehavior::dispatchMethod()</code> works:</li>
+<li>Ensure that the arguments in your <code>_findCustom()</code> method don&#39;t overlap with how <code>ModelBehavior::dispatchMethod()</code> works:</li>
 </ul>
 
 <pre class="rainbow-code"><code data-language="php">class CustomBehavior extends ModelBehavior {
-    var $mapMethods = array('/\b_findCustom\b/' => '_findCustom');
+    var $mapMethods = array('/\b_findCustom\b/' =&gt; '_findCustom');
 
-    function setup(&$model, $settings = array()) {
-        $model->_findMethods['custom'] = true;
+    function setup(&amp;$model, $settings = array()) {
+        $model-&gt;_findMethods['custom'] = true;
     }
 
-    function _findCustom(&$model, $functionCall, $state, $query, $results = array()) {
+    function _findCustom(&amp;$model, $functionCall, $state, $query, $results = array()) {
         if ($state == 'before') {
-            $this->log('using custom find method');
+            $this-&gt;log('using custom find method');
             return $query;
         }
         return $results;
@@ -239,13 +239,13 @@
 <li>Win at life</li>
 </ul>
 
-<p>This method can be used to add as many custom finds as necessary to your models. You will need to be careful that your regex doesn't match incorrectly, as <code>$mapMethods</code> uses a case-insensitive <code>preg_match()</code> in order to map the method. So just make your custom finds unique and everything should be fine. You can also use <code>\b</code> in your pattern so that partial matches do not trigger a find incorrectly.</p>
+<p>This method can be used to add as many custom finds as necessary to your models. You will need to be careful that your regex doesn&#39;t match incorrectly, as <code>$mapMethods</code> uses a case-insensitive <code>preg_match()</code> in order to map the method. So just make your custom finds unique and everything should be fine. You can also use <code>\b</code> in your pattern so that partial matches do not trigger a find incorrectly.</p>
 
   </div>
 
   
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2010/12/01/embedding-custom-finds-in-behaviors/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2010-12-01 00:00:00 -0800">01 Dec 2010</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/behaviors" title="View all posts in Behaviors" rel="category">Behaviors</a> on <a href="http://josediazgonzalez.com/2010/12/01/embedding-custom-finds-in-behaviors/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2010-12-01 00:00:00 -0500">01 Dec 2010</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
   
 </article>
@@ -421,7 +421,7 @@
 							
 								<li class="cat-item"><a href="/categories/behaviors"title="View all posts filed under Behaviors">Behaviors</a></li>
 							
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under CakePHP">CakePHP</a></li>
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 							
 								<li class="cat-item"><a href="/categories/console"title="View all posts filed under Console">Console</a></li>
 							
