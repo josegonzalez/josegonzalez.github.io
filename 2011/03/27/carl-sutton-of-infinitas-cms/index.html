@@ -85,7 +85,7 @@
     
       <div class="comments-link">
         <a href="#comments" title="Comment on Carl Sutton of Infinitas CMS!">
-          <span class="responses-number">0</span> Replies
+          Comments
         </a>
       </div>
     
@@ -402,13 +402,6 @@ Must be all the pizza, late nights and lack of sun... same reason all developers
 					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
 					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
 					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-
-					var commentCount = setInterval(function() {
-						if ($('#dsq-num-posts').length) {
-							$('.responses-number').html($('#dsq-num-posts').html());
-							clearInterval(commentCount);
-						}
-					}, 1000);
 				})();
 			}
 			
