@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Using a personal git host",
+		"url": "/2013/09/09/using-a-personal-git-host/",
+		"description": null,
+		"tokens": ["git","host","personal","using"]
+	},
+	{
+		"type": "post",
 		"title": "Using Beaver to ship log files to Redis/Logstash",
 		"url": "/2013/01/01/setting-up-beaver-for-use-with-logstash/",
 		"description": "This post will guide you through a simple Beaver installation.",
@@ -439,6 +446,12 @@
 		"title": "devops",
 		"url": "/categories/devops/",
 		"tokens": ["devops"]
+	},
+  {
+		"type": "category",
+		"title": "code",
+		"url": "/categories/code/",
+		"tokens": ["code"]
 	},
   {
 		"type": "tag",
@@ -1057,6 +1070,24 @@
 		"title": "logs",
 		"url": "/tags/logs/",
 		"tokens": ["logs"]
+	},
+  {
+		"type": "tag",
+		"title": "gitlab",
+		"url": "/tags/gitlab/",
+		"tokens": ["gitlab"]
+	},
+  {
+		"type": "tag",
+		"title": "git",
+		"url": "/tags/git/",
+		"tokens": ["git"]
+	},
+  {
+		"type": "tag",
+		"title": "digital ocean",
+		"url": "/tags/digital-ocean/",
+		"tokens": ["digital","ocean"]
 	},
 	false
 ]

@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Using a personal git host</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="" />
+		<meta name="keywords" content="gitlab, git, digital-ocean" />
+
+		<link rel="alternate" type="application/rss+xml" title="Using a personal git host » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+		
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					
+				</hgroup>
+
+				
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+    
+      <h1 class="entry-title">
+        Using a personal git host
+      </h1>
+    
+    
+
+    
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Using a personal git host!">
+          Comments
+        </a>
+      </div>
+    
+  </header>
+
+  
+
+  
+
+  <div class="entry-content">
+    
+
+    
+
+
+    <blockquote>
+
+Shameless Plug: Sign up for <a href="https://www.digitalocean.com/?refcode=fe06b043a083">Digital Ocean</a> using my <a href="https://www.digitalocean.com/?refcode=fe06b043a083">referral link</a> so I can get some money out of this :)
+
+</blockquote>
+
+<p>I recently installed <a href="http://gitlab.org/">Gitlab</a> on my <a href="https://www.digitalocean.com/?refcode=fe06b043a083">Digital Ocean</a> account. I did so for a few reasons:</p>
+
+<ul>
+<li>I&#39;ve done less freelancing (I&#39;m bad at it) so there was no need for my CodebaseHQ account</li>
+<li>Wanted to host my side-projects that I have been neglecting to version control</li>
+<li>Always liked the idea of managing my own project management tool</li>
+</ul>
+
+<p>Luckily, Digital Ocean <a href="https://www.digitalocean.com/community/articles/how-to-set-up-gitlab-as-your-very-own-private-github-clone">wrote a post</a> on setting up Gitlab. It&#39;s quite straightforward to install<sup>[1]</sup>, and once it was up and running, it was trivial to fall into my normal GitHub usage flow.</p>
+
+<p>I have a tendency to start working on side-projects and never complete them, or sometimes even forget to create a git repository for them. It&#39;s very easy for me to fall into this pattern for multiple projects, always thinking to myself that I didn&#39;t want others to use it until it was in a working state. I also believed that certain things were private - some side-project where I create the next million dollar idea - and as such neglected basic software engineering principles.</p>
+
+<p>Once I setup Gitlab, I started creating new repositories to hold all my code, good or bad. I have some abandoned side-projects sitting there - monitoring, webapps, cli tools - as well as my current interests.</p>
+
+<p>One thing I noticed was that I had ~19 projects where I had not even bothered to do some/all of the following:</p>
+
+<ul>
+<li>Add a readme with usage/installation instructions. Not even a vision of how I envisioned the thing would work.</li>
+<li>Use proper dependency management. Oh, you need this ruby gem? Just keep running/installing until you get no bugs!</li>
+<li>Point out where the thing was running, if it was supposed to be online.</li>
+<li>Create a git repository.</li>
+</ul>
+
+<p>These issues definitely had an impact on my work on any project. Without proper documentation, I didn&#39;t have a vision for how specific tasks would be implemented, and I certainly would not be able to setup an app on another computer should my current one die. Likewise, as I continued to not use version control on a given project, I would become more and more unlikely to start that process at any point in the future.</p>
+
+<p>Needless to say, I&#39;m quite happy with my current setup. It allows me to continue working on my side-projects and forces me to do all the things I preach about. I&#39;m looking forward to setting up Gitlab-CI integration, which will definitely be a boon to my testing patterns.</p>
+
+<blockquote>
+
+Shameless Plug: Sign up for <a href="https://www.digitalocean.com/?refcode=fe06b043a083">Digital Ocean</a> using my <a href="https://www.digitalocean.com/?refcode=fe06b043a083">referral link</a> so I can get some money out of this :)
+
+</blockquote>
+
+<p>[1]: Like they mention, you may need some amount of swap. I was on a 1GB droplet, so I added a gigabyte of swap. All was well after this.</p>
+
+  </div>
+
+  
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/09/09/using-a-personal-git-host/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-09-09 02:53:00 -0400">09 Sep 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+  
+</article>
+
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+
+					<aside class="widget widget_categories widget_search">
+						
+							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+							<br />
+							<br />
+							<br />
+						
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+							
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+							
+								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
+							
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+							
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+							
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+							
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+							
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+							
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+							
+						</ul>
+					</aside>
+
+					<aside class="widget widget_recent_entries">
+						
+						<h3 class="widget-title">Recent Posts</h3>
+						<ul>
+							
+								<li><a href="/2013/09/09/using-a-personal-git-host/" title="Using a personal git host">Using a personal git host</a></li>
+							
+								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
+							
+								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
+							
+								<li><a href="/2012/09/07/why-cakephp/" title="Why CakePHP?">Why CakePHP?</a></li>
+							
+								<li><a href="/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="Upgrading from Lion to Mountain Lion">Upgrading from Lion to Mountain Lion</a></li>
+							
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+			
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2013/09/09/using-a-personal-git-host/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/09/09/using-a-personal-git-host/';
+				var disqus_title      = 'Using a personal git host';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			}
+			
+			
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			
+		</script>
+	</body>
+</html>

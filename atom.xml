@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-09-09T03:30:56-04:00</updated>
+ <updated>2013-09-09T04:55:14-04:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Using a personal git host]]></title>
+   <link href="http://josediazgonzalez.com/2013/09/09/using-a-personal-git-host/"/>
+   <updated>2013-09-09T02:53:00-04:00</updated>
+   <id>http://josediazgonzalez.com/2013/09/09/using-a-personal-git-host/</id>
+   <content type="html"><![CDATA[]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Using Beaver to ship log files to Redis/Logstash]]></title>
