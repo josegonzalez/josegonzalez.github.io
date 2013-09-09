@@ -78,21 +78,21 @@
 	},
 	{
 		"type": "post",
-		"title": "Daily Dev Log - 4",
+		"title": "The Daily Dev Log - 4",
 		"url": "/2011/06/02/the-daily-dev-log-4/",
 		"description": "On the subject of updating urls in a web framework that gives you access to a router, it's important to have flexibility in writing those routes.",
 		"tokens": ["access","daily","dev","flexibility","framework","gives","important","log","router","routes","subject","updating","urls","web","writing"]
 	},
 	{
 		"type": "post",
-		"title": "The Daily Dev Log 3",
+		"title": "The Daily Dev Log - 3",
 		"url": "/2011/05/27/the-daily-dev-log-3/",
 		"description": "Defining joins in CakePHP finds is simple, but can result in weird sql statements if used in conjunction with Containable.",
 		"tokens": ["cakephp","can","conjunction","containable","daily","defining","dev","finds","joins","log","result","simple","sql","statements","used","weird"]
 	},
 	{
 		"type": "post",
-		"title": "The Daily Dev Log 2",
+		"title": "The Daily Dev Log - 2",
 		"url": "/2011/05/25/the-daily-dev-log-2/",
 		"description": "Always remember to include the host in the protocol when using the EmailComponent",
 		"tokens": ["always","daily","dev","emailcomponent","host","include","log","protocol","remember","using"]
@@ -400,51 +400,9 @@
 	},
   {
 		"type": "category",
-		"title": "models",
-		"url": "/categories/models/",
-		"tokens": ["models"]
-	},
-  {
-		"type": "category",
-		"title": "behaviors",
-		"url": "/categories/behaviors/",
-		"tokens": ["behaviors"]
-	},
-  {
-		"type": "category",
 		"title": "cakephp",
 		"url": "/categories/cakephp/",
 		"tokens": ["cakephp"]
-	},
-  {
-		"type": "category",
-		"title": "authorization",
-		"url": "/categories/authorization/",
-		"tokens": ["authorization"]
-	},
-  {
-		"type": "category",
-		"title": "helpers",
-		"url": "/categories/helpers/",
-		"tokens": ["helpers"]
-	},
-  {
-		"type": "category",
-		"title": "views",
-		"url": "/categories/views/",
-		"tokens": ["views"]
-	},
-  {
-		"type": "category",
-		"title": "routing",
-		"url": "/categories/routing/",
-		"tokens": ["routing"]
-	},
-  {
-		"type": "category",
-		"title": "deployment",
-		"url": "/categories/deployment/",
-		"tokens": ["deployment"]
 	},
   {
 		"type": "category",
@@ -454,39 +412,9 @@
 	},
   {
 		"type": "category",
-		"title": "console",
-		"url": "/categories/console/",
-		"tokens": ["console"]
-	},
-  {
-		"type": "category",
-		"title": "internationalization",
-		"url": "/categories/internationalization/",
-		"tokens": ["internationalization"]
-	},
-  {
-		"type": "category",
-		"title": "datasources",
-		"url": "/categories/datasources/",
-		"tokens": ["datasources"]
-	},
-  {
-		"type": "category",
 		"title": "rant",
 		"url": "/categories/rant/",
 		"tokens": ["rant"]
-	},
-  {
-		"type": "category",
-		"title": "authentication",
-		"url": "/categories/authentication/",
-		"tokens": ["authentication"]
-	},
-  {
-		"type": "category",
-		"title": "forms",
-		"url": "/categories/forms/",
-		"tokens": ["forms"]
 	},
   {
 		"type": "category",
@@ -517,6 +445,12 @@
 		"title": "cakephp",
 		"url": "/tags/cakephp/",
 		"tokens": ["cakephp"]
+	},
+  {
+		"type": "tag",
+		"title": "model",
+		"url": "/tags/model/",
+		"tokens": ["model"]
 	},
   {
 		"type": "tag",
@@ -616,6 +550,12 @@
 	},
   {
 		"type": "tag",
+		"title": "authorization",
+		"url": "/tags/authorization/",
+		"tokens": ["authorization"]
+	},
+  {
+		"type": "tag",
 		"title": "plugins",
 		"url": "/tags/plugins/",
 		"tokens": ["plugins"]
@@ -646,9 +586,15 @@
 	},
   {
 		"type": "tag",
-		"title": "router",
-		"url": "/tags/router/",
-		"tokens": ["router"]
+		"title": "view",
+		"url": "/tags/view/",
+		"tokens": ["view"]
+	},
+  {
+		"type": "tag",
+		"title": "routing",
+		"url": "/tags/routing/",
+		"tokens": ["routing"]
 	},
   {
 		"type": "tag",
@@ -661,12 +607,6 @@
 		"title": "caching",
 		"url": "/tags/caching/",
 		"tokens": ["caching"]
-	},
-  {
-		"type": "tag",
-		"title": "views",
-		"url": "/tags/views/",
-		"tokens": ["views"]
 	},
   {
 		"type": "tag",
@@ -790,12 +730,6 @@
 	},
   {
 		"type": "tag",
-		"title": "models",
-		"url": "/tags/models/",
-		"tokens": ["models"]
-	},
-  {
-		"type": "tag",
 		"title": "thoughts",
 		"url": "/tags/thoughts/",
 		"tokens": ["thoughts"]
@@ -811,6 +745,12 @@
 		"title": "cakeshell",
 		"url": "/tags/cakeshell/",
 		"tokens": ["cakeshell"]
+	},
+  {
+		"type": "tag",
+		"title": "console",
+		"url": "/tags/console/",
+		"tokens": ["console"]
 	},
   {
 		"type": "tag",
@@ -988,12 +928,6 @@
 	},
   {
 		"type": "tag",
-		"title": "model",
-		"url": "/tags/model/",
-		"tokens": ["model"]
-	},
-  {
-		"type": "tag",
 		"title": "loadmodel",
 		"url": "/tags/loadmodel/",
 		"tokens": ["loadmodel"]
@@ -1066,6 +1000,12 @@
 	},
   {
 		"type": "tag",
+		"title": "devops",
+		"url": "/tags/devops/",
+		"tokens": ["devops"]
+	},
+  {
+		"type": "tag",
 		"title": "chef",
 		"url": "/tags/chef/",
 		"tokens": ["chef"]
@@ -1087,12 +1027,6 @@
 		"title": "monitoring",
 		"url": "/tags/monitoring/",
 		"tokens": ["monitoring"]
-	},
-  {
-		"type": "tag",
-		"title": "devops",
-		"url": "/tags/devops/",
-		"tokens": ["devops"]
 	},
   {
 		"type": "tag",

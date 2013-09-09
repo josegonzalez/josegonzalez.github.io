@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-09-08T18:04:32-04:00</updated>
+ <updated>2013-09-09T00:35:39-04:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -101,7 +101,7 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[Daily Dev Log - 4]]></title>
+   <title type="html"><![CDATA[The Daily Dev Log - 4]]></title>
    <link href="http://josediazgonzalez.com/2011/06/02/the-daily-dev-log-4/"/>
    <updated>2011-06-02T00:00:00-04:00</updated>
    <id>http://josediazgonzalez.com/2011/06/02/the-daily-dev-log-4/</id>
@@ -109,7 +109,7 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[The Daily Dev Log 3]]></title>
+   <title type="html"><![CDATA[The Daily Dev Log - 3]]></title>
    <link href="http://josediazgonzalez.com/2011/05/27/the-daily-dev-log-3/"/>
    <updated>2011-05-27T00:00:00-04:00</updated>
    <id>http://josediazgonzalez.com/2011/05/27/the-daily-dev-log-3/</id>
@@ -117,7 +117,7 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[The Daily Dev Log 2]]></title>
+   <title type="html"><![CDATA[The Daily Dev Log - 2]]></title>
    <link href="http://josediazgonzalez.com/2011/05/25/the-daily-dev-log-2/"/>
    <updated>2011-05-25T00:00:00-04:00</updated>
    <id>http://josediazgonzalez.com/2011/05/25/the-daily-dev-log-2/</id>
