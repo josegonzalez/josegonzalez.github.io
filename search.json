@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Deploying your infrastructure to AWS",
+		"url": "/2013/10/17/deploying-your-infrastructure-to-aws/",
+		"description": "Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores",
+		"tokens": ["ameliorate","applications","aws","care","datastores","deploying","deployment","ec2","infrastructure","issues","particular","servers","service","taken"]
+	},
+	{
+		"type": "post",
 		"title": "Using a personal git host",
 		"url": "/2013/09/09/using-a-personal-git-host/",
 		"description": null,
@@ -1088,6 +1095,24 @@
 		"title": "digital ocean",
 		"url": "/tags/digital-ocean/",
 		"tokens": ["digital","ocean"]
+	},
+  {
+		"type": "tag",
+		"title": "aws",
+		"url": "/tags/aws/",
+		"tokens": ["aws"]
+	},
+  {
+		"type": "tag",
+		"title": "provisioning",
+		"url": "/tags/provisioning/",
+		"tokens": ["provisioning"]
+	},
+  {
+		"type": "tag",
+		"title": "heroku",
+		"url": "/tags/heroku/",
+		"tokens": ["heroku"]
 	},
 	false
 ]
