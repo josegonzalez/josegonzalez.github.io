@@ -36,10 +36,10 @@
 	},
 	{
 		"type": "post",
-		"title": "Full Stack CakePHP Deployment With Chef and Capistrano - Part 4",
+		"title": "Creating a cookbook and running chef-solo",
 		"url": "/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/",
 		"description": "How to create a cookbook for the Chef Deployment Tool and an explanation of DNA.json files",
-		"tokens": ["cakephp","capistrano","chef","cookbook","create","deployment","dna","explanation","files","full","json","part","stack","tool"]
+		"tokens": ["chef","cookbook","create","creating","deployment","dna","explanation","files","json","running","solo","tool"]
 	},
 	{
 		"type": "post",
@@ -50,24 +50,24 @@
 	},
 	{
 		"type": "post",
-		"title": "Full Stack CakePHP Deployment With Chef and Capistrano - Part 3",
+		"title": "Templates, Attributes, Resources, and Dependency Management",
 		"url": "/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/",
 		"description": "Templating, Custom Resources, and Cookbook creation for the Chef Deployment Tool",
-		"tokens": ["cakephp","capistrano","chef","cookbook","creation","custom","deployment","full","part","resources","stack","templating","tool"]
+		"tokens": ["attributes","chef","cookbook","creation","custom","dependency","deployment","management","resources","templates","templating","tool"]
 	},
 	{
 		"type": "post",
-		"title": "Full Stack CakePHP Deployment With Chef and Capistrano - Part 2",
+		"title": "Chef Recipes",
 		"url": "/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/",
 		"description": "What goes in a Chef Recipe, and how much do I really need to know about resources?",
-		"tokens": ["cakephp","capistrano","chef","deployment","full","goes","know","much","need","part","really","recipe","resources","stack"]
+		"tokens": ["chef","goes","know","much","need","really","recipe","recipes","resources"]
 	},
 	{
 		"type": "post",
-		"title": "Full Stack CakePHP Deployment With Chef and Capistrano - Part 1",
+		"title": "Introduction to Chef",
 		"url": "/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/",
 		"description": "This text is the first in a long series to correct an extremely disastrous talk at CakeFest 2011. It will also hopefully apply to more than CakePHP.",
-		"tokens": ["also","apply","cakefest","cakephp","capistrano","chef","correct","deployment","disastrous","extremely","first","full","hopefully","long","part","series","stack","talk","text","will"]
+		"tokens": ["also","apply","cakefest","cakephp","chef","correct","disastrous","extremely","first","hopefully","introduction","long","series","talk","text","will"]
 	},
 	{
 		"type": "post",

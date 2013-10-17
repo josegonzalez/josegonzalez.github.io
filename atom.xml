@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-09-22T04:47:04-04:00</updated>
+ <updated>2013-10-17T02:48:38-04:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -53,7 +53,7 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[Full Stack CakePHP Deployment With Chef and Capistrano - Part 4]]></title>
+   <title type="html"><![CDATA[Creating a cookbook and running chef-solo]]></title>
    <link href="http://josediazgonzalez.com/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/"/>
    <updated>2012-05-02T01:53:00-04:00</updated>
    <id>http://josediazgonzalez.com/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/</id>
@@ -69,7 +69,7 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[Full Stack CakePHP Deployment With Chef and Capistrano - Part 3]]></title>
+   <title type="html"><![CDATA[Templates, Attributes, Resources, and Dependency Management]]></title>
    <link href="http://josediazgonzalez.com/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/"/>
    <updated>2012-01-17T00:00:00-05:00</updated>
    <id>http://josediazgonzalez.com/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/</id>
@@ -77,7 +77,7 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[Full Stack CakePHP Deployment With Chef and Capistrano - Part 2]]></title>
+   <title type="html"><![CDATA[Chef Recipes]]></title>
    <link href="http://josediazgonzalez.com/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/"/>
    <updated>2011-10-26T00:00:00-04:00</updated>
    <id>http://josediazgonzalez.com/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/</id>
@@ -85,7 +85,7 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[Full Stack CakePHP Deployment With Chef and Capistrano - Part 1]]></title>
+   <title type="html"><![CDATA[Introduction to Chef]]></title>
    <link href="http://josediazgonzalez.com/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/"/>
    <updated>2011-10-03T00:00:00-04:00</updated>
    <id>http://josediazgonzalez.com/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/</id>

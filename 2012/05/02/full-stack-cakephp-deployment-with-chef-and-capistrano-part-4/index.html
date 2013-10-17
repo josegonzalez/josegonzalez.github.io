@@ -11,7 +11,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width">
-		<title>Full Stack CakePHP Deployment With Chef and Capistrano - Part 4</title>
+		<title>Creating a cookbook and running chef-solo</title>
 		<link rel="profile" href="http://gmpg.org/xfn/11">
 		<!--[if lt IE 9]>
 			<script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -24,19 +24,19 @@
 		<meta name="description" content="How to create a cookbook for the Chef Deployment Tool and an explanation of DNA.json files" />
 		<meta name="keywords" content="deployment, devops, chef, cakephp" />
 
-		<link rel="alternate" type="application/rss+xml" title="Full Stack CakePHP Deployment With Chef and Capistrano - Part 4 » Feed" href="/atom.xml">
+		<link rel="alternate" type="application/rss+xml" title="Creating a cookbook and running chef-solo » Feed" href="/atom.xml">
 		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
 		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
 		<!--[if lt IE 9]>
 			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
 		<![endif]-->
-		
+
 			<script type="text/javascript">
 				var _gaq = _gaq || [];
 				_gaq.push(['_setAccount', 'UA-8668344-3']);
 				_gaq.push(['_trackPageview']);
 			</script>
-		
+
 	</head>
 
 	<body class="home  ">
@@ -49,7 +49,6 @@
 					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and Professional Troll</a></h2>
 				</hgroup>
 
-				
 			</header>
 
 			<div class="wrapper">
@@ -57,31 +56,35 @@
 					<div role="main">
 						<article class="type-post">
   <header class="entry-header">
-    
-      <h1 class="entry-title">
-        Full Stack CakePHP Deployment With Chef and Capistrano - Part 4
-      </h1>
-    
-    
 
-    
+      <h1 class="entry-title">
+        Creating a cookbook and running chef-solo
+      </h1>
+
       <div class="comments-link">
-        <a href="#comments" title="Comment on Full Stack CakePHP Deployment With Chef and Capistrano - Part 4!">
+        <a href="#comments" title="Comment on Creating a cookbook and running chef-solo!">
           Comments
         </a>
       </div>
-    
+
   </header>
 
-  
-
-  
-
   <div class="entry-content">
-    
 
-    
+<div class="series-note">
 
+<p>This entry is <strong>part 4</strong> of <strong>4</strong> in the series "Full Stack CakePHP Deployment With Chef and Capistrano".</p>
+<ul>
+  <li>Part 1 - <a href="/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/">Introduction to Chef</a></li>
+
+  <li>Part 2 - <a href="/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/">Chef Recipes</a></li>
+
+  <li>Part 3 - <a href="/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/">Templates, Attributes, Resources, and Dependency Management</a></li>
+
+  <li>Part 4 - Creating a cookbook and running chef-solo</li>
+</ul>
+
+</div>
 
     <p>Now that you&#39;ve brushed up on how individual pieces of chef work, we&#39;re going to create our own chef cookbook and use it within a dna file.</p>
 
@@ -265,31 +268,27 @@ end</code></pre>
 
   </div>
 
-  
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/devops" title="View all posts in Devops" rel="category">Devops</a> on <a href="http://josediazgonzalez.com/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-05-02 01:53:00 -0400">02 May 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-  
+
 </article>
 
   <div class="related-posts section">
     <h4>Related Posts</h4>
     <ol>
-      <li><a href="/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/">Full Stack CakePHP Deployment With Chef and Capistrano - Part 3</a></li>
-      <li><a href="/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/">Full Stack CakePHP Deployment With Chef and Capistrano - Part 2</a></li>
+      <li><a href="/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/">Templates, Attributes, Resources, and Dependency Management</a></li>
+      <li><a href="/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/">Chef Recipes</a></li>
       <li><a href="/2011/04/13/my-development-setup/">My development setup</a></li>
-      
+
     </ol>
   </div>
-
 
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-
 
 					</div>
 				</div>
@@ -302,40 +301,40 @@ end</code></pre>
 							<br />
 						<h3 class="widget-title">Categories</h3>
 						<ul>
-							
+
 								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-							
+
 								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
-							
+
 								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-							
+
 								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
-							
+
 								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-							
+
 								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
-							
+
 								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-							
+
 								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
-							
+
 						</ul>
 					</aside>
 
 					<aside class="widget widget_recent_entries">
 						<h3 class="widget-title">Recent Posts</h3>
 						<ul>
-							
+
 								<li><a href="/2013/09/09/using-a-personal-git-host/" title="Using a personal git host">Using a personal git host</a></li>
-							
+
 								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
-							
+
 								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
-							
+
 								<li><a href="/2012/09/07/why-cakephp/" title="Why CakePHP?">Why CakePHP?</a></li>
-							
+
 								<li><a href="/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="Upgrading from Lion to Mountain Lion">Upgrading from Lion to Mountain Lion</a></li>
-							
+
 						</ul>
 					</aside>
 
@@ -350,12 +349,12 @@ end</code></pre>
 
 		<script type="text/javascript" src="/javascripts/style.js"></script>
 		<script type="text/javascript">
-			
+
 			if ($('#disqus_thread').length) {
 				var disqus_shortname  = 'josediazgonzalez';
 				var disqus_identifier = '/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/';
 				var disqus_url        = 'http://josediazgonzalez.com/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/';
-				var disqus_title      = 'Full Stack CakePHP Deployment With Chef and Capistrano - Part 4';
+				var disqus_title      = 'Creating a cookbook and running chef-solo';
 
 				(function() {
 					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -363,14 +362,13 @@ end</code></pre>
 					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
 				})();
 			}
-			
-			
+
 				(function() {
 					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
 					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 				})();
-			
+
 		</script>
 	</body>
 </html>
