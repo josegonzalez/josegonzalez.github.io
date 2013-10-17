@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Resource reconfiguration",
+		"url": "/2013/10/17/resource-reconfiguration/",
+		"description": "How do you manage service configurations across a cluster of services?",
+		"tokens": ["across","cluster","configurations","manage","reconfiguration","resource","service","services"]
+	},
+	{
+		"type": "post",
 		"title": "Deploying your infrastructure to AWS",
 		"url": "/2013/10/17/deploying-your-infrastructure-to-aws/",
 		"description": "Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores",
@@ -1113,6 +1120,18 @@
 		"title": "heroku",
 		"url": "/tags/heroku/",
 		"tokens": ["heroku"]
+	},
+  {
+		"type": "tag",
+		"title": "cofiguration",
+		"url": "/tags/cofiguration/",
+		"tokens": ["cofiguration"]
+	},
+  {
+		"type": "tag",
+		"title": "etcd",
+		"url": "/tags/etcd/",
+		"tokens": ["etcd"]
 	},
 	false
 ]

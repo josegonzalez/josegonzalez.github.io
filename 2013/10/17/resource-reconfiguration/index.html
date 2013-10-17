@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Resource reconfiguration</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="How do you manage service configurations across a cluster of services?" />
+		<meta name="keywords" content="devops, provisioning, chef, cofiguration, etcd" />
+
+		<link rel="alternate" type="application/rss+xml" title="Resource reconfiguration » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and Professional Troll</a></h2>
+				</hgroup>
+
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+
+      <h1 class="entry-title">
+        Resource reconfiguration
+      </h1>
+
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Resource reconfiguration!">
+          Comments
+        </a>
+      </div>
+
+  </header>
+
+  <div class="entry-content">
+
+    <p>As you head towards service-oriented architecture, continuous deployment, immutable servers and an ever-growing infrastructure, you inevitably come up against resource provisioning issues.</p>
+
+<p>On a PaaS, you might have <code>100</code> nodes running <code>6</code> different services, each having dependencies upon datastores and other services. How do you route between each service to the correct external source?</p>
+
+<p>One way to do it is by using environment variables:</p>
+
+<pre class="rainbow-code"><code data-language="shell">export DATABASE_URL=mysql://user:password@host:port/database
+export API_URL=http://internal-domain/mount
+export ENV=production
+./path/to/command --opts</code></pre>
+
+<p>This gets a bit messy because there may be several different environment variables, so eventually you may have something like:</p>
+
+<pre class="rainbow-code"><code data-language="shell">cat &gt; /etc/services.d/app.conf &lt;&lt;EOF
+export DATABASE_URL=mysql://user:password@host:port/database
+export API_URL=http://internal-domain/mount
+export ENV=production
+EOF
+
+. /etc/services.d/app.conf ./path/to/command --opts</code></pre>
+
+<blockquote>
+<p>Your user will require access to the <code>app.conf</code> file, so please keep this in mind when creating the file.</p>
+</blockquote>
+
+<p>This <code>app.conf</code> file now contains environment variables for use with shell scripts. This works quite well for one-off tasks, or even cronfiles, though one thing you&#39;ll see is that it does not have provisions for ensuring tasks complete before the environment variables change. Breaking up long-running tasks into jobs can help this, but is outside the scope of this post.</p>
+
+<p>How do you specify a requirement for a service? Perhaps a key-value hash with this information could work:</p>
+
+<pre class="rainbow-code"><code data-language="json">{
+  &quot;id&quot;: &quot;app-www&quot;,
+  &quot;environment&quot;: {
+    &quot;ENV&quot;: &quot;production&quot;
+  },
+  &quot;requires&quot;: {
+    &quot;DATABASE_URL&quot;: &quot;{PRIMARY_DATABASE_URL}&quot;,
+    &quot;API_URL&quot;: &quot;{READONLY_API_URL}&quot;
+  }
+  ... # other stuff
+}</code></pre>
+
+<blockquote>
+<p>Perhaps we specify <code>services</code> we depend upon, instead of environment variable requirements?</p>
+</blockquote>
+
+<p>We could then look up the replacement values for these services and attach them as necessary.</p>
+
+<p>Using a configuration management tool - such as Chef, Puppet, Ansible, etc. - will help you automate the update cycle for this file. A simple workflow could be:</p>
+
+<figure class="ditaa-figure"><a href="/images/ditaa/ditaa-71e11837375589a72b071986b3bc93dd.png" title="images/ditaa/ditaa-71e11837375589a72b071986b3bc93dd.png" ><img src="/images/ditaa/ditaa-71e11837375589a72b071986b3bc93dd.png" title="images/ditaa/ditaa-71e11837375589a72b071986b3bc93dd.png" max-width="99%" /></a></figure>
+
+<p>You would depend upon a listener on an external service - perhaps <code>etcd</code>, perhaps <code>rabbitmq</code> - to ensure that resources are reprovisioned in other locations.</p>
+
+<p>You also want to maintain what resources a specific service <strong>provides</strong>. If you can specify this, then an external service can keep track of the global system state and be used to monitor what is available where. For example, we might provision the <code>www-app</code> service, which could specify its exports thusly:</p>
+
+<pre class="rainbow-code"><code data-language="json">{
+  &quot;id&quot;: &quot;app-www&quot;,
+  &quot;provides&quot;: {
+    &quot;WWW_URL&quot;: &quot;http://{host}:{port}/some-mount&quot;
+  },
+  ... # other stuff
+}</code></pre>
+
+<p>One issue here is that there is a definite lag between when you reprovision a server and when chef-solo on related servers will run/complete their run. If the only thing you are reprovisioning is where a service lives, you could simplify much of your manifest by moving that to a local load balancer.</p>
+
+<h2>Full Deploy Cycle</h2>
+
+<p>The following is a full web service:</p>
+
+<pre class="rainbow-code"><code data-language="json">{
+  &quot;id&quot;: &quot;app-www&quot;,
+  &quot;command&quot;: true,
+  &quot;run_list&quot;: [
+    &quot;nginx::default&quot;,
+    &quot;php::fpm&quot;
+  ],
+  &quot;environment&quot;: {
+    &quot;ENV&quot;: &quot;production&quot;
+    &quot;PORT&quot;: 8080
+  },
+  &quot;requires&quot;: {
+    &quot;DATABASE_URL&quot;: &quot;{PRIMARY_DATABASE_URL}&quot;,
+    &quot;API_URL&quot;: &quot;{READONLY_API_URL}&quot;
+  },
+  &quot;provides&quot;: {
+    &quot;WWW_URL&quot;: &quot;http://{HOST}:{PORT}/some-mount&quot;
+  },
+  &quot;local_port&quot;: 8080
+}</code></pre>
+
+<p>And the api service</p>
+
+<pre class="rainbow-code"><code data-language="json">{
+  &quot;id&quot;: &quot;api&quot;,
+  &quot;command&quot;: true,
+  &quot;run_list&quot;: [
+    &quot;python::default&quot;,
+    &quot;python::virtualenv&quot;,
+    &quot;igraph::default&quot;,
+    &quot;igraph::python&quot;
+  ],
+  &quot;environment&quot;: {
+    &quot;ENV&quot;: &quot;production&quot;,
+    &quot;PORT&quot;: 1100
+  },
+  &quot;requires&quot;: {
+    &quot;DATABASE_URL&quot;: &quot;{PRIMARY_DATABASE_URL}&quot;,
+    &quot;ELASTICSEARCH_URL&quot;: &quot;{API_ELASTICSEARCH_CLUSTER_URL}&quot;
+  },
+  &quot;provides&quot;: {
+    &quot;API_URL&quot;: &quot;http://{HOST}:{PORT}&quot;,
+    &quot;READONLY_API_URL&quot;: &quot;http://{HOST}:{PORT}&quot;
+  },
+  &quot;local_port&quot;: 1100
+}</code></pre>
+
+<p>We could have a set of general configuration attributes for external services/datastores:</p>
+
+<pre class="rainbow-code"><code data-language="ruby"># For things not available from your configuration service for whatever reason
+node.default['configuration']['datastores']['PRIMARY_DATABASE_URL'] = 'mysql://user:password@host:port/database'
+node.default['configuration']['datastores']['API_ELASTICSEARCH_CLUSTER_URL'] = 'http://elastic-ec2-01,elastic-ec2-02:9200'</code></pre>
+
+<p>The process would look like:</p>
+
+<ol>
+<li>deploy a new api node
+
+<ul>
+<li>api node reloads local load balancer with an entry for <code>API_URL</code> at the <code>local_port</code>.</li>
+<li>api node notifies configuration service that the current server provides <code>API_URL</code> and <code>READONLY_API_URL</code></li>
+<li>external load balancer sees notification, reloads its code to add the entries for <code>API_URL</code> and `READONLY<em>API</em>URL</li>
+</ul></li>
+<li>deploy a new www node
+
+<ul>
+<li>web node queries for requirements, specifically the <code>READONLY_API_URL</code></li>
+<li>web node configures itself</li>
+<li>api node reloads local load balancer with an entry for <code>WWW_URL</code> at the <code>local_port</code>.</li>
+<li>web node notifies configuration service that the current server provides <code>WWW_URL</code></li>
+<li>external load balancer sees notification, reloads its code to add an entry for <code>WWW_URL</code></li>
+</ul></li>
+</ol>
+
+<h2>Public and private services</h2>
+
+<p>This is quite important. We will have services that are available only internally, and thus should not be publicly routable. Thus, we should take care to specify whether a service is internal or external:</p>
+
+<pre class="rainbow-code"><code data-language="json">{
+  &quot;id&quot;: &quot;app-www&quot;,
+  &quot;public&quot;: true,
+  ... # other stuff
+}</code></pre>
+
+<p>Load balancers would thus be configured to either be internal load balancers or external, public facing ones. One improvement for internal load balancers would be to only include necessary services in the registry, thus relieving pressure on healthchecks for unneeded resources.</p>
+
+<h2>Service Federation</h2>
+
+<p>As well, you may want to have federations of services that shouldn&#39;t take to each other. An example of this might be a startup&#39;s side project - http://pivot.ly for instance - which may be deployed by the same tooling, but should be segregated for PCI-Compliance.</p>
+
+<pre class="rainbow-code"><code data-language="json">{
+  &quot;id&quot;: &quot;app-www&quot;,
+  &quot;federation&quot;: &quot;seatgeek&quot;,
+  ... # other stuff
+}</code></pre>
+
+<p>Federation could allow you to scope requirements to particular &quot;regions&quot; of your codebase. You could use this as a proxy for the app&#39;s <code>environment</code> - staging, production, testing, bob, etc. - or to segregate applications.</p>
+
+<blockquote>
+<p>Note that there would be no provisions for ensuring multiple federations are deployed to a single node. This should be handled in code somehow.</p>
+</blockquote>
+
+<h2>Multiple Regions</h2>
+
+<p>Bring up necessary services in multiple regions, and ensure the datastores also exist in those regions. Specifying multiple bits of configuration per-region could be difficult.</p>
+
+<h2>The single source of truth</h2>
+
+<p>This should be something that is:</p>
+
+<ul>
+<li>distributed</li>
+<li>highly available</li>
+<li>low latency</li>
+<li>has the ability to perform pub-sub</li>
+<li>low-cost of ownership</li>
+</ul>
+
+<p>I&#39;m looking at potentially using <a href="https://github.com/coreos/etcd"><code>etcd</code></a> here, as it seems well-maintained, and appears to have the attributes desired above.</p>
+
+<blockquote>
+<p>the datastructure has not been defined, so this is all up in the air.</p>
+</blockquote>
+
+<h3>Listeners</h3>
+
+<p>Each service will <code>listen</code> for particular environment variable requirements. If they are updated, the listeners should start a provisioning step.</p>
+
+<p>Note that we should collapse multiple waiting provisions into a single provision call. If you bring up 100 new web nodes, the load balancer should collapse the queued provisions into a single one. There should only ever be 1 queued provision at a time, as any existing subsequent provisions would be taken care of by the first one on the queue.</p>
+
+<p>TODO: How does this work? We want as few moving parts as possible.</p>
+
+<p>The listener <em>should</em> be a system-level service. When chef runs, it should pick up new keys to listen to on the fly. The provision-call could and should be an arbitrary command - what if you don&#39;t run chef-solo? etc. The listener should be one of, if not the, first thing to be installed on a given node, so that it can constantly listen for events. It should also keep track of whether chef-solo is running, in the interest of not re-running.</p>
+
+<p>Note that we should be able to turn the listener on and off. If turned on, it should immediately queue up it&#39;s own provision step, as we wouldn&#39;t know what changed in the time it was off. To prevent a stampede of provisions due to failures in the service, we should write a file somewhere containing the last provision time, and throttling provisioning if there appear to be many calls within a certain timeframe.</p>
+
+<p>TODO: Spec out how this works...</p>
+
+  </div>
+
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/10/17/resource-reconfiguration/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-10-17 11:38:00 -0400">17 Oct 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+
+</article>
+
+  <div class="related-posts section">
+    <h4>Related Posts</h4>
+    <ol>
+      <li><a href="/2013/10/17/deploying-your-infrastructure-to-aws/">Deploying your infrastructure to AWS</a></li>
+      <li><a href="/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/">Creating a cookbook and running chef-solo</a></li>
+      <li><a href="/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/">Templates, Attributes, Resources, and Dependency Management</a></li>
+
+    </ol>
+  </div>
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+
+					<aside class="widget widget_categories widget_search">
+							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+							<br />
+							<br />
+							<br />
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+
+								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
+
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+
+						</ul>
+					</aside>
+
+					<aside class="widget widget_recent_entries">
+						<h3 class="widget-title">Recent Posts</h3>
+						<ul>
+
+								<li><a href="/2013/10/17/resource-reconfiguration/" title="Resource reconfiguration">Resource reconfiguration</a></li>
+
+								<li><a href="/2013/10/17/deploying-your-infrastructure-to-aws/" title="Deploying your infrastructure to AWS">Deploying your infrastructure to AWS</a></li>
+
+								<li><a href="/2013/09/09/using-a-personal-git-host/" title="Using a personal git host">Using a personal git host</a></li>
+
+								<li><a href="/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="Using Beaver to ship log files to Redis/Logstash">Using Beaver to ship log files to Redis/Logstash</a></li>
+
+								<li><a href="/2012/09/07/why-to-actually-choose-cakephp/" title="Why to Actually Choose CakePHP">Why to Actually Choose CakePHP</a></li>
+
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2013/10/17/resource-reconfiguration/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/10/17/resource-reconfiguration/';
+				var disqus_title      = 'Resource reconfiguration';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			}
+
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		</script>
+	</body>
+</html>

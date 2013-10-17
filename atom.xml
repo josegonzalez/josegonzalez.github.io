@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-10-17T02:58:52-04:00</updated>
+ <updated>2013-10-17T15:23:28-04:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Resource reconfiguration]]></title>
+   <link href="http://josediazgonzalez.com/2013/10/17/resource-reconfiguration/"/>
+   <updated>2013-10-17T11:38:00-04:00</updated>
+   <id>http://josediazgonzalez.com/2013/10/17/resource-reconfiguration/</id>
+   <content type="html"><![CDATA[How do you manage service configurations across a cluster of services?]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Deploying your infrastructure to AWS]]></title>
