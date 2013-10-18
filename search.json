@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Service Definitions",
+		"url": "/2013/10/18/service-definitions/",
+		"description": "Just what is a service, and what pieces are necessary to run it?",
+		"tokens": ["definitions","just","necessary","pieces","run","service"]
+	},
+	{
+		"type": "post",
 		"title": "Resource reconfiguration",
 		"url": "/2013/10/17/resource-reconfiguration/",
 		"description": "How do you manage service configurations across a cluster of services?",
@@ -1132,6 +1139,18 @@
 		"title": "etcd",
 		"url": "/tags/etcd/",
 		"tokens": ["etcd"]
+	},
+  {
+		"type": "tag",
+		"title": "configuration",
+		"url": "/tags/configuration/",
+		"tokens": ["configuration"]
+	},
+  {
+		"type": "tag",
+		"title": "resources",
+		"url": "/tags/resources/",
+		"tokens": ["resources"]
 	},
 	false
 ]

@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-10-17T15:33:48-04:00</updated>
+ <updated>2013-10-18T07:17:41-04:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Service Definitions]]></title>
+   <link href="http://josediazgonzalez.com/2013/10/18/service-definitions/"/>
+   <updated>2013-10-18T07:06:00-04:00</updated>
+   <id>http://josediazgonzalez.com/2013/10/18/service-definitions/</id>
+   <content type="html"><![CDATA[Just what is a service, and what pieces are necessary to run it?]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Resource reconfiguration]]></title>
