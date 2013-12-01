@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Testing your CakePHP Plugins with Travis",
+		"url": "/2013/12/01/testing-your-cakephp-plugins-with-travis/",
+		"description": null,
+		"tokens": ["cakephp","plugins","testing","travis"]
+	},
+	{
+		"type": "post",
 		"title": "Service Definitions",
 		"url": "/2013/10/18/service-definitions/",
 		"description": "Just what is a service, and what pieces are necessary to run it?",
@@ -1151,6 +1158,12 @@
 		"title": "resources",
 		"url": "/tags/resources/",
 		"tokens": ["resources"]
+	},
+  {
+		"type": "tag",
+		"title": "travis",
+		"url": "/tags/travis/",
+		"tokens": ["travis"]
 	},
 	false
 ]
