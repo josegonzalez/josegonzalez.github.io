@@ -123,7 +123,8 @@ script: nosetests</code></pre>
 <p>The above runs automated tests for a python application. Which is nice, but we want CakePHP plugins.</p>
 
 <p>Friends Of Cake has built a <em>delicious</em> integration with Travis which is available on <a href="https://github.com/friendsofcake/travis">github</a>. Usage is actually pretty simple:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text"># example for Crud plugin
+
+<pre class="rainbow-code"><code data-language="shell"># example for Crud plugin
 # assumes plugin is in path/to/app/Plugin/Crud
 cd path/to/app
 
@@ -142,8 +143,8 @@ export YOUR_NAME=&quot;Christian Winthers&quot;
 ./vendor/travis/setup.sh
 
 # Remove this repository when you are done
-rm -rf vendor/travis
-</code></pre></div>
+rm -rf vendor/travis</code></pre>
+
 <p>From the readme:</p>
 
 <blockquote>
