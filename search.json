@@ -1,10 +1,17 @@
 [
 	{
 		"type": "post",
+		"title": "Fun with CakePHP Views",
+		"url": "/2013/12/02/fun-with-cakephp-views/",
+		"description": "A guide to creating a custom CakePHP view that generates identicon png images for users",
+		"tokens": ["cakephp","creating","custom","fun","generates","guide","identicon","images","png","users","view","views"]
+	},
+	{
+		"type": "post",
 		"title": "Testing your CakePHP Plugins with Travis",
 		"url": "/2013/12/01/testing-your-cakephp-plugins-with-travis/",
-		"description": null,
-		"tokens": ["cakephp","plugins","testing","travis"]
+		"description": "Quickly setup automated testing for your cakephp plugin code using Travis-Ci",
+		"tokens": ["automated","cakephp","ci","code","plugin","plugins","quickly","setup","testing","travis","using"]
 	},
 	{
 		"type": "post",
@@ -1164,6 +1171,12 @@
 		"title": "travis",
 		"url": "/tags/travis/",
 		"tokens": ["travis"]
+	},
+  {
+		"type": "tag",
+		"title": "indenticon",
+		"url": "/tags/indenticon/",
+		"tokens": ["indenticon"]
 	},
 	false
 ]

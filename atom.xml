@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-01T16:51:26-05:00</updated>
+ <updated>2013-12-01T21:10:58-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -13,11 +13,19 @@
 
 
  <entry>
+   <title type="html"><![CDATA[Fun with CakePHP Views]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/02/fun-with-cakephp-views/"/>
+   <updated>2013-12-02T00:00:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/02/fun-with-cakephp-views/</id>
+   <content type="html"><![CDATA[A guide to creating a custom CakePHP view that generates identicon png images for users]]></content>
+ </entry>
+
+ <entry>
    <title type="html"><![CDATA[Testing your CakePHP Plugins with Travis]]></title>
    <link href="http://josediazgonzalez.com/2013/12/01/testing-your-cakephp-plugins-with-travis/"/>
    <updated>2013-12-01T16:22:00-05:00</updated>
    <id>http://josediazgonzalez.com/2013/12/01/testing-your-cakephp-plugins-with-travis/</id>
-   <content type="html"><![CDATA[]]></content>
+   <content type="html"><![CDATA[Quickly setup automated testing for your cakephp plugin code using Travis-Ci]]></content>
  </entry>
 
  <entry>

@@ -12,6 +12,11 @@
   </url>
 
   <url>
+      <loc>http://josediazgonzalez.com/2013/12/02/fun-with-cakephp-views/</loc>
+      <lastmod>2013-12-02</lastmod>
+  </url>
+
+  <url>
       <loc>http://josediazgonzalez.com/2013/12/01/testing-your-cakephp-plugins-with-travis/</loc>
       <lastmod>2013-12-01</lastmod>
   </url>

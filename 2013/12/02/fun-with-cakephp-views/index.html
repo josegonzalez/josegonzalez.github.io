@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Fun with CakePHP Views</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="A guide to creating a custom CakePHP view that generates identicon png images for users" />
+		<meta name="keywords" content="cakephp, view, indenticon" />
+
+		<link rel="alternate" type="application/rss+xml" title="Fun with CakePHP Views » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and Professional Troll</a></h2>
+				</hgroup>
+
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+
+      <h1 class="entry-title">
+        Fun with CakePHP Views
+      </h1>
+
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Fun with CakePHP Views!">
+          Comments
+        </a>
+      </div>
+
+  </header>
+
+  <div class="entry-content">
+
+<div class="series-note">
+
+<p>This entry is <strong>part 2</strong> of <strong>2</strong> in the series "CakeAdvent".</p>
+<ul>
+  <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
+
+  <li>Part 2 - Fun with CakePHP Views</li>
+</ul>
+
+</div>
+
+    <p>One of the least used features of CakePHP are custom view classes. Custom view classes allow a developer to specify a set of data for the view and have the output automatically formatted. While this automation comes at a price in terms of application speed, it can have great affect on rapid application development. Server resources are cheap, while development time is not.</p>
+
+<p>CakePHP has a few, built-in view classes:</p>
+
+<ul>
+<li><a href="http://book.cakephp.org/2.0/en/views/json-and-xml-views.html">Json/Xml View Classes</a>: useful for building apis.</li>
+<li><a href="http://book.cakephp.org/2.0/en/views/themes.html">ThemeView Class</a>: useful for application theming (think CMS-type applications). As of 2.1, it is built into the default View class.</li>
+<li><a href="http://book.cakephp.org/2.0/en/views/media-view.html">MediaView Class</a>: useful for requiring authentication before rendering an asset (though I&#39;d move this into the server if at all possible). As of 2.3, deprecated in favor of CakeResponse::file().</li>
+<li><a href="http://book.cakephp.org/2.0/en/controllers/scaffolding.html">Scaffold Class</a>: useful for generating quick and dirty admin apps in testing phases.</li>
+</ul>
+
+<p>There are also a few, popular view classes within the community:</p>
+
+<ul>
+<li><a href="https://github.com/ceeram/cakepdf">CakePDF</a>: CakePHP plugin for creating and/or rendering Pdf, with several Pdf engines supported.</li>
+<li><a href="https://github.com/josegonzalez/cakephp-csvview">CsvView</a>: Quickly enable CSV output of your model data, which is quite useful for reporting applications</li>
+<li><a href="https://github.com/predominant/TwigView">TwigView</a>: Cool integration of Twig to replace the built-in PHP-based view system.</li>
+</ul>
+
+<p>These are all well and good, but you can also do some amazing things with views. Today we&#39;ll make a custom view class that shows identicons for a user:</p>
+
+<h2>Scaffolding a View class</h2>
+
+<p>Since we don&#39;t want to fiddle with creating routes, we&#39;ll need to add the ability to parse the <code>png</code> extension. The following bit of code can be added to your <code>routes.php</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+// at the top
+Router::parseExtensions('png');
+
+// your routes here
+?&gt;</code></pre>
+
+<p>This tells the Router to automatically switch view classes when a request is performed with the <code>.png</code> extension.</p>
+
+<p>Our next trick will require telling the <code>RequestHandler</code> about our <code>IdenticonView</code>. This is done within the controller:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+class AppController extends Controller {
+  public $components = array(
+    'RequestHandler' =&gt; array(
+      'viewClassMap' =&gt; array(
+        'png' =&gt; 'Identicon',
+      )
+    )
+  );
+}
+?&gt;</code></pre>
+
+<p>The above code will register the <code>IdenticonView</code> class to any requests for <code>png</code> files on subclasses. This does mean you will need to allow routing <code>png</code> files to your CakePHP application from Nginx or Apache, but that should already be setup ;)</p>
+
+<p>Most view classes use a <code>_serialize</code> view variable to show what variable(s) should be used to retrieve data for the custom view. We&#39;ll also do this for our view as follows:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+class UsersController extends AppController {
+  public function user($username) {
+    $user = $this-&gt;User-&gt;findByUsername($username);
+    $this-&gt;set('user', $user);
+    $this-&gt;set('_serialize', array('user'));
+  }
+}
+?&gt;</code></pre>
+
+<p>Finally, we&#39;ll need to construct our custom view class:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('View', 'View');
+class IdenticonView extends View {
+}
+?&gt;</code></pre>
+
+<p>And we&#39;re done!</p>
+
+<h2>Creating a custom view class</h2>
+
+<p>We actually are a bit farther away than you&#39;d expect. First, we&#39;ll need to have some code that actually generates an identicon. For our purposes, we&#39;ll use the <a href="https://github.com/yzalis/Identicon/">Identicon</a> PHP library maintained by <a href="http://yzalis.com/">YZalis</a>. You can - and should - install it via <a href="http://getcomposer.org/">composer</a>.</p>
+
+<h3>Error Handling</h3>
+
+<p>Next, we&#39;ll want to add a little error detection to our class. If an error/exception is somehow thrown, CakePHP&#39;s exception handler will catch it and - depending upon your setup, the view class <em>could</em> end up recursing this error. We should short-circuit that:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('View', 'View');
+class IdenticonView extends View {
+  public function __construct(Controller $controller = null) {
+    parent::__construct($controller);
+    $this-&gt;response-&gt;type('image/png');
+    if ($Controller instanceof CakeErrorController) {
+      return $this-&gt;response-&gt;type('html');
+    }
+  }
+}
+?&gt;</code></pre>
+
+<p>Next, we&#39;ll need to handle this switch in your <code>IdenticonView::render()</code> class:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('View', 'View');
+class IdenticonView extends View {
+  public function render($view = null, $layout = null) {
+    if ($this-&gt;response-&gt;type() != 'image/png') {
+      return parent::render($view, $layout);
+    }
+
+    $_serialize = $this-&gt;get('_serialize');
+    if (!$_serialize) {
+      throw new CakeException(&quot;No view variable specified&quot;);
+    }
+  }
+}
+?&gt;</code></pre>
+
+<p>The above will switch to the parent <code>View</code> class when the response type is not <code>image/png</code>. We&#39;ll also throw an exception when no view variable is specified int the <code>_serialize</code> key.</p>
+
+<h3>Generating images</h3>
+
+<p>Assuming we have the identicon class included via Composer, we&#39;ll want to now generate the image within our <code>IdenticonView::render()</code> method:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('View', 'View');
+class IdenticonView extends View {
+  public function render($view = null, $layout = null) {
+    if ($this-&gt;response-&gt;type() != 'image/png') {
+      return parent::render($view, $layout);
+    }
+
+    $_serialize = $this-&gt;get('_serialize');
+    if (!$_serialize) {
+      throw new CakeException(&quot;No view variable specified&quot;);
+    }
+
+    // Extract the `email` field from the variable
+    $email = null;
+    foreach ($_serialize as $data) {
+      $email = Hash::get($data, &quot;{s}.email&quot;);
+      if ($email) {
+        break;
+      }
+    }
+
+    // If no email was found in the _serialize'd data, throw an exception
+    if (!$email) {
+      throw new CakeException(&quot;No email address specified&quot;);
+    }
+
+    // Set the image to the `content` block
+    $identicon = new Identicon();
+    $this-&gt;Blocks-&gt;set('content', $identicon-&gt;getImageData($email));
+    return $this-&gt;Blocks-&gt;get('content');
+  }
+}
+?&gt;</code></pre>
+
+<p>Presto-chango! We now have a custom view class! Simply make a request to <code>http://example.com/users/user/derp</code> to see the results!</p>
+
+<h2>What now?</h2>
+
+<p>This was a toy view class, but can be used as a model for future view classes. For instance, we might create a View class that generates gamer tags for embedding on your site, or generate SKU images for printing. A <em>cool</em> use might be to build a status badge for a particular application - maintenance, up, down, etc. - in some sort of application monitoring system.</p>
+
+<p>View classes are a powerful way to speed up your application development. If you&#39;re building something other than HTML output for your application, I suggest looking into how view classes might replace duplicative knowledge.</p>
+
+  </div>
+
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/02/fun-with-cakephp-views/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-02 00:00:00 -0500">02 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+
+</article>
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+
+					<aside class="widget widget_categories widget_search">
+							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+							<br />
+							<br />
+							<br />
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+
+								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
+
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2013/12/02/fun-with-cakephp-views/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/02/fun-with-cakephp-views/';
+				var disqus_title      = 'Fun with CakePHP Views';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			}
+
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		</script>
+	</body>
+</html>
