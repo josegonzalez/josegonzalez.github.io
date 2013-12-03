@@ -3,8 +3,8 @@
 		"type": "post",
 		"title": "Hacking the CakePHP Dispatch System",
 		"url": "/2013/12/03/hacking-the-cakephp-dispatch-system/",
-		"description": null,
-		"tokens": ["cakephp","dispatch","hacking","system"]
+		"description": "Wherein we abuse the CakePHP Disptach cycle to remove the Controllers and Views from our application in favor of smaller, testable units of code. One weird trick, APIs loves this!",
+		"tokens": ["abuse","apis","application","cakephp","code","controllers","cycle","dispatch","disptach","favor","hacking","loves","one","remove","smaller","system","testable","trick","units","views","weird","wherein"]
 	},
 	{
 		"type": "post",

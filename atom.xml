@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-03T00:36:24-05:00</updated>
+ <updated>2013-12-03T00:44:44-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -17,7 +17,7 @@
    <link href="http://josediazgonzalez.com/2013/12/03/hacking-the-cakephp-dispatch-system/"/>
    <updated>2013-12-03T00:13:00-05:00</updated>
    <id>http://josediazgonzalez.com/2013/12/03/hacking-the-cakephp-dispatch-system/</id>
-   <content type="html"><![CDATA[]]></content>
+   <content type="html"><![CDATA[Wherein we abuse the CakePHP Disptach cycle to remove the Controllers and Views from our application in favor of smaller, testable units of code. One weird trick, APIs loves this!]]></content>
  </entry>
 
  <entry>
