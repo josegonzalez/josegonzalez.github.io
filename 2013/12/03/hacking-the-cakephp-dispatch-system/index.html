@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Hacking the CakePHP Dispatch System</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="" />
+		<meta name="keywords" content="dispatcher, cakephp" />
+
+		<meta property="og:title" content="Hacking the CakePHP Dispatch System" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/03/hacking-the-cakephp-dispatch-system/" />
+
+		<link rel="alternate" type="application/rss+xml" title="Hacking the CakePHP Dispatch System » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and Professional Troll</a></h2>
+				</hgroup>
+
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+
+      <h1 class="entry-title">
+        Hacking the CakePHP Dispatch System
+      </h1>
+
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Hacking the CakePHP Dispatch System!">
+          Comments
+        </a>
+      </div>
+
+  </header>
+
+  <div class="entry-content">
+
+<div class="series-note">
+
+<p>This entry is <strong>part 3</strong> of <strong>3</strong> in the series "CakeAdvent".</p>
+<ul>
+  <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
+
+  <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
+
+  <li>Part 3 - Hacking the CakePHP Dispatch System</li>
+</ul>
+
+</div>
+
+    <p>People always complain about CakePHP being slow, so what if we just removed a few layers from the CakePHP MVC?</p>
+
+<p>The smallest CakePHP application - that is maintainable - would be introduced in the <code>bootstrap.php</code> file. It would be a Dispatch Filter:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('DispatcherFilter', 'Routing');
+class ModelFilter extends DispatcherFilter {
+  public function beforeDispatch(CakeEvent $event) {
+    $event-&gt;data['response']-&gt;body('Hello World');
+    $event-&gt;stopPropagation();
+    return $event-&gt;data['response'];
+  }
+}
+?&gt;</code></pre>
+
+<p>The above is a slightly modified version of the <a href="http://book.cakephp.org/2.0/en/development/dispatch-filters.html">HelloWorldFilter</a> from the CakePHP documentation. We would configure it as follows in the application&#39;s <code>bootstrap.php</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+Configure::write('Dispatcher.filters', array(
+    'ModelFilter',
+));
+?&gt;</code></pre>
+
+<p>Once configured, we would respond to all requests with <code>Hello World</code>.  Lets assume we have custom find methods that retrieve the model data appropriately for index/view actions, and we only wish to route those:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('DispatcherFilter', 'Routing');
+class ModelFilter extends DispatcherFilter {
+  public function beforeDispatch(CakeEvent $event) {
+    $request = $event-&gt;data['request'];
+    if (!in_array($request-&gt;action, array('index', 'view'))) {
+      return;
+    }
+
+    $event-&gt;data['response']-&gt;body('Hello World');
+    $event-&gt;stopPropagation();
+    return $event-&gt;data['response'];
+  }
+}
+?&gt;</code></pre>
+
+<p>The next step would be to actually call the model finds. Easy enough, using <code>ClassRegistry::init()</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('DispatcherFilter', 'Routing');
+class ModelFilter extends DispatcherFilter {
+  public function beforeDispatch(CakeEvent $event) {
+    $request = $event-&gt;data['request'];
+    if (!in_array($request-&gt;action, array('index', 'view'))) {
+      return;
+    }
+
+    $modelClass = Inflector::classify($request-&gt;controller);
+    App::uses('ClassRegistry', 'Utility');
+    App::uses($modelClass, 'Model');
+    $posts = ClassRegistry::init($modelClass);
+    try {
+      $posts = $posts-&gt;find($request-&gt;action);
+      $body = array('status' =&gt; 'success', 'data' =&gt; $posts);
+    } catch (Exception $e) {
+      $event-&gt;data['response']-&gt;statusCode(400);
+      $body = array('status' =&gt; 'error', 'message' =&gt; $e-&gt;getMessage());
+    }
+
+    $event-&gt;data['_body'] = $body;
+  }
+}
+?&gt;</code></pre>
+
+<p>The above doesn&#39;t appear to do anything. We didnt modify the response because the purpose of this filter was simply to retrieve data for the response, not to <em>set</em> the response. Lets do that now.</p>
+
+<h2>Modifying the response</h2>
+
+<p>We&#39;ll want to add another filter to the dispatch cycle:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+Configure::write('Dispatcher.filters', array(
+    'ModelFilter',
+    'JsonFilter'
+));
+?&gt;</code></pre>
+
+<p>Now lets build a simple <code>JsonFilter</code>. It will be triggered <em>after</em> the <code>ModelFilter</code>, and as such should check to see if there is a <code>_body</code> in the event data:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('DispatcherFilter', 'Routing');
+class JsonFilter extends DispatcherFilter {
+  public function beforeDispatch(CakeEvent $event) {
+    if (empty($event-&gt;data['_body'])) {
+      return;
+    }
+
+    $event-&gt;data['response']-&gt;body('Hello World');
+    $event-&gt;stopPropagation();
+    return $event-&gt;data['response'];
+  }
+}
+?&gt;</code></pre>
+
+<p>Lets also assume that we need to only process json requests. For this, you&#39;ll need to add the following to the top of your <code>routes.php</code> file:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+Router::parseExtensions('json');
+?&gt;</code></pre>
+
+<p>And our final <code>JsonFilter</code> would look like:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('DispatcherFilter', 'Routing');
+class JsonFilter extends DispatcherFilter {
+  public function beforeDispatch(CakeEvent $event) {
+    $request = $event-&gt;data['request'];
+    if (empty($event-&gt;data['_body']) || $request-&gt;param('ext') != 'json') {
+      return;
+    }
+
+    $event-&gt;data['response']-&gt;body(json_encode($event-&gt;data['_body']));
+    $event-&gt;stopPropagation();
+    return $event-&gt;data['response'];
+  }
+}
+?&gt;</code></pre>
+
+<p>And here is the final response:</p>
+
+<p><img src="http://f.cl.ly/items/3B1H3q3i2g3S3i2n2r05/Screen%20Shot%202013-12-03%20at%2012.07.49%20AM.png" alt="http://cl.ly/image/1P2b3c3z3i3z"></p>
+
+<h2>Adding a bit of <em>flavour</em></h2>
+
+<p>What if we wanted to support something other than json? Lets support <a href="http://msgpack.org/">Message Pack</a>!</p>
+
+<p>First, install the pecl extension:</p>
+
+<pre class="rainbow-code"><code data-language="shell">pecl install msgpack</code></pre>
+
+<p>And now we can add a new filter:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+Configure::write('Dispatcher.filters', array(
+    'ModelFilter',
+    'JsonFilter',
+    'MessagePackFilter',
+));
+?&gt;</code></pre>
+
+<p>And ensure the routing system handles the new extension:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+Router::parseExtensions('msgpack');
+?&gt;</code></pre>
+
+<p>And the code:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('DispatcherFilter', 'Routing');
+class MessagePackFilter extends DispatcherFilter {
+  public function beforeDispatch(CakeEvent $event) {
+    $request = $event-&gt;data['request'];
+    if (empty($event-&gt;data['_body']) || $request-&gt;param('ext') != 'msgpack') {
+      return;
+    }
+
+    $event-&gt;data['response']-&gt;body(msgpack_pack($event-&gt;data['_body']));
+    $event-&gt;stopPropagation();
+    return $event-&gt;data['response'];
+  }
+}
+?&gt;</code></pre>
+
+<p>Instant message pack support!</p>
+
+<h2>Adding a bit of authentication spice</h2>
+
+<p>Lets say we want some dead simple authentication in front of this. We just want to ensure users without the magic key do not get access to our super-webscale json/msgpack api.</p>
+
+<p>They&#39;ll need to set the following header on their requests:</p>
+
+<pre class="rainbow-code"><code data-language="shell">curl -h 'Crappy-Auth: herp:derp' http://example.com/posts/index.json</code></pre>
+
+<p>Doing the above would be <em>trivial</em>. Lets setup a new filter. It needs to run after our <code>ModelFilter</code>, since we only want to trigger it in the case where the <code>ModelFilter</code> runs:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+Configure::write('Dispatcher.filters', array(
+    'ModelFilter',
+    'CrappyAuthFilter',
+    'JsonFilter',
+    'MessagePackFilter',
+));
+?&gt;</code></pre>
+
+<p>And here is our authentication filter:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('DispatcherFilter', 'Routing');
+class CrappyAuthFilter extends DispatcherFilter {
+  public function beforeDispatch(CakeEvent $event) {
+    $request = $event-&gt;data['request'];
+    if (empty($event-&gt;data['_body'])) {
+      return;
+    }
+
+    $auth = $request-&gt;header('Crappy-Auth');
+    if ($auth == 'herp:derp') {
+      return;
+    }
+
+    $event-&gt;data['response']-&gt;statusCode(401);
+    $event-&gt;data['_body'] = array('status' =&gt; 'error', 'message' =&gt; 'Unauthorized');;
+    return $event-&gt;data['response'];
+  }
+}
+?&gt;</code></pre>
+
+<p>And now we&#39;ve added some trivial authentication to our api.</p>
+
+<p><img src="http://f.cl.ly/items/2N1j3J0L0M3k4347422v/Screen%20Shot%202013-12-03%20at%2012.27.14%20AM.png" alt="http://cl.ly/image/0e0p0y0z2u0D"></p>
+
+<h2>Why??!!?</h2>
+
+<p>If you are looking to trim the fat from your CakePHP application - and potentially break some benchmark records - dispatch filters are a cool way to do so. For applications where the majority of the logic is a model-layer action + authentication, they provide a cheap way of getting speed gains while still keeping applications modular and testable.</p>
+
+<p>Props goes to <a href="https://twitter.com/jose_zap">Jose Lorenzo</a> for his initial presentation on this sort of method at the 2010 Chicago Cakefest. He used custom route classes, which is something I later prototyped for the <a href="http://bin.cakephp.org/view/182820021">dispatch system in 2.x as middlewhare</a>, but the basic concept is the same.</p>
+
+<p>Go forth and CakePHP!</p>
+
+  </div>
+
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/03/hacking-the-cakephp-dispatch-system/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-03 00:13:00 -0500">03 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+
+</article>
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+
+					<aside class="widget widget_categories widget_search">
+							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+							<br />
+							<br />
+							<br />
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+
+								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
+
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2013/12/03/hacking-the-cakephp-dispatch-system/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/03/hacking-the-cakephp-dispatch-system/';
+				var disqus_title      = 'Hacking the CakePHP Dispatch System';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			}
+
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		</script>
+	</body>
+</html>

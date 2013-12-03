@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-02T12:49:13-05:00</updated>
+ <updated>2013-12-03T00:36:24-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Hacking the CakePHP Dispatch System]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/03/hacking-the-cakephp-dispatch-system/"/>
+   <updated>2013-12-03T00:13:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/03/hacking-the-cakephp-dispatch-system/</id>
+   <content type="html"><![CDATA[]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Fun with CakePHP Views]]></title>

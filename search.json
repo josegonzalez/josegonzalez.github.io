@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Hacking the CakePHP Dispatch System",
+		"url": "/2013/12/03/hacking-the-cakephp-dispatch-system/",
+		"description": null,
+		"tokens": ["cakephp","dispatch","hacking","system"]
+	},
+	{
+		"type": "post",
 		"title": "Fun with CakePHP Views",
 		"url": "/2013/12/02/fun-with-cakephp-views/",
 		"description": "A guide to creating a custom CakePHP view that generates identicon png images for users",
@@ -1177,6 +1184,12 @@
 		"title": "indenticon",
 		"url": "/tags/indenticon/",
 		"tokens": ["indenticon"]
+	},
+  {
+		"type": "tag",
+		"title": "dispatcher",
+		"url": "/tags/dispatcher/",
+		"tokens": ["dispatcher"]
 	},
 	false
 ]
