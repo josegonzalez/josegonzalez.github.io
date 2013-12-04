@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-04T04:55:21-05:00</updated>
+ <updated>2013-12-04T04:58:06-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -13,11 +13,11 @@
 
 
  <entry>
-   <title type="html"><![CDATA[Interactive command-line REPL using Boris]]></title>
+   <title type="html"><![CDATA[Interactive command-line REPL for CakePHP]]></title>
    <link href="http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/"/>
    <updated>2013-12-04T00:53:00-05:00</updated>
    <id>http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/</id>
-   <content type="html"><![CDATA[]]></content>
+   <content type="html"><![CDATA[Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code]]></content>
  </entry>
 
  <entry>

@@ -1,10 +1,10 @@
 [
 	{
 		"type": "post",
-		"title": "Interactive command-line REPL using Boris",
+		"title": "Interactive command-line REPL for CakePHP",
 		"url": "/2013/12/04/interactive-command-line-repl/",
-		"description": null,
-		"tokens": ["boris","command","interactive","line","repl","using"]
+		"description": "Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code",
+		"tokens": ["cakephp","code","command","different","explore","implement","interactive","line","purposes","quickly","repl","testing","ways"]
 	},
 	{
 		"type": "post",
