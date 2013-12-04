@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-03T00:44:44-05:00</updated>
+ <updated>2013-12-04T04:55:21-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Interactive command-line REPL using Boris]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/"/>
+   <updated>2013-12-04T00:53:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/</id>
+   <content type="html"><![CDATA[]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Hacking the CakePHP Dispatch System]]></title>
