@@ -109,7 +109,7 @@ public function view($id = null) {
 
   $user_id = $this-&gt;Auth-&gt;user('id');
 
-  $post = $this-&gt;Post-&gt;findById($id);
+  $post = $this-&gt;Post-&gt;findById($id)-&gt;first();
   $this-&gt;error404Unless($post &amp;&amp; $post-&gt;isViewableByUser($user_id));
 
   $post-&gt;incrementViewCount();
