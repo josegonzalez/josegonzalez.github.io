@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Objectifying CakePHP 2.0 applications</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="Stop complaining about not being able to use objects in the ORM and use 3.0-like features in your 2.0 application today!" />
+		<meta name="keywords" content="cakephp, objects, orm" />
+
+		<meta property="og:title" content="Objectifying CakePHP 2.0 applications" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/05/objectifying-cakephp-2-0-applications/" />
+		<meta property="og:description" content="Stop complaining about not being able to use objects in the ORM and use 3.0-like features in your 2.0 application today!" />
+
+		<link rel="alternate" type="application/rss+xml" title="Objectifying CakePHP 2.0 applications » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and Professional Troll</a></h2>
+				</hgroup>
+
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+
+      <h1 class="entry-title">
+        Objectifying CakePHP 2.0 applications
+      </h1>
+
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Objectifying CakePHP 2.0 applications!">
+          Comments
+        </a>
+      </div>
+
+  </header>
+
+  <div class="entry-content">
+
+<div class="series-note">
+
+<p>This entry is <strong>part 5</strong> of <strong>5</strong> in the series "CakeAdvent".</p>
+<ul>
+  <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
+
+  <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
+
+  <li>Part 3 - <a href="/2013/12/03/hacking-the-cakephp-dispatch-system/">Hacking the CakePHP Dispatch System</a></li>
+
+  <li>Part 4 - <a href="/2013/12/04/interactive-command-line-repl/">Interactive command-line REPL for CakePHP</a></li>
+
+  <li>Part 5 - Objectifying CakePHP 2.0 applications</li>
+</ul>
+
+</div>
+
+    <p>One &quot;failing&quot; CakePHP has is it&#39;s use of arrays in the Model layer. I say that in quotes because I do believe using arrays in PHP to represent data is the easy choice, and makes a lot of sense in terms of not slowing down data manipulation. In any case, everyone can agree that objects are a good thing, which is why we are moving the Model layer to objects in 3.0.</p>
+
+<p>One issue with this is that it&#39;s difficult to get a sense of how that might affect your CakePHP applications. Many PHP developers have written applications with other frameworks, so they understand what to place where, but there will still be some confusion as to where to place certain methods. Lets take a look at what that might look like in a 2.0 application.</p>
+
+<h2>New classes</h2>
+
+<p>In 3.0, there are now <code>Table</code> and <code>Entity</code> classes. A table represents a collection of objects, and we can use it to represent a collection of MongoDB records or a table of MySQL rows. Similarly, an entity represents a single MongoDB record, or a single MySQL row. Find methods would now exist on the <code>Table</code> class, while <code>Entity</code> classes might have methods relating to data access.</p>
+
+<p>A short example:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+public function view($id = null) {
+  $this-&gt;error404Unless($id);
+
+  $user_id = $this-&gt;Auth-&gt;user('id');
+
+  $post = Post::find('first', array(
+    'conditions' =&gt; array('Post.id' =&gt; $id)
+  ));
+  $this-&gt;error404Unless($post &amp;&amp; $post-&gt;isViewableByUser($user_id));
+
+  $post-&gt;incrementViewCount();
+  $this-&gt;set(compact('post'));
+}
+?&gt;</code></pre>
+
+<p>In the above example, our normal <code>Post</code> model class is now a <code>Table</code> class. We call a find method on it and return a <code>$post</code> Entity object. This <code>$post</code> entity has two user-defined methods, <code>isViewableByUser</code> and <code>incrementViewCount</code>, which we can only call on a single <code>entity</code>.</p>
+
+<p>The obvious benefit of this is that we don&#39;t need to jam all our data-related methods into a single class. That is <em>excellent</em>.</p>
+
+<p>So how the hell do we do this in our 2.0 applications?</p>
+
+<h2>CakeEntity</h2>
+
+<blockquote>
+<p>This plugin <em>should</em> work, though the api will not exactly correspond to 3.0. Pull requests accepted, but keep this in mind!</p>
+</blockquote>
+
+<p>In 2.0 - and 1.3 to an extent - there is the wonderful <code>CakeEntity</code> plugin. It was originally developed by the wonderful folks at <a href="https://www.facebook.com/kanshinkukan">Kanshin</a>, though I have started maintaining a <a href="https://github.com/josegonzalez/cakephp-entity">2.0 branch here</a>.</p>
+
+<p>Installation is quite easy. Add the following to your <code>composer.json</code>:</p>
+
+<pre class="rainbow-code"><code data-language="javascript">&quot;cakephp-entity&quot;: &quot;1.0.0&quot;</code></pre>
+
+<p>And then run the <code>composer update</code> command to install the dependency. If you do not have <code>CakePlugin::loadAll();</code> in your <code>bootstrap.php</code>, you&#39;ll want to add the following:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+CakePlugin::load('Entity');
+?&gt;</code></pre>
+
+<p>Any time you <code>extend AppMode</code>, you&#39;ll need to <code>extend EntityModel</code> instead, like so:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('EntityModel', 'Entity.Model');
+
+class Post extends EntityModel {
+
+}
+?&gt;</code></pre>
+
+<p>Table methods stay in your <code>Post</code> model class. Entity methods will go in a new class. I tend to place mine in <code>app/Model/Entity/</code>, though you can do as you like. Here we have our <code>PostEntity</code> class in <code>app/Model/Entity/PostEntity.php</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('Entity', 'Model/Entity');
+
+class PostEntity extends Entity {
+    // Your custom logic here
+}
+?&gt;</code></pre>
+
+<p>Remember to add the appropriate <code>App::uses</code> statement to the top of your <code>Post</code> model class for this entity. It will otherwise use any currently autoloaded <code>AppEntity</code> class (one exists within the plugin, but you should override it in your app):</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('EntityModel', 'Entity.Model');
+App::uses('PostEntity', 'Model/Entity');
+
+class Post extends EntityModel {
+
+}
+?&gt;</code></pre>
+
+<h3>AppEntity</h3>
+
+<p>Usually I&#39;ll create my custom <code>AppEntity</code> class from which all my entities extend:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('Entity', 'Entity.Model');
+
+class AppEntity extends Entity {
+}
+?&gt;</code></pre>
+
+<blockquote>
+<p>For this section, let&#39;s assume all methods go in our new <code>AppEntity</code> class</p>
+</blockquote>
+
+<p>In PHP 5.4, there is a new interface called <code>JsonSerializable</code>. When you call <code>json_encode</code> on an object, if it implements this interface, it will be serialized according to your specifications. Lets implement it:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  public function jsonSerialize() {
+    return $this-&gt;toArray();
+  }
+?&gt;</code></pre>
+
+<p>Lets also add a helper method - <code>toJson</code> - that can retun json directly:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  public function toJson($full = true) {
+    $data = $this-&gt;jsonSerialize();
+    if ($full == true) {
+      return json_encode($data);
+    }
+
+    $model = $this-&gt;getModel();
+    return json_encode($data[$this-&gt;alias]);
+  }
+?&gt;</code></pre>
+
+<p>There is some extra logic here so that we can skip related entities or only return the data within this entity.</p>
+
+<p>I&#39;ll also add a few methods to retrieve the current object&#39;s application route. This assumes all actions that would retrieve a single entity are called <code>view</code>, though we can override it:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  protected $_viewAction = 'view';
+
+  public function bind(EntityModel $model, $data) {
+    parent::bind($model, $data);
+    $this-&gt;_controllerName = Inflector::pluralize(Inflector::underscore($model-&gt;name));
+  }
+
+  public function url() {
+    return Router::url($this-&gt;route(), true);
+  }
+
+  public function route() {
+    $route = array(
+      'controller' =&gt; $this-&gt;_controllerName,
+      'action' =&gt; $this-&gt;_viewAction,
+      $this-&gt;id
+    );
+
+    $slug = $this-&gt;url_slug();
+    if ($slug !== null) {
+      $route[] = $slug;
+    }
+
+    return $route;
+  }
+
+  public function url_slug() {
+    $model = $this-&gt;getModel();
+    if ($model-&gt;primaryKey == $model-&gt;displayField) {
+      return null;
+    }
+
+    return Inflector::slug(strtolower($this-&gt;{$model-&gt;displayField}), '-');
+  }
+?&gt;</code></pre>
+
+<p>As a bonus, we also add <em>pretty</em> SEO urls for each route :)</p>
+
+<p>I also personally like adding a magic-method that allows me to retrieve any property as it&#39;s sanitized version. For instance, <code>$post-&gt;text</code> vs <code>$post-&gt;text()</code>. The latter can be output on the page, whereas the former is what&#39;s stored in the database. In 3.0, all data is retrieved by <code>$post-&gt;get(&#39;text&#39;)</code>, so this implementation would be a bit different. Keep that in mind.</p>
+
+<blockquote>
+<p>The Sanitize class will be removed in 3.0, so I would recommend finding an alternative before then if you use the following methodology:</p>
+</blockquote>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  public function __call($function, $args) {
+    if (!empty($args) || !property_exists($this, $function)) {
+      throw new NotImplementedException(array($function));
+    }
+
+    if (empty($this-&gt;$function)) {
+      return '';
+    }
+
+    return Sanitize::clean($this-&gt;$function);
+  }
+?&gt;</code></pre>
+
+<h2>Entities</h2>
+
+<p>If I have a <code>PostEntity</code> and want to display one thing versus another if the currently logged in user owns the post, then I would have the following:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('AppEntity', 'Model/Entity');
+
+class PostEntity extends AppEntity {
+  public function isOwnedBy($user_id) {
+    return $user_id == $this-&gt;user_id;
+  }
+}
+?&gt;</code></pre>
+
+<p>And the above would be called via <code>$post-&gt;isOwnedBy($some_id)</code>.</p>
+
+<p>Note that you would also be able to continue using array methods through the magic of <code>ArrayAccess</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+$post_titles = array_map(function ($post) {
+  return Set::extract($post, 'Post.title');
+}, $posts);
+?&gt;</code></pre>
+
+<p>I&#39;d also place special routing methods in entity classes:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  public function routeForLoggedInUsers() {
+    // custom logic here
+  }
+?&gt;</code></pre>
+
+<h3>Table Classes</h3>
+
+<p>Place anything that acts upon a <code>collection</code> of entities here:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+class Post extends EntityModel {
+  public function _findLatest($state, $query, $results = array()) {
+    // logic here
+  }
+}
+?&gt;</code></pre>
+
+<p>And I would also place anything that might create an entity and save it in one shot:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  function approvePost($post_id, $approve_user_id) {
+    $post = $this-&gt;findById($post_id);
+    $post-&gt;approve($approve_user_id);
+    return $post-&gt;save();
+  }
+?&gt;</code></pre>
+
+<h2>Onwards to 3.0</h2>
+
+<p>The above is obviously a taste of what is to come in 3.0. While the api might change, the ideas are still the same, so be aware of the types of changes you&#39;ll have to make to adjust to this post-entity-world.</p>
+
+  </div>
+
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/05/objectifying-cakephp-2-0-applications/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-05 12:59:00 -0500">05 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+
+</article>
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+
+					<aside class="widget widget_categories widget_search">
+							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+							<br />
+							<br />
+							<br />
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+
+								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
+
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2013/12/05/objectifying-cakephp-2-0-applications/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/05/objectifying-cakephp-2-0-applications/';
+				var disqus_title      = 'Objectifying CakePHP 2.0 applications';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			}
+
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		</script>
+	</body>
+</html>

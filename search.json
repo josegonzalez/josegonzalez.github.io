@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Objectifying CakePHP 2.0 applications",
+		"url": "/2013/12/05/objectifying-cakephp-2-0-applications/",
+		"description": "Stop complaining about not being able to use objects in the ORM and use 3.0-like features in your 2.0 application today!",
+		"tokens": ["able","application","applications","cakephp","complaining","features","like","objectifying","objects","orm","stop","today","use"]
+	},
+	{
+		"type": "post",
 		"title": "Interactive command-line REPL for CakePHP",
 		"url": "/2013/12/04/interactive-command-line-repl/",
 		"description": "Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code",
@@ -1209,6 +1216,18 @@
 		"title": "repl",
 		"url": "/tags/repl/",
 		"tokens": ["repl"]
+	},
+  {
+		"type": "tag",
+		"title": "objects",
+		"url": "/tags/objects/",
+		"tokens": ["objects"]
+	},
+  {
+		"type": "tag",
+		"title": "orm",
+		"url": "/tags/orm/",
+		"tokens": ["orm"]
 	},
 	false
 ]

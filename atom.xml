@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-04T04:58:06-05:00</updated>
+ <updated>2013-12-05T09:34:37-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Objectifying CakePHP 2.0 applications]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/05/objectifying-cakephp-2-0-applications/"/>
+   <updated>2013-12-05T12:59:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/05/objectifying-cakephp-2-0-applications/</id>
+   <content type="html"><![CDATA[Stop complaining about not being able to use objects in the ORM and use 3.0-like features in your 2.0 application today!]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Interactive command-line REPL for CakePHP]]></title>
