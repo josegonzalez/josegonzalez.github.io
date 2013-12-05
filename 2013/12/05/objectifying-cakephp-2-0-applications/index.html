@@ -109,9 +109,7 @@ public function view($id = null) {
 
   $user_id = $this-&gt;Auth-&gt;user('id');
 
-  $post = Post::find('first', array(
-    'conditions' =&gt; array('Post.id' =&gt; $id)
-  ));
+  $post = $this-&gt;Post-&gt;findById($id);
   $this-&gt;error404Unless($post &amp;&amp; $post-&gt;isViewableByUser($user_id));
 
   $post-&gt;incrementViewCount();
