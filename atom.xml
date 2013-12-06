@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-05T10:49:28-05:00</updated>
+ <updated>2013-12-06T13:26:06-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Building Service Classes]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/06/building-service-classes/"/>
+   <updated>2013-12-06T12:41:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/06/building-service-classes/</id>
+   <content type="html"><![CDATA[Building complex pages that seem to span hundreds of lines of Controller/Model code? Write Service classes for greater good!]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Objectifying CakePHP 2.0 applications]]></title>

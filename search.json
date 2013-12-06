@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Building Service Classes",
+		"url": "/2013/12/06/building-service-classes/",
+		"description": "Building complex pages that seem to span hundreds of lines of Controller/Model code? Write Service classes for greater good!",
+		"tokens": ["building","classes","code","complex","controller","good","greater","hundreds","lines","model","pages","seem","service","span","write"]
+	},
+	{
+		"type": "post",
 		"title": "Objectifying CakePHP 2.0 applications",
 		"url": "/2013/12/05/objectifying-cakephp-2-0-applications/",
 		"description": "Stop complaining about not being able to use objects in the ORM and use 3.0-like features in your 2.0 application today!",
@@ -1228,6 +1235,18 @@
 		"title": "orm",
 		"url": "/tags/orm/",
 		"tokens": ["orm"]
+	},
+  {
+		"type": "tag",
+		"title": "service oriented architecture",
+		"url": "/tags/service-oriented-architecture/",
+		"tokens": ["architecture","oriented","service"]
+	},
+  {
+		"type": "tag",
+		"title": "refactoring",
+		"url": "/tags/refactoring/",
+		"tokens": ["refactoring"]
 	},
 	false
 ]
