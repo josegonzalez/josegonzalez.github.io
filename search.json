@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "A quick rundown on Asset Compression",
+		"url": "/2013/12/07/a-quick-rundown-on-asset-compression/",
+		"description": "Using the AssetCompress plugin to render concatenated files is a cheap way to get better application performance",
+		"tokens": ["application","asset","assetcompress","better","cheap","compression","concatenated","files","get","performance","plugin","quick","render","rundown","using","way"]
+	},
+	{
+		"type": "post",
 		"title": "Building Service Classes",
 		"url": "/2013/12/06/building-service-classes/",
 		"description": "Building complex pages that seem to span hundreds of lines of Controller/Model code? Write Service classes for greater good!",
@@ -1247,6 +1254,18 @@
 		"title": "refactoring",
 		"url": "/tags/refactoring/",
 		"tokens": ["refactoring"]
+	},
+  {
+		"type": "tag",
+		"title": "asset_compress",
+		"url": "/tags/asset_compress/",
+		"tokens": ["asset_compress"]
+	},
+  {
+		"type": "tag",
+		"title": "assets",
+		"url": "/tags/assets/",
+		"tokens": ["assets"]
 	},
 	false
 ]

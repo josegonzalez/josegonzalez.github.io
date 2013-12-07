@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-06T13:26:06-05:00</updated>
+ <updated>2013-12-07T13:25:02-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[A quick rundown on Asset Compression]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/07/a-quick-rundown-on-asset-compression/"/>
+   <updated>2013-12-07T12:41:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/07/a-quick-rundown-on-asset-compression/</id>
+   <content type="html"><![CDATA[Using the AssetCompress plugin to render concatenated files is a cheap way to get better application performance]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Building Service Classes]]></title>
