@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Composing your applications from plugins",
+		"url": "/2013/12/08/composing-your-applications-from-plugins/",
+		"description": "Properly manage your CakePHP application dependencies using Composer, a PHP dependency management tool",
+		"tokens": ["application","applications","cakephp","composer","composing","dependencies","dependency","manage","management","php","plugins","properly","tool","using"]
+	},
+	{
+		"type": "post",
 		"title": "A quick rundown on Asset Compression",
 		"url": "/2013/12/07/a-quick-rundown-on-asset-compression/",
 		"description": "Using the AssetCompress plugin to render concatenated files is a cheap way to get better application performance",
@@ -1266,6 +1273,18 @@
 		"title": "assets",
 		"url": "/tags/assets/",
 		"tokens": ["assets"]
+	},
+  {
+		"type": "tag",
+		"title": "composer",
+		"url": "/tags/composer/",
+		"tokens": ["composer"]
+	},
+  {
+		"type": "tag",
+		"title": "dependency management",
+		"url": "/tags/dependency-management/",
+		"tokens": ["dependency","management"]
 	},
 	false
 ]
