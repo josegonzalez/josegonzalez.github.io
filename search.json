@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Simplifying OAuth integration",
+		"url": "/2013/12/09/simplifying-oauth-integration/",
+		"description": "Rather than writing the same OAuth code for different projects, reuse a community framework to integrate with service providers like Facebook and Twitter",
+		"tokens": ["code","community","different","facebook","framework","integrate","integration","like","oauth","projects","providers","rather","reuse","service","simplifying","twitter","writing"]
+	},
+	{
+		"type": "post",
 		"title": "Composing your applications from plugins",
 		"url": "/2013/12/08/composing-your-applications-from-plugins/",
 		"description": "Properly manage your CakePHP application dependencies using Composer, a PHP dependency management tool",
@@ -1285,6 +1292,12 @@
 		"title": "dependency management",
 		"url": "/tags/dependency-management/",
 		"tokens": ["dependency","management"]
+	},
+  {
+		"type": "tag",
+		"title": "oauth",
+		"url": "/tags/oauth/",
+		"tokens": ["oauth"]
 	},
 	false
 ]

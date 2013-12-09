@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-08T11:10:27-05:00</updated>
+ <updated>2013-12-09T02:52:11-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -13,9 +13,17 @@
 
 
  <entry>
+   <title type="html"><![CDATA[Simplifying OAuth integration]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/09/simplifying-oauth-integration/"/>
+   <updated>2013-12-09T00:55:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/09/simplifying-oauth-integration/</id>
+   <content type="html"><![CDATA[Rather than writing the same OAuth code for different projects, reuse a community framework to integrate with service providers like Facebook and Twitter]]></content>
+ </entry>
+
+ <entry>
    <title type="html"><![CDATA[Composing your applications from plugins]]></title>
    <link href="http://josediazgonzalez.com/2013/12/08/composing-your-applications-from-plugins/"/>
-   <updated>2013-12-08T13:01:00-05:00</updated>
+   <updated>2013-12-08T06:15:00-05:00</updated>
    <id>http://josediazgonzalez.com/2013/12/08/composing-your-applications-from-plugins/</id>
    <content type="html"><![CDATA[Properly manage your CakePHP application dependencies using Composer, a PHP dependency management tool]]></content>
  </entry>
