@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Queue in scalable applications",
+		"url": "/2013/12/10/queue-in-scalable-applications/",
+		"description": "Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high",
+		"tokens": ["applications","background","computations","conversions","high","instead","keep","long","make","move","queue","running","scalable","server","users","wait"]
+	},
+	{
+		"type": "post",
 		"title": "Simplifying OAuth integration",
 		"url": "/2013/12/09/simplifying-oauth-integration/",
 		"description": "Rather than writing the same OAuth code for different projects, reuse a community framework to integrate with service providers like Facebook and Twitter",
@@ -1298,6 +1305,18 @@
 		"title": "oauth",
 		"url": "/tags/oauth/",
 		"tokens": ["oauth"]
+	},
+  {
+		"type": "tag",
+		"title": "queuing",
+		"url": "/tags/queuing/",
+		"tokens": ["queuing"]
+	},
+  {
+		"type": "tag",
+		"title": "background jobs",
+		"url": "/tags/background-jobs/",
+		"tokens": ["background","jobs"]
 	},
 	false
 ]

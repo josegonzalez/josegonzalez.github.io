@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-09T02:52:11-05:00</updated>
+ <updated>2013-12-10T03:47:27-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Queue in scalable applications]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/10/queue-in-scalable-applications/"/>
+   <updated>2013-12-10T02:37:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/10/queue-in-scalable-applications/</id>
+   <content type="html"><![CDATA[Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Simplifying OAuth integration]]></title>
