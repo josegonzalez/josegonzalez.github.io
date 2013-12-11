@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Giving the gift of CakePHP to the Community",
+		"url": "/2013/12/11/giving-the-gift-of-cakephp-to-the-community/",
+		"description": "Share and contribute back to the CakePHP community in one of many ways!",
+		"tokens": ["back","cakephp","community","contribute","gift","giving","many","one","share","ways"]
+	},
+	{
+		"type": "post",
 		"title": "Queue in scalable applications",
 		"url": "/2013/12/10/queue-in-scalable-applications/",
 		"description": "Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high",
@@ -1317,6 +1324,18 @@
 		"title": "background jobs",
 		"url": "/tags/background-jobs/",
 		"tokens": ["background","jobs"]
+	},
+  {
+		"type": "tag",
+		"title": "community",
+		"url": "/tags/community/",
+		"tokens": ["community"]
+	},
+  {
+		"type": "tag",
+		"title": "contributing",
+		"url": "/tags/contributing/",
+		"tokens": ["contributing"]
 	},
 	false
 ]
