@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Abusing Exceptions to provide model-layer redirection",
+		"url": "/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/",
+		"description": "Fat models and skinny controllers are about more than data handling. You should also concern yourself with Error state handling and how to bubble up exceptions.",
+		"tokens": ["abusing","also","bubble","concern","controllers","data","error","exceptions","fat","handling","layer","model","models","provide","redirection","skinny","state"]
+	},
+	{
+		"type": "post",
 		"title": "Giving the gift of CakePHP to the Community",
 		"url": "/2013/12/11/giving-the-gift-of-cakephp-to-the-community/",
 		"description": "Share and contribute back to the CakePHP community in one of many ways!",
@@ -1336,6 +1343,18 @@
 		"title": "contributing",
 		"url": "/tags/contributing/",
 		"tokens": ["contributing"]
+	},
+  {
+		"type": "tag",
+		"title": "exceptions",
+		"url": "/tags/exceptions/",
+		"tokens": ["exceptions"]
+	},
+  {
+		"type": "tag",
+		"title": "redirect",
+		"url": "/tags/redirect/",
+		"tokens": ["redirect"]
 	},
 	false
 ]

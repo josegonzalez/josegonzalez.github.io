@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-11T12:28:57-05:00</updated>
+ <updated>2013-12-12T03:29:23-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Abusing Exceptions to provide model-layer redirection]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/"/>
+   <updated>2013-12-12T03:01:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/</id>
+   <content type="html"><![CDATA[Fat models and skinny controllers are about more than data handling. You should also concern yourself with Error state handling and how to bubble up exceptions.]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Giving the gift of CakePHP to the Community]]></title>
