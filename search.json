@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Simple application maintenance mode",
+		"url": "/2013/12/13/simple-application-maintenance-mode/",
+		"description": "Setup a fast maintenance mode for your application using the CakePHP Dispatch Filter system",
+		"tokens": ["application","cakephp","dispatch","fast","filter","maintenance","mode","setup","simple","system","using"]
+	},
+	{
+		"type": "post",
 		"title": "Abusing Exceptions to provide model-layer redirection",
 		"url": "/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/",
 		"description": "Fat models and skinny controllers are about more than data handling. You should also concern yourself with Error state handling and how to bubble up exceptions.",
@@ -1355,6 +1362,12 @@
 		"title": "redirect",
 		"url": "/tags/redirect/",
 		"tokens": ["redirect"]
+	},
+  {
+		"type": "tag",
+		"title": "maintenance",
+		"url": "/tags/maintenance/",
+		"tokens": ["maintenance"]
 	},
 	false
 ]

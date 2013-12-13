@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-12T03:29:23-05:00</updated>
+ <updated>2013-12-13T03:45:58-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Simple application maintenance mode]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/13/simple-application-maintenance-mode/"/>
+   <updated>2013-12-13T03:05:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/13/simple-application-maintenance-mode/</id>
+   <content type="html"><![CDATA[Setup a fast maintenance mode for your application using the CakePHP Dispatch Filter system]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Abusing Exceptions to provide model-layer redirection]]></title>

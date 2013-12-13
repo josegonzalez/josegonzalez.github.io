@@ -78,7 +78,7 @@
 
 <div class="series-note">
 
-<p>This entry is <strong>part 3</strong> of <strong>12</strong> in the series "CakeAdvent".</p>
+<p>This entry is <strong>part 3</strong> of <strong>13</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
 
@@ -103,6 +103,8 @@
   <li>Part 11 - <a href="/2013/12/11/giving-the-gift-of-cakephp-to-the-community/">Giving the gift of CakePHP to the Community</a></li>
 
   <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
+
+  <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
 </ul>
 
 </div>
@@ -129,6 +131,10 @@ Configure::write('Dispatcher.filters', array(
     'ModelFilter',
 ));
 ?&gt;</code></pre>
+
+<blockquote>
+<p>Please note that there are other filters - <code>AssetDispatcher</code> and <code>CacheDispatcher</code> - that must also be configured if CakePHP is to respond correctly to reqests. Whether they are before or after the filters in this post is up to you.</p>
+</blockquote>
 
 <p>Once configured, we would respond to all requests with <code>Hello World</code>.  Lets assume we have custom find methods that retrieve the model data appropriately for index/view actions, and we only wish to route those:</p>
 
