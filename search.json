@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Creating a custom session flash handler",
+		"url": "/2013/12/14/creating-a-custom-session-flash-handler/",
+		"description": "Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core.",
+		"tokens": ["actually","aliasing","cakephp","class","core","creating","custom","flash","handler","inject","libraries","logic","powerful","rewriting","session","using","way","without"]
+	},
+	{
+		"type": "post",
 		"title": "Simple application maintenance mode",
 		"url": "/2013/12/13/simple-application-maintenance-mode/",
 		"description": "Setup a fast maintenance mode for your application using the CakePHP Dispatch Filter system",
@@ -1368,6 +1375,18 @@
 		"title": "maintenance",
 		"url": "/tags/maintenance/",
 		"tokens": ["maintenance"]
+	},
+  {
+		"type": "tag",
+		"title": "aliasing",
+		"url": "/tags/aliasing/",
+		"tokens": ["aliasing"]
+	},
+  {
+		"type": "tag",
+		"title": "sessions",
+		"url": "/tags/sessions/",
+		"tokens": ["sessions"]
 	},
 	false
 ]

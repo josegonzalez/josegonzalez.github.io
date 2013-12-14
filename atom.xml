@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-13T04:07:10-05:00</updated>
+ <updated>2013-12-14T16:06:51-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Creating a custom session flash handler]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/14/creating-a-custom-session-flash-handler/"/>
+   <updated>2013-12-14T15:45:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/14/creating-a-custom-session-flash-handler/</id>
+   <content type="html"><![CDATA[Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core.]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Simple application maintenance mode]]></title>

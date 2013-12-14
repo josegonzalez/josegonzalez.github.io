@@ -11,7 +11,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width">
-		<title>CakeAdvent: Simple application maintenance mode</title>
+		<title>CakeAdvent: Creating a custom session flash handler</title>
 		<link rel="profile" href="http://gmpg.org/xfn/11">
 		<!--[if lt IE 9]>
 			<script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -21,15 +21,15 @@
 		<meta name="revisit-after" content="7 days" />
 		<meta name="version" content="1.0" />
 
-		<meta name="description" content="Setup a fast maintenance mode for your application using the CakePHP Dispatch Filter system" />
-		<meta name="keywords" content="dispatcher, cakephp, maintenance" />
+		<meta name="description" content="Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core." />
+		<meta name="keywords" content="cakephp, aliasing, sessions" />
 
-		<meta property="og:title" content="CakeAdvent: Simple application maintenance mode" />
+		<meta property="og:title" content="CakeAdvent: Creating a custom session flash handler" />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/13/simple-application-maintenance-mode/" />
-		<meta property="og:description" content="Setup a fast maintenance mode for your application using the CakePHP Dispatch Filter system" />
+		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/14/creating-a-custom-session-flash-handler/" />
+		<meta property="og:description" content="Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core." />
 
-		<link rel="alternate" type="application/rss+xml" title="Simple application maintenance mode » Feed" href="/atom.xml">
+		<link rel="alternate" type="application/rss+xml" title="Creating a custom session flash handler » Feed" href="/atom.xml">
 		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
 		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
 		<!--[if lt IE 9]>
@@ -63,11 +63,11 @@
   <header class="entry-header">
 
       <h1 class="entry-title">
-        Simple application maintenance mode
+        Creating a custom session flash handler
       </h1>
 
       <div class="comments-link">
-        <a href="#comments" title="Comment on Simple application maintenance mode!">
+        <a href="#comments" title="Comment on Creating a custom session flash handler!">
           Comments
         </a>
       </div>
@@ -78,7 +78,7 @@
 
 <div class="series-note">
 
-<p>This entry is <strong>part 13</strong> of <strong>14</strong> in the series "CakeAdvent".</p>
+<p>This entry is <strong>part 14</strong> of <strong>14</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
 
@@ -104,139 +104,118 @@
 
   <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
 
-  <li>Part 13 - Simple application maintenance mode</li>
+  <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
 
-  <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
+  <li>Part 14 - Creating a custom session flash handler</li>
 </ul>
 
 </div>
 
-    <p>If you need a simple application maintenance mode, fear not! CakePHP has you covered!</p>
-
-<p>We&#39;ll need to create a custom Dispatch Filter:</p>
+    <p>One of CakePHP&#39;s features is to allow you to override internal Behaviors, Components and Helpers using class aliasing. For instance, one might want to override the internal <code>FormHelper</code> to add HTML6 (not a typo) support, and CakePHP would be okay with that:</p>
 
 <pre class="rainbow-code"><code data-language="php">&lt;?php
-// In Lib/Routing/Filters/MaintenanceMode.php
-App::uses('DispatcherFilter', 'Routing');
-class MaintenanceMode extends DispatcherFilter {
-  public function beforeDispatch(CakeEvent $event) {
-    if (!Configure::read('MaintenanceMode.enabled')) {
-      return;
+App::uses('Controller', 'Controller');
+class AppController extends Controller {
+  public $helpers = array(
+    'Form' =&gt; array('className' =&gt; 'HTML6'),
+  );
+}
+?&gt;</code></pre>
+
+<p>Something I&#39;ve been doing recently in most of my projects is use Twitter Bootstap for general setup via the <a href="https://github.com/slywalker/cakephp-plugin-boost_cake">BoostCake plugin</a>. It automatically configures CakePHP to use either Bootstrap 2 or 3, and allows me to alias my pertinent helpers to their bootstrappified equivalents.</p>
+
+<p>One thing that is missing is <code>Session::setFlash()</code>. It is quite a pain to do the following:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+$this-&gt;Session-&gt;setFlash('Some error message', 'alert', array(
+  'plugin' =&gt; 'TwitterBootstrap',
+  'class' =&gt; 'alert-error'
+), 'alert'));
+?&gt;</code></pre>
+
+<p>Boo. Instead, what if we had the following api?</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+$this-&gt;Session-&gt;alert_error('Some error message');
+?&gt;</code></pre>
+
+<p>That is <em>much</em> nicer looking. We could handle this by adding another method to the AppController, but doing so means copy-pasting between projects. Instead, lets make a custom SessionComponent:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('SessionComponent', 'Controller/Component');
+class TwitterSessionComponent extends SessionComponent {
+
+  public function __call($name, $args) {
+    $method = $name;
+    $key = 'flash';
+
+    if (strpos($method, 'form_') === 0) {
+      $key = 'form';
+      $method = preg_replace('/^form_/', '', $method);
     }
 
-    $event-&gt;data['response']-&gt;statusCode(503);
-    $event-&gt;data['response']-&gt;body('503 Service Unavailable');
-    $event-&gt;stopPropagation();
-    return $event-&gt;data['response'];
+    if (strpos($method, 'alert_') === 0) {
+      $method = preg_replace('/^alert_/', '', $method);
+    }
+
+    $class = null;
+    if (in_array($method, array('success', 'danger', 'error', 'info'))) {
+      $class = 'alert-' . $method;
+    }
+
+    if ($class !== null || $method === 'alert') {
+      $plugin = 'TwitterBootstrap';
+      return $this-&gt;setFlash($args[0], 'alert', compact('plugin', 'class'), $key);
+    }
+
+    throw new BadMethodCallException(&quot;Method '{$name}' does not exist.&quot;);
   }
 }
 ?&gt;</code></pre>
 
-<p>Now we can attach it to our existing dispatch filters:</p>
+<p>Sweet, we have a custom component that can deal with our code. But rather than use <em>two</em> SessionComponents, we can use class name aliasing to load just ours as the default!</p>
 
 <pre class="rainbow-code"><code data-language="php">&lt;?php
-// in our bootstrap.php
-App::uses('MaintenanceMode', 'Lib/Routing/Filters');
-Configure::write('Dispatcher.filters', array(
-  'AssetDispatcher',
-  'CacheDispatcher',
-  'MaintenanceMode', // our new filter here!
-));
-?&gt;</code></pre>
-
-<p>Tada! Now turning on maintenance mode is as simple as <code>Configure::write(&#39;MaintenanceMode.enabled&#39;, 1)</code>!</p>
-
-<h2>Using custom views</h2>
-
-<p>The above is lame in that it only works for a simple 503 error page. What if you want to use a custom status code, or maybe a custom view file?</p>
-
-<p>To do this, lets change our filter a bit:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-// In Lib/Routing/Filters/MaintenanceMode.php
-App::uses('DispatcherFilter', 'Routing');
-class MaintenanceMode extends DispatcherFilter {
-  public function beforeDispatch(CakeEvent $event) {
-    if (!Configure::read('MaintenanceMode.enabled')) {
-      return;
-    }
-    $statusCode = Configure::read('MaintenanceMode.code');
-    $statusMessage = Configure::read('MaintenanceMode.message');
-    if (!$statusCode) {
-      $statusCode = 503;
-      $statusMessage = '503 Service Unavailable';
-    }
-
-    if (!$statusMessage) {
-      $statusMessage = $statusCode . ' Currently undergoing maintenance';
-    }
-
-    $event-&gt;data['response']-&gt;statusCode($statusCode);
-    $event-&gt;data['response']-&gt;body($statusMessage);
-    $event-&gt;stopPropagation();
-    return $event-&gt;data['response'];
-  }
+App::uses('Controller', 'Controller');
+class AppController extends Controller {
+  public $components = array(
+    'Auth',
+    'Cookie',
+    'RequestHandler',
+    'Session' =&gt; array('className' =&gt; 'TwitterSession'),
+  );
 }
 ?&gt;</code></pre>
 
-<p>At this point, we can configure a custom status code and a custom message. Lets add the ability to use a custom view:</p>
+<p>Now we can do the following:</p>
 
 <pre class="rainbow-code"><code data-language="php">&lt;?php
-  protected function _getView() {
-    $helpers = Configure::read('MaintenanceMode.helpers');
-    if (empty($helpers) || !is_array($helpers)) {
-      $helpers = array('Html');
+App::uses('AppController', 'Controller');
+class UsersController extends AppController {
+  public function update_profile() {
+    $user_id = $this-&gt;Auth-&gt;user('id');
+    $user = $this-&gt;User-&gt;find('profile', compact('user_id'));
+
+    try {
+      $this-&gt;User-&gt;updateProfile($user, $this-&gt;request-&gt;data);
+      $this-&gt;Session-&gt;form_success(__('Your profile has been updated!'));
+      $user = $this-&gt;User-&gt;find('profile', compact('user_id'));
+      $this-&gt;request-&gt;data = $user;
+    } catch (Exception $e) {
+      $user = $this-&gt;User-&gt;find('profile', compact('user_id'));
+      $this-&gt;Session-&gt;form_danger($e-&gt;getMessage());
     }
-    $View = new View(null);
-    $View-&gt;viewVars = Configure::read('MaintenanceMode');
-    $View-&gt;helpers = $helpers;
-    $View-&gt;loadHelpers();
-    $View-&gt;hasRendered = false;
-    $View-&gt;viewPath = 'MaintenanceMode';
-    return $View;
+
+    $this-&gt;set(compact('user'));
   }
 ?&gt;</code></pre>
 
-<p>We&#39;ll need to modify our <code>beforeDispatch</code>, where we set the response body:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-    $template = Configure::read('MaintenanceMode.template');
-    if ($template) {
-      $View = $this-&gt;_getView();
-      $body = $View-&gt;render($template, Configure::read('MaintenanceMode.layout'));
-      $event-&gt;data['response']-&gt;body($body);
-    } else {
-      $event-&gt;data['response']-&gt;body($statusMessage);
-    }
-?&gt;</code></pre>
-
-<p>And add the <code>App::uses(&#39;View&#39;, &#39;View&#39;);</code> call to the top of your <code>MaintenanceMode</code> class. Now to use a custom view, we&#39;d create a file in <code>app/View/MaintenanceMode/index.ctp</code> with our content, a <code>app/View/MaintenanceMode/maintenance.ctp</code> layout, and then configure our filter as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-Configure::write('MaintenanceMode', array(
-  'enabled' =&gt; true,
-  'helpers' =&gt; 'Html',
-  'layout' =&gt; 'maintenance',
-  'template' =&gt; 'index'
-));
-?&gt;</code></pre>
-
-<p>You can extend this as far as you need, and here are a couple of ideas:</p>
-
-<ul>
-<li>Add ajax request support</li>
-<li>Enable custom view classes</li>
-<li>Allow maintenance mode to be enabled via the existence of a file, or an environment variable</li>
-<li>Have this affect background processes</li>
-<li>Add unit tests!</li>
-</ul>
-
-<p>If you need some downtime this Christmas, CakePHP has your back!</p>
+<p>Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core. Try it today!</p>
 
   </div>
 
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/13/simple-application-maintenance-mode/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-13 03:05:00 -0500">13 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/14/creating-a-custom-session-flash-handler/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-14 15:45:00 -0500">14 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 
 </article>
@@ -292,9 +271,9 @@ Configure::write('MaintenanceMode', array(
 
 			if ($('#disqus_thread').length) {
 				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/12/13/simple-application-maintenance-mode/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/12/13/simple-application-maintenance-mode/';
-				var disqus_title      = 'CakeAdvent: Simple application maintenance mode';
+				var disqus_identifier = '/2013/12/14/creating-a-custom-session-flash-handler/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/14/creating-a-custom-session-flash-handler/';
+				var disqus_title      = 'CakeAdvent: Creating a custom session flash handler';
 
 				(function() {
 					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
