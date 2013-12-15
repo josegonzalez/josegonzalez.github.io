@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>CakeAdvent: Payment Processing using Stripe</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="Making money with your website should be your primary concern, and this blog post will explain a simple, awesome way to do so" />
+		<meta name="keywords" content="cakephp, aliasing, sessions" />
+
+		<meta property="og:title" content="CakeAdvent: Payment Processing using Stripe" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/15/payment-processing-using-stripe/" />
+		<meta property="og:description" content="Making money with your website should be your primary concern, and this blog post will explain a simple, awesome way to do so" />
+
+		<link rel="alternate" type="application/rss+xml" title="Payment Processing using Stripe » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and Professional Troll</a></h2>
+				</hgroup>
+
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+
+      <h1 class="entry-title">
+        Payment Processing using Stripe
+      </h1>
+
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Payment Processing using Stripe!">
+          Comments
+        </a>
+      </div>
+
+  </header>
+
+  <div class="entry-content">
+
+<div class="series-note">
+
+<p>This entry is <strong>part 15</strong> of <strong>15</strong> in the series "CakeAdvent".</p>
+<ul>
+  <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
+
+  <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
+
+  <li>Part 3 - <a href="/2013/12/03/hacking-the-cakephp-dispatch-system/">Hacking the CakePHP Dispatch System</a></li>
+
+  <li>Part 4 - <a href="/2013/12/04/interactive-command-line-repl/">Interactive command-line REPL for CakePHP</a></li>
+
+  <li>Part 5 - <a href="/2013/12/05/objectifying-cakephp-2-0-applications/">Objectifying CakePHP 2.0 applications</a></li>
+
+  <li>Part 6 - <a href="/2013/12/06/building-service-classes/">Building Service Classes</a></li>
+
+  <li>Part 7 - <a href="/2013/12/07/a-quick-rundown-on-asset-compression/">A quick rundown on Asset Compression</a></li>
+
+  <li>Part 8 - <a href="/2013/12/08/composing-your-applications-from-plugins/">Composing your applications from plugins</a></li>
+
+  <li>Part 9 - <a href="/2013/12/09/simplifying-oauth-integration/">Simplifying OAuth integration</a></li>
+
+  <li>Part 10 - <a href="/2013/12/10/queue-in-scalable-applications/">Queue in scalable applications</a></li>
+
+  <li>Part 11 - <a href="/2013/12/11/giving-the-gift-of-cakephp-to-the-community/">Giving the gift of CakePHP to the Community</a></li>
+
+  <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
+
+  <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
+
+  <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
+
+  <li>Part 15 - Payment Processing using Stripe</li>
+</ul>
+
+</div>
+
+    <blockquote>
+<p>This tutorial assumes you are using the FriendsOfCake/app-template project with Composer. Please see <a href="http://josediazgonzalez.com/2013/12/08/composing-your-applications-from-plugins/">this post for more information</a>.</p>
+</blockquote>
+
+<p>One thing lots of developers struggle with is collecting payment information. In recent years, there have been a few companies that have put out excellent apis, simplifying this process. Today we&#39;ll use Stripe to setup payment processing.</p>
+
+<h2>Initial Setup</h2>
+
+<p>The first thing you&#39;ll want to do is <a href="https://stripe.com/">sign up for stripe</a>. We&#39;ll work using in Test mode for now, so no need to activate the account just yet. You can do so when you&#39;re ready to go into production.</p>
+
+<p>Once you&#39;ve signed up, we&#39;ll install the <a href="https://github.com/chronon/CakePHP-StripeComponent-Plugin">Stripe Plugin from chronon</a>. Run the following command in your shell to install it via composer:</p>
+
+<pre class="rainbow-code"><code data-language="shell">composer require chronon/stripe 2.0.0</code></pre>
+
+<p>Your output should be similar to the following:</p>
+
+<p><img src="http://cl.ly/image/0s0b1x062j3d/Screen%20Shot%202013-12-15%20at%202.31.33%20AM.png" alt="http://cl.ly/image/0s0b1x062j3d"></p>
+
+<p>Next, we should ensure that the base Stripe libraries are included within your CakePHP app. We&#39;ll also need to load the plugin. Add the following to your <code>app/Config/bootstrap.php</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+// Either this
+if (!include (ROOT . DS . 'vendor' . DS . 'autoload.php')) {
+  trigger_error(&quot;Unable to load composer autoloader.&quot;, E_USER_ERROR);
+  exit(1);
+}
+
+// Or the following will work
+App::import('Vendor', array('file' =&gt; 'autoload'));
+
+// ALSO: Load the plugin
+CakePlugin::load('Stripe');
+?&gt;</code></pre>
+
+<p>Now we need some configuration. I&#39;ll use the following configuration - and a separate logging config - though you can modify it as necessary:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+Configure::write('Stripe', array(
+  'currency' =&gt; 'usd',
+  'fields' =&gt; array(
+    'stripe_id' =&gt; 'id',
+    'stripe_last4' =&gt; array('card' =&gt; 'last4'),
+    'stripe_address_zip_check' =&gt; array('card' =&gt; 'address_zip_check'),
+    'stripe_cvc_check' =&gt; array('card' =&gt; 'cvc_check'),
+    'stripe_amount' =&gt; 'amount'
+  ),
+  'LiveSecret' =&gt; 'sk_live_LIVE_SECRET_KEY', // from https://manage.stripe.com/account/apikeys
+  'mode' =&gt; 'Test',
+  'TestSecret' =&gt; 'sk_test_TEST_SECRET_KEY', // from https://manage.stripe.com/account/apikeys
+));
+
+CakeLog::config('stripe', array(
+    'engine' =&gt; 'FileLog',
+    'types' =&gt; array('info', 'error'),
+    'scopes' =&gt; array('stripe'),
+    'file' =&gt; 'stripe',
+));
+?&gt;</code></pre>
+
+<p>Now we&#39;ll want to add it to our <code>$components</code> array of our new <code>app/Controller/OrdersController.php</code> file:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+class OrdersController extends AppController {
+  public $components = array(
+    'Stripe.Stripe'
+  );
+
+  // Disable the use of a model for now
+  public $uses = null;
+
+  public function checkout() {
+  }
+}
+?&gt;</code></pre>
+
+<h2>Frontend Integration</h2>
+
+<blockquote>
+<p>Some of the following is replicated from the <a href="https://stripe.com/docs/tutorials/forms">official Stripe documentation</a> to make it easier to follow this tutorial.</p>
+</blockquote>
+
+<p>One of the ways in which you can increase conversion is to avoid a redirect offsite. Every step a user has to complete is liable to make the user less likely to convert, so keeping everything on one-page would be ideal. We&#39;ll use Stripe&#39;s custom form api to keep everything in-house.</p>
+
+<p>Add the following bit of javascript to your <code>app/View/Orders/checkout.ctp</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;script type=&quot;text/javascript&quot; src=&quot;http://code.jquery.com/jquery-1.10.2.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;https://js.stripe.com/v2/&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+  Stripe.setPublishableKey('&lt;?php echo Configure::read('Stripe.TestPublishableKey'); ?&gt;');
+&lt;/script&gt;</code></pre>
+
+<p>You&#39;ll notice we include the <code>stripe.js</code> library, as well as set our publishable api (different from the secret key!). Now we&#39;ll create the following form:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+echo $this-&gt;Form-&gt;create('Order', array('class' =&gt; 'payment-form'));
+echo '&lt;span class=&quot;payment-errors&quot;&gt;&lt;/span&gt;';
+echo $this-&gt;Form-&gt;input('Order.number', array('label' =&gt; 'Card Number'));
+echo $this-&gt;Form-&gt;input('Order.cvc', array('label' =&gt; 'CVC'));
+echo $this-&gt;Form-&gt;input('Order.exp-month', array('label' =&gt; 'Expiration Month (MM)'));
+echo $this-&gt;Form-&gt;input('Order.exp-year', array('label' =&gt; 'Expiration Year (YYYY)'));
+echo $this-&gt;Form-&gt;end();
+?&gt;</code></pre>
+
+<p>We will not be submitting directly from this form to the server. Instead, we&#39;ll process it the following javascript (using the jQuery library) that you should place within <code>&lt;script&gt;&lt;/script&gt;</code> tags in your <code>app/View/Orders/checkout.ctp</code>:</p>
+
+<pre class="rainbow-code"><code data-language="javascript">jQuery(function($) {
+  $('.payment-form').submit(function(e) {
+    // Prevent the form from submitting with the default action
+    e.preventDefault();
+
+    var $form = $(this);
+
+    // Disable the submit button to prevent repeated clicks
+    $form.find('button').prop('disabled', true);
+
+    Stripe.card.createToken({
+      number: $('#OrderNumber').val(),
+      cvc: $('#OrderCvc').val(),
+      exp_month: $('#OrderExp-month').val(),
+      exp_year: $('#OrderExp-year').val()
+    }, stripeResponseHandler);
+  });
+});</code></pre>
+
+<p>When we create a form for checkout, we need to use a custom stripe token for the specific order. This token is made of the data from the user&#39;s credit card info etc., and helps keep the user&#39;s data away from our servers so that we do not have to handle privacy concerns. We created a token using <code>Stripe.card.createToken</code> and setup a specific response handler, <code>stripeResponseHandler</code>. Our <code>stripeResponseHandler</code> will do the heavy lifting of submitting to the site:</p>
+
+<pre class="rainbow-code"><code data-language="javascript">var stripeResponseHandler = function(status, response) {
+  var $form = $('.payment-form');
+
+  if (response.error) {
+    // Show the errors on the form
+    $form.find('.payment-errors').text(response.error.message);
+    $form.find('button').prop('disabled', false);
+  } else {
+    // token contains id, last4, and card type
+    var token = response.id;
+    // Reset form data we do not want to submit to the server
+    $('#OrderNumber, #OrderCvc, #OrderExp-month, #OrderExp-year').val(&quot;&quot;);
+    // Insert the token into the form so it gets submitted to the server
+    $form.append($('&lt;input type=&quot;hidden&quot; name=&quot;data[Order][stripeToken]&quot; /&gt;').val(token));
+    // and submit
+    $form.get(0).submit();
+  }
+};</code></pre>
+
+<p>Now lets add some debugging code to our controller action and submit it:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  public function checkout() {
+    if ($this-&gt;request-&gt;is('post')) {
+      debug($this-&gt;request-&gt;data);die;
+    }
+  }
+?&gt;</code></pre>
+
+<p>We should have output similar to the following:</p>
+
+<p><img src="http://cl.ly/image/2R2l3X0E1Q3M/Screen%20Shot%202013-12-15%20at%204.08.43%20AM.png" alt="http://cl.ly/image/2R2l3X0E1Q3M"></p>
+
+<h2>Server Integration</h2>
+
+<p>At this point, we have a stripeToken that can be used to charge a user <em>once</em>. We can do this with a small bit of PHP code:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  public function checkout() {
+    if ($this-&gt;request-&gt;is('post')) {
+      $data = array(
+        'amount' =&gt; '13.37',
+        'stripeToken' =&gt; $this-&gt;request-&gt;data('Order.stripeToken'),
+        'description' =&gt; 'CakeAdvent Calendar (large)'
+      );
+      $result = $this-&gt;Stripe-&gt;charge($data);
+      debug($result);die;
+    }
+  }
+?&gt;</code></pre>
+
+<p>For successful calls, the output would be as follows:</p>
+
+<p><img src="http://cl.ly/image/1O380a2U2c0x/Screen%20Shot%202013-12-15%20at%204.17.40%20AM.png" alt="http://cl.ly/image/1O380a2U2c0x"></p>
+
+<p>Unsuccessful calls would return an error message as a string. For example, re-using the token would result in the following output:</p>
+
+<p><img src="http://cl.ly/image/0h0n0m3s2V3z/Screen%20Shot%202013-12-15%20at%204.20.42%20AM.png" alt="http://cl.ly/image/0h0n0m3s2V3z"></p>
+
+<h2>Onwards and upwards</h2>
+
+<p>The above walked you through charging a user for a predefined amount. We can go forwards lots of ways:</p>
+
+<ul>
+<li>Build a cart system and use the amount there as the charge</li>
+<li>Submit <a href="https://stripe.com/docs/checkout#integration-simple-parameters">more user info</a>, such as name, address, etc.</li>
+<li>Create customers for the purposes of charging subscription fees</li>
+<li>Keep order histories on your site for later customer viewing</li>
+<li>Integrate this with a shipping api such as <a href="https://www.easypost.com/">EasyPost</a></li>
+<li>Keep your users in the loop using the <a href="https://www.twilio.com/">Twilio</a> api</li>
+</ul>
+
+<p>Setting up payment processing in CakePHP shouldn&#39;t ever be hard, so dive in and start making money today.</p>
+
+  </div>
+
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/15/payment-processing-using-stripe/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-15 01:19:00 -0500">15 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+
+</article>
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+
+					<aside class="widget widget_categories widget_search">
+							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+							<br />
+							<br />
+							<br />
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+
+								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
+
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2013/12/15/payment-processing-using-stripe/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/15/payment-processing-using-stripe/';
+				var disqus_title      = 'CakeAdvent: Payment Processing using Stripe';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			}
+
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		</script>
+	</body>
+</html>

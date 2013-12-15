@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-14T16:06:51-05:00</updated>
+ <updated>2013-12-15T04:42:31-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Payment Processing using Stripe]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/15/payment-processing-using-stripe/"/>
+   <updated>2013-12-15T01:19:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/15/payment-processing-using-stripe/</id>
+   <content type="html"><![CDATA[Making money with your website should be your primary concern, and this blog post will explain a simple, awesome way to do so]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Creating a custom session flash handler]]></title>

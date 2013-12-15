@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Payment Processing using Stripe",
+		"url": "/2013/12/15/payment-processing-using-stripe/",
+		"description": "Making money with your website should be your primary concern, and this blog post will explain a simple, awesome way to do so",
+		"tokens": ["awesome","blog","concern","explain","making","money","payment","post","primary","processing","simple","stripe","using","way","website","will"]
+	},
+	{
+		"type": "post",
 		"title": "Creating a custom session flash handler",
 		"url": "/2013/12/14/creating-a-custom-session-flash-handler/",
 		"description": "Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core.",
