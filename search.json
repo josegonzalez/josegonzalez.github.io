@@ -2,7 +2,7 @@
 	{
 		"type": "post",
 		"title": "Simpler CakePHP Events",
-		"url": "/2013/12/15/simpler-cakephp-events/",
+		"url": "/2013/12/16/simpler-cakephp-events/",
 		"description": "Making small changes to the event system workflow to enhance your productivity through annotations and simpler dispatching!",
 		"tokens": ["annotations","cakephp","changes","dispatching","enhance","event","events","making","productivity","simpler","small","system","workflow"]
 	},
