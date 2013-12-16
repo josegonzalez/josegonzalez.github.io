@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-15T04:42:31-05:00</updated>
+ <updated>2013-12-15T20:02:18-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Simpler CakePHP Events]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/15/simpler-cakephp-events/"/>
+   <updated>2013-12-15T18:15:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/15/simpler-cakephp-events/</id>
+   <content type="html"><![CDATA[Making small changes to the event system workflow to enhance your productivity through annotations and simpler dispatching!]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Payment Processing using Stripe]]></title>

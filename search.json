@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Simpler CakePHP Events",
+		"url": "/2013/12/15/simpler-cakephp-events/",
+		"description": "Making small changes to the event system workflow to enhance your productivity through annotations and simpler dispatching!",
+		"tokens": ["annotations","cakephp","changes","dispatching","enhance","event","events","making","productivity","simpler","small","system","workflow"]
+	},
+	{
+		"type": "post",
 		"title": "Payment Processing using Stripe",
 		"url": "/2013/12/15/payment-processing-using-stripe/",
 		"description": "Making money with your website should be your primary concern, and this blog post will explain a simple, awesome way to do so",
@@ -1394,6 +1401,18 @@
 		"title": "sessions",
 		"url": "/tags/sessions/",
 		"tokens": ["sessions"]
+	},
+  {
+		"type": "tag",
+		"title": "events",
+		"url": "/tags/events/",
+		"tokens": ["events"]
+	},
+  {
+		"type": "tag",
+		"title": "annotations",
+		"url": "/tags/annotations/",
+		"tokens": ["annotations"]
 	},
 	false
 ]
