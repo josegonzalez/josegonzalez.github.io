@@ -144,10 +144,16 @@ CYAN=&quot;\033[0;36m&quot;     # cyan
 DEPLOY_USER=&quot;deploy&quot;
 
 STAGING_SERVER=&quot;staging.example.com&quot;
+# This directory should contain:
+# - `current` directory: contains your git repository
+# - `shared` directory: can contain shared files and folders
 STAGING_DIR=&quot;/apps/staging/example.com&quot;
 STAGING_SSH_PORT=22
 
 PRODUCTION_SERVER=&quot;example.com&quot;
+# This directory should contain:
+# - `current` directory: contains your git repository
+# - `shared` directory: can contain shared files and folders
 PRODUCTION_DIR=&quot;/apps/production/example.com&quot;
 PRODUCTION_SSH_PORT=22</code></pre>
 
@@ -243,15 +249,15 @@ esac</code></pre>
     echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Checking out production branch\&quot; &amp;&amp;\
     git reset -q --hard origin/production &amp;&amp;\
     echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Clearing cache\&quot; &amp;&amp;\
-    sudo rm -rf ../deploy/shared/tmp/cache/models/* ../deploy/shared/tmp/cache/persistent/* ../deploy/shared/tmp/cache/views/* &amp;&amp;\
+    sudo rm -rf ../shared/tmp/cache/models/* ../shared/tmp/cache/persistent/* ../shared/tmp/cache/views/* &amp;&amp;\
     echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Creating tmp folders\&quot; &amp;&amp;\
-    sudo mkdir -p ../deploy/shared/tmp/cache/models ../deploy/shared/tmp/cache/persistent ../deploy/shared/tmp/cache/views ../deploy/shared/tmp/sessions ../deploy/shared/tmp/logs &amp;&amp;\
+    sudo mkdir -p ../shared/tmp/cache/models ../shared/tmp/cache/persistent ../shared/tmp/cache/views ../shared/tmp/sessions ../shared/tmp/logs &amp;&amp;\
     echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Making tmp writeable\&quot; &amp;&amp;\
-    sudo chmod -R 777 ../deploy/shared/tmp/* &amp;&amp;\
+    sudo chmod -R 777 ../shared/tmp/* &amp;&amp;\
     echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Removing old files and symlinks\&quot; &amp;&amp;\
     rm -rf app/webroot/test.php app/tmp &amp;&amp;\
     echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Symlinking tmp\&quot; &amp;&amp;\
-    ln -sf $STAGING_DIR/deploy/shared/tmp app/tmp&quot;
+    ln -sf $STAGING_DIR/shared/tmp app/tmp&quot;
 }</code></pre>
 
 <p><code>deploy_production</code> does the following:</p>
@@ -366,7 +372,7 @@ esac</code></pre>
 
 <h2>The output:</h2>
 
-<p><img src="http://cl.ly/image/15272R0k3Q3r/Screen%20Shot%202013-12-17%20at%205.13.41%20PM.png" alt="http://cl.ly/image/15272R0k3Q3r"></p>
+<p><img src="http://cl.ly/image/1x3F3L3c1m23/Screen%20Shot%202013-12-17%20at%205.20.34%20PM.png" alt="http://cl.ly/image/1x3F3L3c1m23"></p>
 
 <p>We now have a simple way of deploying our applications. No more nasty ssh+git-pull exercises.</p>
 
