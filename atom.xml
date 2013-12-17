@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-15T20:33:40-05:00</updated>
+ <updated>2013-12-17T17:18:29-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Deploy ALL the things using simple Bash scripts]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/17/deploy-all-the-things-with-bash/"/>
+   <updated>2013-12-17T05:51:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/17/deploy-all-the-things-with-bash/</id>
+   <content type="html"><![CDATA[Automate everything, including your deploys, using things as simple as a bash script]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Simpler CakePHP Events]]></title>

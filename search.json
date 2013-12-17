@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Deploy ALL the things using simple Bash scripts",
+		"url": "/2013/12/17/deploy-all-the-things-with-bash/",
+		"description": "Automate everything, including your deploys, using things as simple as a bash script",
+		"tokens": ["automate","bash","deploy","deploys","everything","including","script","scripts","simple","things","using"]
+	},
+	{
+		"type": "post",
 		"title": "Simpler CakePHP Events",
 		"url": "/2013/12/16/simpler-cakephp-events/",
 		"description": "Making small changes to the event system workflow to enhance your productivity through annotations and simpler dispatching!",
@@ -1413,6 +1420,18 @@
 		"title": "annotations",
 		"url": "/tags/annotations/",
 		"tokens": ["annotations"]
+	},
+  {
+		"type": "tag",
+		"title": "deploy",
+		"url": "/tags/deploy/",
+		"tokens": ["deploy"]
+	},
+  {
+		"type": "tag",
+		"title": "bash",
+		"url": "/tags/bash/",
+		"tokens": ["bash"]
 	},
 	false
 ]

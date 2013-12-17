@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>CakeAdvent: Deploy ALL the things using simple Bash scripts</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="Automate everything, including your deploys, using things as simple as a bash script" />
+		<meta name="keywords" content="cakephp, deploy, bash" />
+
+		<meta property="og:title" content="CakeAdvent: Deploy ALL the things using simple Bash scripts" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/17/deploy-all-the-things-with-bash/" />
+		<meta property="og:description" content="Automate everything, including your deploys, using things as simple as a bash script" />
+
+		<link rel="alternate" type="application/rss+xml" title="Deploy ALL the things using simple Bash scripts » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and Professional Troll</a></h2>
+				</hgroup>
+
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+
+      <h1 class="entry-title">
+        Deploy ALL the things using simple Bash scripts
+      </h1>
+
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Deploy ALL the things using simple Bash scripts!">
+          Comments
+        </a>
+      </div>
+
+  </header>
+
+  <div class="entry-content">
+
+<div class="series-note">
+
+<p>This entry is <strong>part 17</strong> of <strong>17</strong> in the series "CakeAdvent".</p>
+<ul>
+  <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
+
+  <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
+
+  <li>Part 3 - <a href="/2013/12/03/hacking-the-cakephp-dispatch-system/">Hacking the CakePHP Dispatch System</a></li>
+
+  <li>Part 4 - <a href="/2013/12/04/interactive-command-line-repl/">Interactive command-line REPL for CakePHP</a></li>
+
+  <li>Part 5 - <a href="/2013/12/05/objectifying-cakephp-2-0-applications/">Objectifying CakePHP 2.0 applications</a></li>
+
+  <li>Part 6 - <a href="/2013/12/06/building-service-classes/">Building Service Classes</a></li>
+
+  <li>Part 7 - <a href="/2013/12/07/a-quick-rundown-on-asset-compression/">A quick rundown on Asset Compression</a></li>
+
+  <li>Part 8 - <a href="/2013/12/08/composing-your-applications-from-plugins/">Composing your applications from plugins</a></li>
+
+  <li>Part 9 - <a href="/2013/12/09/simplifying-oauth-integration/">Simplifying OAuth integration</a></li>
+
+  <li>Part 10 - <a href="/2013/12/10/queue-in-scalable-applications/">Queue in scalable applications</a></li>
+
+  <li>Part 11 - <a href="/2013/12/11/giving-the-gift-of-cakephp-to-the-community/">Giving the gift of CakePHP to the Community</a></li>
+
+  <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
+
+  <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
+
+  <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
+
+  <li>Part 15 - <a href="/2013/12/15/payment-processing-using-stripe/">Payment Processing using Stripe</a></li>
+
+  <li>Part 16 - <a href="/2013/12/16/simpler-cakephp-events/">Simpler CakePHP Events</a></li>
+
+  <li>Part 17 - Deploy ALL the things using simple Bash scripts</li>
+</ul>
+
+</div>
+
+    <p>This is a post about simple CakePHP application deployment. We&#39;ll use the <code>bash</code> language to deploy our application.</p>
+
+<h2>Some setup</h2>
+
+<p>Let&#39;s start by defining a new bash file in the base of our repository called <code>deploy</code>:</p>
+
+<pre class="rainbow-code"><code data-language="shell">#!/bin/sh
+#
+# Deploy Script
+#
+# Makes heavy use of git features to manage quickly deploying
+# to both staging and production environments.
+#</code></pre>
+
+<p>You should execute the command <code>chmod +x deploy</code> in order to give it executable permissions. Next, lets add a few configuration variables:</p>
+
+<pre class="rainbow-code"><code data-language="shell"># Colors
+COLOR_OFF=&quot;\033[0m&quot;   # unsets color to term fg color
+RED=&quot;\033[0;31m&quot;      # red
+GREEN=&quot;\033[0;32m&quot;    # green
+YELLOW=&quot;\033[0;33m&quot;   # yellow
+MAGENTA=&quot;\033[0;35m&quot;  # magenta
+CYAN=&quot;\033[0;36m&quot;     # cyan
+
+DEPLOY_USER=&quot;deploy&quot;
+
+STAGING_SERVER=&quot;staging.example.com&quot;
+STAGING_DIR=&quot;/apps/staging/example.com&quot;
+STAGING_SSH_PORT=22
+
+PRODUCTION_SERVER=&quot;example.com&quot;
+PRODUCTION_DIR=&quot;/apps/production/example.com&quot;
+PRODUCTION_SSH_PORT=22</code></pre>
+
+<blockquote>
+<p>Having a deploy user is a good practice, and I recommend doing so in order to remove your own ssh user from the equation.</p>
+</blockquote>
+
+<p>We&#39;ve defined a few colors for use within our deploy process, as well as configuration for both staging and production. You can modify the paths and configuration as you see fit.</p>
+
+<h2>Meat and Latvian Potatos</h2>
+
+<p>Now lets add some meat to our deploy script. The following bit will control how the script reacts to different arguments:</p>
+
+<pre class="rainbow-code"><code data-language="shell">case $1 in
+  staging)
+    echo &quot;\n${GREEN}DEPLOYING APP TO STAGING${COLOR_OFF}\n&quot;
+
+    # Updates origin/staging to specified branch (default origin/master)
+    # and deploys it to staging_server
+    old_revision=`git rev-parse origin/staging`
+    tag_nonproduction staging $2
+    new_revision=`git rev-parse origin/staging`
+
+    deploy_staging
+    echo &quot;\n${CYAN}APP DEPLOYED!${COLOR_OFF}\n&quot;
+    ;;
+  production)
+    echo &quot;\n${GREEN}DEPLOYING APP TO PRODUCTION${COLOR_OFF}\n&quot;
+
+    # Deploys origin/production to production_server
+    old_revision=`git rev-parse origin/production`
+    tag_production
+    new_revision=`git rev-parse origin/production`
+
+    deploy_production
+
+    echo &quot;\n${CYAN}APP DEPLOYED!${COLOR_OFF}\n&quot;
+    ;;
+  restart_workers)
+    echo &quot;\n${GREEN}RESTARTING PRODUCTION WORKERS${COLOR_OFF}\n&quot;
+    restart_production_workers
+    echo &quot;\n${CYAN}WORKERS RESTARTED!${COLOR_OFF}\n&quot;
+    ;;
+  current)
+    environment=$2
+    if [ -e $2 ]; then
+      environment=&quot;production&quot;
+    fi
+
+    deployed_commit=`git rev-parse origin/$environment 2&gt;/dev/null`
+    if [[ &quot;$deployed_commit&quot; == *origin/* ]]; then
+      echo &quot;$environment: Nothing deployed&quot;
+    else
+      echo &quot;$environment: Deployed hash $deployed_commit&quot;
+    fi
+    ;;
+  *)
+    echo &quot;USAGE: $0 {staging|production|current|restart_workers}&quot;
+    exit
+    ;;
+esac</code></pre>
+
+<p>There are a few moving parts here, so lets review:</p>
+
+<ul>
+<li><code>deploy staging $BRANCH</code> will deploy a given branch to staging</li>
+<li><code>deploy production</code> will deploy <code>master</code> branch to production</li>
+<li><code>deploy current $ENVIRONMENT</code> will display whatever the current deployed version is to a given environment</li>
+<li><code>deploy restart_workers</code> will restart the production workers</li>
+<li>Deploys will change the branch associated with an environment to whatever it is you are deploying. For instance, deploying <code>test</code> branch to the staging environment will result in the <code>staging</code> branch becoming a pointer to the current commit on the <code>test</code> branch</li>
+</ul>
+
+<p>We still don&#39;t have many of the functions referenced, so lets define them. Please place them <em>before</em> the case/switch statement.</p>
+
+<h3><code>restart_production_workers</code></h3>
+
+<pre class="rainbow-code"><code data-language="shell">restart_production_workers() {
+  ssh -p $PRODUCTION_SSH_PORT $DEPLOY_USER@$PRODUCTION_SERVER &quot;cd $PRODUCTION_DIR/current &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Stopping workers \&quot; &amp;&amp;\
+    CAKE_ENV=production app/Console/cake CakeResque.cake_resque stop --all&gt;/dev/null &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Starting ${MAGENTA}[email, default]${COLOR_OFF} workers \&quot; &amp;&amp;\
+    CAKE_ENV=production app/Console/cake CakeResque.cake_resque start --workers 1 --queue email,default --interval 5&quot;
+}</code></pre>
+
+<p>This command is custom to my own setup. It will stop my CakeResque workers and restart them. Nothing too weird here. I have to define my <code>CAKE_ENV</code> as configuration for this app is controlled via an environment (which we&#39;ll discuss in a later post).</p>
+
+<h3><code>deploy_production</code></h3>
+
+<pre class="rainbow-code"><code data-language="shell">deploy_production() {
+  ssh -p $PRODUCTION_SSH_PORT $DEPLOY_USER@$PRODUCTION_SERVER &quot;cd $PRODUCTION_DIR/current &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Fetching changes\&quot; &amp;&amp;\
+    git fetch -q &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Checking out production branch\&quot; &amp;&amp;\
+    git reset -q --hard origin/production &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Clearing cache\&quot; &amp;&amp;\
+    sudo rm -rf ../deploy/shared/tmp/cache/models/* ../deploy/shared/tmp/cache/persistent/* ../deploy/shared/tmp/cache/views/* &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Creating tmp folders\&quot; &amp;&amp;\
+    sudo mkdir -p ../deploy/shared/tmp/cache/models ../deploy/shared/tmp/cache/persistent ../deploy/shared/tmp/cache/views ../deploy/shared/tmp/sessions ../deploy/shared/tmp/logs &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Making tmp writeable\&quot; &amp;&amp;\
+    sudo chmod -R 777 ../deploy/shared/tmp/* &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Removing old files and symlinks\&quot; &amp;&amp;\
+    rm -rf app/webroot/test.php app/tmp &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Symlinking tmp\&quot; &amp;&amp;\
+    ln -sf $STAGING_DIR/deploy/shared/tmp app/tmp&quot;
+}</code></pre>
+
+<p><code>deploy_production</code> does the following:</p>
+
+<ul>
+<li>Fetches all codebase changes</li>
+<li>Checks out the production branch</li>
+<li>Clears the tmp cache and rebuilds it</li>
+<li>Fixes all old and new symlinks</li>
+<li>Removes the <code>test.php</code> file, which doesn&#39;t belong in production</li>
+</ul>
+
+<h3><code>deploy_staging</code></h3>
+
+<pre class="rainbow-code"><code data-language="shell">deploy_staging() {
+  ssh -p $STAGING_SSH_PORT $DEPLOY_USER@$STAGING_SERVER &quot;cd $STAGING_DIR/current &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Fetching changes\&quot; &amp;&amp;\
+    git fetch -q &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Checking out staging branch\&quot; &amp;&amp;\
+    git reset -q --hard origin/staging &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Clearing cache\&quot; &amp;&amp;\
+    sudo rm -rf app/tmp/cache/models/* app/tmp/cache/persistent/* app/tmp/cache/views/* &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Creating tmp folders\&quot; &amp;&amp;\
+    sudo mkdir -p app/tmp/cache/models app/tmp/cache/persistent app/tmp/cache/views app/tmp/sessions app/tmp/logs &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Making tmp writeable\&quot; &amp;&amp;\
+    sudo chmod -R 777 app/tmp/* &amp;&amp;\
+    echo -e \&quot;${YELLOW}---&gt;${COLOR_OFF} Removing old files and symlinks\&quot; &amp;&amp;\
+    rm -f app/webroot/test.php
+}</code></pre>
+
+<p><code>deploy_staging</code> does the following:</p>
+
+<ul>
+<li>Fetches all codebase changes</li>
+<li>Checks out the staging branch</li>
+<li>Clears the tmp cache and rebuilds it</li>
+<li>Fixes all old and new symlinks</li>
+<li>Removes the <code>test.php</code> file, which doesn&#39;t belong in production</li>
+</ul>
+
+<p>Notably, we don&#39;t care about any downtime in staging, so all directory changes are done in-place as opposed to within a symlink.</p>
+
+<h3><code>tag_nonproduction</code></h3>
+
+<pre class="rainbow-code"><code data-language="shell">tag_nonproduction() {
+  verify_working_directory_clean
+
+  local branch=$2
+  if [ -e $2 ]; then
+    branch=&quot;master&quot;
+  fi
+
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Marking staging branch&quot;
+  git fetch -q
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Creating local staging branch&quot;
+  git branch -q -f $1 origin/$branch
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Pushing staging branch to origin&quot;
+  git push -q -f origin $1
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Deleting local staging branch&quot;
+  git branch -q -D $1
+}</code></pre>
+
+<p>Pretty straightforward. To tag the staging release, we:</p>
+
+<ul>
+<li>Verify a clean local working directory. We do much with the local repo, hence this necessary step.</li>
+<li>Create a local staging branch from whatever branch you specify</li>
+<li>Push the staging branch to your central repository</li>
+<li>Delete the local staging branch, as we don&#39;t need it.</li>
+</ul>
+
+<h3><code>production</code></h3>
+
+<pre class="rainbow-code"><code data-language="shell">tag_production() {
+  verify_working_directory_clean
+
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Pushing current master&quot;
+  git push -q origin master
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Fetching all changes&quot;
+  git fetch -q
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Creating local production branch&quot;
+  git branch -q -f production origin/master
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Pushing production branch to origin&quot;
+  git push -q -f origin production
+  echo &quot;${YELLOW}---&gt;${COLOR_OFF} Deleting local production branch&quot;
+  git branch -q -D production
+}</code></pre>
+
+<p>Also straightforward. To tag the production release, we:</p>
+
+<ul>
+<li>Verify a clean local working directory. We do much with the local repo, hence this necessary step.</li>
+<li>Push local changes up to the central repository, as that&#39;s likely what the developer desired.</li>
+<li>Create a local production branch from master</li>
+<li>Push the production branch to your central repository</li>
+<li>Delete the local production branch, as we don&#39;t need it.</li>
+</ul>
+
+<h3><code>verify_working_directory_clean</code></h3>
+
+<pre class="rainbow-code"><code data-language="shell">verify_working_directory_clean() {
+  git status | grep &quot;working directory clean&quot; &amp;&gt; /dev/null
+  if [ ! $? -eq 0 ]; then # working directory is NOT clean
+    echo &quot;${RED}WARNING: You have uncomitted changes, you may have forgotten something${COLOR_OFF}\n&quot;
+    exit
+  fi
+}</code></pre>
+
+<p>We need to verify the current working directory because we don&#39;t want to accidentally break the local repository state. If everything has been pushed, then there is no danger in making potentially bad changes locally.</p>
+
+<p>This also ensures that a developer deploys the code they think they should be deploying. For instance, if you make a change but forget to commit it, this check will give the develop a simple reminder to do so first.</p>
+
+<h2>The output:</h2>
+
+<p><img src="http://cl.ly/image/15272R0k3Q3r/Screen%20Shot%202013-12-17%20at%205.13.41%20PM.png" alt="http://cl.ly/image/15272R0k3Q3r"></p>
+
+<p>We now have a simple way of deploying our applications. No more nasty ssh+git-pull exercises.</p>
+
+  </div>
+
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/17/deploy-all-the-things-with-bash/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-17 05:51:00 -0500">17 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+
+</article>
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+
+					<aside class="widget widget_categories widget_search">
+							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+							<br />
+							<br />
+							<br />
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+
+								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
+
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2013/12/17/deploy-all-the-things-with-bash/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/17/deploy-all-the-things-with-bash/';
+				var disqus_title      = 'CakeAdvent: Deploy ALL the things using simple Bash scripts';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			}
+
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		</script>
+	</body>
+</html>
