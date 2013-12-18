@@ -119,7 +119,11 @@
 
 </div>
 
-    <p>Here are a few tips that will help guide you on your testing path:</p>
+    <blockquote>
+<p>Note: I have typically approached testing as <code>TODO: test this</code>. Meaning I cowboy code a lot. So I take lots of shortcuts. Keep that in mind as you read this post.</p>
+</blockquote>
+
+<p>Here are a few tips that will help guide you on your testing path:</p>
 
 <h2>Use composer to install PHPUnit</h2>
 
@@ -142,7 +146,7 @@ App::import('Vendor', array('file' =&gt; 'autoload'));
 
 <p>Presto-chango! You now have PHPUnit setup and ready to go.</p>
 
-<h2>Don&#39;t test your controllers</h2>
+<h2>Don&#39;t test your controllers (mostly)</h2>
 
 <p>I <em>hate</em> testing my controllers, because they all look like this:</p>
 
@@ -160,6 +164,8 @@ class OrdersController extends AppController {
 <p>I use exceptions to handle error states, which makes my controller logic look a bit plain. Instead, I test the output of the methods I call. Test Components, Behaviors and Models, not controllers.</p>
 
 <blockquote>
+<p>Note: This does not mean you should ignore controller testing altogether. Rather, you want to avoid testing things that would be outside of the scope of your function, such as testing that authentication works in all your controller tests. That should be factored out into it&#39;s own set of tests, otherwise you are polluting your application logic tests.</p>
+
 <p>Testing controller logic requires mocking out the full request/response cycle, which is a pain to do. You retain some sanity if you don&#39;t do that.</p>
 </blockquote>
 
