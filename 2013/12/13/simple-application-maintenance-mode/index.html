@@ -78,7 +78,7 @@
 
 <div class="series-note">
 
-<p>This entry is <strong>part 13</strong> of <strong>17</strong> in the series "CakeAdvent".</p>
+<p>This entry is <strong>part 13</strong> of <strong>18</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
 
@@ -113,6 +113,8 @@
   <li>Part 16 - <a href="/2013/12/16/simpler-cakephp-events/">Simpler CakePHP Events</a></li>
 
   <li>Part 17 - <a href="/2013/12/17/deploy-all-the-things-with-bash/">Deploy ALL the things using simple Bash scripts</a></li>
+
+  <li>Part 18 - <a href="/2013/12/18/cakephp-testing-102/">CakePHP Testing 102</a></li>
 </ul>
 
 </div>
@@ -122,7 +124,7 @@
 <p>We&#39;ll need to create a custom Dispatch Filter:</p>
 
 <pre class="rainbow-code"><code data-language="php">&lt;?php
-// In Lib/Routing/Filters/MaintenanceMode.php
+// In Lib/Routing/Filter/MaintenanceMode.php
 App::uses('DispatcherFilter', 'Routing');
 class MaintenanceMode extends DispatcherFilter {
   public function beforeDispatch(CakeEvent $event) {
@@ -142,7 +144,7 @@ class MaintenanceMode extends DispatcherFilter {
 
 <pre class="rainbow-code"><code data-language="php">&lt;?php
 // in our bootstrap.php
-App::uses('MaintenanceMode', 'Lib/Routing/Filters');
+App::uses('MaintenanceMode', 'Lib/Routing/Filter');
 Configure::write('Dispatcher.filters', array(
   'AssetDispatcher',
   'CacheDispatcher',

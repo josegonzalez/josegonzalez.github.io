@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-17T17:25:21-05:00</updated>
+ <updated>2013-12-18T15:09:24-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[CakePHP Testing 102]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/18/cakephp-testing-102/"/>
+   <updated>2013-12-18T14:17:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/18/cakephp-testing-102/</id>
+   <content type="html"><![CDATA[Some personal thoughts on testing your CakePHP code to get maximum efficiency]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Deploy ALL the things using simple Bash scripts]]></title>

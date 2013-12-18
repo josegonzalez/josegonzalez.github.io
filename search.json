@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "CakePHP Testing 102",
+		"url": "/2013/12/18/cakephp-testing-102/",
+		"description": "Some personal thoughts on testing your CakePHP code to get maximum efficiency",
+		"tokens": ["cakephp","code","efficiency","get","maximum","personal","testing","thoughts"]
+	},
+	{
+		"type": "post",
 		"title": "Deploy ALL the things using simple Bash scripts",
 		"url": "/2013/12/17/deploy-all-the-things-with-bash/",
 		"description": "Automate everything, including your deploys, using things as simple as a bash script",
@@ -1432,6 +1439,12 @@
 		"title": "bash",
 		"url": "/tags/bash/",
 		"tokens": ["bash"]
+	},
+  {
+		"type": "tag",
+		"title": "testing",
+		"url": "/tags/testing/",
+		"tokens": ["testing"]
 	},
 	false
 ]
