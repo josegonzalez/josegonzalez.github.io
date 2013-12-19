@@ -171,24 +171,22 @@ $exception-&gt;setRoute('account/index');
 throw $exception;
 ?&gt;</code></pre>
 
-<blockquote>
-<p>This isn&#39;t very fluent api. A possible solution would be to do something like:
-    &lt;?php
-    //  app /Lib/Exception/AppException.php
-    class AppException extends CakeException {
-      public function <strong>construct($message, $code = 0) {
-        parent::</strong>construct($message, $code);
-        return $this;
-      }</p>
-</blockquote>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">  public function setRoute($route = null) {
-    $this-&gt;_attributes['route'] = $route;
+<p>Note: This isn&#39;t very fluent api. A possible solution would be to do something like:
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+//  app /Lib/Exception/AppException.php
+class AppException extends CakeException {
+  public function <strong>construct($message, $code = 0) {
+    parent::</strong>construct($message, $code);
+    return $this;
+  }</p>
+
+<p>public function setRoute($route = null) {
+    $this-&gt;_attributes[&#39;route&#39;] = $route;
     return $this;
   }
 }
-</code></pre></div>
-<p>and then simply do:
-    throw new AppException(&quot;Some error message&quot;)-&gt;setRoute(&#39;account/index&#39;);</p>
+?&gt;</code></pre>
+and then simply do <code>throw new AppException(&quot;Some error message&quot;)-&gt;setRoute(&#39;account/index&#39;);</code>.</p>
 
 <p>Next, you&#39;ll want to create a custom <code>ErrorHandler</code>. CakePHP allows you to override the built-in one, and while we want most of the original internals, we&#39;ll override for our very own exception:</p>
 
