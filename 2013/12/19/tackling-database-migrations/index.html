@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width">
+		<title>CakeAdvent: Tackling database migrations with one neat trick</title>
+		<link rel="profile" href="http://gmpg.org/xfn/11">
+		<!--[if lt IE 9]>
+			<script src="/javascripts/html5.js" type="text/javascript"></script>
+		<![endif]-->
+		<meta name="robots" content="all" />
+		<meta name="robots" content="index, follow" />
+		<meta name="revisit-after" content="7 days" />
+		<meta name="version" content="1.0" />
+
+		<meta name="description" content="We look at creating a Cakeshell to generate migration files for the CakeDC Migrations plugin" />
+		<meta name="keywords" content="cakephp, migrations" />
+
+		<meta property="og:title" content="CakeAdvent: Tackling database migrations with one neat trick" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/19/tackling-database-migrations/" />
+		<meta property="og:description" content="We look at creating a Cakeshell to generate migration files for the CakeDC Migrations plugin" />
+
+		<link rel="alternate" type="application/rss+xml" title="Tackling database migrations with one neat trick » Feed" href="/atom.xml">
+		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
+		<!--[if lt IE 9]>
+			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+		<![endif]-->
+
+			<script type="text/javascript">
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', 'UA-8668344-3']);
+				_gaq.push(['_trackPageview']);
+			</script>
+
+	</head>
+
+	<body class="home  ">
+		<div class="site">
+			<header class="site-header" role="banner">
+				<hgroup>
+					<h1 class="site-title">
+						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+					</h1>
+					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and Professional Troll</a></h2>
+				</hgroup>
+
+			</header>
+
+			<div class="wrapper">
+				<div class="site-content">
+					<div role="main">
+						<article class="type-post">
+  <header class="entry-header">
+
+      <h1 class="entry-title">
+        Tackling database migrations with one neat trick
+      </h1>
+
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Tackling database migrations with one neat trick!">
+          Comments
+        </a>
+      </div>
+
+  </header>
+
+  <div class="entry-content">
+
+<div class="series-note">
+
+<p>This entry is <strong>part 19</strong> of <strong>19</strong> in the series "CakeAdvent".</p>
+<ul>
+  <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
+
+  <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
+
+  <li>Part 3 - <a href="/2013/12/03/hacking-the-cakephp-dispatch-system/">Hacking the CakePHP Dispatch System</a></li>
+
+  <li>Part 4 - <a href="/2013/12/04/interactive-command-line-repl/">Interactive command-line REPL for CakePHP</a></li>
+
+  <li>Part 5 - <a href="/2013/12/05/objectifying-cakephp-2-0-applications/">Objectifying CakePHP 2.0 applications</a></li>
+
+  <li>Part 6 - <a href="/2013/12/06/building-service-classes/">Building Service Classes</a></li>
+
+  <li>Part 7 - <a href="/2013/12/07/a-quick-rundown-on-asset-compression/">A quick rundown on Asset Compression</a></li>
+
+  <li>Part 8 - <a href="/2013/12/08/composing-your-applications-from-plugins/">Composing your applications from plugins</a></li>
+
+  <li>Part 9 - <a href="/2013/12/09/simplifying-oauth-integration/">Simplifying OAuth integration</a></li>
+
+  <li>Part 10 - <a href="/2013/12/10/queue-in-scalable-applications/">Queue in scalable applications</a></li>
+
+  <li>Part 11 - <a href="/2013/12/11/giving-the-gift-of-cakephp-to-the-community/">Giving the gift of CakePHP to the Community</a></li>
+
+  <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
+
+  <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
+
+  <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
+
+  <li>Part 15 - <a href="/2013/12/15/payment-processing-using-stripe/">Payment Processing using Stripe</a></li>
+
+  <li>Part 16 - <a href="/2013/12/16/simpler-cakephp-events/">Simpler CakePHP Events</a></li>
+
+  <li>Part 17 - <a href="/2013/12/17/deploy-all-the-things-with-bash/">Deploy ALL the things using simple Bash scripts</a></li>
+
+  <li>Part 18 - <a href="/2013/12/18/cakephp-testing-102/">CakePHP Testing 102</a></li>
+
+  <li>Part 19 - Tackling database migrations with one neat trick</li>
+</ul>
+
+</div>
+
+    <p>Database schema migrations are a tricky topic. Luckily, CakePHP has the excellent <a href="https://github.com/CakeDC/migrations">Migrations plugin by CakeDC</a>, but creating a new migration file is often obtuse. Rather than diffing the schema, or trying to manually create it, lets automate some of the process with a custom Cakeshell</p>
+
+<h2>Setup</h2>
+
+<p>First up, we&#39;ll install the <a href="https://github.com/CakeDC/migrations">Migrations plugin</a>. Run the following command in your shell to install it via composer:</p>
+
+<pre class="rainbow-code"><code data-language="shell">composer require cakedc/migrations 2.2.*</code></pre>
+
+<p>Next, lets enable it in our <code>app/Config/bootstrap.php</code>:</p>
+
+<pre class="rainbow-code"><code data-language="shell">echo -e &quot;\nApp::import('Vendor', array('file' =&gt; 'autoload'));&quot; &gt;&gt; app/Config/bootstrap.php;
+echo -e &quot;\nCakePlugin::loadAll();&quot; &gt;&gt; app/Config/bootstrap.php;</code></pre>
+
+<p>Now that it is enabled, we will setup the initial database migrations needed for the plugin itself:</p>
+
+<pre class="rainbow-code"><code data-language="shell">app/Console/cake Migrations.migration run all -p Migrations</code></pre>
+
+<h2>CLI Migration creation</h2>
+
+<blockquote>
+<p>tl;dr Skip this section and copy the contents of <a href="https://gist.github.com/josegonzalez/e800ea3a7cc3db3ca56a">this gist</a> to app/Console/Command/MigrationGeneratorShell.php.</p>
+</blockquote>
+
+<p>At the moment, there is no way to create migrations directly from the command line. Let&#39;s build a way to do so!</p>
+
+<p>Create a file in the path <code>app/Console/Command/MigrationGeneratorShell.php</code> with the following content:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('AppShell', 'Console/Command');
+class MigrationGeneratorShell extends AppShell {
+?&gt;</code></pre>
+
+<p>There isn&#39;t much here. We&#39;ll want the following interface to the shell:</p>
+
+<pre class="rainbow-code"><code data-language="shell"># creates a migration that adds a user_id to the testers table
+app/Console/cake migration_generator create add_user_id_to_tester user_id:integer:index</code></pre>
+
+<p>So we need to add a few methods:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  public function create() {
+  }
+
+  public function getOptionParser() {
+    $parser = parent::getOptionParser();
+    return $parser-&gt;description(
+        'The Migration shell.' .
+        '')
+      -&gt;addSubcommand('Create', array(
+        'help' =&gt; __('Create a migration file.')));
+  }
+?&gt;</code></pre>
+
+<p>We&#39;re going to support the following methods:</p>
+
+<ul>
+<li>add fields to a table</li>
+<li>remove fields from a table</li>
+<li>create a join table</li>
+<li>create a table</li>
+<li>drop a table</li>
+</ul>
+
+<p>So we&#39;ll add the following content to our <code>create()</code> function:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  public function create() {
+    $fileName = array_shift($this-&gt;args);
+    if (preg_match('/^(add|remove)_.*_(?:to|from)_(.*)/', $fileName, $matches)) {
+      $method = '_' . $matches[1] . 'Fields';
+      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
+    } elseif (preg_match('/^(join)_(.*)_(?:with)_(.*)/', $fileName, $matches)) {
+      $method = '_createJoinTable';
+      $tables = array($matches[2], $matches[3]);
+    } elseif (preg_match('/^(create)_(.*)/', $fileName, $matches)) {
+      $method = '_createTable';
+      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
+    } elseif (preg_match('/^(remove)_(.*)/', $fileName, $matches)) {
+      $method = '_dropTable';
+      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
+    }
+  }
+?&gt;</code></pre>
+
+<p>Now that we know what methods we&#39;re going to support, and what tables they will apply to, we need some field parsing magic. Below is a semi-intelligent way of getting specified fields, according to our cli schema of <code>fieldName:type:indexType</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  protected function _getFields() {
+    $fields = array();
+    $indexes = array();
+    foreach ($this-&gt;args as $field) {
+      if (preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?/', $field, $matches)) {
+        $fields[$matches[1]] = array(
+          'type' =&gt; 'string',
+          'null' =&gt; false,
+          'default' =&gt; null,
+          'key' =&gt; null,
+        );
+
+        if (empty($matches[2])) {
+          $fields[$matches[1]]['type'] = $matches[2];
+        }
+        if (empty($matches[3])) {
+          $fields[$matches[1]]['key'] = $matches[3];
+        }
+
+        if (!in_array($fields[$matches[1]]['type'], $this-&gt;_validTypes)) {
+          switch ($matches[1]) {
+            case 'id':
+              $fields[$matches[1]]['type'] = 'integer';
+              break;
+            case 'created':
+            case 'modified':
+            case 'updated':
+              $fields[$matches[1]]['type'] = 'datetime';
+              break;
+            default:
+              $fields[$matches[1]]['type'] = 'string';
+          }
+        }
+
+        switch ($fields[$matches[1]]['type']) {
+          case 'primary_key':
+            $indexes['PRIMARY'] = array('column' =&gt; $matches[1], 'unique' =&gt; 1);
+            $fields[$matches[1]]['key'] = 'primary';
+          case 'string':
+            $fields[$matches[1]]['length'] = 255;
+            break;
+          case 'integer':
+            $fields[$matches[1]]['length'] = 11;
+            break;
+          case 'biginteger':
+            $fields[$matches[1]]['length'] = 20;
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    if (!empty($indexes)) {
+      $fields['indexes'] = $indexes;
+    }
+    return $fields;
+  }
+?&gt;</code></pre>
+
+<p>Now lets add the logic for how retrieved fields act within the migration file itself. Note that because we are having a very quick pass at this, both <code>up</code> and <code>down</code> schema migrations will not be implemented in all cases. Certainly there are ways to improve this as well!</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+  protected function _createTable($table) {
+    $fields = $this-&gt;_getFields();
+    return array(
+      'up' =&gt; array('create_table' =&gt; array($table =&gt; $fields)),
+      'down' =&gt; array('drop_table' =&gt; array($table)),
+    );
+  }
+
+  protected function _dropTable($table) {
+    $this-&gt;out('The `down` step must be manually created');
+    return array(
+      'up' =&gt; array('drop_table' =&gt; array($table)),
+      'down' =&gt; array('create_table' =&gt; array()),
+    );
+  }
+
+  protected function _createJoinTable($tables) {
+    $fields = $this-&gt;_getFields();
+    sort($tables);
+
+    $defaults = array(
+      'type' =&gt; 'integer',
+      'null' =&gt; false,
+      'default' =&gt; null,
+      'key' =&gt; null,
+    );
+    foreach ($tables as $i =&gt; $table) {
+      $tableName = Inflector::tableize(Inflector::pluralize($table));
+      $fieldName = Inflector::underscore(Inflector::singularize($tableName)) . '_id';
+      $tables[$i] = $tableName;
+      if (isset($fields[$fieldName])) {
+        $fields[$fieldName] = array_merge($defaults, $fields[$fieldName]);
+      } else {
+        $fields[$fieldName] = $defaults;
+      }
+    }
+
+    $joinTable = implode('_', $tables);
+    return array(
+      'up' =&gt; array('create_table' =&gt; array($joinTable =&gt; $fields)),
+      'down' =&gt; array('drop_table' =&gt; array($joinTable)),
+    );
+  }
+
+  protected function _addFields($table) {
+    $fields = $this-&gt;_getFields();
+    return array(
+      'up' =&gt; array('create_field' =&gt; array($table =&gt; $fields)),
+      'down' =&gt; array('drop_field' =&gt; array($table =&gt; array_keys($fields))),
+    );
+  }
+
+  protected function _removeFields($table) {
+    $this-&gt;out('The `down` step must be manually created');
+    $fields = $this-&gt;_getFields();
+    return array(
+      'up' =&gt; array('drop_field' =&gt; array($table =&gt; array_keys($fields))),
+      'down' =&gt; array('create_field' =&gt; array()),
+    );
+  }
+
+?&gt;</code></pre>
+
+<p>And now for the glue to create the file. We need a single method to create the file contents. Note that you&#39;ll need to copy the <code>migration.ctp</code> from the migrations plugin into <code>app/Console/Templates/migration.ctp</code> for this to work:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+/**
+ * Include and generate a template string based on a template file
+ *
+ * @param string $template Template file name
+ * @param array $vars List of variables to be used on tempalte
+ * @return string
+ */
+  private function __generateTemplate($template, $vars) {
+    extract($vars);
+    ob_start();
+    ob_implicit_flush(0);
+    include (dirname(__FILE__) . DS . 'Templates' . DS . $template . '.ctp');
+    $content = ob_get_clean();
+
+    return $content;
+  }
+?&gt;</code></pre>
+
+<p>Add the following to the end of your <code>create</code> method:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+    $class = Inflector::classify($fileName);
+    $migration = $this-&gt;$method($tables);
+    $content = var_export($migration);
+    $this-&gt;path = APP . 'Config' . DS . 'Migration' . DS;
+
+    $version = gmdate('U');
+    $content = $this-&gt;__generateTemplate('migration', array('name' =&gt; $class, 'class' =&gt; $class, 'migration' =&gt; $content));
+    $path = $this-&gt;path . $version . '_' . strtolower($fileName) . '.php';
+    $File = new File($path, true);
+    $this-&gt;out('File created at ' . $path);
+    return $File-&gt;write($content);
+?&gt;</code></pre>
+
+<h2>Create a schema file</h2>
+
+<pre class="rainbow-code"><code data-language="shell">app/Console/cake migration_generator create create_users id:primary_key name:string created:datetime modified:datetime</code></pre>
+
+<p>Success! You should have a new file in <code>app/Config/Migration</code> with your migrations in it. Now you can run them:</p>
+
+<pre class="rainbow-code"><code data-language="shell">app/Console/cake Migrations.migration run all</code></pre>
+
+<h2>More notes</h2>
+
+<p>The <a href="https://github.com/CakeDC/migrations">CakeDC Migrations readme</a> is pretty comprehensive in terms of what it supports. I personally like using <code>app/Console/cake Migrations.migration status</code> to check on the status of my migrations in production.</p>
+
+<p>You should definitely look into using <a href="https://github.com/CakeDC/migrations#callbacks">migration callbacks</a>. Callbacks are a simple way of populating your production database with relevant information before or after a database migration. For instance, if you are creating a new name field that combines all the users names, you might want to run an update statement in the <code>afterMigration</code> callback to populate that field for all existing users.</p>
+
+<p>I&#39;ve hooked up migrations into the deploy process of most of my applications. It&#39;s pretty trivial to run migrations automatically - just do <code>run all</code> - and there is no reason to not do so after an application deployment.</p>
+
+  </div>
+
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/19/tackling-database-migrations/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-19 00:54:00 -0500">19 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+
+</article>
+
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+
+					</div>
+				</div>
+				<div class="widget-area" role="complementary">
+
+					<aside class="widget widget_categories widget_search">
+							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+							<br />
+							<br />
+							<br />
+						<h3 class="widget-title">Categories</h3>
+						<ul>
+
+								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+
+								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
+
+								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+
+								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
+
+								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+
+								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+
+								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+
+								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+
+						</ul>
+					</aside>
+
+				</div>
+			</div>
+			<footer class="colophon" role="contentinfo">
+				<div class="site-info">
+					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+				</div>
+			</footer>
+		</div>
+
+		<script type="text/javascript" src="/javascripts/style.js"></script>
+		<script type="text/javascript">
+
+			if ($('#disqus_thread').length) {
+				var disqus_shortname  = 'josediazgonzalez';
+				var disqus_identifier = '/2013/12/19/tackling-database-migrations/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/19/tackling-database-migrations/';
+				var disqus_title      = 'CakeAdvent: Tackling database migrations with one neat trick';
+
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			}
+
+				(function() {
+					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		</script>
+	</body>
+</html>

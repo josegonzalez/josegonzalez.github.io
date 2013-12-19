@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Tackling database migrations with one neat trick",
+		"url": "/2013/12/19/tackling-database-migrations/",
+		"description": "We look at creating a Cakeshell to generate migration files for the CakeDC Migrations plugin",
+		"tokens": ["cakedc","cakeshell","creating","database","files","generate","look","migration","migrations","neat","one","plugin","tackling","trick"]
+	},
+	{
+		"type": "post",
 		"title": "CakePHP Testing 102",
 		"url": "/2013/12/18/cakephp-testing-102/",
 		"description": "Some personal thoughts on testing your CakePHP code to get maximum efficiency",
@@ -1445,6 +1452,12 @@
 		"title": "testing",
 		"url": "/tags/testing/",
 		"tokens": ["testing"]
+	},
+  {
+		"type": "tag",
+		"title": "migrations",
+		"url": "/tags/migrations/",
+		"tokens": ["migrations"]
 	},
 	false
 ]
