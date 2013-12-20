@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Application Environment Configuration",
+		"url": "/2013/12/20/application-environment-configuration/",
+		"description": "Specifying application configuration doesn't have to be hard, and here are three ways to do it!",
+		"tokens": ["application","configuration","environment","hard","specifying","three","ways"]
+	},
+	{
+		"type": "post",
 		"title": "Tackling database migrations with one neat trick",
 		"url": "/2013/12/19/tackling-database-migrations/",
 		"description": "We look at creating a Cakeshell to generate migration files for the CakeDC Migrations plugin",
