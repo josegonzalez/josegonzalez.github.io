@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-20T11:19:17-05:00</updated>
+ <updated>2013-12-21T17:08:27-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Building a Behavior with CakePHP]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/"/>
+   <updated>2013-12-21T14:52:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/</id>
+   <content type="html"><![CDATA[Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `delete_at` field]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Application Environment Configuration]]></title>

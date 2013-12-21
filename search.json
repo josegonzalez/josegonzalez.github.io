@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Building a Behavior with CakePHP",
+		"url": "/2013/12/21/building-a-behavior-with-cakephp/",
+		"description": "Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `delete_at` field",
+		"tokens": ["behavior","building","cakephp","covering","creating","creation","delete_at","field","handle","plugin","tests","unit","writing"]
+	},
+	{
+		"type": "post",
 		"title": "Application Environment Configuration",
 		"url": "/2013/12/20/application-environment-configuration/",
 		"description": "Specifying application configuration doesn't have to be hard, and here are three ways to do it!",
