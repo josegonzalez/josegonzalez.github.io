@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Deploying a CakePHP application to Heroku",
+		"url": "/2013/12/22/deploying-a-cakephp-application-to-heroku/",
+		"description": "Heroku is a popular place to try out small experiments in CakePHP, so I decided to document the steps necessary for a successful Heroku integration.",
+		"tokens": ["application","cakephp","decided","deploying","document","experiments","heroku","integration","necessary","place","popular","small","steps","successful","try"]
+	},
+	{
+		"type": "post",
 		"title": "Building a Behavior with CakePHP",
 		"url": "/2013/12/21/building-a-behavior-with-cakephp/",
 		"description": "Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field",

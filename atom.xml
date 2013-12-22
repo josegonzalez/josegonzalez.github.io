@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-21T17:26:30-05:00</updated>
+ <updated>2013-12-22T15:42:49-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Deploying a CakePHP application to Heroku]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/22/deploying-a-cakephp-application-to-heroku/"/>
+   <updated>2013-12-22T15:18:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/22/deploying-a-cakephp-application-to-heroku/</id>
+   <content type="html"><![CDATA[Heroku is a popular place to try out small experiments in CakePHP, so I decided to document the steps necessary for a successful Heroku integration.]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Building a Behavior with CakePHP]]></title>
