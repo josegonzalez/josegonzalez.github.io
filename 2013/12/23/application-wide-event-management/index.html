@@ -11,7 +11,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width">
-		<title>CakeAdvent: Building Service Classes</title>
+		<title>CakeAdvent: Application-wide event management</title>
 		<link rel="profile" href="http://gmpg.org/xfn/11">
 		<!--[if lt IE 9]>
 			<script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -21,21 +21,21 @@
 		<meta name="revisit-after" content="7 days" />
 		<meta name="version" content="1.0" />
 
-		<meta name="description" content="Building complex pages that seem to span hundreds of lines of Controller/Model code? Write Service classes for greater good!" />
-		<meta name="keywords" content="cakephp, service-oriented-architecture, refactoring" />
+		<meta name="description" content="Triggering global CakePHP events isn't difficult, and this tutorial shows you how to do it." />
+		<meta name="keywords" content="cakephp, events" />
 
-		<meta property="og:title" content="CakeAdvent: Building Service Classes" />
+		<meta property="og:title" content="CakeAdvent: Application-wide event management" />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/06/building-service-classes/" />
-		<meta property="og:description" content="Building complex pages that seem to span hundreds of lines of Controller/Model code? Write Service classes for greater good!" />
+		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/23/application-wide-event-management/" />
+		<meta property="og:description" content="Triggering global CakePHP events isn't difficult, and this tutorial shows you how to do it." />
 
 		<meta name="twitter:card" content="summary">
 		<meta name="twitter:site" content="@savant">
 		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="CakeAdvent: Building Service Classes" />
-		<meta name="twitter:description" content="Building complex pages that seem to span hundreds of lines of Controller/Model code? Write Service classes for greater good!" />
+		<meta name="twitter:title" content="CakeAdvent: Application-wide event management" />
+		<meta name="twitter:description" content="Triggering global CakePHP events isn't difficult, and this tutorial shows you how to do it." />
 
-		<link rel="alternate" type="application/rss+xml" title="Building Service Classes » Feed" href="/atom.xml">
+		<link rel="alternate" type="application/rss+xml" title="Application-wide event management » Feed" href="/atom.xml">
 		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
 		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
 		<!--[if lt IE 9]>
@@ -69,11 +69,11 @@
   <header class="entry-header">
 
       <h1 class="entry-title">
-        Building Service Classes
+        Application-wide event management
       </h1>
 
       <div class="comments-link">
-        <a href="#comments" title="Comment on Building Service Classes!">
+        <a href="#comments" title="Comment on Application-wide event management!">
           Comments
         </a>
       </div>
@@ -84,7 +84,7 @@
 
 <div class="series-note">
 
-<p>This entry is <strong>part 6</strong> of <strong>23</strong> in the series "CakeAdvent".</p>
+<p>This entry is <strong>part 23</strong> of <strong>23</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
 
@@ -96,7 +96,7 @@
 
   <li>Part 5 - <a href="/2013/12/05/objectifying-cakephp-2-0-applications/">Objectifying CakePHP 2.0 applications</a></li>
 
-  <li>Part 6 - Building Service Classes</li>
+  <li>Part 6 - <a href="/2013/12/06/building-service-classes/">Building Service Classes</a></li>
 
   <li>Part 7 - <a href="/2013/12/07/a-quick-rundown-on-asset-compression/">A quick rundown on Asset Compression</a></li>
 
@@ -130,131 +130,113 @@
 
   <li>Part 22 - <a href="/2013/12/22/deploying-a-cakephp-application-to-heroku/">Deploying a CakePHP application to Heroku</a></li>
 
-  <li>Part 23 - <a href="/2013/12/23/application-wide-event-management/">Application-wide event management</a></li>
+  <li>Part 23 - Application-wide event management</li>
 </ul>
 
 </div>
 
-    <blockquote>
-<p>The following can apply to any framework or application. I actually took the code sample from my job&#39;s Symfony application.</p>
-</blockquote>
+    <p>Today&#39;s post is a simple, application-wide event manager. Listening and firing events usually requires some thought as to where the event should be attached. Do we want it on a model? What if I make a custom class? What if I don&#39;t have access to something because I am in a plugin?</p>
 
-<p>One of the things I keep finding in my applications are, regardless of my desire to move as much as possible into the model, the controller layer still ends up being hundreds of lines long. I retrieve data, check it against the request, retrieve more data conditionally, send tracking requests to backend services, start ab tests etc. And we haven&#39;t even talked about responding to multiple request content types.</p>
+<p>One thing I do is make a generic event dispatcher that can be used everywhere. Here&#39;s how you can do the same.</p>
 
-<p>For any reasonably complex application, you will eventually get to the point where you have controller actions and model methods that are hundreds of lines long and deal with the generation of your main, revenue generating page. This is both hard to grok from a developer standpoint and more costly to test/replace/extend from a business standpoint.</p>
+<h2>AppEventDispatcher</h2>
 
-<p>Let&#39;s take a simple example. We&#39;ll only show controller code to make the example brief:</p>
+<p>We discussed an <code>AppEventDispatcher</code> in a <a href="/2013/12/16/simpler-cakephp-events/">previous post</a>. If you are using that, you can continue doing so. Everything from here will be additive.</p>
 
-<blockquote>
-<p>Code here is pseudo-code. Please don&#39;t expect these methods to exist ;)</p>
-</blockquote>
+<p>First, the <code>CakeEventManager</code> has a method <code>instance()</code> which returns a globale <code>CakeEventManager</code>. This is useful for a global hooks system. We&#39;ll use this in our own methods.</p>
 
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-class EventsController extends AppController {
-  public function view() {
-    $this-&gt;Abtest-&gt;convert(array(
-      'test' =&gt; 'kpi',
-      'test-two'
-    ));
-
-    $embeddedPage = false;
-    if ($this-&gt;_isDisplayedInIframe()) {
-      $this-&gt;_noIndex();
-      $embeddedPage = true;
-      $event = $this-&gt;Event-&gt;findEvent($this-&gt;request-&gt;params);
-    } else {
-      $event = EventApi::retrieve($this-&gt;request-&gt;params('event_id'));
-    }
-
-    if (!$event) {
-      throw new NotFoundException;
-    }
-
-    // A 40 line function
-    if ($this-&gt;_incorrectRouteForEvent($event)) {
-      return $this-&gt;redirect($event-&gt;getRoute());
-    }
-
-    if ($this-&gt;_hasTrackingParams()) {
-      $this-&gt;_trackPage($event);
-      return $this-&gt;redirect301($event-&gt;getRoute());
-    }
-
-    $apiEvent = EventApi::retrieve($event-&gt;get('id'));
-    $recommendations = $this-&gt;getRecommendations();
-    // etc.
-  }
-}
-?&gt;</code></pre>
-
-<p>Already, for a nontrivial event, for things that most can agree should be in the controller layer, we have 60 lines of code. We didn&#39;t:</p>
+<p>To handle the entire cycle, we will use both a <code>listen</code> and <code>fire</code> method.</p>
 
 <ul>
-<li>Retrieve all data necessary for the page</li>
-<li>Set custom SEO metadata</li>
-<li>Start new ab tests</li>
-<li>Add custom tracking info</li>
-<li>Handle multiple response types</li>
+<li><code>listen</code>: Handles the attachment of a listener to the specified event. If the listener is an instance of <code>EventListener</code>, event names can be omitted.</li>
+<li><code>fire</code>: Handles the dispatching of a given event. Keep in mind that <code>$subject</code> and <code>$data</code> are optional arguments to this method.</li>
 </ul>
 
-<p>So as you can imagine, the logic could get very hairy.</p>
-
-<h2>Service classes</h2>
-
-<p>A service class is a wrapper around logic. It would contain everything necessary to handle the rendering of a page. Typically, CakePHP developers move as much as possible into the Model layer, but that isn&#39;t always possible, as you can&#39;t really handle page redirects for instance. Another thing is that - in my opinion - a Model class should only speak to a single data layer. It should not speak to multiple disparate apis. In our above example, we hit three different api endpoints, only one of which is a database in the traditional sense.</p>
-
-<p>Your best bet would be to create a service class. This can be a component or just a new library. Lets use a new library. This allows us to ignore loading of a new class for every request in a given controller.</p>
+<p>Here is our <code>Lib/Event/AppEventDispatcher.php</code> class with the above methods:</p>
 
 <pre class="rainbow-code"><code data-language="php">&lt;?php
-class EventPage {
-  public function __construct(Controller $controller) {
-    $this-&gt;_controller = $controller;
-    $this-&gt;_request = $controller-&gt;request;
+App::uses('CakeEvent', 'Event');
+App::uses('CakeEventManager', 'Event');
+
+class AppEventDispatcher {
+  public static function listen($callable, $eventKey = null, $options = array()) {
+    $manager = CakeEventManager::instance();
+    $manager-&gt;attach($callable, $eventKey, $options);
   }
 
-  public function run() {
-    $this-&gt;trackAbTests();
-
-    // Non-boolean responses == redirect
-    // You could also throw an exception that performs a redirect in your ExceptionHandler
-    $response = $this-&gt;retrieveEvent();
-    if ($response !== true) {
-      return $this-&gt;redirect($response);
-    }
-
-    $this-&gt;checkPageEmbedding();
-    $response = $this-&gt;ensureProperRoute();
-    if ($response !== true) {
-      return $this-&gt;redirect($response);
-    }
-
-    // Complex logic in each of these methods
-    $this-&gt;trackPage();
-    $this-&gt;retrieveData();
-    $this-&gt;setupResponse();
+  public static function fire($name, $subject = null, $data = null) {
+    $manager = CakeEventManager::instance();
+    $event = new CakeEvent($name, $subject, $data);
+    $manager-&gt;dispatch($event);
+    return $event;
   }
 }
 ?&gt;</code></pre>
 
-<p>Our 60+ line controller action now becomes:</p>
+<p>Now that we have our AppEventDispatcher in place, we can start using it.</p>
+
+<h2>Global Startup Events</h2>
+
+<p>You may wish to create global events before most of the app has started. We&#39;ll create a new file, <code>app/Config/events.php</code>, which will contain our events. Include this file in your <code>app/Config/bootstrap.php</code>:</p>
 
 <pre class="rainbow-code"><code data-language="php">&lt;?php
-class EventsController extends AppController {
-  public function view() {
-    $eventPage = new EventPage($this);
-    return $eventPage-&gt;run();
-  }
-}
+include dirname(__FILE__) . DS . 'events.php';
 ?&gt;</code></pre>
 
-<p>This methodology is very powerful in that it allows you to continue developing in a manner you are otherwise familiar with, while still making it simple to understand how a page is being constructed.</p>
+<p>Next, create the file:</p>
 
-<p><strong>Fat Models, Skinny Controllers</strong> is now <strong>Fat Models, Intelligent Services Classes, Skinny Controllers</strong> :)</p>
+<pre class="rainbow-code"><code data-language="shell">touch app/Config/events.php</code></pre>
+
+<p>And we&#39;ll add the following as content:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+App::uses('AppEventDispatcher', 'Lib/Event');
+App::uses('CakeEvent', 'Event');
+?&gt;</code></pre>
+
+<p>Now we&#39;re ready to test our global event system</p>
+
+<h2>Test the whole thing</h2>
+
+<p>Lets add the following to <code>app/Config/events.php</code>:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+AppEventDispatcher::listen(function(CakeEvent $event) {
+  debug($event-&gt;name());
+  debug($event-&gt;subject());
+  debug($event-&gt;data);
+  die;
+}, 'foo');
+?&gt;</code></pre>
+
+<p>This is the initial setup for a dummy event <code>foo</code> that triggers a callback which prints out the event and then exits the app. Not too fantastic, but for the purposes of our demo, it will do.</p>
+
+<p>Now we need to fire the event. While not super exciting, I am placing the following at the bottom of my <code>app/Config/routes.php</code> file:</p>
+
+<pre class="rainbow-code"><code data-language="php">&lt;?php
+AppEventDispatcher::fire('foo', null, array('baz'));
+?&gt;</code></pre>
+
+<p>And if we start our app, here is the output:</p>
+
+<p><img src="http://cl.ly/image/1Q1O252X323d/Screen%20Shot%202013-12-23%20at%202.30.04%20PM.png" alt="http://cl.ly/image/1Q1O252X323d"></p>
+
+<h2>Going further</h2>
+
+<p>The following things are not available in our current implementation:</p>
+
+<ul>
+<li>Queued events. These events would wait for a <code>AppEventDispatcher::flush()</code> before firing.</li>
+<li>Subscriber classes that can be subscribed to any specified event</li>
+<li>Wildcard event names.</li>
+</ul>
+
+<p>Some of the above may be tricky, but all are doable, and if you find them useful, feel free to extend my implementation to include your use cases :)</p>
 
   </div>
 
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/06/building-service-classes/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-06 12:41:00 -0500">06 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/23/application-wide-event-management/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-23 14:15:00 -0500">23 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 
 </article>
@@ -310,9 +292,9 @@ class EventsController extends AppController {
 
 			if ($('#disqus_thread').length) {
 				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/12/06/building-service-classes/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/12/06/building-service-classes/';
-				var disqus_title      = 'CakeAdvent: Building Service Classes';
+				var disqus_identifier = '/2013/12/23/application-wide-event-management/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/23/application-wide-event-management/';
+				var disqus_title      = 'CakeAdvent: Application-wide event management';
 
 				(function() {
 					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

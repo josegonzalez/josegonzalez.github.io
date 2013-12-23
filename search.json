@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Application-wide event management",
+		"url": "/2013/12/23/application-wide-event-management/",
+		"description": "Triggering global CakePHP events isn't difficult, and this tutorial shows you how to do it.",
+		"tokens": ["application","cakephp","difficult","event","events","global","management","shows","triggering","tutorial","wide"]
+	},
+	{
+		"type": "post",
 		"title": "Deploying a CakePHP application to Heroku",
 		"url": "/2013/12/22/deploying-a-cakephp-application-to-heroku/",
 		"description": "Heroku is a popular place to try out small experiments in CakePHP, so I decided to document the steps necessary for a successful Heroku integration.",
@@ -582,6 +589,12 @@
 	},
   {
 		"type": "category",
+		"title": "code",
+		"url": "/categories/code/",
+		"tokens": ["code"]
+	},
+  {
+		"type": "category",
 		"title": "cakephp",
 		"url": "/categories/cakephp/",
 		"tokens": ["cakephp"]
@@ -623,16 +636,16 @@
 		"tokens": ["devops"]
 	},
   {
-		"type": "category",
-		"title": "code",
-		"url": "/categories/code/",
-		"tokens": ["code"]
-	},
-  {
 		"type": "tag",
 		"title": "cakephp",
 		"url": "/tags/cakephp/",
 		"tokens": ["cakephp"]
+	},
+  {
+		"type": "tag",
+		"title": "events",
+		"url": "/tags/events/",
+		"tokens": ["events"]
 	},
   {
 		"type": "tag",
@@ -1443,12 +1456,6 @@
 		"title": "sessions",
 		"url": "/tags/sessions/",
 		"tokens": ["sessions"]
-	},
-  {
-		"type": "tag",
-		"title": "events",
-		"url": "/tags/events/",
-		"tokens": ["events"]
 	},
   {
 		"type": "tag",
