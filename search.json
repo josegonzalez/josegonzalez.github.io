@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Writing Slimmer Controllers",
+		"url": "/2013/12/24/writing-slimmer-controllers/",
+		"description": "Refactoring Controller code should be simple, and I'll tear apart my own code to show how you can go about it.",
+		"tokens": ["apart","can","code","controller","controllers","go","refactoring","show","simple","slimmer","tear","writing"]
+	},
+	{
+		"type": "post",
 		"title": "Application-wide event management",
 		"url": "/2013/12/23/application-wide-event-management/",
 		"description": "Triggering global CakePHP events isn't difficult, and this tutorial shows you how to do it.",
@@ -646,6 +653,12 @@
 		"title": "events",
 		"url": "/tags/events/",
 		"tokens": ["events"]
+	},
+  {
+		"type": "tag",
+		"title": "controllers",
+		"url": "/tags/controllers/",
+		"tokens": ["controllers"]
 	},
   {
 		"type": "tag",

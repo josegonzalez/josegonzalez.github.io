@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-23T14:36:12-05:00</updated>
+ <updated>2013-12-24T14:29:45-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Writing Slimmer Controllers]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/24/writing-slimmer-controllers/"/>
+   <updated>2013-12-24T13:27:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/24/writing-slimmer-controllers/</id>
+   <content type="html"><![CDATA[Refactoring Controller code should be simple, and I'll tear apart my own code to show how you can go about it.]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Application-wide event management]]></title>
