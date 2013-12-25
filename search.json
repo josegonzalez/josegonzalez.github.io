@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Local Development Environment using Vagrant and Virtualbox",
+		"url": "/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/",
+		"description": "Tired of reinstalling your development environment? We've created one specifically for CakePHP usage.",
+		"tokens": ["cakephp","created","development","environment","local","one","reinstalling","specifically","tired","usage","using","vagrant","virtualbox"]
+	},
+	{
+		"type": "post",
 		"title": "Writing Slimmer Controllers",
 		"url": "/2013/12/24/writing-slimmer-controllers/",
 		"description": "Refactoring Controller code should be simple, and I'll tear apart my own code to show how you can go about it.",
@@ -662,6 +669,18 @@
 	},
   {
 		"type": "tag",
+		"title": "vagrant",
+		"url": "/tags/vagrant/",
+		"tokens": ["vagrant"]
+	},
+  {
+		"type": "tag",
+		"title": "development",
+		"url": "/tags/development/",
+		"tokens": ["development"]
+	},
+  {
+		"type": "tag",
 		"title": "model",
 		"url": "/tags/model/",
 		"tokens": ["model"]
@@ -1043,12 +1062,6 @@
 		"title": "life",
 		"url": "/tags/life/",
 		"tokens": ["life"]
-	},
-  {
-		"type": "tag",
-		"title": "development",
-		"url": "/tags/development/",
-		"tokens": ["development"]
 	},
   {
 		"type": "tag",

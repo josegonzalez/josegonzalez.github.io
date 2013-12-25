@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2013-12-24T14:29:45-05:00</updated>
+ <updated>2013-12-25T16:39:45-05:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Local Development Environment using Vagrant and Virtualbox]]></title>
+   <link href="http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/"/>
+   <updated>2013-12-25T16:29:00-05:00</updated>
+   <id>http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/</id>
+   <content type="html"><![CDATA[Tired of reinstalling your development environment? We've created one specifically for CakePHP usage.]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Writing Slimmer Controllers]]></title>

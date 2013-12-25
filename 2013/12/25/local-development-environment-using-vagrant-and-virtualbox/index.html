@@ -11,7 +11,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width">
-		<title>CakeAdvent: Creating a custom session flash handler</title>
+		<title>CakeAdvent: Local Development Environment using Vagrant and Virtualbox</title>
 		<link rel="profile" href="http://gmpg.org/xfn/11">
 		<!--[if lt IE 9]>
 			<script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -21,21 +21,21 @@
 		<meta name="revisit-after" content="7 days" />
 		<meta name="version" content="1.0" />
 
-		<meta name="description" content="Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core." />
-		<meta name="keywords" content="cakephp, aliasing, sessions" />
+		<meta name="description" content="Tired of reinstalling your development environment? We've created one specifically for CakePHP usage." />
+		<meta name="keywords" content="cakephp, vagrant, development" />
 
-		<meta property="og:title" content="CakeAdvent: Creating a custom session flash handler" />
+		<meta property="og:title" content="CakeAdvent: Local Development Environment using Vagrant and Virtualbox" />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/14/creating-a-custom-session-flash-handler/" />
-		<meta property="og:description" content="Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core." />
+		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/" />
+		<meta property="og:description" content="Tired of reinstalling your development environment? We've created one specifically for CakePHP usage." />
 
 		<meta name="twitter:card" content="summary">
 		<meta name="twitter:site" content="@savant">
 		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="CakeAdvent: Creating a custom session flash handler" />
-		<meta name="twitter:description" content="Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core." />
+		<meta name="twitter:title" content="CakeAdvent: Local Development Environment using Vagrant and Virtualbox" />
+		<meta name="twitter:description" content="Tired of reinstalling your development environment? We've created one specifically for CakePHP usage." />
 
-		<link rel="alternate" type="application/rss+xml" title="Creating a custom session flash handler » Feed" href="/atom.xml">
+		<link rel="alternate" type="application/rss+xml" title="Local Development Environment using Vagrant and Virtualbox » Feed" href="/atom.xml">
 		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
 		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
 		<!--[if lt IE 9]>
@@ -69,11 +69,11 @@
   <header class="entry-header">
 
       <h1 class="entry-title">
-        Creating a custom session flash handler
+        Local Development Environment using Vagrant and Virtualbox
       </h1>
 
       <div class="comments-link">
-        <a href="#comments" title="Comment on Creating a custom session flash handler!">
+        <a href="#comments" title="Comment on Local Development Environment using Vagrant and Virtualbox!">
           Comments
         </a>
       </div>
@@ -84,7 +84,7 @@
 
 <div class="series-note">
 
-<p>This entry is <strong>part 14</strong> of <strong>25</strong> in the series "CakeAdvent".</p>
+<p>This entry is <strong>part 25</strong> of <strong>25</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
 
@@ -112,7 +112,7 @@
 
   <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
 
-  <li>Part 14 - Creating a custom session flash handler</li>
+  <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
 
   <li>Part 15 - <a href="/2013/12/15/payment-processing-using-stripe/">Payment Processing using Stripe</a></li>
 
@@ -134,116 +134,46 @@
 
   <li>Part 24 - <a href="/2013/12/24/writing-slimmer-controllers/">Writing Slimmer Controllers</a></li>
 
-  <li>Part 25 - <a href="/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/">Local Development Environment using Vagrant and Virtualbox</a></li>
+  <li>Part 25 - Local Development Environment using Vagrant and Virtualbox</li>
 </ul>
 
 </div>
 
-    <p>One of CakePHP&#39;s features is to allow you to override internal Behaviors, Components and Helpers using class aliasing. For instance, one might want to override the internal <code>FormHelper</code> to add HTML6 (not a typo) support, and CakePHP would be okay with that:</p>
+    <p>One thing developers have issues with is setting up their local development environment. You install a piece of software, it breaks something, and then rolling back is annoying. Or perhaps you have a new laptop, and now you need to reinstall the entire kitchen sink.</p>
 
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-App::uses('Controller', 'Controller');
-class AppController extends Controller {
-  public $helpers = array(
-    'Form' =&gt; array('className' =&gt; 'HTML6'),
-  );
-}
-?&gt;</code></pre>
+<p>I&#39;ve been using <a href="http://www.vagrantup.com/">Vagrant</a> for the past few months to great success. Vagrant allows you to automate the creation and lifecycle of a virtual machine. You can <em>provision</em> a new machine, automatically run code, and have a fully working environment in a few miinutes. The hard part is figuring out the exact steps needed to get your development environment up to speed.</p>
 
-<p>Something I&#39;ve been doing recently in most of my projects is use Twitter Bootstap for general setup via the <a href="https://github.com/slywalker/cakephp-plugin-boost_cake">BoostCake plugin</a>. It automatically configures CakePHP to use either Bootstrap 2 or 3, and allows me to alias my pertinent helpers to their bootstrappified equivalents.</p>
+<p>My Christmas gift to CakePHP developers is the <em><a href="https://github.com/FriendsOfCake/vagrant-chef">FriendsOfCake/vagrant-chef</a></em> repository, a vagrant installation custom-built for CakePHP applications. It will automatically setup the following within a virtual machine:</p>
 
-<p>One thing that is missing is <code>Session::setFlash()</code>. It is quite a pain to do the following:</p>
+<ul>
+<li>Ubuntu 12.04 Precise Pangolin</li>
+<li>Ningx 1.1</li>
+<li>PHP 5.5</li>
+<li>Percona MySQL 5.5</li>
+<li>Redis 2.8</li>
+<li>Memcached 1.4</li>
+<li>Git 1.7</li>
+<li>Composer</li>
+</ul>
 
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-$this-&gt;Session-&gt;setFlash('Some error message', 'alert', array(
-  'plugin' =&gt; 'TwitterBootstrap',
-  'class' =&gt; 'alert-error'
-), 'alert'));
-?&gt;</code></pre>
+<p>How do we do it?</p>
 
-<p>Boo. Instead, what if we had the following api?</p>
+<ol>
+<li>Install <a href="http://www.vagrantup.com/downloads.html">Vagrant</a></li>
+<li>Install <a href="https://www.virtualbox.org/wiki/Downloads">Virtualbox</a></li>
+<li><code>git clone https://github.com/FriendsOfCake/vagrant-chef.git</code></li>
+<li><code>cd vagrant-chef</code></li>
+<li><code>vagrant up</code></li>
+</ol>
 
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-$this-&gt;Session-&gt;alert_error('Some error message');
-?&gt;</code></pre>
+<p>Once it&#39;s up, you can simply replace your <code>app</code> directory with your application and visit <code>192.168.13.37</code>. Your application should be ready and raring to go!</p>
 
-<p>That is <em>much</em> nicer looking. We could handle this by adding another method to the AppController, but doing so means copy-pasting between projects. Instead, lets make a custom SessionComponent:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-App::uses('SessionComponent', 'Controller/Component');
-class TwitterSessionComponent extends SessionComponent {
-
-  public function __call($name, $args) {
-    $method = $name;
-    $key = 'flash';
-
-    if (strpos($method, 'form_') === 0) {
-      $key = 'form';
-      $method = preg_replace('/^form_/', '', $method);
-    }
-
-    if (strpos($method, 'alert_') === 0) {
-      $method = preg_replace('/^alert_/', '', $method);
-    }
-
-    $class = null;
-    if (in_array($method, array('success', 'danger', 'error', 'info'))) {
-      $class = 'alert-' . $method;
-    }
-
-    if ($class !== null || $method === 'alert') {
-      $plugin = 'TwitterBootstrap';
-      return $this-&gt;setFlash($args[0], 'alert', compact('plugin', 'class'), $key);
-    }
-
-    throw new BadMethodCallException(&quot;Method '{$name}' does not exist.&quot;);
-  }
-}
-?&gt;</code></pre>
-
-<p>Sweet, we have a custom component that can deal with our code. But rather than use <em>two</em> SessionComponents, we can use class name aliasing to load just ours as the default!</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-App::uses('Controller', 'Controller');
-class AppController extends Controller {
-  public $components = array(
-    'Auth',
-    'Cookie',
-    'RequestHandler',
-    'Session' =&gt; array('className' =&gt; 'TwitterSession'),
-  );
-}
-?&gt;</code></pre>
-
-<p>Now we can do the following:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
-App::uses('AppController', 'Controller');
-class UsersController extends AppController {
-  public function update_profile() {
-    $user_id = $this-&gt;Auth-&gt;user('id');
-    $user = $this-&gt;User-&gt;find('profile', compact('user_id'));
-
-    try {
-      $this-&gt;User-&gt;updateProfile($user, $this-&gt;request-&gt;data);
-      $this-&gt;Session-&gt;form_success(__('Your profile has been updated!'));
-      $user = $this-&gt;User-&gt;find('profile', compact('user_id'));
-      $this-&gt;request-&gt;data = $user;
-    } catch (Exception $e) {
-      $user = $this-&gt;User-&gt;find('profile', compact('user_id'));
-      $this-&gt;Session-&gt;form_danger($e-&gt;getMessage());
-    }
-
-    $this-&gt;set(compact('user'));
-  }
-?&gt;</code></pre>
-
-<p>Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core. Try it today!</p>
+<p>For more information, please visit the  <em><a href="https://github.com/FriendsOfCake/vagrant-chef">FriendsOfCake/vagrant-chef</a></em> repository! Happy Holidays!</p>
 
   </div>
 
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/14/creating-a-custom-session-flash-handler/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-14 15:45:00 -0500">14 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/code" title="View all posts in Code" rel="category">Code</a> on <a href="http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-25 16:29:00 -0500">25 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 
 </article>
@@ -299,9 +229,9 @@ class UsersController extends AppController {
 
 			if ($('#disqus_thread').length) {
 				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/12/14/creating-a-custom-session-flash-handler/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/12/14/creating-a-custom-session-flash-handler/';
-				var disqus_title      = 'CakeAdvent: Creating a custom session flash handler';
+				var disqus_identifier = '/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/';
+				var disqus_url        = 'http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/';
+				var disqus_title      = 'CakeAdvent: Local Development Environment using Vagrant and Virtualbox';
 
 				(function() {
 					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
