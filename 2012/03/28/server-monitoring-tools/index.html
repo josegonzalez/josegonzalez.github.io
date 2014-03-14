@@ -22,7 +22,7 @@
 		<meta name="version" content="1.0" />
 
 		<meta name="description" content="An easy to install, maintain, and use tool for server monitoring doesn't exist, why is that?" />
-		<meta name="keywords" content="deployment, tools, monitoring, devops" />
+		<meta name="keywords" content="deployment, tools, monitoring" />
 
 		<meta property="og:title" content="Server Monitoring Tools" />
 		<meta property="og:type" content="website" />
@@ -82,7 +82,7 @@
 
   <div class="entry-content">
 
-    <p>I&#39;ve been recently doing a bit of devops work at SeatGeek, and it strikes me that much of the monitoring/alerting code there sucks for one or more of the following reasons:</p>
+    <p>I&#39;ve been recently doing a bit of systems administration at SeatGeek, and it strikes me that much of the monitoring/alerting code there sucks for one or more of the following reasons:</p>
 
 <ul>
 <li>Ridiculous setup</li>
@@ -150,7 +150,7 @@
 
 <pre class="rainbow-code"><code data-language="generic">hostname.service_name.metric</code></pre>
 
-<p>Grouping metrics is key. Because Graphite already stores non-devops related statistics, and also would store stats on a per-instance basis, I would like a way to track different sets of metrics somewhere. Because of how graphs are created, it would be useful to store information about each graph - who created the graph, usecase, a damned name - along with it. This data could change from graph to graph of course.</p>
+<p>Grouping metrics is key. Because Graphite already stores application-related statistics, and also would store stats on a per-instance basis, I would like a way to track different sets of metrics somewhere. Because of how graphs are created, it would be useful to store information about each graph - who created the graph, usecase, a damned name - along with it. This data could change from graph to graph of course.</p>
 
 <p>Whenever I create a graph, it should be easy to share it with others. My boss may want to see how deploys affect conversions, or we may want to place one of these in a blog post about earthquakes. Sharing the url to a graph should be straightforward. It should also be possible for me to save a snapshot of a graph somewhere, although this can be a generic interface that can be extended as time goes on. Please note, we should be able to annotate the hell out of these stored graphs.</p>
 
@@ -173,7 +173,7 @@
 <li>Should be generic enough that it would be possible to write a one-liner to collect a new statistic</li>
 </ul></li>
 <li>Alerts are useful, but perhaps it would be better to leave alerts elsewhere.</li>
-<li>Some attention should be paid to UI. This is 2012, lets make devops easy on the eyes</li>
+<li>Some attention should be paid to UI. This is 2012, lets make graphing easy on the eyes</li>
 <li>Graphing/UI should be fairly generic, and easy to move to another framework as necessary</li>
 </ul>
 
@@ -190,7 +190,7 @@
   </div>
 
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/devops" title="View all posts in Devops" rel="category">Devops</a> on <a href="http://josediazgonzalez.com/2012/03/28/server-monitoring-tools/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-03-28 00:00:00 -0400">28 Mar 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/opschops" title="View all posts in Opschops" rel="category">Opschops</a> on <a href="http://josediazgonzalez.com/2012/03/28/server-monitoring-tools/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-03-28 00:00:00 +0000">28 Mar 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 
 </article>
@@ -215,19 +215,13 @@
 
 								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
 
-								<li class="cat-item"><a href="/categories/code"title="View all posts filed under Code">Code</a></li>
-
 								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/devops"title="View all posts filed under Devops">Devops</a></li>
 
 								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
 
-								<li class="cat-item"><a href="/categories/interviews"title="View all posts filed under Interviews">Interviews</a></li>
+								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
 
 								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-								<li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
 
 						</ul>
 					</aside>

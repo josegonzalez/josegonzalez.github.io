@@ -358,13 +358,6 @@
 	},
 	{
 		"type": "post",
-		"title": "Ruby on Rails Web Developer positions available in Chicago, NYC, San Francisco",
-		"url": "/2010/09/23/ruby-on-rails-web-developer-positions-available-in-chicago-nyc-san-francisco/",
-		"description": "Clearly this person doesn't even know what I do. Also, grammar matters?",
-		"tokens": ["also","available","chicago","clearly","developer","even","francisco","grammar","know","matters","nyc","person","positions","rails","ruby","san","web"]
-	},
-	{
-		"type": "post",
 		"title": "Why CakePHP documentation sucks and what I'm doing about it",
 		"url": "/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/",
 		"description": "When people complain about documentation, the solution is to write more, and better, documentation.",
@@ -418,13 +411,6 @@
 		"url": "/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/",
 		"description": "Sanitizing saved data when rendering the view is stupid, and it should be done when creating/updating records.",
 		"tokens": ["behavior","clean","creating","data","done","model","purifiable","records","rendering","sanitizing","saved","stupid","updating","view"]
-	},
-	{
-		"type": "post",
-		"title": "How to Grow or A Look Back at 2009",
-		"url": "/2010/01/09/how-to-grow-or-a-look-back-at-2009/",
-		"description": "2009 wasn't so bad, and here's how it owned face for me.",
-		"tokens": ["back","bad","face","grow","look","owned"]
 	},
 	{
 		"type": "post",
@@ -603,12 +589,6 @@
 	},
   {
 		"type": "category",
-		"title": "code",
-		"url": "/categories/code/",
-		"tokens": ["code"]
-	},
-  {
-		"type": "category",
 		"title": "cakephp",
 		"url": "/categories/cakephp/",
 		"tokens": ["cakephp"]
@@ -621,21 +601,9 @@
 	},
   {
 		"type": "category",
-		"title": "rant",
-		"url": "/categories/rant/",
-		"tokens": ["rant"]
-	},
-  {
-		"type": "category",
 		"title": "installation",
 		"url": "/categories/installation/",
 		"tokens": ["installation"]
-	},
-  {
-		"type": "category",
-		"title": "interviews",
-		"url": "/categories/interviews/",
-		"tokens": ["interviews"]
 	},
   {
 		"type": "category",
@@ -645,21 +613,15 @@
 	},
   {
 		"type": "category",
-		"title": "devops",
-		"url": "/categories/devops/",
-		"tokens": ["devops"]
+		"title": "opschops",
+		"url": "/categories/opschops/",
+		"tokens": ["opschops"]
 	},
   {
 		"type": "tag",
 		"title": "cakephp",
 		"url": "/tags/cakephp/",
 		"tokens": ["cakephp"]
-	},
-  {
-		"type": "tag",
-		"title": "events",
-		"url": "/tags/events/",
-		"tokens": ["events"]
 	},
   {
 		"type": "tag",
@@ -1059,12 +1021,6 @@
 	},
   {
 		"type": "tag",
-		"title": "life",
-		"url": "/tags/life/",
-		"tokens": ["life"]
-	},
-  {
-		"type": "tag",
 		"title": "html purifier",
 		"url": "/tags/html-purifier/",
 		"tokens": ["html","purifier"]
@@ -1224,12 +1180,6 @@
 		"title": "deployment",
 		"url": "/tags/deployment/",
 		"tokens": ["deployment"]
-	},
-  {
-		"type": "tag",
-		"title": "devops",
-		"url": "/tags/devops/",
-		"tokens": ["devops"]
 	},
   {
 		"type": "tag",
@@ -1482,6 +1432,12 @@
 		"title": "sessions",
 		"url": "/tags/sessions/",
 		"tokens": ["sessions"]
+	},
+  {
+		"type": "tag",
+		"title": "events",
+		"url": "/tags/events/",
+		"tokens": ["events"]
 	},
   {
 		"type": "tag",
