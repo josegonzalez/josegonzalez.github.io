@@ -125,7 +125,8 @@ class PostCell extends ViewCell {
     public function run(array $options = [])
     {
         // Short-circuit the cell and return any passed data
-        if (!empty($params['post'])) {
+        if (!empty($options['post'])) {
+            $this-&gt;set('post', $options['post']);
             return $this; // So I can chain the `run` method
         }
 
@@ -257,7 +258,8 @@ class PostCell extends ViewCell {
     public function run(array $options = [])
     {
         // Short-circuit the cell and return any passed data
-        if (!empty($params['post'])) {
+        if (!empty($options['post'])) {
+            $this-&gt;set('post', $options['post']);
             return $this; // So I can chain the `run` method
         }
 
