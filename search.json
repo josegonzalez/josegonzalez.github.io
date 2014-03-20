@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Using View Cells in your CakePHP applications",
+		"url": "/2014/03/20/view-cells/",
+		"description": "A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes",
+		"tokens": ["applications","cakephp","cells","classes","forward","look","service","throwback","using","view","writing","x"]
+	},
+	{
+		"type": "post",
 		"title": "Local Development Environment using Vagrant and Virtualbox",
 		"url": "/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/",
 		"description": "Tired of reinstalling your development environment? We've created one specifically for CakePHP usage.",
@@ -640,6 +647,18 @@
 		"title": "development",
 		"url": "/tags/development/",
 		"tokens": ["development"]
+	},
+  {
+		"type": "tag",
+		"title": "views",
+		"url": "/tags/views/",
+		"tokens": ["views"]
+	},
+  {
+		"type": "tag",
+		"title": "service",
+		"url": "/tags/service/",
+		"tokens": ["service"]
 	},
   {
 		"type": "tag",

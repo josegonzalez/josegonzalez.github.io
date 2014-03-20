@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-03-14T05:35:02+00:00</updated>
+ <updated>2014-03-20T19:58:29+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Using View Cells in your CakePHP applications]]></title>
+   <link href="http://josediazgonzalez.com/2014/03/20/view-cells/"/>
+   <updated>2014-03-20T16:54:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/03/20/view-cells/</id>
+   <content type="html"><![CDATA[A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Local Development Environment using Vagrant and Virtualbox]]></title>
