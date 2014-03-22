@@ -181,15 +181,12 @@ class LogstashLog extends BaseLog
 
 <pre class="rainbow-code"><code data-language="php">public function write($type, $message)
 {
-    $data = [];
-    if (is_array($message)) {
-        $data = $message;
-    } else {
-        $data['message'] = $message;
-    }
+    $message = is_array($message) ? $message : compact('message');
+    $data = array_merge(array(
+        '@timestamp' =&gt; date($this-&gt;format),
+        '@version' =&gt; 1,
+    ), $message);
 
-    $data['@timestamp'] = date($this-&gt;format);
-    $data['@version'] = 1;
     if (isset($data['tags'])) {
         $data['tags'][] = $type;
     } else {
@@ -227,15 +224,12 @@ class LogstashLog extends FileLog
 
     public function write($type, $message)
     {
-        $data = [];
-        if (is_array($message)) {
-            $data = $message;
-        } else {
-            $data['message'] = $message;
-        }
+        $message = is_array($message) ? $message : compact('message');
+        $data = array_merge(array(
+            '@timestamp' =&gt; date($this-&gt;format),
+            '@version' =&gt; 1,
+        ), $message);
 
-        $data['@timestamp'] = date($this-&gt;format);
-        $data['@version'] = 1;
         if (isset($data['tags'])) {
             $data['tags'][] = $type;
         } else {
@@ -243,7 +237,7 @@ class LogstashLog extends FileLog
         }
 
         if (!openlog('app', LOG_PID, LOG_USER)) {
-            return parent::write($type, json_ecode($message));
+            return parent::write($type, json_ecode($data));
         }
 
         return syslog($this-&gt;logLevels[$type], json_encode($data));
