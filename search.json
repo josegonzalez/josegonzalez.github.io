@@ -1,6 +1,13 @@
 [
 	{
 		"type": "post",
+		"title": "Shipping CakePHP App Logs to Logstash via Syslog",
+		"url": "/2014/03/22/shipping-cakephp-application-logs-to-logstash/",
+		"description": "If you've never written a CakePHP Logger, here is a simple post on how to do so",
+		"tokens": ["app","cakephp","logger","logs","logstash","never","post","shipping","simple","syslog","via","written"]
+	},
+	{
+		"type": "post",
 		"title": "Using View Cells in your CakePHP applications",
 		"url": "/2014/03/20/view-cells/",
 		"description": "A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes",
@@ -632,36 +639,6 @@
 	},
   {
 		"type": "tag",
-		"title": "controllers",
-		"url": "/tags/controllers/",
-		"tokens": ["controllers"]
-	},
-  {
-		"type": "tag",
-		"title": "vagrant",
-		"url": "/tags/vagrant/",
-		"tokens": ["vagrant"]
-	},
-  {
-		"type": "tag",
-		"title": "development",
-		"url": "/tags/development/",
-		"tokens": ["development"]
-	},
-  {
-		"type": "tag",
-		"title": "views",
-		"url": "/tags/views/",
-		"tokens": ["views"]
-	},
-  {
-		"type": "tag",
-		"title": "service",
-		"url": "/tags/service/",
-		"tokens": ["service"]
-	},
-  {
-		"type": "tag",
 		"title": "model",
 		"url": "/tags/model/",
 		"tokens": ["model"]
@@ -1100,6 +1077,12 @@
 	},
   {
 		"type": "tag",
+		"title": "development",
+		"url": "/tags/development/",
+		"tokens": ["development"]
+	},
+  {
+		"type": "tag",
 		"title": "os x",
 		"url": "/tags/os-x/",
 		"tokens": ["os","x"]
@@ -1487,6 +1470,30 @@
 		"title": "migrations",
 		"url": "/tags/migrations/",
 		"tokens": ["migrations"]
+	},
+  {
+		"type": "tag",
+		"title": "controllers",
+		"url": "/tags/controllers/",
+		"tokens": ["controllers"]
+	},
+  {
+		"type": "tag",
+		"title": "vagrant",
+		"url": "/tags/vagrant/",
+		"tokens": ["vagrant"]
+	},
+  {
+		"type": "tag",
+		"title": "views",
+		"url": "/tags/views/",
+		"tokens": ["views"]
+	},
+  {
+		"type": "tag",
+		"title": "service",
+		"url": "/tags/service/",
+		"tokens": ["service"]
 	},
 	false
 ]
