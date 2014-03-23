@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-03-22T07:38:23+00:00</updated>
+ <updated>2014-03-23T21:14:38+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[CakePHP as a Microframework]]></title>
+   <link href="http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/"/>
+   <updated>2014-03-23T20:37:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/</id>
+   <content type="html"><![CDATA[Using CakePHP as a library to build applications microframework-style]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Shipping CakePHP App Logs to Logstash via Syslog]]></title>
