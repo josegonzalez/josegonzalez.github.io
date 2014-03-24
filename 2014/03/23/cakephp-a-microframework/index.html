@@ -133,7 +133,7 @@ class CallableFilter extends DispatcherFilter {
 
         if (is_string($callable) &amp;&amp; class_exists($callable)) {
             $callable = new $callable;
-            $callable-&gt;respond($request, $response);
+            $callable-&gt;respond($event-&gt;data['request'], $event-&gt;data['response']);
         } elseif (is_callable($callable)) {
             $callable($event-&gt;data['request'], $event-&gt;data['response']);
         } else {
