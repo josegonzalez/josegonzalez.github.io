@@ -15,6 +15,6 @@
 
 /* SITE */
 
-	Last update: 2014/03/24
+	Last update: 2014/08/03
 	Standards: HTML5
 	Software: Jekyll, Cimino
