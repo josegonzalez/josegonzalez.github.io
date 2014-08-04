@@ -74,7 +74,16 @@
 
   <div class="entry-content">
 
-    <div class="book-container">
+    <div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=775202682501320&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<div class="book-container">
     <div class="book-summary">
         <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340"><img src="/images/title_page-preview.png" /></a><br />
         <p class="image-by">Cover design by <a href="http://lauraknetzger.com/">Laura Knetzger</a></p>
@@ -93,6 +102,7 @@
     </div>
 
     <div class="book-info">
+        <div class="fb-like" data-href="http://josediazgonzalez.com/cakephp-book/" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
         <p>Looking for a CakePHP book that covers <strong>CakePHP 2.5+</strong>? Well you've come to the right place! Here's a sample of topics covered:</p>
 
         <ul>
