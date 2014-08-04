@@ -168,7 +168,7 @@
 </div>
 
 <div class="btn-buy-container">
-    <a class="btn" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Get the best CakePHP 2.0 book today!</a>
+    <a class="btn btn-two" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Get the best CakePHP 2 book today!</a>
 </div>
 
 <style>
@@ -191,10 +191,10 @@
     text-align: center;
 }
 .book-info {
+    padding-right: 2em;
 }
 .book-summary {
     float: right;
-    padding-left: 2em;
     text-align: center;
 }
 .book-container .buy-now {
@@ -237,6 +237,17 @@
   background-image: linear-gradient(to bottom, #87bb03, #518000);
   color: #efefef !important;
   text-decoration: none;
+}
+.btn-two {
+    padding: 10px;
+}
+@media (max-width:700px)  {
+    .book-summary {
+        float: none;
+    }
+}
+.fb_iframe_widget span {
+    width: 300px !important;
 }
 </style>
 
