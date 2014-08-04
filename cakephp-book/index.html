@@ -75,15 +75,22 @@
   <div class="entry-content">
 
     <div class="book-container">
-    <div class="book-image">
-        <img src="/images/title_page-preview.png" /><br />
-        <a target="_top" class="dpdcart iframe" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340"><img border="0" alt="Add to Cart" class="buy-now buy-button" src="https://getdpd.com/images/buy_buttons/atc/solid1/dpd_addtocart_3.png"></a>
+    <div class="book-summary">
+        <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340"><img src="/images/title_page-preview.png" /></a><br />
+        <p class="image-by">Cover design by <a href="http://lauraknetzger.com/">Laura Knetzger</a></p>
+        <div class="btn-buy-container">
+            <a class="btn" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Buy Now</a>
+        </div>
+        <p class="price-detail">
+            Price: <span itemprop="highPrice">$34.99</span> for all formats
+        </p>
+        <p class="price-detail">
+            <span itemprop="lowPrice">$14.99</span> for a single format
+        </p>
     </div>
 
     <div class="book-info">
-        <p>Looking for my book? Well you've come to the right place!</p>
-
-        <p>Here's a sample of topics covered:</p>
+        <p>Looking for a CakePHP book that covers <strong>CakePHP 2.5+</strong>? Well you've come to the right place! Here's a sample of topics covered:</p>
 
         <ul>
             <li>Developing within a Vagrant Virtual Machine</li>
@@ -96,24 +103,83 @@
             <li>The CakePHP Event system</li>
         </ul>
 
+        <p>What do you get for your money? The book comes to you in the following formats:</p>
+        <ul>
+            <li><strong>PDF</strong> (for Mac or PC)</li>
+            <li><strong>EPUB</strong> (for iPad, iPhone, Android, and other ebook readers)</li>
+            <li><strong>MOBI</strong> (for Kindle)</li>
+        </ul>
+
         <p>Want to learn how the CakePHP pros rapidly prototype a website? Need to get familiar quickly with the CakePHP way? <strong>This book is for you!</strong></p>
 
         <p>This book runs through the process of building a simple pastebin website with the CakePHP web application framework. It covers all the topics in your typical CakePHP tutorial, but takes extra care to point out useful information and techniques for speeding up your own application development. Using CakePHP best practices, commonly used community libraries, and advanced development methodologies, this book is targeted at both beginner and advanced CakePHP developers looking to increase their capabilities.</p>
 
-        <!-- <p>Interested? <a href="/book/sample.pdf">Here</a> is a sample!</p> -->
-
-        <p>Interested? Buy today!</p>
-
-        <a target="_top" class="dpdcart iframe" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340"><img border="0" alt="Add to Cart" class="buy-button" src="https://getdpd.com/images/buy_buttons/atc/solid1/dpd_addtocart_3.png"></a>
+        <p>Have questions or comments? Get in touch via <a href="mailto:book@josediazgonzalez.com">email</a>!</p>
     </div>
 </div>
 
+<div class="book-container">
+    <div class="book-summary">
+        <strong>Chapters</strong>
+        <p>Want to know what is in the book before<br /> you buy it? Here is the chapter list:</p>
+        <ol class="dont-style">
+            <li>The Setup</li>
+            <li>Prepping our Application</li>
+            <li>Adding automated testing</li>
+            <li>Deploying to Heroku</li>
+            <li>Implementing a Paste</li>
+            <li>Custom Application Actions</li>
+            <li>Public and Private Pastes</li>
+            <li>Debugging Data via DebugKit</li>
+            <li>User Authentication</li>
+            <li>User profiles</li>
+            <li>Conclusion</li>
+        </ol>
+    </div>
+
+    <div class="book-info">
+        <strong>Sample Chapters</strong>
+        <p>You can read the sample chapter <a href="/cakephp-book/rad-cakephp-preview.pdf">here</a>. The chapter introduces you to the AuthComponent and the Migrations plugin.</p>
+
+        <strong>Formats</strong>
+
+        <p>Not everyone needs every format, so the book is made available at a reduced price for individual formats.</p>
+
+        <ul>
+            <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91114&amp;method_id=95362">Buy the PDF<a/></li>
+            <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91115&amp;method_id=95363">Buy the ePub</a></li>
+            <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91116&amp;method_id=95364">Buy the Kindle/Mobi</a></li>
+            <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Buy all three formats and save!</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="btn-buy-container">
+    <a class="btn" href="https://cakephp-book.dpdcart.com/">Get the best CakePHP 2.0 book today!</a>
+</div>
+
 <style>
+.site-header {
+    display: none;
+}
 .book-container {
+    padding-top: 1.714285714rem;
+    border-top: 1px solid #ededed;
+}
+.book-container .price-detail {
+    font-size: 0.6875em;
+    color: #9c9991;
+    margin-bottom: 0;
+    text-align: center;
+}
+.book-container .image-by {
+    color: #9c9991;
+    font-size: 0.4em;
+    text-align: center;
 }
 .book-info {
 }
-.book-image {
+.book-summary {
     float: right;
     padding-left: 2em;
     text-align: center;
@@ -124,6 +190,40 @@
 .book-container .buy-button {
     border-radius: none;
     box-shadow: none;
+}
+.book-container .dont-style {
+    list-style-type: none;
+}
+.book-container .dont-style li {
+    margin: 0;
+}
+.btn-buy-container {
+    padding: 10px;
+}
+.btn {
+  background: #89ba03;
+  background-image: -webkit-linear-gradient(top, #89ba03, #5c9402);
+  background-image: -moz-linear-gradient(top, #89ba03, #5c9402);
+  background-image: -ms-linear-gradient(top, #89ba03, #5c9402);
+  background-image: -o-linear-gradient(top, #89ba03, #5c9402);
+  background-image: linear-gradient(to bottom, #89ba03, #5c9402);
+  -webkit-border-radius: 3;
+  -moz-border-radius: 3;
+  border-radius: 3px;
+  font: 400 14px proxima-nova-1,proxima-nova-2,'Proxima Nova',HelveticaNeue,"Helvetica Neue",HelveticaNeueRoman,HelveticaNeue-Roman,"Helvetica Neue Roman",Helvetica,Tahoma,Geneva,Arial,sans-serif;
+  color: #ffffff;
+  padding: 10px 110px;
+  text-decoration: none;
+}
+.btn:hover {
+  background: #87bb03;
+  background-image: -webkit-linear-gradient(top, #87bb03, #518000);
+  background-image: -moz-linear-gradient(top, #87bb03, #518000);
+  background-image: -ms-linear-gradient(top, #87bb03, #518000);
+  background-image: -o-linear-gradient(top, #87bb03, #518000);
+  background-image: linear-gradient(to bottom, #87bb03, #518000);
+  color: #efefef !important;
+  text-decoration: none;
 }
 </style>
 
