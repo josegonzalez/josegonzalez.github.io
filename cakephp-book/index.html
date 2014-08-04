@@ -84,7 +84,7 @@
 }(document, 'script', 'facebook-jssdk'));</script>
 
 <div class="book-container">
-    <div class="book-summary">
+    <div class="book-summary book-summary-image">
         <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340"><img src="/images/title_page-preview.png" /></a><br />
         <p class="image-by">Cover design by <a href="http://lauraknetzger.com/">Laura Knetzger</a></p>
         <div class="btn-buy-container">
@@ -102,7 +102,7 @@
     </div>
 
     <div class="book-info">
-        <div class="fb-like" data-href="http://josediazgonzalez.com/cakephp-book/" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+        <div class="fb-like" data-href="http://josediazgonzalez.com/cakephp-book/" data-layout="standard" data-action="like" data-show-faces="false" data-share="true"></div>
         <p>Looking for a CakePHP book that covers <strong>CakePHP 2.5+</strong>? Well you've come to the right place! Here's a sample of topics covered:</p>
 
         <ul>
@@ -197,6 +197,9 @@
     float: right;
     text-align: center;
 }
+.book-summary-image {
+    padding-bottom: 20px;
+}
 .book-container .buy-now {
     padding-top: 2em;
 }
@@ -241,13 +244,15 @@
 .btn-two {
     padding: 10px;
 }
+.fb_iframe_widget span {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    width: 300px !important;
+}
 @media (max-width:700px)  {
     .book-summary {
         float: none;
     }
-}
-.fb_iframe_widget span {
-    width: 300px !important;
 }
 </style>
 
