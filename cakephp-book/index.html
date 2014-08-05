@@ -132,6 +132,7 @@
 
         <p>Have questions or comments? Get in touch via <a href="mailto:book@josediazgonzalez.com">email</a>!</p>
     </div>
+    <br style="clear:both">
 </div>
 
 <div class="book-container">
@@ -169,12 +170,18 @@
             <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91116&amp;method_id=95364">Buy the Kindle/Mobi</a></li>
             <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Buy all three formats and save!</a></li>
         </ul>
+        <div class="btn-buy-container mobile-hide">
+            <a class="btn btn-two" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Get the best CakePHP 2 book today!</a>
+        </div>
     </div>
+    <br style="clear:both">
 </div>
 
-<div class="btn-buy-container">
+<div class="btn-buy-container mobile-show">
     <a class="btn btn-two" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Get the best CakePHP 2 book today!</a>
 </div>
+
+<!-- https://github.com/josegonzalez/rad-cakephp-2/issues -->
 
 <style>
 .site-header {
@@ -254,18 +261,31 @@
     margin-bottom: 10px;
     width: 300px !important;
 }
+.mobile-show {
+  display: none;
+}
+.mobile-hide {
+  display: block;
+}
 @media (max-width:700px)  {
-    .btn {
-      padding: 10px 60px;
-    }
-    .btn-two {
-      font-size: 12px;
-      padding: 10px;
-      text-align: center;
-    }
-    .book-summary {
-        float: none;
-    }
+  .btn {
+    padding: 10px 60px;
+  }
+  .btn-two {
+    font-size: 12px;
+    padding: 10px;
+    text-align: center;
+  }
+  .book-summary {
+      float: none;
+  }
+  .mobile-show {
+    display: block;
+    text-align: center;
+  }
+  .mobile-hide {
+    display: none;
+  }
 }
 </style>
 
