@@ -283,7 +283,7 @@ margin:0 10px 0 0;
 
 #banner .one_half h1 {
 line-height:1.1em;
-margin:25px 0 15px 0;
+margin:0 0 15px 0;
 }
 
 h2.subheader {
@@ -1229,10 +1229,10 @@ color:#999;
 
 	/*Banner*/
 
-#shelf {
-background:url(../images/shelf_ipad.png) no-repeat center bottom;
-padding-bottom:22px;
-}
+    #shelf {
+        background:url(../images/shelf_ipad.png) no-repeat center bottom;
+        padding-bottom:22px;
+    }
 
 	/*Buttons*/
 
@@ -1265,6 +1265,10 @@ padding-bottom:22px;
 	#screenshots a.last  {
 	margin:0 15px 15px 0!important;
 	}
+
+    .price {
+        font-size: 4.4em;
+    }
 
 	/*Author*/
 
@@ -1455,6 +1459,7 @@ padding-bottom:10px;
 
 #logo h2 {
 display:block;
+margin-left: 56px;
 }
 
 #banner .two_thirds, #shelf.one_half {
@@ -1490,6 +1495,10 @@ margin:0;
 #author .button_buy {
 margin:0;
 text-align:center;
+}
+
+.button_buy a {
+    font-size: 1.5em;
 }
 
 /*Testimonials*/
