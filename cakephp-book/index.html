@@ -1,337 +1,483 @@
-<!DOCTYPE html>
-<!--[if IE 7]>
-<html class="ie ie7" lang="en-US">
-<![endif]-->
-<!--[if IE 8]>
-<html class="ie ie8" lang="en-US">
-<![endif]-->
-<!--[if !(IE 7) | !(IE 8)  ]><!-->
-<html lang="en-US">
-<!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>Rapid Application Development with CakePHP 2</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
 
-		<meta name="description" content="Looking for a CakePHP book that covers CakePHP 2.5+? Well you've come to the right place! This book is written by a CakePHP Core Developer and is designed to get you up and running with the latest and greatest CakePHP development practices." />
-		<meta name="keywords" content="" />
+        <!--Page Title-->
+        <title>Rapid Application Development with CakePHP 2</title>
 
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="Rapid Application Development with CakePHP 2" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/cakephp-book/index.html" />
-		<meta property="og:description" content="Looking for a CakePHP book that covers CakePHP 2.5+? Well you've come to the right place! This book is written by a CakePHP Core Developer and is designed to get you up and running with the latest and greatest CakePHP development practices." />
-		<meta property="og:image" content="http://josediazgonzalez.com/images/title_page-preview.png" />
+        <!--Device Width Check-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
 
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="Rapid Application Development with CakePHP 2" />
-		<meta name="twitter:description" content="Looking for a CakePHP book that covers CakePHP 2.5+? Well you've come to the right place! This book is written by a CakePHP Core Developer and is designed to get you up and running with the latest and greatest CakePHP development practices." />
-		<meta name="twitter:image" content="http://josediazgonzalez.com/images/title_page-preview.png" />
+        <!--Meta Keywords and Description-->
+        <meta name="description" content="Looking for a CakePHP book that covers CakePHP 2.5+? Well you've come to the right place! This book is written by a CakePHP Core Developer and is designed to get you up and running with the latest and greatest CakePHP development practices." />
+        <meta name="keywords" content="" />
 
-		<link rel="alternate" type="application/rss+xml" title="Rapid Application Development with CakePHP 2 » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
+        <meta property="fb:app_id" content="775202682501320" />
+        <meta property="og:title" content="Rapid Application Development with CakePHP 2" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://josediazgonzalez.com/cakephp-book/index.html" />
+        <meta property="og:description" content="Looking for a CakePHP book that covers CakePHP 2.5+? Well you've come to the right place! This book is written by a CakePHP Core Developer and is designed to get you up and running with the latest and greatest CakePHP development practices." />
+        <meta property="og:image" content="http://josediazgonzalez.com/images/title_page-preview.png" />
 
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@savant">
+        <meta name="twitter:creator" content="@savant">
+        <meta name="twitter:title" content="Rapid Application Development with CakePHP 2" />
+        <meta name="twitter:description" content="Looking for a CakePHP book that covers CakePHP 2.5+? Well you've come to the right place! This book is written by a CakePHP Core Developer and is designed to get you up and running with the latest and greatest CakePHP development practices." />
+        <meta name="twitter:image" content="http://josediazgonzalez.com/images/title_page-preview.png" />
 
-	</head>
+        <!--Favicon-->
+        <link rel="shortcut icon" href="images/favicon.ico" title="Favicon" />
 
-	<body class="home full-width template-front-page ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
+        <!--Fixes for Internet Explorer CSS3 and HTML5-->
+        <!--[if gte IE 9]>
+        <style type="text/css">
+            .gradient { filter: none!important;}
+        </style>
+        <![endif]-->
 
-			</header>
+        <!--[if lt IE 9]>
+        <script>
+          'article aside footer header nav section time'.replace(/\w+/g,function(n){document.createElement(n)})
+        </script>
+        <![endif]-->
 
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
-  <header class="entry-header">
+        <!--Main CSS-->
+        <link rel="stylesheet" href="css/style.css" media="screen, projection">
 
-      <h1 class="entry-title">
-        Rapid Application Development with CakePHP 2
-      </h1>
+        <!--[if lt IE 9]>
+        <link rel="stylesheet" href="css/style_ie8.css" media="screen, projection">
+        <![endif]-->
 
-  </header>
+        <!--Icon Fonts-->
+        <link rel="stylesheet" href="css/font-awesome.min.css">
 
-  <div class="entry-content">
+        <!--[if IE 7]>
+        <link rel="stylesheet" href="css/font-awesome-ie7.min.css">
+        <![endif]-->
 
-    <div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=775202682501320&version=v2.0";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
+        <!--Google Webfonts-->
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
 
-<div class="book-container">
-    <div class="book-summary book-summary-image">
-        <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340"><img src="/images/title_page-preview.png" /></a><br />
-        <p class="image-by">Cover design by <a href="http://lauraknetzger.com/">Laura Knetzger</a></p>
-        <div class="btn-buy-container">
-            <a class="btn" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Buy Now</a>
+            <script type="text/javascript">
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', 'UA-8668344-3']);
+                _gaq.push(['_trackPageview']);
+            </script>
+
+    </head>
+    <body>
+
+        <!--Start of Product Banner-->
+        <section id="banner" role="banner">
+            <div class="row">
+                <div id="header_region">
+                    <!--Start of Header Logo-->
+                    <div id="logo" class="two_thirds">
+                        <h1><img src="images/logo.png" alt="Rapid Application Development with CakePHP 2" title="Rapid Application Development with CakePHP 2" height="41" width="41"/>Rapid Application Development</h1>
+                        <h2>with CakePHP 2</h2>
+                    </div>
+                    <!--End of Header Logo-->
+
+                    <!--Start of Social Elements-->
+                    <aside id="social_elements" class="one_third last">
+                        <ul>
+                            <li><a class="icon icon-2x icon-twitter" target="_blank" title="Twitter" href="https://twitter.com/savant"><span>Twitter</span></a></li>
+                            <!-- <li><a class="facebook" target="_blank" title="Facebook" href=""><span>Facebook</span></a></li> -->
+                            <!-- <li><a class="googleplus" target="_blank" title="Google Plus" href=""><span>Google Plus</span></a></li> -->
+                            <li><a class="icon icon-2x icon-github" target="_blank" title="GitHub" href="https://github.com/josegonzalez/rad-cakephp-2"><span>GitHub</span></a></li>
+                            <li><a class="icon icon-2x icon-envelope-alt" target="_blank" title="Feedback Form" href="mailto:book@josediazgonzalez.com"><span>Feedback Form</span></a></li>
+                        </ul>
+                    </aside>
+                    <!--End of Social Elements-->
+                </div>
+                <!--Start of Product Image-->
+                <div id="shelf" class="one_half">
+                    <img src="images/book_dummy-custom.png" height="451" width="331" alt="Book"/>
+                </div>
+                <!--End of Product Image-->
+
+                <!--Start of Product Banner Description-->
+                <div class="one_half last">
+                    <!--Start of Banner Title-->
+                    <h1>Looking for a CakePHP book that covers CakePHP 2.x?</h1>
+                    <h2 class="subheader">Want to learn how the CakePHP pros rapidly prototype a website? Need to get familiar quickly with the CakePHP way? This book is for you!</h2>
+                    <!--End of Banner Title-->
+
+                    <p>This book runs through the process of building a simple pastebin website with the CakePHP web application framework. It covers all the topics in your typical CakePHP tutorial, but takes extra care to point out useful information and techniques for speeding up your own application development.</p>
+
+                    <!--Start of Buy Button-->
+                    <div class="button_buy">
+                        <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&method_id=95340" class="gradient" title="Buy eBook"><span class="button_price">$34.99</span> <span class="button_text">Buy eBook Bundle</span></a>
+                        <p class="hint">eBook includes PDF, ePub, Kindle versions. Video coming soon!</p>
+                    </div>
+                    <!--End of Buy Button-->
+
+                </div>
+                <!--End of Product Banner Description-->
+
+            </div>
+        </section>
+        <!--End of Product Banner-->
+
+        <!--Start of Main Content-->
+        <article role="main">
+            <div id="main_content">
+
+                <!--Start of Companies-->
+<!--                 <aside id="companies" class="background_grey">
+                    <div class="row">
+                        <img src="images/companies/company_logo_1.png" alt="Company" height="27" width="140"/>
+                        <img src="images/companies/company_logo_2.png" alt="Company" height="27" width="114"/>
+                        <img src="images/companies/company_logo_3.png" alt="Company" height="27" width="137"/>
+                        <img src="images/companies/company_logo_4.png" alt="Company" height="27" width="110"/>
+                        <img src="images/companies/company_logo_5.png" alt="Company" height="27" width="140"/>
+                    </div>
+                </aside> -->
+                <!--End of Companies-->
+
+                <!--Start of Features-->
+                <section id="features">
+                    <div class="row">
+
+                        <!--Start of Features Title-->
+                        <h2 class="section_title"><span>What you will learn with this eBook</span></h2>
+                        <!--End of Features Title-->
+
+                        <!--Start of Features List-->
+                        <ul>
+                            <li class="one_half">
+                                <i class="icon-desktop icon-4x"></i>
+                                <h4>Developing within a Vagrant Virtual Machine</h4>
+                                <p>Ever tire of setting up a local development server just to screw up the rest of your TCP/IP settings? Fret no more as we work within a virtualized server.</p>
+                            </li>
+                            <li class="one_half last">
+                                <i class="icon-cogs icon-4x"></i>
+                                <h4>Managing Dependencies via Composer</h4>
+                                <p>Installing CakePHP, Plugins, and external libraries need not be difficult. Learn how to use the excellent Composer tool to manage libraries your app uses.</p>
+                            </li>
+                            <li class="one_half">
+                                <i class="icon-road icon-4x"></i>
+                                <h4>Custom CakePHP Routes</h4>
+                                <p>Customizing your URL structure is important. We go over creating custom route classes, enabling you to really harness the power of the CakePHP Router.</p>
+                            </li>
+                            <li class="one_half last">
+                                <i class="icon-puzzle-piece icon-4x"></i>
+                                <h4>Using the Powerful Crud Plugin</h4>
+                                <p>Tired of writing the same old CRUD code? Ever wanted to expand the way bake generated data internally? Use the Crud plugin to boost your baking skills.</p>
+                            </li>
+                            <li class="one_half">
+                                <i class="icon-group icon-4x"></i>
+                                <h4>User Authentication and Authorization</h4>
+                                <p>Stop fighting the CakePHP AuthComponent. Learn a quick and easy way to add application authentication and protect your app using the simplest authorization code.</p>
+                            </li>
+                            <li class="one_half last">
+                                <i class="icon-rocket icon-4x"></i>
+                                <h4>Deploying your application to Heroku</h4>
+                                <p>Rather than attempt to figure out yet another production server, we deploy your application to the cloud using the excellent Heroku platform. For free. Boom.</p>
+                            </li>
+                            <li class="one_half">
+                                <i class="icon-time icon-4x"></i>
+                                <h4>Scaffold templates using Bake</h4>
+                                <p>Save time with the <code>bake</code> CakePHP shell and generate your template files with minimal fuss.</p>
+                            </li>
+                            <li class="one_half last">
+                                <i class="icon-calendar icon-4x"></i>
+                                <h4>The CakePHP Event system</h4>
+                                <p>Confused on how CakePHP uses events internally? Want to start using them in your everyday code? This book introduces multiple ways to use events. All in simple to understand examples.</p>
+                            </li>
+                        </ul>
+                        <!--End of Features List-->
+                    </div>
+                </section>
+                <!--End of Features-->
+
+                <!--Start of Testimonials-->
+                <section id="testimonials" class="background_grey">
+                    <div class="row">
+
+                        <!--Start of Testimonial-->
+                        <blockquote class="one_third">
+                            <q>Just bought this book and can't wait to tear into this bad boy!</q>
+                            <footer>
+                                <img src="images/testimonial_1_chris.jpg" height="60" width="60" alt="John Doe"/>
+                                <div>Chris Pierce</div>
+                                Developer
+                            </footer>
+                        </blockquote>
+                        <!--End of Testimonial-->
+
+                        <!--Start of Testimonial-->
+                        <blockquote class="one_third">
+                            <q>Excited to see some best practices and latest tools from a #CakePHP core developer :)</q>
+                            <footer>
+                                <img src="images/testimonial_2_kyle.jpg" height="60" width="60" alt="Jane Doe"/>
+                                <div>Kyle Weishaupt</div>
+                                IT Manager
+                            </footer>
+                        </blockquote>
+                        <!--End of Testimonial-->
+
+                        <!--Start of Testimonial-->
+                        <blockquote class="one_third last">
+                            <q>It's helped me out quite a lot, especially with Heroku deployment.</q>
+                            <footer>
+                                <img src="images/testimonial_3_david.jpg" height="60" width="60" alt="Jimmy Doe"/>
+                                <div>David Gallagher</div>
+                                Web Developer
+                            </footer>
+                        </blockquote>
+                        <!--End of Testimonial-->
+
+                    </div>
+                </section>
+                <!--End of Testimonials-->
+
+                <!--Start of Screenshots-->
+<!--                 <section id="screenshots" class="background_white">
+                    <div class="row">
+                        <div class="one_half">
+                            <h2>Take a sneak peak inside</h2>
+                            <h3>This book runs through the process of building a simple pastebin website with the CakePHP web application framework.</h3>
+                            <p>It covers all the topics in your typical CakePHP tutorial, but takes extra care to point out useful information and techniques for speeding up your own application development. Using CakePHP best practices, commonly used community libraries, and advanced development methodologies, this book is targeted at both beginner and advanced CakePHP developers looking to increase their capabilities.</p>
+
+                            <ul class="list_check">
+                                <li>Learn how to use the Migrations plugin.</li>
+                                <li>Start writing tests for your code.</li>
+                                <li>Follow step-by-step examples on baking just like the pros do.</li>
+                            </ul>
+                        </div>
+
+                        <div class="one_half last">
+                            <div class="image-gallery">
+                                <a class="zoom-cursor" href="images/screenshots/1.jpg" title="What's That Click? 1"><img src="images/screenshots/thb_1.jpg" width="220" height="140" alt="Screenshot 1" /></a>
+                                <a class="zoom-cursor last" href="images/screenshots/2.jpg" title="What's That Click? 2"><img src="images/screenshots/thb_2.jpg" width="220" height="140" alt="Screenshot 2" /></a>
+                                <a class="zoom-cursor" href="images/screenshots/3.jpg" title="What's That Click? 3"><img src="images/screenshots/thb_3.jpg" width="220" height="140" alt="Screenshot 3" /></a>
+                                <a class="zoom-cursor last" href="images/screenshots/4.jpg" title="What's That Click? 4"><img src="images/screenshots/thb_4.jpg" width="220" height="140" alt="Screenshot 4" /></a>
+                            </div>
+                        </div>
+                    </div>
+                </section> -->
+                <!--End of Screenshots-->
+
+                <section class="background_white">
+                    <div class="row">
+
+                        <div class="one_half">
+                            <img src="images/device_dummy.jpg" alt="eBook Landing Page" height="352" width="350" />
+                        </div>
+
+                        <!--Start How it Works-->
+                        <div class="one_half last">
+                            <h2>Read it on your favorite device!</h2>
+                            <h3>Why get trapped on a single device? This book is offered in multiple formats so you can read it as you please.</h3>
+
+                            <p>I am constantly on the go, so nothing annoys me more than not being able to read a book or article while on the subway without whipping out yet another device. So please, get the bundle, and enjoy the book on your iPad, Android device, and Amazon Kindle.</p>
+
+                            <p>The book comes lovingly crafted in all digital formats, ready for you to consume at your leisure. Rest assured that regardless of the device, you'll always get the same great content in the best form possible. And don't worry, all formats will receive errata updates and new content as it becomes available!</p>
+
+                            <p>Don't need all the versions? Just grab the format of your preference, and read the book however you like.</p>
+                        </div>
+                        <!--End of How it Works-->
+                    </div>
+                </section>
+
+                <!--Start of Pricing-->
+                <section id="pricing" class="background_grey">
+                    <div class="row">
+
+                        <h2 class="section_title"><span>Buy the version of your choice!</span></h2>
+
+                        <div id="pricing_table">
+
+                            <!--Beginn Pricing Block-->
+                            <div class="pricing_block one_fourth">
+                                <div class="pricing_header">
+                                    <h4>ePub Version</h4>
+                                </div>
+                                <div class="pricing">
+                                    <p class="price"><span>$</span>14.99</p>
+                                    <p class="price_sub">The standard edition</p>
+                                </div>
+                                <ul>
+                                    <li>Complete Book</li>
+                                    <li>Bonus GIT Repository (soon!)</li>
+                                    <li class="last">Access to Downloads</li>
+                                </ul>
+                                <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91115&method_id=95363" class="button_buy_table gradient">Buy now</a>
+                            </div>
+                            <!--End Pricing Block-->
+
+                            <!--Beginn Pricing Block-->
+                            <div class="pricing_block one_fourth">
+                                <div class="pricing_header">
+                                    <h4>PDF Version</h4>
+                                </div>
+                                <div class="pricing">
+                                    <p class="price"><span>$</span>14.99</p>
+                                    <p class="price_sub">The PDF edition</p>
+                                </div>
+                                <ul>
+                                    <li>Complete Book</li>
+                                    <li>Bonus GIT Repository (soon!)</li>
+                                    <li class="last">Access to Downloads</li>
+                                </ul>
+                                <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91114&method_id=95362" class="button_buy_table gradient">Buy now</a>
+                            </div>
+                            <!--End Pricing Block-->
+
+                            <!--Beginn Pricing Block-->
+                            <div id="favorite" class="pricing_block one_fourth">
+                                <div class="pricing_header">
+                                    <h4>Bundle</h4>
+                                </div>
+                                <div class="pricing">
+                                    <p class="price"><span>$</span>34.99</p>
+                                    <p class="price_sub">The complete collection</p>
+                                </div>
+                                <ul>
+                                    <li>Complete Book</li>
+                                    <li>PDF, ePub, Mobi formats</li>
+                                    <li>Bonus GIT Repository (soon!)</li>
+                                    <li class="last">Access to Video when released</li>
+                                </ul>
+                                <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&method_id=95340" class="button_buy_table gradient">Buy now</a>
+                            </div>
+                            <!--End Pricing Block-->
+
+                            <!--Beginn Pricing Block-->
+                            <div class="pricing_block one_fourth last">
+                                <div class="pricing_header">
+                                    <h4>Kindle Version</h4>
+                                </div>
+                                <div class="pricing">
+                                    <p class="price"><span>$</span>14.99</p>
+                                    <p class="price_sub">The Kindle/Mobi edition</p>
+                                </div>
+                                <ul>
+                                    <li>Complete Book</li>
+                                    <li>Bonus GIT Repository (soon!)</li>
+                                    <li class="last">Access to Downloads</li>
+                                </ul>
+                                <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91116&method_id=95364" class="button_buy_table gradient">Buy now</a>
+                            </div>
+                            <!--End Pricing Block-->
+
+                        </div><!--End of Pricing Table-->
+
+                    </div>
+                </section>
+                <!--End of Pricing-->
+
+                <!--Start of A Word from the Author-->
+                <section id="author" class="background_white">
+                    <div class="row">
+                        <div class="one_half">
+
+                            <!--Author Avatar-->
+                            <img src="images/author.jpg" height="100" width="100" id="author_image" class="left" alt="Author" />
+                            <!--End of Author Avatar-->
+
+                            <div class="one_third last">
+
+                                <h2>A word from the Author</h2>
+
+                                <p>I wrote this book after being frustrated with the options for new CakePHP developers. This book is therefore a distillation of my own development practices, mixed with those of other CakePHP Core Developers and the community at large. I focused on getting past the tough issues quickly while utilizing knowledge of the internals to teach you how to create a bakers delight.</p>
+
+                                <p>Whether you are a CakePHP beginner, or have been using CakePHP for years, this book is designed to ensure you learn exactly what you need to do to craft a high performance application that is also a treat to work with. I hope you enjoy it.</p>
+
+                                <p>- Jose Diaz-Gonzalez, CakePHP Core Developer</p>
+
+                            </div>
+                        </div>
+
+                        <div id="book_cover" class="one_half last">
+
+                            <!--Start of Book Cover-->
+                            <img src="images/book.png" alt="eBook Landing Page" height="370" width="320"/>
+                            <!--End of Book Cover-->
+
+                        </div>
+
+                        <!--Start of Buy Button-->
+                        <div class="button_buy">
+                            <a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&method_id=95340" class="gradient" title="Buy eBook"><span class="button_price">$34.99</span> <span class="button_text">Buy eBook Bundle</span></a>
+                            <p class="hint">eBook includes PDF, ePub, Kindle versions. Video coming soon!</p>
+                        </div>
+                        <!--End of Buy Button-->
+
+                    </div>
+                </section>
+                <!--End of A Word from the Author-->
+<!--
+                <aside class="background_grey">
+
+                    <div id="newsletter" class="row">
+
+                        <h2>For a free Chapter, join our Newsletter!</h2>
+
+                        <form>
+                            <input type="text" name="e-mail" id="e-mail" value="Enter your E-mail Address" onBlur="if(this.value == '') { this.value = 'Enter your E-mail Address'; }" onFocus="if(this.value == 'Enter your E-mail Address') { this.value = ''; }" />
+                            <input id="submit" class="gradient" type="submit" value="Subscribe" name="submit" />
+                        </form>
+                    </div>
+                </aside>
+ -->
+            </div>
+        </article>
+        <!--End of Main Content-->
+
+        <!--Start of Landing Page Footer-->
+        <footer role="contentinfo" class="background_grey">
+            <div id="page_footer" class="row">
+                <ul>
+                    <li><a href="http://josediazgonzalez.com/about/">About</a></li>
+                    <!-- <li><a href="#">Press</a></li> -->
+                    <li><a href="mailto:book@josediazgonzalez.com">Contact</a></li>
+                </ul>
+
+                <p>
+                &copy; Rapid Application Development with CakePHP 2 2014. All rights reserved.
+                </p>
+            </div>
+        </footer>
+        <!--End of Landing Page Footer-->
+
+        <!--Beginning of Contact form-->
+        <div id="contact" class="reveal-modal medium">
+            <a href="javascript:closecontact();" id="contact_close"><span>Close</span></a>
+            <div id="contactmessages"></div>
+            <div id="formwrapper">
+                <form method="post" action="contact.php" id="contactform">
+                    <label>Your Name</label>
+                    <input id="contactname" name="name" required>
+                    <label>Your Email</label>
+                    <input id="contactemail" name="email" type="email" required>
+                    <label>Your Message</label>
+                    <textarea name="message" required></textarea>
+                    <label>What is <span id="captcha">???</span> (Anti-spam)</label>
+                    <input id="humanornot" name="humanornot" placeholder="Type Here" required>
+                    <input name="s" id="s" value="blank" type="hidden">
+                    <input id="submitcontact" name="submit" type="submit" value="Submit" class="gradient">
+                </form>
+            </div>
         </div>
-        <p class="price-detail">
-            Price: <span itemprop="highPrice">$34.99</span> for all formats
-        </p>
-        <p class="price-detail">
-            <span itemprop="lowPrice">$14.99</span> for a single format
-        </p>
-    </div>
+        <!--End of Contact form-->
 
-    <div class="book-info">
-        <div class="fb-like" data-href="http://josediazgonzalez.com/cakephp-book/" data-layout="standard" data-action="like" data-show-faces="false" data-share="true"></div>
-        <p>Looking for a CakePHP book that covers <strong>CakePHP 2.5+</strong>? Well you've come to the right place! Here's a sample of topics covered:</p>
+        <a href="#" class="scrollup">Scroll up</a>
+        <!-- Included JS Files (Compressed) -->
+        <script src="js/foundation.min.js"></script>
+        <script src="js/phrases.js"></script>
+        <script src="js/site.min.js"></script>
+        <script type="text/javascript">
 
-        <ul>
-            <li>Developing within a Vagrant Virtual Machine</li>
-            <li>Managing Dependencies via Composer</li>
-            <li>Custom CakePHP Routes</li>
-            <li>Using the powerful Crud Plugin</li>
-            <li>Deploying your application to Heroku</li>
-            <li>User Authentication and Authorization</li>
-            <li>Using the bake cli tool to automatically create scaffolded pages</li>
-            <li>The CakePHP Event system</li>
-        </ul>
+                (function() {
+                    var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
 
-        <p>What do you get for your money? The book comes to you in the following formats:</p>
-        <ul>
-            <li><strong>PDF</strong> (for Mac or PC)</li>
-            <li><strong>EPUB</strong> (for iPad, iPhone, Android, and other ebook readers)</li>
-            <li><strong>MOBI</strong> (for Kindle)</li>
-            <li><strong>Video</strong> (coming soon in the bundle!)</li>
-        </ul>
-
-        <p>Want to learn how the CakePHP pros rapidly prototype a website? Need to get familiar quickly with the CakePHP way? <strong>This book is for you!</strong></p>
-
-        <p>This book runs through the process of building a simple pastebin website with the CakePHP web application framework. It covers all the topics in your typical CakePHP tutorial, but takes extra care to point out useful information and techniques for speeding up your own application development. Using CakePHP best practices, commonly used community libraries, and advanced development methodologies, this book is targeted at both beginner and advanced CakePHP developers looking to increase their capabilities.</p>
-
-        <p>Have questions or comments? Get in touch via <a href="mailto:book@josediazgonzalez.com">email</a>!</p>
-    </div>
-    <br style="clear:both">
-</div>
-
-<div class="book-container">
-    <div class="book-summary">
-        <strong>Chapters</strong>
-        <p>Want to know what is in the book before<br /> you buy it? Here is the chapter list:</p>
-        <ol class="dont-style">
-            <li>The Setup</li>
-            <li>Prepping our Application</li>
-            <li>Adding automated testing</li>
-            <li>Deploying to Heroku</li>
-            <li>Implementing a Paste</li>
-            <li>Custom Application Actions</li>
-            <li>Public and Private Pastes</li>
-            <li>Debugging Data via DebugKit</li>
-            <li>User Authentication</li>
-            <li>User profiles</li>
-            <li>Conclusion</li>
-        </ol>
-
-        <p>A full chapter summary is available <a href="/cakephp-book/rad-cakephp-toc.pdf">here</a>, with more chapters on the way!</p>
-    </div>
-
-    <div class="book-info">
-        <strong>Sample Chapters</strong>
-        <p>You can read the sample chapter <a href="/cakephp-book/rad-cakephp-preview.pdf">here</a>. The chapter introduces you to the AuthComponent and the Migrations plugin.</p>
-
-        <strong>Formats</strong>
-
-        <p>Not everyone needs every format, so the book is made available at a reduced price for individual formats.</p>
-
-        <ul>
-            <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91114&amp;method_id=95362">Buy the PDF<a/></li>
-            <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91115&amp;method_id=95363">Buy the ePub</a></li>
-            <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91116&amp;method_id=95364">Buy the Kindle/Mobi</a></li>
-            <li><a href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Buy all three formats and save!</a></li>
-        </ul>
-        <div class="btn-buy-container mobile-hide">
-            <a class="btn btn-two" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Get the best CakePHP 2 book today!</a>
-        </div>
-    </div>
-    <br style="clear:both">
-</div>
-
-<div class="btn-buy-container mobile-show">
-    <a class="btn btn-two" href="https://cakephp-book.dpdcart.com/cart/add?product_id=91093&amp;method_id=95340">Get the best CakePHP 2 book today!</a>
-</div>
-
-<!-- https://github.com/josegonzalez/rad-cakephp-2/issues -->
-
-<style>
-.site-header {
-    display: none;
-}
-.book-container {
-    padding-top: 1.714285714rem;
-    border-top: 1px solid #ededed;
-}
-.book-container .price-detail {
-    font-size: 0.6875em;
-    color: #9c9991;
-    margin-bottom: 0;
-    text-align: center;
-}
-.book-container .image-by {
-    color: #9c9991;
-    font-size: 0.4em;
-    text-align: center;
-}
-.book-info {
-    padding-right: 2em;
-}
-.book-summary {
-    float: right;
-    text-align: center;
-}
-.book-summary-image {
-    padding-bottom: 20px;
-}
-.book-container .buy-now {
-    padding-top: 2em;
-}
-.book-container .buy-button {
-    border-radius: none;
-    box-shadow: none;
-}
-.book-container .dont-style {
-    list-style-type: none;
-}
-.book-container .dont-style li {
-    margin: 0;
-}
-.btn-buy-container {
-    padding: 10px;
-}
-.btn {
-  background: #89ba03;
-  background-image: -webkit-linear-gradient(top, #89ba03, #5c9402);
-  background-image: -moz-linear-gradient(top, #89ba03, #5c9402);
-  background-image: -ms-linear-gradient(top, #89ba03, #5c9402);
-  background-image: -o-linear-gradient(top, #89ba03, #5c9402);
-  background-image: linear-gradient(to bottom, #89ba03, #5c9402);
-  -webkit-border-radius: 3;
-  -moz-border-radius: 3;
-  border-radius: 3px;
-  font: 400 14px proxima-nova-1,proxima-nova-2,'Proxima Nova',HelveticaNeue,"Helvetica Neue",HelveticaNeueRoman,HelveticaNeue-Roman,"Helvetica Neue Roman",Helvetica,Tahoma,Geneva,Arial,sans-serif;
-  color: #ffffff;
-  padding: 10px 100px;
-  text-decoration: none;
-}
-.btn:hover {
-  background: #87bb03;
-  background-image: -webkit-linear-gradient(top, #87bb03, #518000);
-  background-image: -moz-linear-gradient(top, #87bb03, #518000);
-  background-image: -ms-linear-gradient(top, #87bb03, #518000);
-  background-image: -o-linear-gradient(top, #87bb03, #518000);
-  background-image: linear-gradient(to bottom, #87bb03, #518000);
-  color: #efefef !important;
-  text-decoration: none;
-}
-.btn-two {
-    padding: 10px;
-}
-.fb_iframe_widget span {
-    margin-top: -10px;
-    margin-bottom: 10px;
-    width: 300px !important;
-}
-.mobile-show {
-  display: none;
-}
-.mobile-hide {
-  display: block;
-}
-@media (max-width:700px)  {
-  .btn {
-    padding: 10px 60px;
-  }
-  .btn-two {
-    font-size: 12px;
-    padding: 10px;
-    text-align: center;
-  }
-  .book-summary {
-      float: none;
-  }
-  .mobile-show {
-    display: block;
-    text-align: center;
-  }
-  .mobile-hide {
-    display: none;
-  }
-}
-</style>
-
-  </div>
-
-</article>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories">
-
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/cakephp-book/index.html';
-				var disqus_url        = 'http://josediazgonzalez.com/cakephp-book/index.html';
-				var disqus_title      = 'Rapid Application Development with CakePHP 2';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+        </script>
+    </body>
 </html>
