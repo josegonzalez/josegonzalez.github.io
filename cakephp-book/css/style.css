@@ -452,14 +452,6 @@ display:inline;
     font-size: 1.14286em;
 }
 
-
-@media only screen and (min-width: 768px) {
-    li.freshness strong, li.sample strong, li.coming_soon strong {
-        line-height: 1.55556em;
-        font-size: 1.28571em;
-    }
-}
-
 /* 6.2 Features */
 
 #features ul, #features ul li {
@@ -1341,6 +1333,15 @@ color:#999;
        margin-bottom:10px;
     }
 
+    #companies .info_block {
+        margin-bottom: 15px;
+    }
+
+    li.freshness strong, li.sample strong, li.coming_soon strong {
+        line-height: 1.55556em;
+        font-size: 1.28571em;
+    }
+
     /*Testimonials*/
 
     #testimonials img {
@@ -1461,6 +1462,10 @@ color:#999;
 
     #companies img {
         margin:5px;
+    }
+
+    #companies .info_block {
+        margin-bottom: 15px;
     }
 
     /*Features*/
