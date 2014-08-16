@@ -126,15 +126,29 @@
             <div id="main_content">
 
                 <!--Start of Companies-->
-<!--                 <aside id="companies" class="background_grey">
+                <aside id="companies" class="background_grey">
                     <div class="row">
-                        <img src="images/companies/company_logo_1.png" alt="Company" height="27" width="140"/>
-                        <img src="images/companies/company_logo_2.png" alt="Company" height="27" width="114"/>
-                        <img src="images/companies/company_logo_3.png" alt="Company" height="27" width="137"/>
-                        <img src="images/companies/company_logo_4.png" alt="Company" height="27" width="110"/>
-                        <img src="images/companies/company_logo_5.png" alt="Company" height="27" width="140"/>
+                        <ul class="small-block-grid-3 large-block-grid-8">
+                            <li class="info_block sample">
+                                <strong>Free sample</strong>
+                                <a href="http://samples.leanpub.com/rad-cakephp-sample.pdf">download</a>
+                            </li>
+                            <li class="info_block page_count">
+                                <strong>82</strong> pages
+                            </li>
+<!--                             <li class="info_block word_count">
+                                <strong>34,111</strong> words
+                            </li> -->
+                            <li class="info_block language">
+                                <i class="icon icon-2x icon-comment-alt" text="Book language"></i> English
+                            </li>
+                            <li class="info_block freshness">
+                                <strong>Updated</strong>
+                                <time datetime="2014-08-03T19:40:49Z" id="freshness-timestamp">2014-08-03</time>
+                            </li>
+                        </ul>
                     </div>
-                </aside> -->
+                </aside>
                 <!--End of Companies-->
 
                 <!--Start of Features-->
@@ -537,14 +551,23 @@
         <script src="js/foundation.min.js"></script>
         <script src="js/phrases.js"></script>
         <script src="js/site.min.js"></script>
+        <script src="js/moment.js"></script>
         <script type="text/javascript">
+            (function() {
+                var dates = $('time');
+                $.each(dates, function (i, date) {
+                    var $date = $(date);
+                    $date.html(moment(new Date($date.attr('datetime'))).fromNow());
+                });
+            })();
 
-                (function() {
-                    var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-                })();
+            (function() {
+                var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
 
         </script>
+
     </body>
 </html>
