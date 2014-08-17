@@ -1,1512 +1,1169 @@
 [
-	{
-		"type": "post",
-		"title": "CakePHP as a Microframework",
-		"url": "/2014/03/23/cakephp-a-microframework/",
-		"description": "Using CakePHP as a library to build applications microframework-style",
-		"tokens": ["applications","build","cakephp","library","microframework","style","using"]
-	},
-	{
-		"type": "post",
-		"title": "Shipping CakePHP App Logs to Logstash via Syslog",
-		"url": "/2014/03/22/shipping-cakephp-application-logs-to-logstash/",
-		"description": "If you've never written a CakePHP Logger, here is a simple post on how to do so",
-		"tokens": ["app","cakephp","logger","logs","logstash","never","post","shipping","simple","syslog","via","written"]
-	},
-	{
-		"type": "post",
-		"title": "Using View Cells in your CakePHP applications",
-		"url": "/2014/03/20/view-cells/",
-		"description": "A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes",
-		"tokens": ["applications","cakephp","cells","classes","forward","look","service","throwback","using","view","writing","x"]
-	},
-	{
-		"type": "post",
-		"title": "Local Development Environment using Vagrant and Virtualbox",
-		"url": "/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/",
-		"description": "Tired of reinstalling your development environment? We've created one specifically for CakePHP usage.",
-		"tokens": ["cakephp","created","development","environment","local","one","reinstalling","specifically","tired","usage","using","vagrant","virtualbox"]
-	},
-	{
-		"type": "post",
-		"title": "Writing Slimmer Controllers",
-		"url": "/2013/12/24/writing-slimmer-controllers/",
-		"description": "Refactoring Controller code should be simple, and I'll tear apart my own code to show how you can go about it.",
-		"tokens": ["apart","can","code","controller","controllers","go","refactoring","show","simple","slimmer","tear","writing"]
-	},
-	{
-		"type": "post",
-		"title": "Application-wide event management",
-		"url": "/2013/12/23/application-wide-event-management/",
-		"description": "Triggering global CakePHP events isn't difficult, and this tutorial shows you how to do it.",
-		"tokens": ["application","cakephp","difficult","event","events","global","management","shows","triggering","tutorial","wide"]
-	},
-	{
-		"type": "post",
-		"title": "Deploying a CakePHP application to Heroku",
-		"url": "/2013/12/22/deploying-a-cakephp-application-to-heroku/",
-		"description": "Heroku is a popular place to try out small experiments in CakePHP, so I decided to document the steps necessary for a successful Heroku integration.",
-		"tokens": ["application","cakephp","decided","deploying","document","experiments","heroku","integration","necessary","place","popular","small","steps","successful","try"]
-	},
-	{
-		"type": "post",
-		"title": "Building a Behavior with CakePHP",
-		"url": "/2013/12/21/building-a-behavior-with-cakephp/",
-		"description": "Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field",
-		"tokens": ["behavior","building","cakephp","covering","creating","creation","deleted","field","handle","plugin","tests","unit","writing"]
-	},
-	{
-		"type": "post",
-		"title": "Application Environment Configuration",
-		"url": "/2013/12/20/application-environment-configuration/",
-		"description": "Specifying application configuration doesn't have to be hard, and here are three ways to do it!",
-		"tokens": ["application","configuration","environment","hard","specifying","three","ways"]
-	},
-	{
-		"type": "post",
-		"title": "Tackling database migrations with one neat trick",
-		"url": "/2013/12/19/tackling-database-migrations/",
-		"description": "We look at creating a Cakeshell to generate migration files for the CakeDC Migrations plugin",
-		"tokens": ["cakedc","cakeshell","creating","database","files","generate","look","migration","migrations","neat","one","plugin","tackling","trick"]
-	},
-	{
-		"type": "post",
-		"title": "CakePHP Testing 102",
-		"url": "/2013/12/18/cakephp-testing-102/",
-		"description": "Some personal thoughts on testing your CakePHP code to get maximum efficiency",
-		"tokens": ["cakephp","code","efficiency","get","maximum","personal","testing","thoughts"]
-	},
-	{
-		"type": "post",
-		"title": "Deploy ALL the things using simple Bash scripts",
-		"url": "/2013/12/17/deploy-all-the-things-with-bash/",
-		"description": "Automate everything, including your deploys, using things as simple as a bash script",
-		"tokens": ["automate","bash","deploy","deploys","everything","including","script","scripts","simple","things","using"]
-	},
-	{
-		"type": "post",
-		"title": "Simpler CakePHP Events",
-		"url": "/2013/12/16/simpler-cakephp-events/",
-		"description": "Making small changes to the event system workflow to enhance your productivity through annotations and simpler dispatching!",
-		"tokens": ["annotations","cakephp","changes","dispatching","enhance","event","events","making","productivity","simpler","small","system","workflow"]
-	},
-	{
-		"type": "post",
-		"title": "Payment Processing using Stripe",
-		"url": "/2013/12/15/payment-processing-using-stripe/",
-		"description": "Making money with your website should be your primary concern, and this blog post will explain a simple, awesome way to do so",
-		"tokens": ["awesome","blog","concern","explain","making","money","payment","post","primary","processing","simple","stripe","using","way","website","will"]
-	},
-	{
-		"type": "post",
-		"title": "Creating a custom session flash handler",
-		"url": "/2013/12/14/creating-a-custom-session-flash-handler/",
-		"description": "Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core.",
-		"tokens": ["actually","aliasing","cakephp","class","core","creating","custom","flash","handler","inject","libraries","logic","powerful","rewriting","session","using","way","without"]
-	},
-	{
-		"type": "post",
-		"title": "Simple application maintenance mode",
-		"url": "/2013/12/13/simple-application-maintenance-mode/",
-		"description": "Setup a fast maintenance mode for your application using the CakePHP Dispatch Filter system",
-		"tokens": ["application","cakephp","dispatch","fast","filter","maintenance","mode","setup","simple","system","using"]
-	},
-	{
-		"type": "post",
-		"title": "Abusing Exceptions to provide model-layer redirection",
-		"url": "/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/",
-		"description": "Fat models and skinny controllers are about more than data handling. You should also concern yourself with Error state handling and how to bubble up exceptions.",
-		"tokens": ["abusing","also","bubble","concern","controllers","data","error","exceptions","fat","handling","layer","model","models","provide","redirection","skinny","state"]
-	},
-	{
-		"type": "post",
-		"title": "Giving the gift of CakePHP to the Community",
-		"url": "/2013/12/11/giving-the-gift-of-cakephp-to-the-community/",
-		"description": "Share and contribute back to the CakePHP community in one of many ways!",
-		"tokens": ["back","cakephp","community","contribute","gift","giving","many","one","share","ways"]
-	},
-	{
-		"type": "post",
-		"title": "Queue in scalable applications",
-		"url": "/2013/12/10/queue-in-scalable-applications/",
-		"description": "Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high",
-		"tokens": ["applications","background","computations","conversions","high","instead","keep","long","make","move","queue","running","scalable","server","users","wait"]
-	},
-	{
-		"type": "post",
-		"title": "Simplifying OAuth integration",
-		"url": "/2013/12/09/simplifying-oauth-integration/",
-		"description": "Rather than writing the same OAuth code for different projects, reuse a community framework to integrate with service providers like Facebook and Twitter",
-		"tokens": ["code","community","different","facebook","framework","integrate","integration","like","oauth","projects","providers","rather","reuse","service","simplifying","twitter","writing"]
-	},
-	{
-		"type": "post",
-		"title": "Composing your applications from plugins",
-		"url": "/2013/12/08/composing-your-applications-from-plugins/",
-		"description": "Properly manage your CakePHP application dependencies using Composer, a PHP dependency management tool",
-		"tokens": ["application","applications","cakephp","composer","composing","dependencies","dependency","manage","management","php","plugins","properly","tool","using"]
-	},
-	{
-		"type": "post",
-		"title": "A quick rundown on Asset Compression",
-		"url": "/2013/12/07/a-quick-rundown-on-asset-compression/",
-		"description": "Using the AssetCompress plugin to render concatenated files is a cheap way to get better application performance",
-		"tokens": ["application","asset","assetcompress","better","cheap","compression","concatenated","files","get","performance","plugin","quick","render","rundown","using","way"]
-	},
-	{
-		"type": "post",
-		"title": "Building Service Classes",
-		"url": "/2013/12/06/building-service-classes/",
-		"description": "Building complex pages that seem to span hundreds of lines of Controller/Model code? Write Service classes for greater good!",
-		"tokens": ["building","classes","code","complex","controller","good","greater","hundreds","lines","model","pages","seem","service","span","write"]
-	},
-	{
-		"type": "post",
-		"title": "Objectifying CakePHP 2.0 applications",
-		"url": "/2013/12/05/objectifying-cakephp-2-0-applications/",
-		"description": "Stop complaining about not being able to use objects in the ORM and use 3.0-like features in your 2.0 application today!",
-		"tokens": ["able","application","applications","cakephp","complaining","features","like","objectifying","objects","orm","stop","today","use"]
-	},
-	{
-		"type": "post",
-		"title": "Interactive command-line REPL for CakePHP",
-		"url": "/2013/12/04/interactive-command-line-repl/",
-		"description": "Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code",
-		"tokens": ["cakephp","code","command","different","explore","implement","interactive","line","purposes","quickly","repl","testing","ways"]
-	},
-	{
-		"type": "post",
-		"title": "Hacking the CakePHP Dispatch System",
-		"url": "/2013/12/03/hacking-the-cakephp-dispatch-system/",
-		"description": "Wherein we abuse the CakePHP Disptach cycle to remove the Controllers and Views from our application in favor of smaller, testable units of code. One weird trick, APIs loves this!",
-		"tokens": ["abuse","apis","application","cakephp","code","controllers","cycle","dispatch","disptach","favor","hacking","loves","one","remove","smaller","system","testable","trick","units","views","weird","wherein"]
-	},
-	{
-		"type": "post",
-		"title": "Fun with CakePHP Views",
-		"url": "/2013/12/02/fun-with-cakephp-views/",
-		"description": "A guide to creating a custom CakePHP view that generates identicon png images for users",
-		"tokens": ["cakephp","creating","custom","fun","generates","guide","identicon","images","png","users","view","views"]
-	},
-	{
-		"type": "post",
-		"title": "Testing your CakePHP Plugins with Travis",
-		"url": "/2013/12/01/testing-your-cakephp-plugins-with-travis/",
-		"description": "Quickly setup automated testing for your cakephp plugin code using Travis-Ci",
-		"tokens": ["automated","cakephp","ci","code","plugin","plugins","quickly","setup","testing","travis","using"]
-	},
-	{
-		"type": "post",
-		"title": "Service Definitions",
-		"url": "/2013/10/18/service-definitions/",
-		"description": "Just what is a service, and what pieces are necessary to run it?",
-		"tokens": ["definitions","just","necessary","pieces","run","service"]
-	},
-	{
-		"type": "post",
-		"title": "Resource reconfiguration",
-		"url": "/2013/10/17/resource-reconfiguration/",
-		"description": "How do you manage service configurations across a cluster of services?",
-		"tokens": ["across","cluster","configurations","manage","reconfiguration","resource","service","services"]
-	},
-	{
-		"type": "post",
-		"title": "Deploying your infrastructure to AWS",
-		"url": "/2013/10/17/deploying-your-infrastructure-to-aws/",
-		"description": "Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores",
-		"tokens": ["ameliorate","applications","aws","care","datastores","deploying","deployment","ec2","infrastructure","issues","particular","servers","service","taken"]
-	},
-	{
-		"type": "post",
-		"title": "Using a personal git host",
-		"url": "/2013/09/09/using-a-personal-git-host/",
-		"description": null,
-		"tokens": ["git","host","personal","using"]
-	},
-	{
-		"type": "post",
-		"title": "Using Beaver to ship log files to Redis/Logstash",
-		"url": "/2013/01/01/setting-up-beaver-for-use-with-logstash/",
-		"description": "This post will guide you through a simple Beaver installation.",
-		"tokens": ["beaver","files","guide","installation","log","logstash","post","redis","ship","simple","using","will"]
-	},
-	{
-		"type": "post",
-		"title": "Why to Actually Choose CakePHP",
-		"url": "/2012/09/07/why-to-actually-choose-cakephp/",
-		"description": "Why I think CakePHP is a great framework option",
-		"tokens": ["actually","cakephp","choose","framework","great","option","think"]
-	},
-	{
-		"type": "post",
-		"title": "Why CakePHP?",
-		"url": "/2012/09/07/why-cakephp/",
-		"description": "Why choose CakePHP over any other framework?",
-		"tokens": ["cakephp","choose","framework"]
-	},
-	{
-		"type": "post",
-		"title": "Upgrading from Lion to Mountain Lion",
-		"url": "/2012/07/25/upgrading-from-lion-to-mountain-lion/",
-		"description": "A guide to fixing all the breaking php and ruby packages in Mountain Lion",
-		"tokens": ["breaking","fixing","guide","lion","mountain","packages","php","ruby","upgrading"]
-	},
-	{
-		"type": "post",
-		"title": "Creating a cookbook and running chef-solo",
-		"url": "/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/",
-		"description": "How to create a cookbook for the Chef Deployment Tool and an explanation of DNA.json files",
-		"tokens": ["chef","cookbook","create","creating","deployment","dna","explanation","files","json","running","solo","tool"]
-	},
-	{
-		"type": "post",
-		"title": "Server Monitoring Tools",
-		"url": "/2012/03/28/server-monitoring-tools/",
-		"description": "An easy to install, maintain, and use tool for server monitoring doesn't exist, why is that?",
-		"tokens": ["easy","exist","install","maintain","monitoring","server","tool","tools","use"]
-	},
-	{
-		"type": "post",
-		"title": "Templates, Attributes, Resources, and Dependency Management",
-		"url": "/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/",
-		"description": "Templating, Custom Resources, and Cookbook creation for the Chef Deployment Tool",
-		"tokens": ["attributes","chef","cookbook","creation","custom","dependency","deployment","management","resources","templates","templating","tool"]
-	},
-	{
-		"type": "post",
-		"title": "Chef Recipes",
-		"url": "/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/",
-		"description": "What goes in a Chef Recipe, and how much do I really need to know about resources?",
-		"tokens": ["chef","goes","know","much","need","really","recipe","recipes","resources"]
-	},
-	{
-		"type": "post",
-		"title": "Introduction to Chef",
-		"url": "/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/",
-		"description": "This text is the first in a long series to correct an extremely disastrous talk at CakeFest 2011. It will also hopefully apply to more than CakePHP.",
-		"tokens": ["also","apply","cakefest","cakephp","chef","correct","disastrous","extremely","first","hopefully","introduction","long","series","talk","text","will"]
-	},
-	{
-		"type": "post",
-		"title": "A CakePHP Book I can finally recommend",
-		"url": "/2011/06/19/a-cakephp-book-i-can-finally-recommend/",
-		"description": "Review of Mariano Iglesias' CakePHP 1.3 Application Development Cookbook",
-		"tokens": ["application","book","cakephp","can","cookbook","development","finally","iglesias","mariano","recommend","review"]
-	},
-	{
-		"type": "post",
-		"title": "The Daily Dev Log - 5",
-		"url": "/2011/06/11/the-daily-dev-log-5/",
-		"description": "Writing a CakeRoute might be straightforward, and when used correctly, can really trim down the number of routes you connect in your routes.php file.",
-		"tokens": ["cakeroute","can","connect","correctly","daily","dev","file","log","might","number","php","really","routes","straightforward","trim","used","writing"]
-	},
-	{
-		"type": "post",
-		"title": "The Daily Dev Log - 4",
-		"url": "/2011/06/02/the-daily-dev-log-4/",
-		"description": "On the subject of updating urls in a web framework that gives you access to a router, it's important to have flexibility in writing those routes.",
-		"tokens": ["access","daily","dev","flexibility","framework","gives","important","log","router","routes","subject","updating","urls","web","writing"]
-	},
-	{
-		"type": "post",
-		"title": "The Daily Dev Log - 3",
-		"url": "/2011/05/27/the-daily-dev-log-3/",
-		"description": "Defining joins in CakePHP finds is simple, but can result in weird sql statements if used in conjunction with Containable.",
-		"tokens": ["cakephp","can","conjunction","containable","daily","defining","dev","finds","joins","log","result","simple","sql","statements","used","weird"]
-	},
-	{
-		"type": "post",
-		"title": "The Daily Dev Log - 2",
-		"url": "/2011/05/25/the-daily-dev-log-2/",
-		"description": "Always remember to include the host in the protocol when using the EmailComponent",
-		"tokens": ["always","daily","dev","emailcomponent","host","include","log","protocol","remember","using"]
-	},
-	{
-		"type": "post",
-		"title": "The Daily Dev Log - 1",
-		"url": "/2011/05/24/the-daily-dev-log-1/",
-		"description": "I spent around 7 hours putzing with History.js in cake_admin. While History.js should auto-ajax any web application, it doesn't quite play nice with CakePHP.",
-		"tokens": ["ajax","application","around","auto","cake_admin","cakephp","daily","dev","history","hours","js","log","nice","play","putzing","quite","spent","web"]
-	},
-	{
-		"type": "post",
-		"title": "Using CakeAdmin to generate backend applications",
-		"url": "/2011/05/17/using-cakeadmin-to-generate-backend-applications/",
-		"description": "CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions.",
-		"tokens": ["analogous","application","applications","backend","backends","bake","basic","building","cake","cakeadmin","cakephp","easily","generate","generating","plugin","questions","quickly","running","series","structure","using","web"]
-	},
-	{
-		"type": "post",
-		"title": "My development setup",
-		"url": "/2011/04/13/my-development-setup/",
-		"description": "For the purposes of archiving how I like to develop, I'll chronicle a few things here.",
-		"tokens": ["archiving","chronicle","develop","development","like","purposes","setup","things"]
-	},
-	{
-		"type": "post",
-		"title": "A Standard Readme for your CakePHP Plugins",
-		"url": "/2011/04/05/a-standard-readme-for-your-cakephp-plugins/",
-		"description": "Please stop using jank readmes for your CakePHP plugins, and use something like this instead.",
-		"tokens": ["cakephp","instead","jank","like","please","plugins","readme","readmes","something","standard","stop","use","using"]
-	},
-	{
-		"type": "post",
-		"title": "Carl Sutton of Infinitas CMS",
-		"url": "/2011/03/27/carl-sutton-of-infinitas-cms/",
-		"description": "Infinitas CMS is a pretty well-built and performant CMS, and Carl Sutton has a few thoughts to share on CakePHP in general.",
-		"tokens": ["built","cakephp","carl","cms","general","infinitas","performant","pretty","share","sutton","thoughts"]
-	},
-	{
-		"type": "post",
-		"title": "Embedding Custom Finds in Behaviors",
-		"url": "/2010/12/01/embedding-custom-finds-in-behaviors/",
-		"description": "Embedding custom finds in behaviors is extremely useful, but not the most straight-forward thing to do. Here's how.",
-		"tokens": ["behaviors","custom","embedding","extremely","finds","forward","straight","thing","useful"]
-	},
-	{
-		"type": "post",
-		"title": "Fahad Ibnay Heylaal, creator of Croogo CMS",
-		"url": "/2010/10/30/fahad-ibnay-heylaal-creator-of-croogo-cms/",
-		"description": "What does Fahad think about Croogo, CakePHP, and the CakePHP community in general?",
-		"tokens": ["cakephp","cms","community","creator","croogo","fahad","general","heylaal","ibnay","think"]
-	},
-	{
-		"type": "post",
-		"title": "Using loadModel() in the Model",
-		"url": "/2010/10/05/using-loadmodel-in-the-model/",
-		"description": "How do you use loadModel() in the CakePHP Model? Hint, you don't. There are other ways though.",
-		"tokens": ["cakephp","hint","loadmodel","model","though","use","using","ways"]
-	},
-	{
-		"type": "post",
-		"title": "Why CakePHP documentation sucks and what I'm doing about it",
-		"url": "/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/",
-		"description": "When people complain about documentation, the solution is to write more, and better, documentation.",
-		"tokens": ["better","cakephp","complain","documentation","people","solution","sucks","write"]
-	},
-	{
-		"type": "post",
-		"title": "Cakefest Conference Notes",
-		"url": "/2010/09/04/cakefest-conference-notes/",
-		"description": "CakeFest 2010 Conference notes and links",
-		"tokens": ["cakefest","conference","links","notes"]
-	},
-	{
-		"type": "post",
-		"title": "CakePHP Plugins - A Biblical Retelling",
-		"url": "/2010/08/16/cakephp-plugins-a-biblical-retelling/",
-		"description": "A list of CakePHP plugins I use and abuse on a daily basis, as well as things I've discovered but haven't found a use for but seem to be cool.",
-		"tokens": ["abuse","basis","biblical","cakephp","cool","daily","discovered","found","list","plugins","retelling","seem","things","use"]
-	},
-	{
-		"type": "post",
-		"title": "Things to install or update on my mac when first installing",
-		"url": "/2010/02/10/things-to-install-or-update-on-my-mac-when-first-installing/",
-		"description": "A list of things I install and do on my mac whenever I re-install or update it.",
-		"tokens": ["first","install","installing","list","mac","re","things","update","whenever"]
-	},
-	{
-		"type": "post",
-		"title": "Drop-down select fields in CakePHP",
-		"url": "/2010/02/09/drop-down-select-fields-in-cakephp/",
-		"description": "For anyone wishing to make dropdown select fields in CakePHP forms happen automagically, here are some facts.",
-		"tokens": ["anyone","automagically","cakephp","drop","dropdown","facts","fields","forms","happen","make","select","wishing"]
-	},
-	{
-		"type": "post",
-		"title": "Your username/password should never be a lastname/uid",
-		"url": "/2010/02/05/your-username-password-should-never-be-a-lastname-uid/",
-		"description": "I'm developing an application where the client wants the username and password combination to be a lastname and member ID number. This is quite stupid.",
-		"tokens": ["application","client","combination","developing","lastname","member","never","number","password","quite","stupid","uid","username","wants"]
-	},
-	{
-		"type": "post",
-		"title": "You want access? Well you no can has! - A CakePHP AccessComponent",
-		"url": "/2010/01/11/you-want-access-well-you-no-can-has-cakephp-access-component/",
-		"description": "One of the things I am working on is Authentication and Access Control. While Authsome Component takes care of authentication, we still need something more.",
-		"tokens": ["access","accesscomponent","authentication","authsome","cakephp","can","care","component","control","need","one","something","still","takes","things","want","working"]
-	},
-	{
-		"type": "post",
-		"title": "Clean up your Model data with Purifiable Behavior",
-		"url": "/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/",
-		"description": "Sanitizing saved data when rendering the view is stupid, and it should be done when creating/updating records.",
-		"tokens": ["behavior","clean","creating","data","done","model","purifiable","records","rendering","sanitizing","saved","stupid","updating","view"]
-	},
-	{
-		"type": "post",
-		"title": "The Chaw - A Wishlist",
-		"url": "/2009/12/19/thechaw-a-wishlist/",
-		"description": null,
-		"tokens": ["chaw","wishlist"]
-	},
-	{
-		"type": "post",
-		"title": "How CakePHP Automagic fails me (or How I failed at the FormHelper)",
-		"url": "/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/",
-		"description": "Getting CakePHP form urls to generate correctly might be difficult if you don't know how the default url is created.",
-		"tokens": ["automagic","cakephp","correctly","created","default","difficult","failed","fails","form","formhelper","generate","getting","know","might","url","urls"]
-	},
-	{
-		"type": "post",
-		"title": "Quick Tip - Bring Out Yer Queries",
-		"url": "/2009/11/30/quick-tip-bring-out-yer-queries/",
-		"description": "Log your queries to find out what CakePHP is doing when it has 9 million blobs or is taking 34234 years to process.",
-		"tokens": ["blobs","bring","cakephp","find","log","million","process","queries","quick","taking","tip","years","yer"]
-	},
-	{
-		"type": "post",
-		"title": "Quick Tip - Translating Model Variables",
-		"url": "/2009/11/28/quick-tip-translating-model-variables/",
-		"description": "Translating CakePHP Model variables and validation rules isn't straight-forward to new developers. However, it is possible through the use of the class constructor.",
-		"tokens": ["cakephp","class","constructor","developers","forward","however","model","new","possible","quick","rules","straight","tip","translating","use","validation","variables"]
-	},
-	{
-		"type": "post",
-		"title": "Inflect Shell - Inflect the heck out of your word(s)",
-		"url": "/2009/11/28/inflect-the-heck-out-of-your-words/",
-		"description": "CakePHP provides us with a nice little Inflector class. It's quite useful in creating slugs, but can't be used for testing purposes without creating a dummy page.",
-		"tokens": ["cakephp","class","creating","dummy","heck","inflect","inflector","little","nice","page","provides","purposes","quite","s","slugs","testing","us","used","useful","without","word"]
-	},
-	{
-		"type": "post",
-		"title": "Thoughts - An API for Plugin Installation",
-		"url": "/2009/11/27/thoughts-an-api-for-plugin-installation/",
-		"description": "One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago.",
-		"tokens": ["across","ago","anderson","api","cakephp","came","com","created","current","david","existing","first","http","installation","john","looking","months","neat","one","plugin","projects","sample","server","things","thoughtglade","thoughts","www"]
-	},
-	{
-		"type": "post",
-		"title": "Quick Tip - Model::save() isn't Model::saveAll()",
-		"url": "/2009/11/27/quick-tip-save-isnt-saveall/",
-		"description": "A very small example on when to use Model::save() versus Model::saveAll()",
-		"tokens": ["example","model","quick","save","saveall","small","tip","use","versus"]
-	},
-	{
-		"type": "post",
-		"title": "Rails-Style Error Messages in CakePHP",
-		"url": "/2009/11/26/rails-style-error-messages-in-cakephp/",
-		"description": "A simple CakePHP helper for outputting grouped error messages as in the Ruby on Rails framework.",
-		"tokens": ["cakephp","error","framework","grouped","helper","messages","outputting","rails","ruby","simple","style"]
-	},
-	{
-		"type": "post",
-		"title": "Trees Versus Graphs versus Vines",
-		"url": "/2009/11/22/trees-versus-graphs-versus-vines/",
-		"description": "Trees Versus Graphs versus Vines",
-		"tokens": ["graphs","trees","versus","vines"]
-	},
-	{
-		"type": "post",
-		"title": "CakePHP HABTM Relationships",
-		"url": "/2009/11/22/cakephp-habtm-relationships/",
-		"description": "A slightly misguided post on CakePHP HABTM relationships",
-		"tokens": ["cakephp","habtm","misguided","post","relationships","slightly"]
-	},
-	{
-		"type": "post",
-		"title": "First Post",
-		"url": "/2009/11/21/first-post/",
-		"description": "my first post",
-		"tokens": ["first","post"]
-	},
-	{
-		"type": "post",
-		"title": "Allow Subdirectories Apache",
-		"url": "/2009/09/07/allow-subdirectories-apache/",
-		"description": "Example .htaccess file for allowing custom subdirectories in your CakePHP application under Apache",
-		"tokens": ["allow","allowing","apache","application","cakephp","custom","example","file","htaccess","subdirectories"]
-	},
-	{
-		"type": "post",
-		"title": "Simple JSON Layout",
-		"url": "/2009/09/04/simple-json-layout/",
-		"description": "Extremely simple JSON Layout for your application",
-		"tokens": ["application","extremely","json","layout","simple"]
-	},
-	{
-		"type": "post",
-		"title": "Cacheable Behavior",
-		"url": "/2009/09/04/cacheable-behavior/",
-		"description": "Cacheable Model behavior caches views pertaining to model records to the disk via a RequestAction hack.",
-		"tokens": ["behavior","cacheable","caches","disk","hack","model","pertaining","records","requestaction","via","views"]
-	},
-	{
-		"type": "post",
-		"title": "ResourceHelper",
-		"url": "/2009/09/03/resource-helper/",
-		"description": "A general purpose helper to support random functionality that need not be in it's own helper. Has BlueprintCSS support, jQuery ASM HABTM, File displaying, jQuery Error displaying and Google Maps support.",
-		"tokens": ["asm","blueprintcss","displaying","error","file","functionality","general","google","habtm","helper","jquery","maps","need","purpose","random","resourcehelper","support"]
-	},
-	{
-		"type": "post",
-		"title": "Hide Plugin Prefixes in Routed Urls",
-		"url": "/2009/09/03/hide-plugin-prefixes-in-routed-urls/",
-		"description": "Hack on the CakePHP Router to hide the plugin prefix in connected routes",
-		"tokens": ["cakephp","connected","hack","hide","plugin","prefix","prefixes","routed","router","routes","urls"]
-	},
-	{
-		"type": "post",
-		"title": "Conditionally Load Javascript",
-		"url": "/2009/09/03/conditionally-load-js/",
-		"description": "Example of loading javascript files in 1.2 based on the current controller/action path",
-		"tokens": ["action","based","conditionally","controller","current","example","files","javascript","load","loading","path"]
-	},
-	{
-		"type": "post",
-		"title": "Conditional Loading of Helpers",
-		"url": "/2009/09/03/conditional-loading-of-helpers/",
-		"description": "Example of conditionally loading helpers in a view",
-		"tokens": ["conditional","conditionally","example","helpers","loading","view"]
-	},
-	{
-		"type": "post",
-		"title": "Application Settings",
-		"url": "/2009/09/03/application-settings/",
-		"description": "Snippet of code to load application-level settings from the database",
-		"tokens": ["application","code","database","level","load","settings","snippet"]
-	},
-	{
-		"type": "post",
-		"title": "Auto-Building your ACOs table with Plugins",
-		"url": "/2009/08/26/autobuilding-your-acos-table-with-plugins/",
-		"description": "Snippet of code that can automatically build CakePHP ACL ACOs for plugins",
-		"tokens": ["acl","acos","auto","automatically","build","building","cakephp","can","code","plugins","snippet","table"]
-	},
-	{
-		"type": "post",
-		"title": "Adding a Helper/Behavior/Component on the fly",
-		"url": "/2009/08/14/adding-a-helper-behavior-component-on-the-fly/",
-		"description": "A short tutorial on adding behaviors/components/helpers to your application in a dynamic fashion",
-		"tokens": ["adding","application","behavior","behaviors","component","components","dynamic","fashion","fly","helper","helpers","short","tutorial"]
-	},
-	{
-		"type": "post",
-		"title": "Toggle Behavior",
-		"url": "/2009/08/13/toggle-behavior/",
-		"description": "Toggle CakePHP Behavior for toggling boolean model fields in CakePHP",
-		"tokens": ["behavior","boolean","cakephp","fields","model","toggle","toggling"]
-	},
-	{
-		"type": "post",
-		"title": "Trackable Behavior",
-		"url": "/2009/06/15/trackable-behavior/",
-		"description": "Trackable Behavior for CakePHP 1.2/1.3",
-		"tokens": ["behavior","cakephp","trackable"]
-	},
-	{
-		"type": "post",
-		"title": "Commentable Behavior",
-		"url": "/2009/06/15/commentable-behavior/",
-		"description": "Commentable Behavior for CakePHP 1.2",
-		"tokens": ["behavior","cakephp","commentable"]
-	},
-	{
-		"type": "post",
-		"title": "Yahoo Maps-based Geocoding",
-		"url": "/2009/06/14/yahoo-maps-based-geocoding/",
-		"description": "Very crude integration of Yahoo Maps and CakePHP using CURL",
-		"tokens": ["based","cakephp","crude","curl","geocoding","integration","maps","using","yahoo"]
-	},
-  {
-		"type": "category",
-		"title": "cakephp",
-		"url": "/categories/cakephp/",
-		"tokens": ["cakephp"]
-	},
-  {
-		"type": "category",
-		"title": "other",
-		"url": "/categories/other/",
-		"tokens": []
-	},
-  {
-		"type": "category",
-		"title": "installation",
-		"url": "/categories/installation/",
-		"tokens": ["installation"]
-	},
-  {
-		"type": "category",
-		"title": "dev log",
-		"url": "/categories/dev-log/",
-		"tokens": ["dev","log"]
-	},
-  {
-		"type": "category",
-		"title": "opschops",
-		"url": "/categories/opschops/",
-		"tokens": ["opschops"]
-	},
-  {
-		"type": "tag",
-		"title": "cakephp",
-		"url": "/tags/cakephp/",
-		"tokens": ["cakephp"]
-	},
-  {
-		"type": "tag",
-		"title": "model",
-		"url": "/tags/model/",
-		"tokens": ["model"]
-	},
-  {
-		"type": "tag",
-		"title": "yahoo maps",
-		"url": "/tags/yahoo-maps/",
-		"tokens": ["maps","yahoo"]
-	},
-  {
-		"type": "tag",
-		"title": "geocoding",
-		"url": "/tags/geocoding/",
-		"tokens": ["geocoding"]
-	},
-  {
-		"type": "tag",
-		"title": "cakephp 1.2",
-		"url": "/tags/cakephp-1.2/",
-		"tokens": ["cakephp"]
-	},
-  {
-		"type": "tag",
-		"title": "commentable",
-		"url": "/tags/commentable/",
-		"tokens": ["commentable"]
-	},
-  {
-		"type": "tag",
-		"title": "behaviors",
-		"url": "/tags/behaviors/",
-		"tokens": ["behaviors"]
-	},
-  {
-		"type": "tag",
-		"title": "github",
-		"url": "/tags/github/",
-		"tokens": ["github"]
-	},
-  {
-		"type": "tag",
-		"title": "quicktip",
-		"url": "/tags/quicktip/",
-		"tokens": ["quicktip"]
-	},
-  {
-		"type": "tag",
-		"title": "trackable",
-		"url": "/tags/trackable/",
-		"tokens": ["trackable"]
-	},
-  {
-		"type": "tag",
-		"title": "cakephp 1.3",
-		"url": "/tags/cakephp-1.3/",
-		"tokens": ["cakephp"]
-	},
-  {
-		"type": "tag",
-		"title": "toggle",
-		"url": "/tags/toggle/",
-		"tokens": ["toggle"]
-	},
-  {
-		"type": "tag",
-		"title": "cakephp bin",
-		"url": "/tags/cakephp-bin/",
-		"tokens": ["bin","cakephp"]
-	},
-  {
-		"type": "tag",
-		"title": "components",
-		"url": "/tags/components/",
-		"tokens": ["components"]
-	},
-  {
-		"type": "tag",
-		"title": "helpers",
-		"url": "/tags/helpers/",
-		"tokens": ["helpers"]
-	},
-  {
-		"type": "tag",
-		"title": "fails",
-		"url": "/tags/fails/",
-		"tokens": ["fails"]
-	},
-  {
-		"type": "tag",
-		"title": "snippet",
-		"url": "/tags/snippet/",
-		"tokens": ["snippet"]
-	},
-  {
-		"type": "tag",
-		"title": "acos",
-		"url": "/tags/acos/",
-		"tokens": ["acos"]
-	},
-  {
-		"type": "tag",
-		"title": "authorization",
-		"url": "/tags/authorization/",
-		"tokens": ["authorization"]
-	},
-  {
-		"type": "tag",
-		"title": "plugins",
-		"url": "/tags/plugins/",
-		"tokens": ["plugins"]
-	},
-  {
-		"type": "tag",
-		"title": "book",
-		"url": "/tags/book/",
-		"tokens": ["book"]
-	},
-  {
-		"type": "tag",
-		"title": "settings",
-		"url": "/tags/settings/",
-		"tokens": ["settings"]
-	},
-  {
-		"type": "tag",
-		"title": "conditional",
-		"url": "/tags/conditional/",
-		"tokens": ["conditional"]
-	},
-  {
-		"type": "tag",
-		"title": "javascript",
-		"url": "/tags/javascript/",
-		"tokens": ["javascript"]
-	},
-  {
-		"type": "tag",
-		"title": "view",
-		"url": "/tags/view/",
-		"tokens": ["view"]
-	},
-  {
-		"type": "tag",
-		"title": "routing",
-		"url": "/tags/routing/",
-		"tokens": ["routing"]
-	},
-  {
-		"type": "tag",
-		"title": "overload",
-		"url": "/tags/overload/",
-		"tokens": ["overload"]
-	},
-  {
-		"type": "tag",
-		"title": "caching",
-		"url": "/tags/caching/",
-		"tokens": ["caching"]
-	},
-  {
-		"type": "tag",
-		"title": "layout",
-		"url": "/tags/layout/",
-		"tokens": ["layout"]
-	},
-  {
-		"type": "tag",
-		"title": "json",
-		"url": "/tags/json/",
-		"tokens": ["json"]
-	},
-  {
-		"type": "tag",
-		"title": "htaccess",
-		"url": "/tags/htaccess/",
-		"tokens": ["htaccess"]
-	},
-  {
-		"type": "tag",
-		"title": "apache",
-		"url": "/tags/apache/",
-		"tokens": ["apache"]
-	},
-  {
-		"type": "tag",
-		"title": "jekyll",
-		"url": "/tags/jekyll/",
-		"tokens": ["jekyll"]
-	},
-  {
-		"type": "tag",
-		"title": "ruby",
-		"url": "/tags/ruby/",
-		"tokens": ["ruby"]
-	},
-  {
-		"type": "tag",
-		"title": "first",
-		"url": "/tags/first/",
-		"tokens": ["first"]
-	},
-  {
-		"type": "tag",
-		"title": "blog",
-		"url": "/tags/blog/",
-		"tokens": ["blog"]
-	},
-  {
-		"type": "tag",
-		"title": "habtm",
-		"url": "/tags/habtm/",
-		"tokens": ["habtm"]
-	},
-  {
-		"type": "tag",
-		"title": "relationships",
-		"url": "/tags/relationships/",
-		"tokens": ["relationships"]
-	},
-  {
-		"type": "tag",
-		"title": "join tables",
-		"url": "/tags/join-tables/",
-		"tokens": ["join","tables"]
-	},
-  {
-		"type": "tag",
-		"title": "counterCache",
-		"url": "/tags/countercache/",
-		"tokens": ["countercache"]
-	},
-  {
-		"type": "tag",
-		"title": "trees",
-		"url": "/tags/trees/",
-		"tokens": ["trees"]
-	},
-  {
-		"type": "tag",
-		"title": "graphs",
-		"url": "/tags/graphs/",
-		"tokens": ["graphs"]
-	},
-  {
-		"type": "tag",
-		"title": "vines",
-		"url": "/tags/vines/",
-		"tokens": ["vines"]
-	},
-  {
-		"type": "tag",
-		"title": "tree behavior",
-		"url": "/tags/tree-behavior/",
-		"tokens": ["behavior","tree"]
-	},
-  {
-		"type": "tag",
-		"title": "graph behavior",
-		"url": "/tags/graph-behavior/",
-		"tokens": ["behavior","graph"]
-	},
-  {
-		"type": "tag",
-		"title": "rails",
-		"url": "/tags/rails/",
-		"tokens": ["rails"]
-	},
-  {
-		"type": "tag",
-		"title": "errors",
-		"url": "/tags/errors/",
-		"tokens": ["errors"]
-	},
-  {
-		"type": "tag",
-		"title": "errorhelper",
-		"url": "/tags/errorhelper/",
-		"tokens": ["errorhelper"]
-	},
-  {
-		"type": "tag",
-		"title": "thoughts",
-		"url": "/tags/thoughts/",
-		"tokens": ["thoughts"]
-	},
-  {
-		"type": "tag",
-		"title": "side projects",
-		"url": "/tags/side-projects/",
-		"tokens": ["projects","side"]
-	},
-  {
-		"type": "tag",
-		"title": "cakeshell",
-		"url": "/tags/cakeshell/",
-		"tokens": ["cakeshell"]
-	},
-  {
-		"type": "tag",
-		"title": "console",
-		"url": "/tags/console/",
-		"tokens": ["console"]
-	},
-  {
-		"type": "tag",
-		"title": "inflector",
-		"url": "/tags/inflector/",
-		"tokens": ["inflector"]
-	},
-  {
-		"type": "tag",
-		"title": "internationalization",
-		"url": "/tags/internationalization/",
-		"tokens": ["internationalization"]
-	},
-  {
-		"type": "tag",
-		"title": "translation",
-		"url": "/tags/translation/",
-		"tokens": ["translation"]
-	},
-  {
-		"type": "tag",
-		"title": "datasources",
-		"url": "/tags/datasources/",
-		"tokens": ["datasources"]
-	},
-  {
-		"type": "tag",
-		"title": "debugging",
-		"url": "/tags/debugging/",
-		"tokens": ["debugging"]
-	},
-  {
-		"type": "tag",
-		"title": "mysql",
-		"url": "/tags/mysql/",
-		"tokens": ["mysql"]
-	},
-  {
-		"type": "tag",
-		"title": "logging",
-		"url": "/tags/logging/",
-		"tokens": ["logging"]
-	},
-  {
-		"type": "tag",
-		"title": "forms",
-		"url": "/tags/forms/",
-		"tokens": ["forms"]
-	},
-  {
-		"type": "tag",
-		"title": "automagic",
-		"url": "/tags/automagic/",
-		"tokens": ["automagic"]
-	},
-  {
-		"type": "tag",
-		"title": "thechaw",
-		"url": "/tags/thechaw/",
-		"tokens": ["thechaw"]
-	},
-  {
-		"type": "tag",
-		"title": "project management",
-		"url": "/tags/project-management/",
-		"tokens": ["management","project"]
-	},
-  {
-		"type": "tag",
-		"title": "wishlist",
-		"url": "/tags/wishlist/",
-		"tokens": ["wishlist"]
-	},
-  {
-		"type": "tag",
-		"title": "html purifier",
-		"url": "/tags/html-purifier/",
-		"tokens": ["html","purifier"]
-	},
-  {
-		"type": "tag",
-		"title": "licensing",
-		"url": "/tags/licensing/",
-		"tokens": ["licensing"]
-	},
-  {
-		"type": "tag",
-		"title": "access",
-		"url": "/tags/access/",
-		"tokens": ["access"]
-	},
-  {
-		"type": "tag",
-		"title": "authsome plugin",
-		"url": "/tags/authsome-plugin/",
-		"tokens": ["authsome","plugin"]
-	},
-  {
-		"type": "tag",
-		"title": "component",
-		"url": "/tags/component/",
-		"tokens": ["component"]
-	},
-  {
-		"type": "tag",
-		"title": "passwords",
-		"url": "/tags/passwords/",
-		"tokens": ["passwords"]
-	},
-  {
-		"type": "tag",
-		"title": "authentication",
-		"url": "/tags/authentication/",
-		"tokens": ["authentication"]
-	},
-  {
-		"type": "tag",
-		"title": "selects",
-		"url": "/tags/selects/",
-		"tokens": ["selects"]
-	},
-  {
-		"type": "tag",
-		"title": "dropdowns",
-		"url": "/tags/dropdowns/",
-		"tokens": ["dropdowns"]
-	},
-  {
-		"type": "tag",
-		"title": "install",
-		"url": "/tags/install/",
-		"tokens": ["install"]
-	},
-  {
-		"type": "tag",
-		"title": "development",
-		"url": "/tags/development/",
-		"tokens": ["development"]
-	},
-  {
-		"type": "tag",
-		"title": "os x",
-		"url": "/tags/os-x/",
-		"tokens": ["os","x"]
-	},
-  {
-		"type": "tag",
-		"title": "useful",
-		"url": "/tags/useful/",
-		"tokens": ["useful"]
-	},
-  {
-		"type": "tag",
-		"title": "conference",
-		"url": "/tags/conference/",
-		"tokens": ["conference"]
-	},
-  {
-		"type": "tag",
-		"title": "cakefest",
-		"url": "/tags/cakefest/",
-		"tokens": ["cakefest"]
-	},
-  {
-		"type": "tag",
-		"title": "code",
-		"url": "/tags/code/",
-		"tokens": ["code"]
-	},
-  {
-		"type": "tag",
-		"title": "loadmodel",
-		"url": "/tags/loadmodel/",
-		"tokens": ["loadmodel"]
-	},
-  {
-		"type": "tag",
-		"title": "croogo",
-		"url": "/tags/croogo/",
-		"tokens": ["croogo"]
-	},
-  {
-		"type": "tag",
-		"title": "cms",
-		"url": "/tags/cms/",
-		"tokens": ["cms"]
-	},
-  {
-		"type": "tag",
-		"title": "custom find",
-		"url": "/tags/custom-find/",
-		"tokens": ["custom","find"]
-	},
-  {
-		"type": "tag",
-		"title": "infinitas",
-		"url": "/tags/infinitas/",
-		"tokens": ["infinitas"]
-	},
-  {
-		"type": "tag",
-		"title": "readme",
-		"url": "/tags/readme/",
-		"tokens": ["readme"]
-	},
-  {
-		"type": "tag",
-		"title": "cake_admin",
-		"url": "/tags/cake_admin/",
-		"tokens": ["cake_admin"]
-	},
-  {
-		"type": "tag",
-		"title": "admin",
-		"url": "/tags/admin/",
-		"tokens": ["admin"]
-	},
-  {
-		"type": "tag",
-		"title": "jquery",
-		"url": "/tags/jquery/",
-		"tokens": ["jquery"]
-	},
-  {
-		"type": "tag",
-		"title": "history.js",
-		"url": "/tags/history.js/",
-		"tokens": ["history","js"]
-	},
-  {
-		"type": "tag",
-		"title": "application",
-		"url": "/tags/application/",
-		"tokens": ["application"]
-	},
-  {
-		"type": "tag",
-		"title": "deployment",
-		"url": "/tags/deployment/",
-		"tokens": ["deployment"]
-	},
-  {
-		"type": "tag",
-		"title": "chef",
-		"url": "/tags/chef/",
-		"tokens": ["chef"]
-	},
-  {
-		"type": "tag",
-		"title": "capistrano",
-		"url": "/tags/capistrano/",
-		"tokens": ["capistrano"]
-	},
-  {
-		"type": "tag",
-		"title": "tools",
-		"url": "/tags/tools/",
-		"tokens": ["tools"]
-	},
-  {
-		"type": "tag",
-		"title": "monitoring",
-		"url": "/tags/monitoring/",
-		"tokens": ["monitoring"]
-	},
-  {
-		"type": "tag",
-		"title": "mountain lion",
-		"url": "/tags/mountain-lion/",
-		"tokens": ["lion","mountain"]
-	},
-  {
-		"type": "tag",
-		"title": "upgrade",
-		"url": "/tags/upgrade/",
-		"tokens": ["upgrade"]
-	},
-  {
-		"type": "tag",
-		"title": "logstash",
-		"url": "/tags/logstash/",
-		"tokens": ["logstash"]
-	},
-  {
-		"type": "tag",
-		"title": "beaver",
-		"url": "/tags/beaver/",
-		"tokens": ["beaver"]
-	},
-  {
-		"type": "tag",
-		"title": "logs",
-		"url": "/tags/logs/",
-		"tokens": ["logs"]
-	},
-  {
-		"type": "tag",
-		"title": "gitlab",
-		"url": "/tags/gitlab/",
-		"tokens": ["gitlab"]
-	},
-  {
-		"type": "tag",
-		"title": "git",
-		"url": "/tags/git/",
-		"tokens": ["git"]
-	},
-  {
-		"type": "tag",
-		"title": "digital ocean",
-		"url": "/tags/digital-ocean/",
-		"tokens": ["digital","ocean"]
-	},
-  {
-		"type": "tag",
-		"title": "aws",
-		"url": "/tags/aws/",
-		"tokens": ["aws"]
-	},
-  {
-		"type": "tag",
-		"title": "provisioning",
-		"url": "/tags/provisioning/",
-		"tokens": ["provisioning"]
-	},
-  {
-		"type": "tag",
-		"title": "heroku",
-		"url": "/tags/heroku/",
-		"tokens": ["heroku"]
-	},
-  {
-		"type": "tag",
-		"title": "cofiguration",
-		"url": "/tags/cofiguration/",
-		"tokens": ["cofiguration"]
-	},
-  {
-		"type": "tag",
-		"title": "etcd",
-		"url": "/tags/etcd/",
-		"tokens": ["etcd"]
-	},
-  {
-		"type": "tag",
-		"title": "configuration",
-		"url": "/tags/configuration/",
-		"tokens": ["configuration"]
-	},
-  {
-		"type": "tag",
-		"title": "resources",
-		"url": "/tags/resources/",
-		"tokens": ["resources"]
-	},
-  {
-		"type": "tag",
-		"title": "travis",
-		"url": "/tags/travis/",
-		"tokens": ["travis"]
-	},
-  {
-		"type": "tag",
-		"title": "indenticon",
-		"url": "/tags/indenticon/",
-		"tokens": ["indenticon"]
-	},
-  {
-		"type": "tag",
-		"title": "dispatcher",
-		"url": "/tags/dispatcher/",
-		"tokens": ["dispatcher"]
-	},
-  {
-		"type": "tag",
-		"title": "cli",
-		"url": "/tags/cli/",
-		"tokens": ["cli"]
-	},
-  {
-		"type": "tag",
-		"title": "repl",
-		"url": "/tags/repl/",
-		"tokens": ["repl"]
-	},
-  {
-		"type": "tag",
-		"title": "objects",
-		"url": "/tags/objects/",
-		"tokens": ["objects"]
-	},
-  {
-		"type": "tag",
-		"title": "orm",
-		"url": "/tags/orm/",
-		"tokens": ["orm"]
-	},
-  {
-		"type": "tag",
-		"title": "service oriented architecture",
-		"url": "/tags/service-oriented-architecture/",
-		"tokens": ["architecture","oriented","service"]
-	},
-  {
-		"type": "tag",
-		"title": "refactoring",
-		"url": "/tags/refactoring/",
-		"tokens": ["refactoring"]
-	},
-  {
-		"type": "tag",
-		"title": "asset_compress",
-		"url": "/tags/asset_compress/",
-		"tokens": ["asset_compress"]
-	},
-  {
-		"type": "tag",
-		"title": "assets",
-		"url": "/tags/assets/",
-		"tokens": ["assets"]
-	},
-  {
-		"type": "tag",
-		"title": "composer",
-		"url": "/tags/composer/",
-		"tokens": ["composer"]
-	},
-  {
-		"type": "tag",
-		"title": "dependency management",
-		"url": "/tags/dependency-management/",
-		"tokens": ["dependency","management"]
-	},
-  {
-		"type": "tag",
-		"title": "oauth",
-		"url": "/tags/oauth/",
-		"tokens": ["oauth"]
-	},
-  {
-		"type": "tag",
-		"title": "queuing",
-		"url": "/tags/queuing/",
-		"tokens": ["queuing"]
-	},
-  {
-		"type": "tag",
-		"title": "background jobs",
-		"url": "/tags/background-jobs/",
-		"tokens": ["background","jobs"]
-	},
-  {
-		"type": "tag",
-		"title": "community",
-		"url": "/tags/community/",
-		"tokens": ["community"]
-	},
-  {
-		"type": "tag",
-		"title": "contributing",
-		"url": "/tags/contributing/",
-		"tokens": ["contributing"]
-	},
-  {
-		"type": "tag",
-		"title": "exceptions",
-		"url": "/tags/exceptions/",
-		"tokens": ["exceptions"]
-	},
-  {
-		"type": "tag",
-		"title": "redirect",
-		"url": "/tags/redirect/",
-		"tokens": ["redirect"]
-	},
-  {
-		"type": "tag",
-		"title": "maintenance",
-		"url": "/tags/maintenance/",
-		"tokens": ["maintenance"]
-	},
-  {
-		"type": "tag",
-		"title": "aliasing",
-		"url": "/tags/aliasing/",
-		"tokens": ["aliasing"]
-	},
-  {
-		"type": "tag",
-		"title": "sessions",
-		"url": "/tags/sessions/",
-		"tokens": ["sessions"]
-	},
-  {
-		"type": "tag",
-		"title": "events",
-		"url": "/tags/events/",
-		"tokens": ["events"]
-	},
-  {
-		"type": "tag",
-		"title": "annotations",
-		"url": "/tags/annotations/",
-		"tokens": ["annotations"]
-	},
-  {
-		"type": "tag",
-		"title": "deploy",
-		"url": "/tags/deploy/",
-		"tokens": ["deploy"]
-	},
-  {
-		"type": "tag",
-		"title": "bash",
-		"url": "/tags/bash/",
-		"tokens": ["bash"]
-	},
-  {
-		"type": "tag",
-		"title": "testing",
-		"url": "/tags/testing/",
-		"tokens": ["testing"]
-	},
-  {
-		"type": "tag",
-		"title": "migrations",
-		"url": "/tags/migrations/",
-		"tokens": ["migrations"]
-	},
-  {
-		"type": "tag",
-		"title": "controllers",
-		"url": "/tags/controllers/",
-		"tokens": ["controllers"]
-	},
-  {
-		"type": "tag",
-		"title": "vagrant",
-		"url": "/tags/vagrant/",
-		"tokens": ["vagrant"]
-	},
-  {
-		"type": "tag",
-		"title": "views",
-		"url": "/tags/views/",
-		"tokens": ["views"]
-	},
-  {
-		"type": "tag",
-		"title": "service",
-		"url": "/tags/service/",
-		"tokens": ["service"]
-	},
-  {
-		"type": "tag",
-		"title": "microframeworks",
-		"url": "/tags/microframeworks/",
-		"tokens": ["microframeworks"]
-	},
-	false
+  {
+    "type": "post",
+    "title": "CakePHP as a Microframework",
+    "url": "/2014/03/23/cakephp-a-microframework/",
+    "description": "Using CakePHP as a library to build applications microframework-style",
+    "tokens": ["applications","build","cakephp","library","microframework","style","using"]
+  },
+  {
+    "type": "post",
+    "title": "Shipping CakePHP App Logs to Logstash via Syslog",
+    "url": "/2014/03/22/shipping-cakephp-application-logs-to-logstash/",
+    "description": "If you've never written a CakePHP Logger, here is a simple post on how to do so",
+    "tokens": ["app","cakephp","logger","logs","logstash","never","post","shipping","simple","syslog","via","written"]
+  },
+  {
+    "type": "post",
+    "title": "Using View Cells in your CakePHP applications",
+    "url": "/2014/03/20/view-cells/",
+    "description": "A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes",
+    "tokens": ["applications","cakephp","cells","classes","forward","look","service","throwback","using","view","writing","x"]
+  },
+  {
+    "type": "post",
+    "title": "Local Development Environment using Vagrant and Virtualbox",
+    "url": "/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/",
+    "description": "Tired of reinstalling your development environment? We've created one specifically for CakePHP usage.",
+    "tokens": ["cakephp","created","development","environment","local","one","reinstalling","specifically","tired","usage","using","vagrant","virtualbox"]
+  },
+  {
+    "type": "post",
+    "title": "Writing Slimmer Controllers",
+    "url": "/2013/12/24/writing-slimmer-controllers/",
+    "description": "Refactoring Controller code should be simple, and I'll tear apart my own code to show how you can go about it.",
+    "tokens": ["apart","can","code","controller","controllers","go","refactoring","show","simple","slimmer","tear","writing"]
+  },
+  {
+    "type": "post",
+    "title": "Application-wide event management",
+    "url": "/2013/12/23/application-wide-event-management/",
+    "description": "Triggering global CakePHP events isn't difficult, and this tutorial shows you how to do it.",
+    "tokens": ["application","cakephp","difficult","event","events","global","management","shows","triggering","tutorial","wide"]
+  },
+  {
+    "type": "post",
+    "title": "Deploying a CakePHP application to Heroku",
+    "url": "/2013/12/22/deploying-a-cakephp-application-to-heroku/",
+    "description": "Heroku is a popular place to try out small experiments in CakePHP, so I decided to document the steps necessary for a successful Heroku integration.",
+    "tokens": ["application","cakephp","decided","deploying","document","experiments","heroku","integration","necessary","place","popular","small","steps","successful","try"]
+  },
+  {
+    "type": "post",
+    "title": "Building a Behavior with CakePHP",
+    "url": "/2013/12/21/building-a-behavior-with-cakephp/",
+    "description": "Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field",
+    "tokens": ["behavior","building","cakephp","covering","creating","creation","deleted","field","handle","plugin","tests","unit","writing"]
+  },
+  {
+    "type": "post",
+    "title": "Application Environment Configuration",
+    "url": "/2013/12/20/application-environment-configuration/",
+    "description": "Specifying application configuration doesn't have to be hard, and here are three ways to do it!",
+    "tokens": ["application","configuration","environment","hard","specifying","three","ways"]
+  },
+  {
+    "type": "post",
+    "title": "Tackling database migrations with one neat trick",
+    "url": "/2013/12/19/tackling-database-migrations/",
+    "description": "We look at creating a Cakeshell to generate migration files for the CakeDC Migrations plugin",
+    "tokens": ["cakedc","cakeshell","creating","database","files","generate","look","migration","migrations","neat","one","plugin","tackling","trick"]
+  },
+  {
+    "type": "post",
+    "title": "CakePHP Testing 102",
+    "url": "/2013/12/18/cakephp-testing-102/",
+    "description": "Some personal thoughts on testing your CakePHP code to get maximum efficiency",
+    "tokens": ["cakephp","code","efficiency","get","maximum","personal","testing","thoughts"]
+  },
+  {
+    "type": "post",
+    "title": "Deploy ALL the things using simple Bash scripts",
+    "url": "/2013/12/17/deploy-all-the-things-with-bash/",
+    "description": "Automate everything, including your deploys, using things as simple as a bash script",
+    "tokens": ["automate","bash","deploy","deploys","everything","including","script","scripts","simple","things","using"]
+  },
+  {
+    "type": "post",
+    "title": "Simpler CakePHP Events",
+    "url": "/2013/12/16/simpler-cakephp-events/",
+    "description": "Making small changes to the event system workflow to enhance your productivity through annotations and simpler dispatching!",
+    "tokens": ["annotations","cakephp","changes","dispatching","enhance","event","events","making","productivity","simpler","small","system","workflow"]
+  },
+  {
+    "type": "post",
+    "title": "Payment Processing using Stripe",
+    "url": "/2013/12/15/payment-processing-using-stripe/",
+    "description": "Making money with your website should be your primary concern, and this blog post will explain a simple, awesome way to do so",
+    "tokens": ["awesome","blog","concern","explain","making","money","payment","post","primary","processing","simple","stripe","using","way","website","will"]
+  },
+  {
+    "type": "post",
+    "title": "Creating a custom session flash handler",
+    "url": "/2013/12/14/creating-a-custom-session-flash-handler/",
+    "description": "Using class aliasing is a powerful way to inject custom logic into the CakePHP core without actually rewriting libraries in the CakePHP core.",
+    "tokens": ["actually","aliasing","cakephp","class","core","creating","custom","flash","handler","inject","libraries","logic","powerful","rewriting","session","using","way","without"]
+  },
+  {
+    "type": "post",
+    "title": "Simple application maintenance mode",
+    "url": "/2013/12/13/simple-application-maintenance-mode/",
+    "description": "Setup a fast maintenance mode for your application using the CakePHP Dispatch Filter system",
+    "tokens": ["application","cakephp","dispatch","fast","filter","maintenance","mode","setup","simple","system","using"]
+  },
+  {
+    "type": "post",
+    "title": "Abusing Exceptions to provide model-layer redirection",
+    "url": "/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/",
+    "description": "Fat models and skinny controllers are about more than data handling. You should also concern yourself with Error state handling and how to bubble up exceptions.",
+    "tokens": ["abusing","also","bubble","concern","controllers","data","error","exceptions","fat","handling","layer","model","models","provide","redirection","skinny","state"]
+  },
+  {
+    "type": "post",
+    "title": "Giving the gift of CakePHP to the Community",
+    "url": "/2013/12/11/giving-the-gift-of-cakephp-to-the-community/",
+    "description": "Share and contribute back to the CakePHP community in one of many ways!",
+    "tokens": ["back","cakephp","community","contribute","gift","giving","many","one","share","ways"]
+  },
+  {
+    "type": "post",
+    "title": "Queue in scalable applications",
+    "url": "/2013/12/10/queue-in-scalable-applications/",
+    "description": "Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high",
+    "tokens": ["applications","background","computations","conversions","high","instead","keep","long","make","move","queue","running","scalable","server","users","wait"]
+  },
+  {
+    "type": "post",
+    "title": "Simplifying OAuth integration",
+    "url": "/2013/12/09/simplifying-oauth-integration/",
+    "description": "Rather than writing the same OAuth code for different projects, reuse a community framework to integrate with service providers like Facebook and Twitter",
+    "tokens": ["code","community","different","facebook","framework","integrate","integration","like","oauth","projects","providers","rather","reuse","service","simplifying","twitter","writing"]
+  },
+  {
+    "type": "post",
+    "title": "Composing your applications from plugins",
+    "url": "/2013/12/08/composing-your-applications-from-plugins/",
+    "description": "Properly manage your CakePHP application dependencies using Composer, a PHP dependency management tool",
+    "tokens": ["application","applications","cakephp","composer","composing","dependencies","dependency","manage","management","php","plugins","properly","tool","using"]
+  },
+  {
+    "type": "post",
+    "title": "A quick rundown on Asset Compression",
+    "url": "/2013/12/07/a-quick-rundown-on-asset-compression/",
+    "description": "Using the AssetCompress plugin to render concatenated files is a cheap way to get better application performance",
+    "tokens": ["application","asset","assetcompress","better","cheap","compression","concatenated","files","get","performance","plugin","quick","render","rundown","using","way"]
+  },
+  {
+    "type": "post",
+    "title": "Building Service Classes",
+    "url": "/2013/12/06/building-service-classes/",
+    "description": "Building complex pages that seem to span hundreds of lines of Controller/Model code? Write Service classes for greater good!",
+    "tokens": ["building","classes","code","complex","controller","good","greater","hundreds","lines","model","pages","seem","service","span","write"]
+  },
+  {
+    "type": "post",
+    "title": "Objectifying CakePHP 2.0 applications",
+    "url": "/2013/12/05/objectifying-cakephp-2-0-applications/",
+    "description": "Stop complaining about not being able to use objects in the ORM and use 3.0-like features in your 2.0 application today!",
+    "tokens": ["able","application","applications","cakephp","complaining","features","like","objectifying","objects","orm","stop","today","use"]
+  },
+  {
+    "type": "post",
+    "title": "Interactive command-line REPL for CakePHP",
+    "url": "/2013/12/04/interactive-command-line-repl/",
+    "description": "Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code",
+    "tokens": ["cakephp","code","command","different","explore","implement","interactive","line","purposes","quickly","repl","testing","ways"]
+  },
+  {
+    "type": "post",
+    "title": "Hacking the CakePHP Dispatch System",
+    "url": "/2013/12/03/hacking-the-cakephp-dispatch-system/",
+    "description": "Wherein we abuse the CakePHP Disptach cycle to remove the Controllers and Views from our application in favor of smaller, testable units of code. One weird trick, APIs loves this!",
+    "tokens": ["abuse","apis","application","cakephp","code","controllers","cycle","dispatch","disptach","favor","hacking","loves","one","remove","smaller","system","testable","trick","units","views","weird","wherein"]
+  },
+  {
+    "type": "post",
+    "title": "Fun with CakePHP Views",
+    "url": "/2013/12/02/fun-with-cakephp-views/",
+    "description": "A guide to creating a custom CakePHP view that generates identicon png images for users",
+    "tokens": ["cakephp","creating","custom","fun","generates","guide","identicon","images","png","users","view","views"]
+  },
+  {
+    "type": "post",
+    "title": "Testing your CakePHP Plugins with Travis",
+    "url": "/2013/12/01/testing-your-cakephp-plugins-with-travis/",
+    "description": "Quickly setup automated testing for your cakephp plugin code using Travis-Ci",
+    "tokens": ["automated","cakephp","ci","code","plugin","plugins","quickly","setup","testing","travis","using"]
+  },
+  {
+    "type": "post",
+    "title": "Service Definitions",
+    "url": "/2013/10/18/service-definitions/",
+    "description": "Just what is a service, and what pieces are necessary to run it?",
+    "tokens": ["definitions","just","necessary","pieces","run","service"]
+  },
+  {
+    "type": "post",
+    "title": "Resource reconfiguration",
+    "url": "/2013/10/17/resource-reconfiguration/",
+    "description": "How do you manage service configurations across a cluster of services?",
+    "tokens": ["across","cluster","configurations","manage","reconfiguration","resource","service","services"]
+  },
+  {
+    "type": "post",
+    "title": "Deploying your infrastructure to AWS",
+    "url": "/2013/10/17/deploying-your-infrastructure-to-aws/",
+    "description": "Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores",
+    "tokens": ["ameliorate","applications","aws","care","datastores","deploying","deployment","ec2","infrastructure","issues","particular","servers","service","taken"]
+  },
+  {
+    "type": "post",
+    "title": "Using a personal git host",
+    "url": "/2013/09/09/using-a-personal-git-host/",
+    "description": null,
+    "tokens": ["git","host","personal","using"]
+  },
+  {
+    "type": "post",
+    "title": "Using Beaver to ship log files to Redis/Logstash",
+    "url": "/2013/01/01/setting-up-beaver-for-use-with-logstash/",
+    "description": "This post will guide you through a simple Beaver installation.",
+    "tokens": ["beaver","files","guide","installation","log","logstash","post","redis","ship","simple","using","will"]
+  },
+  {
+    "type": "post",
+    "title": "Why to Actually Choose CakePHP",
+    "url": "/2012/09/07/why-to-actually-choose-cakephp/",
+    "description": "Why I think CakePHP is a great framework option",
+    "tokens": ["actually","cakephp","choose","framework","great","option","think"]
+  },
+  {
+    "type": "post",
+    "title": "Why CakePHP?",
+    "url": "/2012/09/07/why-cakephp/",
+    "description": "Why choose CakePHP over any other framework?",
+    "tokens": ["cakephp","choose","framework"]
+  },
+  {
+    "type": "post",
+    "title": "Upgrading from Lion to Mountain Lion",
+    "url": "/2012/07/25/upgrading-from-lion-to-mountain-lion/",
+    "description": "A guide to fixing all the breaking php and ruby packages in Mountain Lion",
+    "tokens": ["breaking","fixing","guide","lion","mountain","packages","php","ruby","upgrading"]
+  },
+  {
+    "type": "post",
+    "title": "Creating a cookbook and running chef-solo",
+    "url": "/2012/05/02/full-stack-cakephp-deployment-with-chef-and-capistrano-part-4/",
+    "description": "How to create a cookbook for the Chef Deployment Tool and an explanation of DNA.json files",
+    "tokens": ["chef","cookbook","create","creating","deployment","dna","explanation","files","json","running","solo","tool"]
+  },
+  {
+    "type": "post",
+    "title": "Server Monitoring Tools",
+    "url": "/2012/03/28/server-monitoring-tools/",
+    "description": "An easy to install, maintain, and use tool for server monitoring doesn't exist, why is that?",
+    "tokens": ["easy","exist","install","maintain","monitoring","server","tool","tools","use"]
+  },
+  {
+    "type": "post",
+    "title": "Templates, Attributes, Resources, and Dependency Management",
+    "url": "/2012/01/17/full-stack-cakephp-deployment-with-chef-capistrano-part-3/",
+    "description": "Templating, Custom Resources, and Cookbook creation for the Chef Deployment Tool",
+    "tokens": ["attributes","chef","cookbook","creation","custom","dependency","deployment","management","resources","templates","templating","tool"]
+  },
+  {
+    "type": "post",
+    "title": "Chef Recipes",
+    "url": "/2011/10/26/full-stack-cakephp-deployment-with-chef-capistrano-part-2/",
+    "description": "What goes in a Chef Recipe, and how much do I really need to know about resources?",
+    "tokens": ["chef","goes","know","much","need","really","recipe","recipes","resources"]
+  },
+  {
+    "type": "post",
+    "title": "Introduction to Chef",
+    "url": "/2011/10/03/full-stack-cakephp-deployment-with-chef-and-capistrano/",
+    "description": "This text is the first in a long series to correct an extremely disastrous talk at CakeFest 2011. It will also hopefully apply to more than CakePHP.",
+    "tokens": ["also","apply","cakefest","cakephp","chef","correct","disastrous","extremely","first","hopefully","introduction","long","series","talk","text","will"]
+  },
+  {
+    "type": "post",
+    "title": "A CakePHP Book I can finally recommend",
+    "url": "/2011/06/19/a-cakephp-book-i-can-finally-recommend/",
+    "description": "Review of Mariano Iglesias' CakePHP 1.3 Application Development Cookbook",
+    "tokens": ["application","book","cakephp","can","cookbook","development","finally","iglesias","mariano","recommend","review"]
+  },
+  {
+    "type": "post",
+    "title": "The Daily Dev Log - 5",
+    "url": "/2011/06/11/the-daily-dev-log-5/",
+    "description": "Writing a CakeRoute might be straightforward, and when used correctly, can really trim down the number of routes you connect in your routes.php file.",
+    "tokens": ["cakeroute","can","connect","correctly","daily","dev","file","log","might","number","php","really","routes","straightforward","trim","used","writing"]
+  },
+  {
+    "type": "post",
+    "title": "The Daily Dev Log - 4",
+    "url": "/2011/06/02/the-daily-dev-log-4/",
+    "description": "On the subject of updating urls in a web framework that gives you access to a router, it's important to have flexibility in writing those routes.",
+    "tokens": ["access","daily","dev","flexibility","framework","gives","important","log","router","routes","subject","updating","urls","web","writing"]
+  },
+  {
+    "type": "post",
+    "title": "The Daily Dev Log - 3",
+    "url": "/2011/05/27/the-daily-dev-log-3/",
+    "description": "Defining joins in CakePHP finds is simple, but can result in weird sql statements if used in conjunction with Containable.",
+    "tokens": ["cakephp","can","conjunction","containable","daily","defining","dev","finds","joins","log","result","simple","sql","statements","used","weird"]
+  },
+  {
+    "type": "post",
+    "title": "The Daily Dev Log - 2",
+    "url": "/2011/05/25/the-daily-dev-log-2/",
+    "description": "Always remember to include the host in the protocol when using the EmailComponent",
+    "tokens": ["always","daily","dev","emailcomponent","host","include","log","protocol","remember","using"]
+  },
+  {
+    "type": "post",
+    "title": "The Daily Dev Log - 1",
+    "url": "/2011/05/24/the-daily-dev-log-1/",
+    "description": "I spent around 7 hours putzing with History.js in cake_admin. While History.js should auto-ajax any web application, it doesn't quite play nice with CakePHP.",
+    "tokens": ["ajax","application","around","auto","cake_admin","cakephp","daily","dev","history","hours","js","log","nice","play","putzing","quite","spent","web"]
+  },
+  {
+    "type": "post",
+    "title": "Using CakeAdmin to generate backend applications",
+    "url": "/2011/05/17/using-cakeadmin-to-generate-backend-applications/",
+    "description": "CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions.",
+    "tokens": ["analogous","application","applications","backend","backends","bake","basic","building","cake","cakeadmin","cakephp","easily","generate","generating","plugin","questions","quickly","running","series","structure","using","web"]
+  },
+  {
+    "type": "post",
+    "title": "My development setup",
+    "url": "/2011/04/13/my-development-setup/",
+    "description": "For the purposes of archiving how I like to develop, I'll chronicle a few things here.",
+    "tokens": ["archiving","chronicle","develop","development","like","purposes","setup","things"]
+  },
+  {
+    "type": "post",
+    "title": "A Standard Readme for your CakePHP Plugins",
+    "url": "/2011/04/05/a-standard-readme-for-your-cakephp-plugins/",
+    "description": "Please stop using jank readmes for your CakePHP plugins, and use something like this instead.",
+    "tokens": ["cakephp","instead","jank","like","please","plugins","readme","readmes","something","standard","stop","use","using"]
+  },
+  {
+    "type": "post",
+    "title": "Embedding Custom Finds in Behaviors",
+    "url": "/2010/12/01/embedding-custom-finds-in-behaviors/",
+    "description": "Embedding custom finds in behaviors is extremely useful, but not the most straight-forward thing to do. Here's how.",
+    "tokens": ["behaviors","custom","embedding","extremely","finds","forward","straight","thing","useful"]
+  },
+  {
+    "type": "post",
+    "title": "Using loadModel() in the Model",
+    "url": "/2010/10/05/using-loadmodel-in-the-model/",
+    "description": "How do you use loadModel() in the CakePHP Model? Hint, you don't. There are other ways though.",
+    "tokens": ["cakephp","hint","loadmodel","model","though","use","using","ways"]
+  },
+  {
+    "type": "post",
+    "title": "Why CakePHP documentation sucks and what I'm doing about it",
+    "url": "/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/",
+    "description": "When people complain about documentation, the solution is to write more, and better, documentation.",
+    "tokens": ["better","cakephp","complain","documentation","people","solution","sucks","write"]
+  },
+  {
+    "type": "post",
+    "title": "Cakefest Conference Notes",
+    "url": "/2010/09/04/cakefest-conference-notes/",
+    "description": "CakeFest 2010 Conference notes and links",
+    "tokens": ["cakefest","conference","links","notes"]
+  },
+  {
+    "type": "post",
+    "title": "CakePHP Plugins - A Biblical Retelling",
+    "url": "/2010/08/16/cakephp-plugins-a-biblical-retelling/",
+    "description": "A list of CakePHP plugins I use and abuse on a daily basis, as well as things I've discovered but haven't found a use for but seem to be cool.",
+    "tokens": ["abuse","basis","biblical","cakephp","cool","daily","discovered","found","list","plugins","retelling","seem","things","use"]
+  },
+  {
+    "type": "post",
+    "title": "Things to install or update on my mac when first installing",
+    "url": "/2010/02/10/things-to-install-or-update-on-my-mac-when-first-installing/",
+    "description": "A list of things I install and do on my mac whenever I re-install or update it.",
+    "tokens": ["first","install","installing","list","mac","re","things","update","whenever"]
+  },
+  {
+    "type": "post",
+    "title": "Your username/password should never be a lastname/uid",
+    "url": "/2010/02/05/your-username-password-should-never-be-a-lastname-uid/",
+    "description": "I'm developing an application where the client wants the username and password combination to be a lastname and member ID number. This is quite stupid.",
+    "tokens": ["application","client","combination","developing","lastname","member","never","number","password","quite","stupid","uid","username","wants"]
+  },
+  {
+    "type": "post",
+    "title": "You want access? Well you no can has! - A CakePHP AccessComponent",
+    "url": "/2010/01/11/you-want-access-well-you-no-can-has-cakephp-access-component/",
+    "description": "One of the things I am working on is Authentication and Access Control. While Authsome Component takes care of authentication, we still need something more.",
+    "tokens": ["access","accesscomponent","authentication","authsome","cakephp","can","care","component","control","need","one","something","still","takes","things","want","working"]
+  },
+  {
+    "type": "post",
+    "title": "Clean up your Model data with Purifiable Behavior",
+    "url": "/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/",
+    "description": "Sanitizing saved data when rendering the view is stupid, and it should be done when creating/updating records.",
+    "tokens": ["behavior","clean","creating","data","done","model","purifiable","records","rendering","sanitizing","saved","stupid","updating","view"]
+  },
+  {
+    "type": "post",
+    "title": "The Chaw - A Wishlist",
+    "url": "/2009/12/19/thechaw-a-wishlist/",
+    "description": null,
+    "tokens": ["chaw","wishlist"]
+  },
+  {
+    "type": "post",
+    "title": "Thoughts - An API for Plugin Installation",
+    "url": "/2009/11/27/thoughts-an-api-for-plugin-installation/",
+    "description": "One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago.",
+    "tokens": ["across","ago","anderson","api","cakephp","came","com","created","current","david","existing","first","http","installation","john","looking","months","neat","one","plugin","projects","sample","server","things","thoughtglade","thoughts","www"]
+  },
+  {
+    "type": "post",
+    "title": "Quick Tip - Model::save() isn't Model::saveAll()",
+    "url": "/2009/11/27/quick-tip-save-isnt-saveall/",
+    "description": "A very small example on when to use Model::save() versus Model::saveAll()",
+    "tokens": ["example","model","quick","save","saveall","small","tip","use","versus"]
+  },
+  {
+    "type": "post",
+    "title": "Trees Versus Graphs versus Vines",
+    "url": "/2009/11/22/trees-versus-graphs-versus-vines/",
+    "description": "Trees Versus Graphs versus Vines",
+    "tokens": ["graphs","trees","versus","vines"]
+  },
+  {
+    "type": "post",
+    "title": "CakePHP HABTM Relationships",
+    "url": "/2009/11/22/cakephp-habtm-relationships/",
+    "description": "A slightly misguided post on CakePHP HABTM relationships",
+    "tokens": ["cakephp","habtm","misguided","post","relationships","slightly"]
+  },
+  {
+    "type": "post",
+    "title": "First Post",
+    "url": "/2009/11/21/first-post/",
+    "description": "my first post",
+    "tokens": ["first","post"]
+  },
+  {
+    "type": "post",
+    "title": "Allow Subdirectories Apache",
+    "url": "/2009/09/07/allow-subdirectories-apache/",
+    "description": "Example .htaccess file for allowing custom subdirectories in your CakePHP application under Apache",
+    "tokens": ["allow","allowing","apache","application","cakephp","custom","example","file","htaccess","subdirectories"]
+  },
+  {
+    "type": "post",
+    "title": "Simple JSON Layout",
+    "url": "/2009/09/04/simple-json-layout/",
+    "description": "Extremely simple JSON Layout for your application",
+    "tokens": ["application","extremely","json","layout","simple"]
+  },
+  {
+    "type": "category",
+    "title": "cakephp",
+    "url": "/categories/cakephp/",
+    "tokens": ["cakephp"]
+  },
+  {
+    "type": "category",
+    "title": "other",
+    "url": "/categories/other/",
+    "tokens": []
+  },
+  {
+    "type": "category",
+    "title": "installation",
+    "url": "/categories/installation/",
+    "tokens": ["installation"]
+  },
+  {
+    "type": "category",
+    "title": "dev log",
+    "url": "/categories/dev-log/",
+    "tokens": ["dev","log"]
+  },
+  {
+    "type": "category",
+    "title": "opschops",
+    "url": "/categories/opschops/",
+    "tokens": ["opschops"]
+  },
+  {
+    "type": "tag",
+    "title": "cakephp",
+    "url": "/tags/cakephp/",
+    "tokens": ["cakephp"]
+  },
+  {
+    "type": "tag",
+    "title": "view",
+    "url": "/tags/view/",
+    "tokens": ["view"]
+  },
+  {
+    "type": "tag",
+    "title": "layout",
+    "url": "/tags/layout/",
+    "tokens": ["layout"]
+  },
+  {
+    "type": "tag",
+    "title": "json",
+    "url": "/tags/json/",
+    "tokens": ["json"]
+  },
+  {
+    "type": "tag",
+    "title": "quicktip",
+    "url": "/tags/quicktip/",
+    "tokens": ["quicktip"]
+  },
+  {
+    "type": "tag",
+    "title": "htaccess",
+    "url": "/tags/htaccess/",
+    "tokens": ["htaccess"]
+  },
+  {
+    "type": "tag",
+    "title": "apache",
+    "url": "/tags/apache/",
+    "tokens": ["apache"]
+  },
+  {
+    "type": "tag",
+    "title": "jekyll",
+    "url": "/tags/jekyll/",
+    "tokens": ["jekyll"]
+  },
+  {
+    "type": "tag",
+    "title": "ruby",
+    "url": "/tags/ruby/",
+    "tokens": ["ruby"]
+  },
+  {
+    "type": "tag",
+    "title": "first",
+    "url": "/tags/first/",
+    "tokens": ["first"]
+  },
+  {
+    "type": "tag",
+    "title": "blog",
+    "url": "/tags/blog/",
+    "tokens": ["blog"]
+  },
+  {
+    "type": "tag",
+    "title": "model",
+    "url": "/tags/model/",
+    "tokens": ["model"]
+  },
+  {
+    "type": "tag",
+    "title": "habtm",
+    "url": "/tags/habtm/",
+    "tokens": ["habtm"]
+  },
+  {
+    "type": "tag",
+    "title": "relationships",
+    "url": "/tags/relationships/",
+    "tokens": ["relationships"]
+  },
+  {
+    "type": "tag",
+    "title": "join tables",
+    "url": "/tags/join-tables/",
+    "tokens": ["join","tables"]
+  },
+  {
+    "type": "tag",
+    "title": "counterCache",
+    "url": "/tags/countercache/",
+    "tokens": ["countercache"]
+  },
+  {
+    "type": "tag",
+    "title": "trees",
+    "url": "/tags/trees/",
+    "tokens": ["trees"]
+  },
+  {
+    "type": "tag",
+    "title": "graphs",
+    "url": "/tags/graphs/",
+    "tokens": ["graphs"]
+  },
+  {
+    "type": "tag",
+    "title": "vines",
+    "url": "/tags/vines/",
+    "tokens": ["vines"]
+  },
+  {
+    "type": "tag",
+    "title": "tree behavior",
+    "url": "/tags/tree-behavior/",
+    "tokens": ["behavior","tree"]
+  },
+  {
+    "type": "tag",
+    "title": "graph behavior",
+    "url": "/tags/graph-behavior/",
+    "tokens": ["behavior","graph"]
+  },
+  {
+    "type": "tag",
+    "title": "snippet",
+    "url": "/tags/snippet/",
+    "tokens": ["snippet"]
+  },
+  {
+    "type": "tag",
+    "title": "thoughts",
+    "url": "/tags/thoughts/",
+    "tokens": ["thoughts"]
+  },
+  {
+    "type": "tag",
+    "title": "plugins",
+    "url": "/tags/plugins/",
+    "tokens": ["plugins"]
+  },
+  {
+    "type": "tag",
+    "title": "side projects",
+    "url": "/tags/side-projects/",
+    "tokens": ["projects","side"]
+  },
+  {
+    "type": "tag",
+    "title": "thechaw",
+    "url": "/tags/thechaw/",
+    "tokens": ["thechaw"]
+  },
+  {
+    "type": "tag",
+    "title": "project management",
+    "url": "/tags/project-management/",
+    "tokens": ["management","project"]
+  },
+  {
+    "type": "tag",
+    "title": "wishlist",
+    "url": "/tags/wishlist/",
+    "tokens": ["wishlist"]
+  },
+  {
+    "type": "tag",
+    "title": "github",
+    "url": "/tags/github/",
+    "tokens": ["github"]
+  },
+  {
+    "type": "tag",
+    "title": "behaviors",
+    "url": "/tags/behaviors/",
+    "tokens": ["behaviors"]
+  },
+  {
+    "type": "tag",
+    "title": "html purifier",
+    "url": "/tags/html-purifier/",
+    "tokens": ["html","purifier"]
+  },
+  {
+    "type": "tag",
+    "title": "licensing",
+    "url": "/tags/licensing/",
+    "tokens": ["licensing"]
+  },
+  {
+    "type": "tag",
+    "title": "cakephp 1.3",
+    "url": "/tags/cakephp-1.3/",
+    "tokens": ["cakephp"]
+  },
+  {
+    "type": "tag",
+    "title": "access",
+    "url": "/tags/access/",
+    "tokens": ["access"]
+  },
+  {
+    "type": "tag",
+    "title": "authorization",
+    "url": "/tags/authorization/",
+    "tokens": ["authorization"]
+  },
+  {
+    "type": "tag",
+    "title": "authsome plugin",
+    "url": "/tags/authsome-plugin/",
+    "tokens": ["authsome","plugin"]
+  },
+  {
+    "type": "tag",
+    "title": "component",
+    "url": "/tags/component/",
+    "tokens": ["component"]
+  },
+  {
+    "type": "tag",
+    "title": "passwords",
+    "url": "/tags/passwords/",
+    "tokens": ["passwords"]
+  },
+  {
+    "type": "tag",
+    "title": "authentication",
+    "url": "/tags/authentication/",
+    "tokens": ["authentication"]
+  },
+  {
+    "type": "tag",
+    "title": "install",
+    "url": "/tags/install/",
+    "tokens": ["install"]
+  },
+  {
+    "type": "tag",
+    "title": "development",
+    "url": "/tags/development/",
+    "tokens": ["development"]
+  },
+  {
+    "type": "tag",
+    "title": "os x",
+    "url": "/tags/os-x/",
+    "tokens": ["os","x"]
+  },
+  {
+    "type": "tag",
+    "title": "useful",
+    "url": "/tags/useful/",
+    "tokens": ["useful"]
+  },
+  {
+    "type": "tag",
+    "title": "conference",
+    "url": "/tags/conference/",
+    "tokens": ["conference"]
+  },
+  {
+    "type": "tag",
+    "title": "cakefest",
+    "url": "/tags/cakefest/",
+    "tokens": ["cakefest"]
+  },
+  {
+    "type": "tag",
+    "title": "code",
+    "url": "/tags/code/",
+    "tokens": ["code"]
+  },
+  {
+    "type": "tag",
+    "title": "loadmodel",
+    "url": "/tags/loadmodel/",
+    "tokens": ["loadmodel"]
+  },
+  {
+    "type": "tag",
+    "title": "custom find",
+    "url": "/tags/custom-find/",
+    "tokens": ["custom","find"]
+  },
+  {
+    "type": "tag",
+    "title": "readme",
+    "url": "/tags/readme/",
+    "tokens": ["readme"]
+  },
+  {
+    "type": "tag",
+    "title": "cake_admin",
+    "url": "/tags/cake_admin/",
+    "tokens": ["cake_admin"]
+  },
+  {
+    "type": "tag",
+    "title": "admin",
+    "url": "/tags/admin/",
+    "tokens": ["admin"]
+  },
+  {
+    "type": "tag",
+    "title": "javascript",
+    "url": "/tags/javascript/",
+    "tokens": ["javascript"]
+  },
+  {
+    "type": "tag",
+    "title": "jquery",
+    "url": "/tags/jquery/",
+    "tokens": ["jquery"]
+  },
+  {
+    "type": "tag",
+    "title": "history.js",
+    "url": "/tags/history.js/",
+    "tokens": ["history","js"]
+  },
+  {
+    "type": "tag",
+    "title": "book",
+    "url": "/tags/book/",
+    "tokens": ["book"]
+  },
+  {
+    "type": "tag",
+    "title": "application",
+    "url": "/tags/application/",
+    "tokens": ["application"]
+  },
+  {
+    "type": "tag",
+    "title": "deployment",
+    "url": "/tags/deployment/",
+    "tokens": ["deployment"]
+  },
+  {
+    "type": "tag",
+    "title": "chef",
+    "url": "/tags/chef/",
+    "tokens": ["chef"]
+  },
+  {
+    "type": "tag",
+    "title": "capistrano",
+    "url": "/tags/capistrano/",
+    "tokens": ["capistrano"]
+  },
+  {
+    "type": "tag",
+    "title": "tools",
+    "url": "/tags/tools/",
+    "tokens": ["tools"]
+  },
+  {
+    "type": "tag",
+    "title": "monitoring",
+    "url": "/tags/monitoring/",
+    "tokens": ["monitoring"]
+  },
+  {
+    "type": "tag",
+    "title": "mountain lion",
+    "url": "/tags/mountain-lion/",
+    "tokens": ["lion","mountain"]
+  },
+  {
+    "type": "tag",
+    "title": "upgrade",
+    "url": "/tags/upgrade/",
+    "tokens": ["upgrade"]
+  },
+  {
+    "type": "tag",
+    "title": "logstash",
+    "url": "/tags/logstash/",
+    "tokens": ["logstash"]
+  },
+  {
+    "type": "tag",
+    "title": "beaver",
+    "url": "/tags/beaver/",
+    "tokens": ["beaver"]
+  },
+  {
+    "type": "tag",
+    "title": "logs",
+    "url": "/tags/logs/",
+    "tokens": ["logs"]
+  },
+  {
+    "type": "tag",
+    "title": "gitlab",
+    "url": "/tags/gitlab/",
+    "tokens": ["gitlab"]
+  },
+  {
+    "type": "tag",
+    "title": "git",
+    "url": "/tags/git/",
+    "tokens": ["git"]
+  },
+  {
+    "type": "tag",
+    "title": "digital ocean",
+    "url": "/tags/digital-ocean/",
+    "tokens": ["digital","ocean"]
+  },
+  {
+    "type": "tag",
+    "title": "aws",
+    "url": "/tags/aws/",
+    "tokens": ["aws"]
+  },
+  {
+    "type": "tag",
+    "title": "provisioning",
+    "url": "/tags/provisioning/",
+    "tokens": ["provisioning"]
+  },
+  {
+    "type": "tag",
+    "title": "heroku",
+    "url": "/tags/heroku/",
+    "tokens": ["heroku"]
+  },
+  {
+    "type": "tag",
+    "title": "cofiguration",
+    "url": "/tags/cofiguration/",
+    "tokens": ["cofiguration"]
+  },
+  {
+    "type": "tag",
+    "title": "etcd",
+    "url": "/tags/etcd/",
+    "tokens": ["etcd"]
+  },
+  {
+    "type": "tag",
+    "title": "configuration",
+    "url": "/tags/configuration/",
+    "tokens": ["configuration"]
+  },
+  {
+    "type": "tag",
+    "title": "resources",
+    "url": "/tags/resources/",
+    "tokens": ["resources"]
+  },
+  {
+    "type": "tag",
+    "title": "travis",
+    "url": "/tags/travis/",
+    "tokens": ["travis"]
+  },
+  {
+    "type": "tag",
+    "title": "indenticon",
+    "url": "/tags/indenticon/",
+    "tokens": ["indenticon"]
+  },
+  {
+    "type": "tag",
+    "title": "dispatcher",
+    "url": "/tags/dispatcher/",
+    "tokens": ["dispatcher"]
+  },
+  {
+    "type": "tag",
+    "title": "cli",
+    "url": "/tags/cli/",
+    "tokens": ["cli"]
+  },
+  {
+    "type": "tag",
+    "title": "repl",
+    "url": "/tags/repl/",
+    "tokens": ["repl"]
+  },
+  {
+    "type": "tag",
+    "title": "objects",
+    "url": "/tags/objects/",
+    "tokens": ["objects"]
+  },
+  {
+    "type": "tag",
+    "title": "orm",
+    "url": "/tags/orm/",
+    "tokens": ["orm"]
+  },
+  {
+    "type": "tag",
+    "title": "service oriented architecture",
+    "url": "/tags/service-oriented-architecture/",
+    "tokens": ["architecture","oriented","service"]
+  },
+  {
+    "type": "tag",
+    "title": "refactoring",
+    "url": "/tags/refactoring/",
+    "tokens": ["refactoring"]
+  },
+  {
+    "type": "tag",
+    "title": "asset_compress",
+    "url": "/tags/asset_compress/",
+    "tokens": ["asset_compress"]
+  },
+  {
+    "type": "tag",
+    "title": "assets",
+    "url": "/tags/assets/",
+    "tokens": ["assets"]
+  },
+  {
+    "type": "tag",
+    "title": "composer",
+    "url": "/tags/composer/",
+    "tokens": ["composer"]
+  },
+  {
+    "type": "tag",
+    "title": "dependency management",
+    "url": "/tags/dependency-management/",
+    "tokens": ["dependency","management"]
+  },
+  {
+    "type": "tag",
+    "title": "oauth",
+    "url": "/tags/oauth/",
+    "tokens": ["oauth"]
+  },
+  {
+    "type": "tag",
+    "title": "queuing",
+    "url": "/tags/queuing/",
+    "tokens": ["queuing"]
+  },
+  {
+    "type": "tag",
+    "title": "background jobs",
+    "url": "/tags/background-jobs/",
+    "tokens": ["background","jobs"]
+  },
+  {
+    "type": "tag",
+    "title": "community",
+    "url": "/tags/community/",
+    "tokens": ["community"]
+  },
+  {
+    "type": "tag",
+    "title": "contributing",
+    "url": "/tags/contributing/",
+    "tokens": ["contributing"]
+  },
+  {
+    "type": "tag",
+    "title": "exceptions",
+    "url": "/tags/exceptions/",
+    "tokens": ["exceptions"]
+  },
+  {
+    "type": "tag",
+    "title": "redirect",
+    "url": "/tags/redirect/",
+    "tokens": ["redirect"]
+  },
+  {
+    "type": "tag",
+    "title": "maintenance",
+    "url": "/tags/maintenance/",
+    "tokens": ["maintenance"]
+  },
+  {
+    "type": "tag",
+    "title": "aliasing",
+    "url": "/tags/aliasing/",
+    "tokens": ["aliasing"]
+  },
+  {
+    "type": "tag",
+    "title": "sessions",
+    "url": "/tags/sessions/",
+    "tokens": ["sessions"]
+  },
+  {
+    "type": "tag",
+    "title": "events",
+    "url": "/tags/events/",
+    "tokens": ["events"]
+  },
+  {
+    "type": "tag",
+    "title": "annotations",
+    "url": "/tags/annotations/",
+    "tokens": ["annotations"]
+  },
+  {
+    "type": "tag",
+    "title": "deploy",
+    "url": "/tags/deploy/",
+    "tokens": ["deploy"]
+  },
+  {
+    "type": "tag",
+    "title": "bash",
+    "url": "/tags/bash/",
+    "tokens": ["bash"]
+  },
+  {
+    "type": "tag",
+    "title": "testing",
+    "url": "/tags/testing/",
+    "tokens": ["testing"]
+  },
+  {
+    "type": "tag",
+    "title": "migrations",
+    "url": "/tags/migrations/",
+    "tokens": ["migrations"]
+  },
+  {
+    "type": "tag",
+    "title": "controllers",
+    "url": "/tags/controllers/",
+    "tokens": ["controllers"]
+  },
+  {
+    "type": "tag",
+    "title": "vagrant",
+    "url": "/tags/vagrant/",
+    "tokens": ["vagrant"]
+  },
+  {
+    "type": "tag",
+    "title": "views",
+    "url": "/tags/views/",
+    "tokens": ["views"]
+  },
+  {
+    "type": "tag",
+    "title": "service",
+    "url": "/tags/service/",
+    "tokens": ["service"]
+  },
+  {
+    "type": "tag",
+    "title": "logging",
+    "url": "/tags/logging/",
+    "tokens": ["logging"]
+  },
+  {
+    "type": "tag",
+    "title": "microframeworks",
+    "url": "/tags/microframeworks/",
+    "tokens": ["microframeworks"]
+  },
+  false
 ]
+

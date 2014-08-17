@@ -267,18 +267,8 @@
   </url>
 
   <url>
-      <loc>http://josediazgonzalez.com/2011/03/27/carl-sutton-of-infinitas-cms/</loc>
-      <lastmod>2011-03-27</lastmod>
-  </url>
-
-  <url>
       <loc>http://josediazgonzalez.com/2010/12/01/embedding-custom-finds-in-behaviors/</loc>
       <lastmod>2010-12-01</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2010/10/30/fahad-ibnay-heylaal-creator-of-croogo-cms/</loc>
-      <lastmod>2010-10-30</lastmod>
   </url>
 
   <url>
@@ -307,11 +297,6 @@
   </url>
 
   <url>
-      <loc>http://josediazgonzalez.com/2010/02/09/drop-down-select-fields-in-cakephp/</loc>
-      <lastmod>2010-02-09</lastmod>
-  </url>
-
-  <url>
       <loc>http://josediazgonzalez.com/2010/02/05/your-username-password-should-never-be-a-lastname-uid/</loc>
       <lastmod>2010-02-05</lastmod>
   </url>
@@ -332,26 +317,6 @@
   </url>
 
   <url>
-      <loc>http://josediazgonzalez.com/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/</loc>
-      <lastmod>2009-12-10</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/11/30/quick-tip-bring-out-yer-queries/</loc>
-      <lastmod>2009-11-30</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/11/28/quick-tip-translating-model-variables/</loc>
-      <lastmod>2009-11-28</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/11/28/inflect-the-heck-out-of-your-words/</loc>
-      <lastmod>2009-11-28</lastmod>
-  </url>
-
-  <url>
       <loc>http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/</loc>
       <lastmod>2009-11-27</lastmod>
   </url>
@@ -359,11 +324,6 @@
   <url>
       <loc>http://josediazgonzalez.com/2009/11/27/quick-tip-save-isnt-saveall/</loc>
       <lastmod>2009-11-27</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/11/26/rails-style-error-messages-in-cakephp/</loc>
-      <lastmod>2009-11-26</lastmod>
   </url>
 
   <url>
@@ -389,66 +349,6 @@
   <url>
       <loc>http://josediazgonzalez.com/2009/09/04/simple-json-layout/</loc>
       <lastmod>2009-09-04</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/09/04/cacheable-behavior/</loc>
-      <lastmod>2009-09-04</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/09/03/resource-helper/</loc>
-      <lastmod>2009-09-03</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/09/03/hide-plugin-prefixes-in-routed-urls/</loc>
-      <lastmod>2009-09-03</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/09/03/conditionally-load-js/</loc>
-      <lastmod>2009-09-03</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/09/03/conditional-loading-of-helpers/</loc>
-      <lastmod>2009-09-03</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/09/03/application-settings/</loc>
-      <lastmod>2009-09-03</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/08/26/autobuilding-your-acos-table-with-plugins/</loc>
-      <lastmod>2009-08-26</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/08/14/adding-a-helper-behavior-component-on-the-fly/</loc>
-      <lastmod>2009-08-14</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/08/13/toggle-behavior/</loc>
-      <lastmod>2009-08-13</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/06/15/trackable-behavior/</loc>
-      <lastmod>2009-06-15</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/06/15/commentable-behavior/</loc>
-      <lastmod>2009-06-15</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/06/14/yahoo-maps-based-geocoding/</loc>
-      <lastmod>2009-06-14</lastmod>
   </url>
 
 
