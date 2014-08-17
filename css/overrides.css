@@ -209,7 +209,9 @@ pre code {
   right: 0;
   top: 0; }
 .about-page .position {
-  margin-bottom: 4px; }
+  margin-bottom: 4px;
+  font-style: italic;
+  font-weight: normal; }
 .about-page #side-intro {
   display: none; }
 
