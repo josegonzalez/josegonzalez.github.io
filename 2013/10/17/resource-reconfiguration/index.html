@@ -72,14 +72,6 @@
       </div>
   </header>
   <div class="entry-content">
-<div class="series-note">
-<p>This entry is <strong>part 2</strong> of <strong>3</strong> in the series "Insane Server Management".</p>
-<ul>
-  <li>Part 1 - <a href="/2013/10/17/deploying-your-infrastructure-to-aws/">Deploying your infrastructure to AWS</a></li>
-  <li>Part 2 - Resource reconfiguration</li>
-  <li>Part 3 - <a href="/2013/10/18/service-definitions/">Service Definitions</a></li>
-</ul>
-</div>
     <p>As you head towards service-oriented architecture, continuous deployment, immutable servers and an ever-growing infrastructure, you inevitably come up against resource provisioning issues.</p>
 <p>On a PaaS, you might have <code>100</code> nodes running <code>6</code> different services, each having dependencies upon datastores and other services. How do you route between each service to the correct external source?</p>
 <p>One way to do it is by using environment variables:</p>
@@ -260,7 +252,15 @@ node.default['configuration']['datastores']['API_ELASTICSEARCH_CLUSTER_URL'] = '
         <div class="widget-area" role="complementary">
     <aside class="widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-        <h3 class="widget-title">Categories</h3>
+<div class="series-note">
+    <p>This entry is <strong>part 2</strong> of <strong>3</strong> in the series "Insane Server Management".</p>
+    <ol>
+      <li><a href="/2013/10/17/deploying-your-infrastructure-to-aws/">Deploying your infrastructure to AWS</a></li>
+      <li>Resource reconfiguration</li>
+      <li><a href="/2013/10/18/service-definitions/">Service Definitions</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
         <ul>
                 <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
                 <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>

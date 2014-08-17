@@ -72,14 +72,6 @@
       </div>
   </header>
   <div class="entry-content">
-<div class="series-note">
-<p>This entry is <strong>part 1</strong> of <strong>3</strong> in the series "Insane Server Management".</p>
-<ul>
-  <li>Part 1 - Deploying your infrastructure to AWS</li>
-  <li>Part 2 - <a href="/2013/10/17/resource-reconfiguration/">Resource reconfiguration</a></li>
-  <li>Part 3 - <a href="/2013/10/18/service-definitions/">Service Definitions</a></li>
-</ul>
-</div>
     <p>This document refers to the deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores.</p>
 <blockquote>
   <p>This is the result of about 6 hours of rambling thought and a few diagrams, as well as 2+ years of fiddling with servers and seeing what definitely does not work. That is to say, there is no guarantee any of the following is <code>[truthful, working, awesome]</code>.</p>
@@ -462,7 +454,15 @@ git commit -m "added user processing to 12_04-bee machines"
         <div class="widget-area" role="complementary">
     <aside class="widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-        <h3 class="widget-title">Categories</h3>
+<div class="series-note">
+    <p>This entry is <strong>part 1</strong> of <strong>3</strong> in the series "Insane Server Management".</p>
+    <ol>
+      <li>Deploying your infrastructure to AWS</li>
+      <li><a href="/2013/10/17/resource-reconfiguration/">Resource reconfiguration</a></li>
+      <li><a href="/2013/10/18/service-definitions/">Service Definitions</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
         <ul>
                 <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
                 <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>

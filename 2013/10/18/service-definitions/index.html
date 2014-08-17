@@ -72,14 +72,6 @@
       </div>
   </header>
   <div class="entry-content">
-<div class="series-note">
-<p>This entry is <strong>part 3</strong> of <strong>3</strong> in the series "Insane Server Management".</p>
-<ul>
-  <li>Part 1 - <a href="/2013/10/17/deploying-your-infrastructure-to-aws/">Deploying your infrastructure to AWS</a></li>
-  <li>Part 2 - <a href="/2013/10/17/resource-reconfiguration/">Resource reconfiguration</a></li>
-  <li>Part 3 - Service Definitions</li>
-</ul>
-</div>
     <p>Services are typically defined as tasks that run continuously. For example, the following might be considered a service:</p>
 <pre><code class="language-ruby">require 'sinatra'
 get '/hi' do
@@ -248,7 +240,15 @@ kill -9 1337
         <div class="widget-area" role="complementary">
     <aside class="widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-        <h3 class="widget-title">Categories</h3>
+<div class="series-note">
+    <p>This entry is <strong>part 3</strong> of <strong>3</strong> in the series "Insane Server Management".</p>
+    <ol>
+      <li><a href="/2013/10/17/deploying-your-infrastructure-to-aws/">Deploying your infrastructure to AWS</a></li>
+      <li><a href="/2013/10/17/resource-reconfiguration/">Resource reconfiguration</a></li>
+      <li>Service Definitions</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
         <ul>
                 <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
                 <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>

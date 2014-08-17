@@ -15,7 +15,7 @@
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 $app = new \Slim\Slim();
-$app-&amp;gt;get('/hello/:name', function ($name) {
+$app-&amp;gt;get(&#39;/hello/:name&#39;, function ($name) {
     echo &quot;Hello, $name&quot;;
 });
 $app-&amp;gt;run();
@@ -37,15 +37,15 @@ class ResponseInterface {
 
 class HelloWorld implements ResponseInterface {
     public function respond($request, $response) {
-        $response-&amp;gt;body('Hello World');
+        $response-&amp;gt;body(&#39;Hello World&#39;);
     }
 }
 
-Router::connect('/hello/*', ['callable' =&amp;gt; function($request, $response) {
-    $response-&amp;gt;body('Hello World');
+Router::connect(&#39;/hello/*&#39;, [&#39;callable&#39; =&amp;gt; function($request, $response) {
+    $response-&amp;gt;body(&#39;Hello World&#39;);
 }]);
 
-Router::connect('/world/*', ['callable' =&amp;gt; 'HelloWorld']);
+Router::connect(&#39;/world/*&#39;, [&#39;callable&#39; =&amp;gt; &#39;HelloWorld&#39;]);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -54,25 +54,25 @@ Router::connect('/world/*', ['callable' =&amp;gt; 'HelloWorld']);
 &lt;p&gt;To route these properly, we’ll hook into CakePHP’s dispatch cycle using a custom dispatch filter as follows:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('DispatcherFilter', 'Routing');
+App::uses(&#39;DispatcherFilter&#39;, &#39;Routing&#39;);
 class CallableFilter extends DispatcherFilter {
     public function beforeDispatch(CakeEvent $event) {
         $callable = null;
-        if (isset($event-&amp;gt;data['request']-&amp;gt;params['callable'])) {
-            $callable = $event-&amp;gt;data['request']-&amp;gt;params['callable'];
+        if (isset($event-&amp;gt;data[&#39;request&#39;]-&amp;gt;params[&#39;callable&#39;])) {
+            $callable = $event-&amp;gt;data[&#39;request&#39;]-&amp;gt;params[&#39;callable&#39;];
         }
 
         if (is_string($callable) &amp;amp;&amp;amp; class_exists($callable)) {
             $callable = new $callable;
-            $callable-&amp;gt;respond($event-&amp;gt;data['request'], $event-&amp;gt;data['response']);
+            $callable-&amp;gt;respond($event-&amp;gt;data[&#39;request&#39;], $event-&amp;gt;data[&#39;response&#39;]);
         } elseif (is_callable($callable)) {
-            $callable($event-&amp;gt;data['request'], $event-&amp;gt;data['response']);
+            $callable($event-&amp;gt;data[&#39;request&#39;], $event-&amp;gt;data[&#39;response&#39;]);
         } else {
             return null;
         }
 
         $event-&amp;gt;stopPropagation();
-        return $event-&amp;gt;data['response'];
+        return $event-&amp;gt;data[&#39;response&#39;];
     }
 }
 ?&amp;gt;
@@ -83,10 +83,10 @@ class CallableFilter extends DispatcherFilter {
 &lt;p&gt;To configure our filter, simply attach it to your DispatcherFilter configuration in &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt; like so:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-Configure::write('Dispatcher.filters', [
-    'AssetDispatcher',
-    'CacheDispatcher',
-    'CallableFilter'
+Configure::write(&#39;Dispatcher.filters&#39;, [
+    &#39;AssetDispatcher&#39;,
+    &#39;CacheDispatcher&#39;,
+    &#39;CallableFilter&#39;
 ]);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -125,7 +125,7 @@ Configure::write('Dispatcher.filters', [
         <description>&lt;p&gt;Writing a logger for CakePHP isn’t very difficult. The work lies in implementing the &lt;code&gt;CakeLogInterface&lt;/code&gt;, which requires that you implement a &lt;code&gt;write&lt;/code&gt; method as follows:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('BaseLog', 'Log/Engine');
+App::uses(&#39;BaseLog&#39;, &#39;Log/Engine&#39;);
 class LogstashLog extends BaseLog
 {
     public function write($type, $message)
@@ -141,7 +141,7 @@ class LogstashLog extends BaseLog
 &lt;p&gt;At the very base, log messages should have some context about the logs - specifically a timestamp. Rather than invent our own format, we’ll use &lt;a href=&quot;http://en.wikipedia.org/wiki/ISO_8601&quot;&gt;ISO-8601&lt;/a&gt;, which Logstash can handle natively. We can represent this using the following bit of code:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$format = 'Y-m-d\TH:i:s.uP';
+$format = &#39;Y-m-d\TH:i:s.uP&#39;;
 echo date($format); // ISO-8601 compliant datetime
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -157,17 +157,17 @@ echo date($format); // ISO-8601 compliant datetime
 &lt;p&gt;All other fields are optional, and therefore our &lt;code&gt;LogstashLog&lt;/code&gt; would look as follows:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('BaseLog', 'Log/Engine');
+App::uses(&#39;BaseLog&#39;, &#39;Log/Engine&#39;);
 class LogstashLog extends BaseLog
 {
-    protected $format = 'Y-m-d\TH:i:s.uP';
+    protected $format = &#39;Y-m-d\TH:i:s.uP&#39;;
     public function write($type, $message)
     {
         $data = [
-            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
-            '@version' =&amp;gt; 1,
-            'message' =&amp;gt; $message,
-            'tags' =&amp;gt; [$type],
+            &#39;@timestamp&#39; =&amp;gt; date($this-&amp;gt;format),
+            &#39;@version&#39; =&amp;gt; 1,
+            &#39;message&#39; =&amp;gt; $message,
+            &#39;tags&#39; =&amp;gt; [$type],
         ];
         // write to some output.
     }
@@ -186,32 +186,32 @@ class LogstashLog extends BaseLog
 &lt;p&gt;Adding in &lt;code&gt;syslog&lt;/code&gt; support will change our logger as follows:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('BaseLog', 'Log/Engine');
+App::uses(&#39;BaseLog&#39;, &#39;Log/Engine&#39;);
 class LogstashLog extends BaseLog
 {
-    protected $format = 'Y-m-d\TH:i:s.uP';
+    protected $format = &#39;Y-m-d\TH:i:s.uP&#39;;
 
     protected $logLevels = [
-        'emergency' =&amp;gt; LOG_EMERG,
-        'alert' =&amp;gt; LOG_ALERT,
-        'critical' =&amp;gt; LOG_CRIT,
-        'error' =&amp;gt; LOG_ERR,
-        'warning' =&amp;gt; LOG_WARNING,
-        'notice' =&amp;gt; LOG_NOTICE,
-        'info' =&amp;gt; LOG_INFO,
-        'debug' =&amp;gt; LOG_DEBUG,
+        &#39;emergency&#39; =&amp;gt; LOG_EMERG,
+        &#39;alert&#39; =&amp;gt; LOG_ALERT,
+        &#39;critical&#39; =&amp;gt; LOG_CRIT,
+        &#39;error&#39; =&amp;gt; LOG_ERR,
+        &#39;warning&#39; =&amp;gt; LOG_WARNING,
+        &#39;notice&#39; =&amp;gt; LOG_NOTICE,
+        &#39;info&#39; =&amp;gt; LOG_INFO,
+        &#39;debug&#39; =&amp;gt; LOG_DEBUG,
     ];
 
     public function write($type, $message)
     {
         $data = [
-            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
-            '@version' =&amp;gt; 1,
-            'message' =&amp;gt; $message,
-            'tags' =&amp;gt; [$type],
+            &#39;@timestamp&#39; =&amp;gt; date($this-&amp;gt;format),
+            &#39;@version&#39; =&amp;gt; 1,
+            &#39;message&#39; =&amp;gt; $message,
+            &#39;tags&#39; =&amp;gt; [$type],
         ];
 
-        if (!openlog('app', LOG_PID, LOG_USER)) {
+        if (!openlog(&#39;app&#39;, LOG_PID, LOG_USER)) {
             // Handle your logging error...
             return;
         }
@@ -226,19 +226,19 @@ class LogstashLog extends BaseLog
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function write($type, $message)
 {
-    $message = is_array($message) ? $message : compact('message');
+    $message = is_array($message) ? $message : compact(&#39;message&#39;);
     $data = array_merge(array(
-        '@timestamp' =&amp;gt; date($this-&amp;gt;format),
-        '@version' =&amp;gt; 1,
+        &#39;@timestamp&#39; =&amp;gt; date($this-&amp;gt;format),
+        &#39;@version&#39; =&amp;gt; 1,
     ), $message);
 
-    if (isset($data['tags'])) {
-        $data['tags'][] = $type;
+    if (isset($data[&#39;tags&#39;])) {
+        $data[&#39;tags&#39;][] = $type;
     } else {
-        $data['tags'] = [$type];
+        $data[&#39;tags&#39;] = [$type];
     }
 
-    if (!openlog('app', LOG_PID, LOG_USER)) {
+    if (!openlog(&#39;app&#39;, LOG_PID, LOG_USER)) {
         // Handle your logging error...
         return;
     }
@@ -252,37 +252,37 @@ class LogstashLog extends BaseLog
 &lt;p&gt;Here is what our log engine will look like at the end of the day:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('FileLog', 'Log');
+App::uses(&#39;FileLog&#39;, &#39;Log&#39;);
 class LogstashLog extends FileLog
 {
-    protected $format = 'Y-m-d\TH:i:s.uP';
+    protected $format = &#39;Y-m-d\TH:i:s.uP&#39;;
 
     protected $logLevels = [
-        'emergency' =&amp;gt; LOG_EMERG,
-        'alert' =&amp;gt; LOG_ALERT,
-        'critical' =&amp;gt; LOG_CRIT,
-        'error' =&amp;gt; LOG_ERR,
-        'warning' =&amp;gt; LOG_WARNING,
-        'notice' =&amp;gt; LOG_NOTICE,
-        'info' =&amp;gt; LOG_INFO,
-        'debug' =&amp;gt; LOG_DEBUG,
+        &#39;emergency&#39; =&amp;gt; LOG_EMERG,
+        &#39;alert&#39; =&amp;gt; LOG_ALERT,
+        &#39;critical&#39; =&amp;gt; LOG_CRIT,
+        &#39;error&#39; =&amp;gt; LOG_ERR,
+        &#39;warning&#39; =&amp;gt; LOG_WARNING,
+        &#39;notice&#39; =&amp;gt; LOG_NOTICE,
+        &#39;info&#39; =&amp;gt; LOG_INFO,
+        &#39;debug&#39; =&amp;gt; LOG_DEBUG,
     ];
 
     public function write($type, $message)
     {
-        $message = is_array($message) ? $message : compact('message');
+        $message = is_array($message) ? $message : compact(&#39;message&#39;);
         $data = array_merge(array(
-            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
-            '@version' =&amp;gt; 1,
+            &#39;@timestamp&#39; =&amp;gt; date($this-&amp;gt;format),
+            &#39;@version&#39; =&amp;gt; 1,
         ), $message);
 
-        if (isset($data['tags'])) {
-            $data['tags'][] = $type;
+        if (isset($data[&#39;tags&#39;])) {
+            $data[&#39;tags&#39;][] = $type;
         } else {
-            $data['tags'] = [$type];
+            $data[&#39;tags&#39;] = [$type];
         }
 
-        if (!openlog('app', LOG_PID, LOG_USER)) {
+        if (!openlog(&#39;app&#39;, LOG_PID, LOG_USER)) {
             return parent::write($type, json_ecode($data));
         }
 
@@ -296,16 +296,16 @@ class LogstashLog extends FileLog
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 // in our app/Config/bootstrap.php
-App::uses('CakeLog', 'Log');
-CakeLog::config('debug', [
-    'engine' =&amp;gt; 'Logstash',
-    'types' =&amp;gt; ['notice', 'info', 'debug'],
-    'file' =&amp;gt; 'debug',
+App::uses(&#39;CakeLog&#39;, &#39;Log&#39;);
+CakeLog::config(&#39;debug&#39;, [
+    &#39;engine&#39; =&amp;gt; &#39;Logstash&#39;,
+    &#39;types&#39; =&amp;gt; [&#39;notice&#39;, &#39;info&#39;, &#39;debug&#39;],
+    &#39;file&#39; =&amp;gt; &#39;debug&#39;,
 ]);
-CakeLog::config('error', [
-    'engine' =&amp;gt; 'Logstash',
-    'types' =&amp;gt; ['warning', 'error', 'critical', 'alert', 'emergency'],
-    'file' =&amp;gt; 'error',
+CakeLog::config(&#39;error&#39;, [
+    &#39;engine&#39; =&amp;gt; &#39;Logstash&#39;,
+    &#39;types&#39; =&amp;gt; [&#39;warning&#39;, &#39;error&#39;, &#39;critical&#39;, &#39;alert&#39;, &#39;emergency&#39;],
+    &#39;file&#39; =&amp;gt; &#39;error&#39;,
 ]);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -339,14 +339,14 @@ CakeLog::config('error', [
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 class PostCell extends ViewCell {
-    public $view = 'single_post';
+    public $view = &#39;single_post&#39;;
 
     // I am renaming the method `render` to `run` for a specific reason...
     public function run(array $options = [])
     {
-        $this-&amp;gt;loadModel('Posts');
-        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
-        $this-&amp;gt;set(compact('post'));
+        $this-&amp;gt;loadModel(&#39;Posts&#39;);
+        $post = $this-&amp;gt;Posts-&amp;gt;findById($options[&#39;id&#39;]
+        $this-&amp;gt;set(compact(&#39;post&#39;));
         return $this; // So I can chain the `run` method
     }
 }
@@ -355,15 +355,15 @@ class PostCell extends ViewCell {
 
 &lt;p&gt;The above class would retrieve the data necessary to render a &lt;code&gt;PostCell&lt;/code&gt; using the &lt;code&gt;single_post&lt;/code&gt; template file. Our template file could be as follows:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h1&amp;gt;&amp;lt;?= $post-&amp;gt;get('title') ?&amp;gt;&amp;lt;/h1&amp;gt;
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h1&amp;gt;&amp;lt;?= $post-&amp;gt;get(&#39;title&#39;) ?&amp;gt;&amp;lt;/h1&amp;gt;
 &amp;lt;div class=&quot;post-content&quot;&amp;gt;
-    &amp;lt;?= $post-&amp;gt;get('content') ?&amp;gt;
+    &amp;lt;?= $post-&amp;gt;get(&#39;content&#39;) ?&amp;gt;
 &amp;lt;/div&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;In order to use this view cell, we might do the following in our &lt;code&gt;view.ctp&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;cell('PostCell', array('id' =&amp;gt; 10)) ?&amp;gt;
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;cell(&#39;PostCell&#39;, array(&#39;id&#39; =&amp;gt; 10)) ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&quot;reusing-cells-with-existing-data&quot;&gt;Reusing cells with existing data&lt;/h2&gt;
@@ -372,19 +372,19 @@ class PostCell extends ViewCell {
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 class PostCell extends ViewCell {
-    public $view = 'single_post';
+    public $view = &#39;single_post&#39;;
 
     public function run(array $options = [])
     {
         // Short-circuit the cell and return any passed data
-        if (!empty($options['post'])) {
-            $this-&amp;gt;set('post', $options['post']);
+        if (!empty($options[&#39;post&#39;])) {
+            $this-&amp;gt;set(&#39;post&#39;, $options[&#39;post&#39;]);
             return $this; // So I can chain the `run` method
         }
 
-        $this-&amp;gt;loadModel('Posts');
-        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
-        $this-&amp;gt;set(compact('post'));
+        $this-&amp;gt;loadModel(&#39;Posts&#39;);
+        $post = $this-&amp;gt;Posts-&amp;gt;findById($options[&#39;id&#39;]
+        $this-&amp;gt;set(compact(&#39;post&#39;));
         return $this; // So I can chain the `run` method
     }
 }
@@ -394,7 +394,7 @@ class PostCell extends ViewCell {
 &lt;p&gt;Our use case would be to show this on an &lt;code&gt;index.ctp&lt;/code&gt; like the following:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;? foreach ($posts as $post) : ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;cell('PostCell', compact('post')) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;cell(&#39;PostCell&#39;, compact(&#39;post&#39;)) ?&amp;gt;
 &amp;lt;? endforeach; ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -411,10 +411,10 @@ class PostsController extends Controller
     {
         $post = $this-&amp;gt;Post-&amp;gt;findById($id);
         if (!$post) {
-            throw new NotFoundException('Post not found');
+            throw new NotFoundException(&#39;Post not found&#39;);
         }
 
-        $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $post));
+        $this-&amp;gt;set(&#39;post&#39;, $this-&amp;gt;decorate(&#39;PostCell&#39;, $post));
     }
 }
 ?&amp;gt;
@@ -436,14 +436,14 @@ class PostsController extends Controller
 
     public function view($id)
     {
-        $data = (new PostCell())-&amp;gt;run(compact('id'))-&amp;gt;data();
-        if (empty($data['post'])) {
-            throw new NotFoundException('Post not found');
+        $data = (new PostCell())-&amp;gt;run(compact(&#39;id&#39;))-&amp;gt;data();
+        if (empty($data[&#39;post&#39;])) {
+            throw new NotFoundException(&#39;Post not found&#39;);
         }
 
-        // do things to $data['post']
+        // do things to $data[&#39;post&#39;]
 
-        $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $data['post']));
+        $this-&amp;gt;set(&#39;post&#39;, $this-&amp;gt;decorate(&#39;PostCell&#39;, $data[&#39;post&#39;]));
     }
 }
 ?&amp;gt;
@@ -472,7 +472,7 @@ class AppViewCell extends ViewCell
 &lt;p&gt;If you change the parent class of &lt;code&gt;PostCell&lt;/code&gt; to &lt;code&gt;AppViewCell&lt;/code&gt;, we can now do:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$cell = PostCell::perform(array('id' =&amp;gt; 10));
+$cell = PostCell::perform(array(&#39;id&#39; =&amp;gt; 10));
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -513,22 +513,22 @@ class AppViewCell extends ViewCell
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 class PostCell extends ViewCell {
-    public $view = 'single_post';
+    public $view = &#39;single_post&#39;;
 
     public function run(array $options = [])
     {
         // Short-circuit the cell and return any passed data
-        if (!empty($options['post'])) {
-            $this-&amp;gt;set('post', $options['post']);
+        if (!empty($options[&#39;post&#39;])) {
+            $this-&amp;gt;set(&#39;post&#39;, $options[&#39;post&#39;]);
             return $this; // So I can chain the `run` method
         }
 
-        $this-&amp;gt;loadModel('Posts');
-        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
+        $this-&amp;gt;loadModel(&#39;Posts&#39;);
+        $post = $this-&amp;gt;Posts-&amp;gt;findById($options[&#39;id&#39;]
         $this-&amp;gt;success = !!$post;
 
         if ($this-&amp;gt;success) {
-            $this-&amp;gt;set(compact('post'));
+            $this-&amp;gt;set(compact(&#39;post&#39;));
         }
 
         return $this; // So I can chain the `run` method
@@ -546,12 +546,12 @@ class PostsController extends Controller
 
     public function view($id)
     {
-        $cell = PostCell::perform(compact('id'));
+        $cell = PostCell::perform(compact(&#39;id&#39;));
         if ($cell-&amp;gt;successful()) {
-            $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $cell-&amp;gt;data()));
+            $this-&amp;gt;set(&#39;post&#39;, $this-&amp;gt;decorate(&#39;PostCell&#39;, $cell-&amp;gt;data()));
         }
 
-        throw new NotFoundException('Post not found');
+        throw new NotFoundException(&#39;Post not found&#39;);
     }
 }
 ?&amp;gt;
@@ -637,39 +637,39 @@ class PostsController extends Controller
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 public function add($restaurant_id = null) {
   if (empty($restaurant_id)) {
-    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+    return $this-&amp;gt;redirect(array(&#39;action&#39; =&amp;gt; &#39;index&#39;));
   }
 
-  $lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('first', array(
-    'entity' =&amp;gt; true,
-    'conditions' =&amp;gt; array('Lunch.date' =&amp;gt; date('Y-m-d')),
-    'contain' =&amp;gt; array('Restaurant'),
+  $lunchDate = $this-&amp;gt;Lunch-&amp;gt;find(&#39;first&#39;, array(
+    &#39;entity&#39; =&amp;gt; true,
+    &#39;conditions&#39; =&amp;gt; array(&#39;Lunch.date&#39; =&amp;gt; date(&#39;Y-m-d&#39;)),
+    &#39;contain&#39; =&amp;gt; array(&#39;Restaurant&#39;),
   ));
 
   if (!empty($lunchDate)) {
-    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'update', $restaurant_id));
+    return $this-&amp;gt;redirect(array(&#39;action&#39; =&amp;gt; &#39;update&#39;, $restaurant_id));
   }
 
   $this-&amp;gt;_breadcrumbs[] = array(
-    'name', =&amp;gt; 'Create Lunch Date',
-    'url' =&amp;gt; array(),
+    &#39;name&#39;, =&amp;gt; &#39;Create Lunch Date&#39;,
+    &#39;url&#39; =&amp;gt; array(),
   );
 
-  $this-&amp;gt;set(compact('restaurant_id'));
+  $this-&amp;gt;set(compact(&#39;restaurant_id&#39;));
 
-  if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
-    $this-&amp;gt;Session-&amp;gt;info('Lunch canceled');
-    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+  if (!empty($this-&amp;gt;request-&amp;gt;data[&#39;cancel&#39;])) {
+    $this-&amp;gt;Session-&amp;gt;info(&#39;Lunch canceled&#39;);
+    return $this-&amp;gt;redirect(array(&#39;action&#39; =&amp;gt; &#39;index&#39;));
   }
 
-  if (!$this-&amp;gt;request-&amp;gt;is('post')) {
-    $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
+  if (!$this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
+    $data = $this-&amp;gt;Lunch-&amp;gt;getData(&#39;add&#39;);
     return $this-&amp;gt;set($data);
   }
 
   try {
     $entity = $this-&amp;gt;Lunch-&amp;gt;addEntity($this-&amp;gt;request-&amp;gt;data);
-    $this-&amp;gt;Session-&amp;gt;success(__('The Lunch has been saved.'));
+    $this-&amp;gt;Session-&amp;gt;success(__(&#39;The Lunch has been saved.&#39;));
     return $this-&amp;gt;redirect($entity-&amp;gt;route());
   } catch (Exception $e) {
     $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
@@ -677,7 +677,7 @@ public function add($restaurant_id = null) {
       $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray();
     }
 
-    $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
+    $data = $this-&amp;gt;Lunch-&amp;gt;getData(&#39;add&#39;);
     return $this-&amp;gt;set($data);
   }
 }
@@ -699,7 +699,7 @@ public function add($restaurant_id = null) {
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 if (empty($restaurant_id)) {
-  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+  return $this-&amp;gt;redirect(array(&#39;action&#39; =&amp;gt; &#39;index&#39;));
 }
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -713,7 +713,7 @@ public function redirectUnless($variable, $redirectTo = null) {
   }
 
   if (empty($redirectTo)) {
-    $redirectTo = array('action' =&amp;gt; 'index');
+    $redirectTo = array(&#39;action&#39; =&amp;gt; &#39;index&#39;);
   }
 
   return $this-&amp;gt;redirect($redirectTo);
@@ -735,14 +735,14 @@ $this-&amp;gt;redirectUnless($restaurant_id);
 &lt;h2 id=&quot;custom-finds&quot;&gt;Custom finds:&lt;/h2&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('first', array(
-  'entity' =&amp;gt; true,
-  'conditions' =&amp;gt; array('Lunch.date' =&amp;gt; date('Y-m-d')),
-  'contain' =&amp;gt; array('Restaurant'),
+$lunchDate = $this-&amp;gt;Lunch-&amp;gt;find(&#39;first&#39;, array(
+  &#39;entity&#39; =&amp;gt; true,
+  &#39;conditions&#39; =&amp;gt; array(&#39;Lunch.date&#39; =&amp;gt; date(&#39;Y-m-d&#39;)),
+  &#39;contain&#39; =&amp;gt; array(&#39;Restaurant&#39;),
 ));
 
 if (!empty($lunchDate)) {
-  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'update', $restaurant_id));
+  return $this-&amp;gt;redirect(array(&#39;action&#39; =&amp;gt; &#39;update&#39;, $restaurant_id));
 }
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -750,19 +750,19 @@ if (!empty($lunchDate)) {
 &lt;p&gt;I absolutely hate writing finds in my view. Instead, I use custom finds:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('EntityModel', 'Entity.Model');
-App::uses('LunchEntity', 'Model/Entity');
+App::uses(&#39;EntityModel&#39;, &#39;Entity.Model&#39;);
+App::uses(&#39;LunchEntity&#39;, &#39;Model/Entity&#39;);
 class Lunch extends EntityModel {
   public $findMethods = array(
-    'lunchDate' =&amp;gt; true,
+    &#39;lunchDate&#39; =&amp;gt; true,
   );
 
   public function _findLunchDate($state, $query, $results = array()) {
-    if ($state == 'before') {
-      $query['entity'] = true;
-      $query['conditions'] = array('Lunch.date' =&amp;gt; date('Y-m-d'));
-      $query['contain'] = array('Restaurant');
-      $query['limit'] = 1;
+    if ($state == &#39;before&#39;) {
+      $query[&#39;entity&#39;] = true;
+      $query[&#39;conditions&#39;] = array(&#39;Lunch.date&#39; =&amp;gt; date(&#39;Y-m-d&#39;));
+      $query[&#39;contain&#39;] = array(&#39;Restaurant&#39;);
+      $query[&#39;limit&#39;] = 1;
       return $query;
     }
 
@@ -781,8 +781,8 @@ class Lunch extends EntityModel {
 &lt;p&gt;Our code sample would finally become:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('lunchDate');
-$this-&amp;gt;redirectUnless($lunchDate, array('action' =&amp;gt; 'update', $restaurant_id));
+$lunchDate = $this-&amp;gt;Lunch-&amp;gt;find(&#39;lunchDate&#39;);
+$this-&amp;gt;redirectUnless($lunchDate, array(&#39;action&#39; =&amp;gt; &#39;update&#39;, $restaurant_id));
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -790,8 +790,8 @@ $this-&amp;gt;redirectUnless($lunchDate, array('action' =&amp;gt; 'update', $res
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 $this-&amp;gt;_breadcrumbs[] = array(
-  'name', =&amp;gt; 'Create Lunch Date',
-  'url' =&amp;gt; array(),
+  &#39;name&#39;, =&amp;gt; &#39;Create Lunch Date&#39;,
+  &#39;url&#39; =&amp;gt; array(),
 );
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -800,7 +800,7 @@ $this-&amp;gt;_breadcrumbs[] = array(
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 protected function _addBreadcrumb($name, $url = array()) {
-  $this-&amp;gt;_breadcrumbs[] = compact('name', 'url');
+  $this-&amp;gt;_breadcrumbs[] = compact(&#39;name&#39;, &#39;url&#39;);
 }
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -808,16 +808,16 @@ protected function _addBreadcrumb($name, $url = array()) {
 &lt;p&gt;Then my controller code becomes:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$this-&amp;gt;_addBreadcrumb('Create Lunch Date');
+$this-&amp;gt;_addBreadcrumb(&#39;Create Lunch Date&#39;);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&quot;handling-form-cancellation&quot;&gt;Handling Form Cancellation&lt;/h2&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
-  $this-&amp;gt;Session-&amp;gt;info(__('Lunch canceled'));
-  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+if (!empty($this-&amp;gt;request-&amp;gt;data[&#39;cancel&#39;])) {
+  $this-&amp;gt;Session-&amp;gt;info(__(&#39;Lunch canceled&#39;));
+  return $this-&amp;gt;redirect(array(&#39;action&#39; =&amp;gt; &#39;index&#39;));
 }
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -828,9 +828,9 @@ if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 public function beforeFilter() {
-  if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
-    $this-&amp;gt;Session-&amp;gt;info(__('%s canceled', $this-&amp;gt;modelClass));
-    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+  if (!empty($this-&amp;gt;request-&amp;gt;data[&#39;cancel&#39;])) {
+    $this-&amp;gt;Session-&amp;gt;info(__(&#39;%s canceled&#39;, $this-&amp;gt;modelClass));
+    return $this-&amp;gt;redirect(array(&#39;action&#39; =&amp;gt; &#39;index&#39;));
   }
 }
 ?&amp;gt;
@@ -841,14 +841,14 @@ public function beforeFilter() {
 &lt;h2 id=&quot;generic-form-handling&quot;&gt;Generic Form Handling&lt;/h2&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-if (!$this-&amp;gt;request-&amp;gt;is('post')) {
-  $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
+if (!$this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
+  $data = $this-&amp;gt;Lunch-&amp;gt;getData(&#39;add&#39;);
   return $this-&amp;gt;set($data);
 }
 
 try {
   $entity = $this-&amp;gt;Lunch-&amp;gt;addEntity($this-&amp;gt;request-&amp;gt;data);
-  $this-&amp;gt;Session-&amp;gt;success(__('The Lunch has been saved.'));
+  $this-&amp;gt;Session-&amp;gt;success(__(&#39;The Lunch has been saved.&#39;));
   return $this-&amp;gt;redirect($entity-&amp;gt;route());
 } catch (Exception $e) {
   $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
@@ -856,7 +856,7 @@ try {
     $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray();
   }
 
-  $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
+  $data = $this-&amp;gt;Lunch-&amp;gt;getData(&#39;add&#39;);
   return $this-&amp;gt;set($data);
 }
 ?&amp;gt;
@@ -870,20 +870,20 @@ protected function _form($entity = null, $modelClass = null) {
     $modelClass = $this-&amp;gt;modelClass;
   }
 
-  $_action = $this-&amp;gt;request-&amp;gt;params['action'];
+  $_action = $this-&amp;gt;request-&amp;gt;params[&#39;action&#39;];
   if ($entity &amp;amp;&amp;amp; empty($this-&amp;gt;request-&amp;gt;data)) {
     $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray($_action);
   }
 
-  if (!$this-&amp;gt;request-&amp;gt;is($entity ? 'put' : 'post')) {
+  if (!$this-&amp;gt;request-&amp;gt;is($entity ? &#39;put&#39; : &#39;post&#39;)) {
     $data = $this-&amp;gt;{$modelClass}-&amp;gt;getData($_action);
     return $this-&amp;gt;set($data);
   }
 
   try {
-    $method = $entity ? 'updateEntity' : 'addEntity';
+    $method = $entity ? &#39;updateEntity&#39; : &#39;addEntity&#39;;
     $entity = $this-&amp;gt;{$modelClass}-&amp;gt;$method($this-&amp;gt;request-&amp;gt;data, $entity);
-    $this-&amp;gt;Session-&amp;gt;success(__('The %s has been saved.', Inflector::humanize($modelClass)));
+    $this-&amp;gt;Session-&amp;gt;success(__(&#39;The %s has been saved.&#39;, Inflector::humanize($modelClass)));
     return $this-&amp;gt;redirect($entity-&amp;gt;route());
   } catch (Exception $e) {
     $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
@@ -924,11 +924,11 @@ return $this-&amp;gt;_form();
 public function add($restaurant_id = null) {
   $this-&amp;gt;redirectUnless($restaurant_id);
 
-  $lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('lunchDate');
-  $this-&amp;gt;redirectUnless($lunchDate, array('action' =&amp;gt; 'update', $restaurant_id));
+  $lunchDate = $this-&amp;gt;Lunch-&amp;gt;find(&#39;lunchDate&#39;);
+  $this-&amp;gt;redirectUnless($lunchDate, array(&#39;action&#39; =&amp;gt; &#39;update&#39;, $restaurant_id));
 
-  $this-&amp;gt;_addBreadcrumb('Create Lunch Date');
-  $this-&amp;gt;set(compact('restaurant_id'));
+  $this-&amp;gt;_addBreadcrumb(&#39;Create Lunch Date&#39;);
+  $this-&amp;gt;set(compact(&#39;restaurant_id&#39;));
   return $this-&amp;gt;_form();
 }
 ?&amp;gt;
@@ -980,8 +980,8 @@ public function add($restaurant_id = null) {
 &lt;p&gt;Here is our &lt;code&gt;Lib/Event/AppEventDispatcher.php&lt;/code&gt; class with the above methods:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('CakeEvent', 'Event');
-App::uses('CakeEventManager', 'Event');
+App::uses(&#39;CakeEvent&#39;, &#39;Event&#39;);
+App::uses(&#39;CakeEventManager&#39;, &#39;Event&#39;);
 
 class AppEventDispatcher {
   public static function listen($callable, $eventKey = null, $options = array()) {
@@ -1006,7 +1006,7 @@ class AppEventDispatcher {
 &lt;p&gt;You may wish to create global events before most of the app has started. We’ll create a new file, &lt;code&gt;app/Config/events.php&lt;/code&gt;, which will contain our events. Include this file in your &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-include dirname(__FILE__) . DS . 'events.php';
+include dirname(__FILE__) . DS . &#39;events.php&#39;;
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1018,8 +1018,8 @@ include dirname(__FILE__) . DS . 'events.php';
 &lt;p&gt;And we’ll add the following as content:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('AppEventDispatcher', 'Lib/Event');
-App::uses('CakeEvent', 'Event');
+App::uses(&#39;AppEventDispatcher&#39;, &#39;Lib/Event&#39;);
+App::uses(&#39;CakeEvent&#39;, &#39;Event&#39;);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1035,7 +1035,7 @@ AppEventDispatcher::listen(function(CakeEvent $event) {
   debug($event-&amp;gt;subject());
   debug($event-&amp;gt;data);
   die;
-}, 'foo');
+}, &#39;foo&#39;);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1044,7 +1044,7 @@ AppEventDispatcher::listen(function(CakeEvent $event) {
 &lt;p&gt;Now we need to fire the event. While not super exciting, I am placing the following at the bottom of my &lt;code&gt;app/Config/routes.php&lt;/code&gt; file:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-AppEventDispatcher::fire('foo', null, array('baz'));
+AppEventDispatcher::fire(&#39;foo&#39;, null, array(&#39;baz&#39;));
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1093,13 +1093,13 @@ AppEventDispatcher::fire('foo', null, array('baz'));
 &lt;p&gt;We’ll need it to make the CakePHP app compatible with the buildpack we’ll be using:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-define('APP_DIR', 'app');
-define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', dirname(__FILE__));
-define('WEBROOT_DIR', 'webroot');
-define('WWW_ROOT', ROOT . DS . APP_DIR . DS . WEBROOT_DIR . DS);
+define(&#39;APP_DIR&#39;, &#39;app&#39;);
+define(&#39;DS&#39;, DIRECTORY_SEPARATOR);
+define(&#39;ROOT&#39;, dirname(__FILE__));
+define(&#39;WEBROOT_DIR&#39;, &#39;webroot&#39;);
+define(&#39;WWW_ROOT&#39;, ROOT . DS . APP_DIR . DS . WEBROOT_DIR . DS);
 
-require APP_DIR . DS . WEBROOT_DIR . DS . 'index.php';
+require APP_DIR . DS . WEBROOT_DIR . DS . &#39;index.php&#39;;
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1113,25 +1113,25 @@ class DATABASE_CONFIG {
   public $default;
 
   public $test = array(
-    'persistent' =&amp;gt; false,
-    'host' =&amp;gt; '',
-    'login' =&amp;gt; '',
-    'password' =&amp;gt; '',
-    'database' =&amp;gt; 'cakephp_test',
-    'prefix' =&amp;gt; ''
+    &#39;persistent&#39; =&amp;gt; false,
+    &#39;host&#39; =&amp;gt; &#39;&#39;,
+    &#39;login&#39; =&amp;gt; &#39;&#39;,
+    &#39;password&#39; =&amp;gt; &#39;&#39;,
+    &#39;database&#39; =&amp;gt; &#39;cakephp_test&#39;,
+    &#39;prefix&#39; =&amp;gt; &#39;&#39;
   );
 
   public function __construct() {
-    $DATABASE_URL = parse_url(getenv('DATABASE_URL'));
+    $DATABASE_URL = parse_url(getenv(&#39;DATABASE_URL&#39;));
     $this-&amp;gt;default = array(
-      'datasource' =&amp;gt; 'Database/Postgres',
-      'persistent' =&amp;gt; false,
-      'host'       =&amp;gt; $DATABASE_URL['host'],
-      'login'      =&amp;gt; $DATABASE_URL['user'],
-      'password'   =&amp;gt; $DATABASE_URL['pass'],
-      'database'   =&amp;gt; substr($DATABASE_URL['path'], 1),
-      'prefix'     =&amp;gt; '',
-      'encoding'   =&amp;gt; 'utf8',
+      &#39;datasource&#39; =&amp;gt; &#39;Database/Postgres&#39;,
+      &#39;persistent&#39; =&amp;gt; false,
+      &#39;host&#39;       =&amp;gt; $DATABASE_URL[&#39;host&#39;],
+      &#39;login&#39;      =&amp;gt; $DATABASE_URL[&#39;user&#39;],
+      &#39;password&#39;   =&amp;gt; $DATABASE_URL[&#39;pass&#39;],
+      &#39;database&#39;   =&amp;gt; substr($DATABASE_URL[&#39;path&#39;], 1),
+      &#39;prefix&#39;     =&amp;gt; &#39;&#39;,
+      &#39;encoding&#39;   =&amp;gt; &#39;utf8&#39;,
     );
   }
 
@@ -1170,49 +1170,49 @@ $password = null;
 $server = null;
 $servers = null;
 
-if (extension_loaded('apc') &amp;amp;&amp;amp; function_exists('apc_dec') &amp;amp;&amp;amp; (php_sapi_name() !== 'cli')) {
-  $engine = 'Apc';
+if (extension_loaded(&#39;apc&#39;) &amp;amp;&amp;amp; function_exists(&#39;apc_dec&#39;) &amp;amp;&amp;amp; (php_sapi_name() !== &#39;cli&#39;)) {
+  $engine = &#39;Apc&#39;;
 }
 
-if (getenv('MEMCACHED_URL')) {
+if (getenv(&#39;MEMCACHED_URL&#39;)) {
   // Custom Memcached implementation
-  include ROOT . DS . APP_DIR . DS . 'Lib' . DS . 'Memcached.php';
-  $engine = 'Memcached';
-  $MEMCACHED_URL = parse_url(getenv('MEMCACHED_URL'));
-  $servers = Hash::get($MEMCACHED_URL, 'host');
-  $port = Hash::get($MEMCACHED_URL, 'port');
-  $login = Hash::get($MEMCACHED_URL, 'user');
-  $password = Hash::get($MEMCACHED_URL, 'pass');
-} elseif (getenv('REDIS_URL')) {
+  include ROOT . DS . APP_DIR . DS . &#39;Lib&#39; . DS . &#39;Memcached.php&#39;;
+  $engine = &#39;Memcached&#39;;
+  $MEMCACHED_URL = parse_url(getenv(&#39;MEMCACHED_URL&#39;));
+  $servers = Hash::get($MEMCACHED_URL, &#39;host&#39;);
+  $port = Hash::get($MEMCACHED_URL, &#39;port&#39;);
+  $login = Hash::get($MEMCACHED_URL, &#39;user&#39;);
+  $password = Hash::get($MEMCACHED_URL, &#39;pass&#39;);
+} elseif (getenv(&#39;REDIS_URL&#39;)) {
   // Custom Redis implementation
-  include ROOT . DS . APP_DIR . DS . 'Lib' . DS . 'Redis.php';
-  $engine = 'Redis';
-  $REDIS_URL = parse_url(getenv('REDIS_URL'));
-  $server = Hash::get($REDIS_URL, 'host');
-  $port = Hash::get($REDIS_URL, 'port');
-  $login = Hash::get($REDIS_URL, 'user');
-  $password = Hash::get($REDIS_URL, 'pass');
+  include ROOT . DS . APP_DIR . DS . &#39;Lib&#39; . DS . &#39;Redis.php&#39;;
+  $engine = &#39;Redis&#39;;
+  $REDIS_URL = parse_url(getenv(&#39;REDIS_URL&#39;));
+  $server = Hash::get($REDIS_URL, &#39;host&#39;);
+  $port = Hash::get($REDIS_URL, &#39;port&#39;);
+  $login = Hash::get($REDIS_URL, &#39;user&#39;);
+  $password = Hash::get($REDIS_URL, &#39;pass&#39;);
 }
 
-$prefix = 'app_';
+$prefix = &#39;app_&#39;;
 
 // In development mode, caches should expire quickly.
-$duration = '+999 days';
-if (Configure::read('debug') &amp;gt; 0) {
-  $duration = '+10 seconds';
+$duration = &#39;+999 days&#39;;
+if (Configure::read(&#39;debug&#39;) &amp;gt; 0) {
+  $duration = &#39;+10 seconds&#39;;
 }
 
-// Setup a 'default' cache configuration for use in the application.
-Cache::config('default', array(
-  'engine' =&amp;gt; $engine,
-  'prefix' =&amp;gt; $prefix . 'default_',
-  'path' =&amp;gt; CACHE . 'persistent' . DS,
-  'serialize' =&amp;gt; ($engine === 'File'),
-  'duration' =&amp;gt; $duration,
-  'login' =&amp;gt; $login,
-  'password' =&amp;gt; $password,
-  'server' =&amp;gt; $server,
-  'servers' =&amp;gt; $servers,
+// Setup a &#39;default&#39; cache configuration for use in the application.
+Cache::config(&#39;default&#39;, array(
+  &#39;engine&#39; =&amp;gt; $engine,
+  &#39;prefix&#39; =&amp;gt; $prefix . &#39;default_&#39;,
+  &#39;path&#39; =&amp;gt; CACHE . &#39;persistent&#39; . DS,
+  &#39;serialize&#39; =&amp;gt; ($engine === &#39;File&#39;),
+  &#39;duration&#39; =&amp;gt; $duration,
+  &#39;login&#39; =&amp;gt; $login,
+  &#39;password&#39; =&amp;gt; $password,
+  &#39;server&#39; =&amp;gt; $server,
+  &#39;servers&#39; =&amp;gt; $servers,
 ));
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -1222,18 +1222,18 @@ Cache::config('default', array(
 &lt;p&gt;Your application will not be able to stream logs to you unless you use a custom logging path. Here is how I configured it in my &lt;code&gt;bootstrap.php&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-CakeLog::config('default', array(
-    'engine' =&amp;gt; 'FileLog',
-    'file' =&amp;gt; 'stdout.log',
-    'path' =&amp;gt;  getenv('LOG_PATH'),
-    'types' =&amp;gt; array('notice', 'info', 'debug'),
+CakeLog::config(&#39;default&#39;, array(
+    &#39;engine&#39; =&amp;gt; &#39;FileLog&#39;,
+    &#39;file&#39; =&amp;gt; &#39;stdout.log&#39;,
+    &#39;path&#39; =&amp;gt;  getenv(&#39;LOG_PATH&#39;),
+    &#39;types&#39; =&amp;gt; array(&#39;notice&#39;, &#39;info&#39;, &#39;debug&#39;),
 ));
 
-CakeLog::config('error', array(
-    'engine' =&amp;gt; 'FileLog',
-    'file' =&amp;gt; 'error.log',
-    'path' =&amp;gt;  getenv('LOG_PATH'),
-    'types' =&amp;gt; array('emergency', 'alert', 'critical', 'error', 'warning'),
+CakeLog::config(&#39;error&#39;, array(
+    &#39;engine&#39; =&amp;gt; &#39;FileLog&#39;,
+    &#39;file&#39; =&amp;gt; &#39;error.log&#39;,
+    &#39;path&#39; =&amp;gt;  getenv(&#39;LOG_PATH&#39;),
+    &#39;types&#39; =&amp;gt; array(&#39;emergency&#39;, &#39;alert&#39;, &#39;critical&#39;, &#39;error&#39;, &#39;warning&#39;),
 ));
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -1247,7 +1247,7 @@ CakeLog::config('error', array(
 
 &lt;p&gt;If you’re building a new application, do it correctly. In your &lt;code&gt;core.php&lt;/code&gt;, uncomment the datetime call:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;date_default_timezone_set('UTC');
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;date_default_timezone_set(&#39;UTC&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&quot;copy-plugin-assets-into-the-webroot&quot;&gt;Copy plugin assets into the webroot&lt;/h2&gt;
@@ -1259,7 +1259,7 @@ CakeLog::config('error', array(
     &quot;document-root&quot;: &quot;app/webroot&quot;,
     &quot;index-document&quot;: &quot;index.php&quot;,
     &quot;compile&quot;: [
-      &quot;echo 'Copying DebugKit webroot directory' &amp;amp;&amp;amp; cp -rfp $BUILD_DIR/Plugin/DebugKit/webroot $BUILD_DIR/app/webroot/debug_kit&quot;
+      &quot;echo &#39;Copying DebugKit webroot directory&#39; &amp;amp;&amp;amp; cp -rfp $BUILD_DIR/Plugin/DebugKit/webroot $BUILD_DIR/app/webroot/debug_kit&quot;
     ]
   }
 }
@@ -1339,16 +1339,16 @@ touch Test/Case/Model/Behavior/DeletedAtBehaviorTest.php
 &lt;p&gt;The initial contents of each are pretty simple:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('ModelBehavior', 'Model');
+App::uses(&#39;ModelBehavior&#39;, &#39;Model&#39;);
 class DeletedAtBehavior extends ModelBehavior {
 }
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('Model', 'Model');
-App::uses('AppModel', 'Model');
-require_once CAKE . 'Test' . DS . 'CASE' . DS . 'Model' . DS . 'models.php';
+App::uses(&#39;Model&#39;, &#39;Model&#39;);
+App::uses(&#39;AppModel&#39;, &#39;Model&#39;);
+require_once CAKE . &#39;Test&#39; . DS . &#39;CASE&#39; . DS . &#39;Model&#39; . DS . &#39;models.php&#39;;
 class DeletedAtBehaviorTest extends CakeTestCase {
 }
 ?&amp;gt;
@@ -1357,7 +1357,7 @@ class DeletedAtBehaviorTest extends CakeTestCase {
 &lt;p&gt;Finally, lets enable our plugin so that we can run tests. Add the following to your &lt;code&gt;bootstrap.php&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-CakePlugin::load('DeletedAt');
+CakePlugin::load(&#39;DeletedAt&#39;);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1396,22 +1396,22 @@ touch Test/Fixture/DeletedUserFixture.php
 &lt;p&gt;Fixture classes require two class attributes: &lt;code&gt;$fields&lt;/code&gt; and &lt;code&gt;$records&lt;/code&gt;. The &lt;code&gt;$fields&lt;/code&gt; attribute is used to define the schema for the mocked out table. The &lt;code&gt;$records&lt;/code&gt; attribute is an array of records to insert into your database. The &lt;code&gt;$records&lt;/code&gt; attribute should have values specified for each field in &lt;code&gt;$fields&lt;/code&gt;, otherwise the behavior would be unknown. We’ll use the following for our fixture:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('CakeTestFixture', 'TestSuite/Fixture');
+App::uses(&#39;CakeTestFixture&#39;, &#39;TestSuite/Fixture&#39;);
 class DeletedUserFixture extends CakeTestFixture {
 
   public $fields = array(
-    'id' =&amp;gt; array('type' =&amp;gt; 'integer', 'key' =&amp;gt; 'primary'),
-    'user' =&amp;gt; array('type' =&amp;gt; 'string', 'null' =&amp;gt; true),
-    'password' =&amp;gt; array('type' =&amp;gt; 'string', 'null' =&amp;gt; true),
-    'created' =&amp;gt; 'datetime',
-    'updated' =&amp;gt; 'datetime',
-    'deleted' =&amp;gt; array('type' =&amp;gt; 'datetime', 'null' =&amp;gt; true),
+    &#39;id&#39; =&amp;gt; array(&#39;type&#39; =&amp;gt; &#39;integer&#39;, &#39;key&#39; =&amp;gt; &#39;primary&#39;),
+    &#39;user&#39; =&amp;gt; array(&#39;type&#39; =&amp;gt; &#39;string&#39;, &#39;null&#39; =&amp;gt; true),
+    &#39;password&#39; =&amp;gt; array(&#39;type&#39; =&amp;gt; &#39;string&#39;, &#39;null&#39; =&amp;gt; true),
+    &#39;created&#39; =&amp;gt; &#39;datetime&#39;,
+    &#39;updated&#39; =&amp;gt; &#39;datetime&#39;,
+    &#39;deleted&#39; =&amp;gt; array(&#39;type&#39; =&amp;gt; &#39;datetime&#39;, &#39;null&#39; =&amp;gt; true),
   );
 
   public $records = array(
-    array('user' =&amp;gt; 'mariano', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:16:23', 'updated' =&amp;gt; '2007-03-17 01:18:31', 'deleted' =&amp;gt; '2007-03-18 10:45:31'),
-    array('user' =&amp;gt; 'nate', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:18:23', 'updated' =&amp;gt; '2007-03-17 01:20:31', 'deleted' =&amp;gt; null),
-    array('user' =&amp;gt; 'larry', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:20:23', 'updated' =&amp;gt; '2007-03-17 01:22:31', 'deleted' =&amp;gt; null),
+    array(&#39;user&#39; =&amp;gt; &#39;mariano&#39;, &#39;password&#39; =&amp;gt; &#39;5f4dcc3b5aa765d61d8327deb882cf99&#39;, &#39;created&#39; =&amp;gt; &#39;2007-03-17 01:16:23&#39;, &#39;updated&#39; =&amp;gt; &#39;2007-03-17 01:18:31&#39;, &#39;deleted&#39; =&amp;gt; &#39;2007-03-18 10:45:31&#39;),
+    array(&#39;user&#39; =&amp;gt; &#39;nate&#39;, &#39;password&#39; =&amp;gt; &#39;5f4dcc3b5aa765d61d8327deb882cf99&#39;, &#39;created&#39; =&amp;gt; &#39;2007-03-17 01:18:23&#39;, &#39;updated&#39; =&amp;gt; &#39;2007-03-17 01:20:31&#39;, &#39;deleted&#39; =&amp;gt; null),
+    array(&#39;user&#39; =&amp;gt; &#39;larry&#39;, &#39;password&#39; =&amp;gt; &#39;5f4dcc3b5aa765d61d8327deb882cf99&#39;, &#39;created&#39; =&amp;gt; &#39;2007-03-17 01:20:23&#39;, &#39;updated&#39; =&amp;gt; &#39;2007-03-17 01:22:31&#39;, &#39;deleted&#39; =&amp;gt; null),
   );
 
 }
@@ -1430,14 +1430,14 @@ class DeletedUserFixture extends CakeTestFixture {
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
   public $fixtures = array(
-    'plugin.deleted_at.deleted_user'
+    &#39;plugin.deleted_at.deleted_user&#39;
   );
 
   public function setUp() {
     parent::setUp();
-    $this-&amp;gt;DeletedUser = ClassRegistry::init('User');
-    $this-&amp;gt;DeletedUser-&amp;gt;useTable = 'deleted_users';
-    $this-&amp;gt;DeletedUser-&amp;gt;Behaviors-&amp;gt;load('DeletedAt.DeletedAt');
+    $this-&amp;gt;DeletedUser = ClassRegistry::init(&#39;User&#39;);
+    $this-&amp;gt;DeletedUser-&amp;gt;useTable = &#39;deleted_users&#39;;
+    $this-&amp;gt;DeletedUser-&amp;gt;Behaviors-&amp;gt;load(&#39;DeletedAt.DeletedAt&#39;);
   }
 
   public function tearDown() {
@@ -1451,15 +1451,15 @@ class DeletedUserFixture extends CakeTestFixture {
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
   public function testFindDeleted() {
-    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('all', array(
-      'conditions' =&amp;gt; array('deleted &amp;lt;&amp;gt;' =&amp;gt; null)
+    $records = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;all&#39;, array(
+      &#39;conditions&#39; =&amp;gt; array(&#39;deleted &amp;lt;&amp;gt;&#39; =&amp;gt; null)
     ));
     $this-&amp;gt;assertEqual(1, count($records));
   }
 
   public function testFindNonDeleted() {
-    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('all', array(
-      'conditions' =&amp;gt; array('deleted' =&amp;gt; null)
+    $records = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;all&#39;, array(
+      &#39;conditions&#39; =&amp;gt; array(&#39;deleted&#39; =&amp;gt; null)
     ));
     $this-&amp;gt;assertEqual(2, count($records));
   }
@@ -1481,32 +1481,32 @@ class DeletedUserFixture extends CakeTestFixture {
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
   public $mapMethods = array(
-    '/findDeleted/' =&amp;gt; 'findDeleted',
-    '/findNon_deleted/' =&amp;gt; 'findNonDeleted',
+    &#39;/findDeleted/&#39; =&amp;gt; &#39;findDeleted&#39;,
+    &#39;/findNon_deleted/&#39; =&amp;gt; &#39;findNonDeleted&#39;,
   );
 
   public function setup(Model $model, $config = array()) {
-      $model-&amp;gt;_findMethods['deleted'] = true;
-      $model-&amp;gt;_findMethods['non_deleted'] = true;
+      $model-&amp;gt;_findMethods[&#39;deleted&#39;] = true;
+      $model-&amp;gt;_findMethods[&#39;non_deleted&#39;] = true;
   }
 
   public function findDeleted(&amp;amp;$model, $functionCall, $state, $query, $results = array()) {
-      if ($state == 'before') {
-        if (empty($query['conditions'])) {
-          $query['conditions'] = array();
+      if ($state == &#39;before&#39;) {
+        if (empty($query[&#39;conditions&#39;])) {
+          $query[&#39;conditions&#39;] = array();
         }
-        $query['conditions'][&quot;{$model-&amp;gt;alias}.deleted &amp;lt;&amp;gt;&quot;] = null;
+        $query[&#39;conditions&#39;][&quot;{$model-&amp;gt;alias}.deleted &amp;lt;&amp;gt;&quot;] = null;
         return $query;
       }
       return $results;
   }
 
   public function findNonDeleted(&amp;amp;$model, $functionCall, $state, $query, $results = array()) {
-      if ($state == 'before') {
-        if (empty($query['conditions'])) {
-          $query['conditions'] = array();
+      if ($state == &#39;before&#39;) {
+        if (empty($query[&#39;conditions&#39;])) {
+          $query[&#39;conditions&#39;] = array();
         }
-        $query['conditions'][&quot;{$model-&amp;gt;alias}.deleted&quot;] = null;
+        $query[&#39;conditions&#39;][&quot;{$model-&amp;gt;alias}.deleted&quot;] = null;
         return $query;
       }
       return $results;
@@ -1518,12 +1518,12 @@ class DeletedUserFixture extends CakeTestFixture {
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
   public function testFindDeleted() {
-    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
+    $records = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;deleted&#39;);
     $this-&amp;gt;assertEqual(1, count($records));
   }
 
   public function testFindNonDeleted() {
-    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $records = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;non_deleted&#39;);
     $this-&amp;gt;assertEqual(2, count($records));
   }
 ?&amp;gt;
@@ -1538,40 +1538,40 @@ class DeletedUserFixture extends CakeTestFixture {
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
   public function testSoftdelete() {
     $this-&amp;gt;DeletedUser-&amp;gt;softdelete(1);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;deleted&#39;);
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;non_deleted&#39;);
     $this-&amp;gt;assertEqual(1, count($deleted));
     $this-&amp;gt;assertEqual(2, count($nonDeleted));
 
     $this-&amp;gt;DeletedUser-&amp;gt;softdelete(2);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;deleted&#39;);
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;non_deleted&#39;);
     $this-&amp;gt;assertEqual(2, count($deleted));
     $this-&amp;gt;assertEqual(1, count($nonDeleted));
 
     $this-&amp;gt;DeletedUser-&amp;gt;softdelete(3);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;deleted&#39;);
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;non_deleted&#39;);
     $this-&amp;gt;assertEqual(3, count($deleted));
     $this-&amp;gt;assertEqual(0, count($nonDeleted));
   }
 
   public function testUnDelete() {
     $this-&amp;gt;DeletedUser-&amp;gt;undelete(3);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;deleted&#39;);
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;non_deleted&#39;);
     $this-&amp;gt;assertEqual(1, count($deleted));
     $this-&amp;gt;assertEqual(2, count($nonDeleted));
 
     $this-&amp;gt;DeletedUser-&amp;gt;undelete(2);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;deleted&#39;);
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;non_deleted&#39;);
     $this-&amp;gt;assertEqual(1, count($deleted));
     $this-&amp;gt;assertEqual(2, count($nonDeleted));
 
     $this-&amp;gt;DeletedUser-&amp;gt;undelete(1);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;deleted&#39;);
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find(&#39;non_deleted&#39;);
     $this-&amp;gt;assertEqual(0, count($deleted));
     $this-&amp;gt;assertEqual(3, count($nonDeleted));
   }
@@ -1592,7 +1592,7 @@ class DeletedUserFixture extends CakeTestFixture {
       return false;
     }
 
-    $deleteCol = 'deleted';
+    $deleteCol = &#39;deleted&#39;;
     if (!$model-&amp;gt;hasField($deleteCol)) {
       return false;
     }
@@ -1600,12 +1600,12 @@ class DeletedUserFixture extends CakeTestFixture {
     $db = $model-&amp;gt;getDataSource();
     $now = time();
 
-    $default = array('formatter' =&amp;gt; 'date');
+    $default = array(&#39;formatter&#39; =&amp;gt; &#39;date&#39;);
     $colType = array_merge($default, $db-&amp;gt;columns[$model-&amp;gt;getColumnType($deleteCol)]);
 
     $time = $now;
-    if (array_key_exists('format', $colType)) {
-      $time = call_user_func($colType['formatter'], $colType['format']);
+    if (array_key_exists(&#39;format&#39;, $colType)) {
+      $time = call_user_func($colType[&#39;formatter&#39;], $colType[&#39;format&#39;]);
     }
 
     if (!empty($model-&amp;gt;whitelist)) {
@@ -1624,7 +1624,7 @@ class DeletedUserFixture extends CakeTestFixture {
       return false;
     }
 
-    $deleteCol = 'deleted';
+    $deleteCol = &#39;deleted&#39;;
     if (!$model-&amp;gt;hasField($deleteCol)) {
       return false;
     }
@@ -1679,12 +1679,12 @@ class DeletedUserFixture extends CakeTestFixture {
 &lt;p&gt;This version is the least likely to work alone. Essentially, you switch configuration based on whatever hostname is requesting your application. For instance, you might configure your cache as follows:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-if (in_array(env('SERVER_NAME'), array('example.com', 'staging.example.com'))) {
+if (in_array(env(&#39;SERVER_NAME&#39;), array(&#39;example.com&#39;, &#39;staging.example.com&#39;))) {
   // production
-  Cache::config('default', array('engine' =&amp;gt; 'Apc'));
+  Cache::config(&#39;default&#39;, array(&#39;engine&#39; =&amp;gt; &#39;Apc&#39;));
 } else {
   // staging
-  Cache::config('default', array('engine' =&amp;gt; 'File'));
+  Cache::config(&#39;default&#39;, array(&#39;engine&#39; =&amp;gt; &#39;File&#39;));
 }
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -1715,12 +1715,12 @@ if (in_array(env('SERVER_NAME'), array('example.com', 'staging.example.com'))) {
 &lt;p&gt;Your &lt;code&gt;environments.php&lt;/code&gt; file would contain the following:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-CakePlugin::load('Environments');
-App::uses('Environment', 'Environments.Lib');
+CakePlugin::load(&#39;Environments&#39;);
+App::uses(&#39;Environment&#39;, &#39;Environments.Lib&#39;);
 
-include dirname(__FILE__) . DS . 'environments' . DS . 'production.php';
-include dirname(__FILE__) . DS . 'environments' . DS . 'staging.php';
-include dirname(__FILE__) . DS . 'environments' . DS . 'development.php';
+include dirname(__FILE__) . DS . &#39;environments&#39; . DS . &#39;production.php&#39;;
+include dirname(__FILE__) . DS . &#39;environments&#39; . DS . &#39;staging.php&#39;;
+include dirname(__FILE__) . DS . &#39;environments&#39; . DS . &#39;development.php&#39;;
 
 Environment::start();
 ?&amp;gt;
@@ -1729,26 +1729,26 @@ Environment::start();
 &lt;p&gt;An example &lt;code&gt;development.php&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-Environment::configure('development',
+Environment::configure(&#39;development&#39;,
   true, // Defaults to development
   array(
-    'Settings.FULL_BASE_URL'  =&amp;gt; 'http://example.dev',
+    &#39;Settings.FULL_BASE_URL&#39;  =&amp;gt; &#39;http://example.dev&#39;,
 
-    'Email.username'          =&amp;gt; 'email@example.com',
-    'Email.password'          =&amp;gt; 'password',
-    'Email.test'              =&amp;gt; 'email@example.com',
-    'Email.from'              =&amp;gt; 'email@example.com',
+    &#39;Email.username&#39;          =&amp;gt; &#39;email@example.com&#39;,
+    &#39;Email.password&#39;          =&amp;gt; &#39;password&#39;,
+    &#39;Email.test&#39;              =&amp;gt; &#39;email@example.com&#39;,
+    &#39;Email.from&#39;              =&amp;gt; &#39;email@example.com&#39;,
 
-    'logQueries'              =&amp;gt; true,
+    &#39;logQueries&#39;              =&amp;gt; true,
 
-    'debug'                   =&amp;gt; 2,
-    'Cache.disable'           =&amp;gt; true,
-    'Security.salt'           =&amp;gt; 'SALT',
-    'Security.cipherSeed'     =&amp;gt; 'CIPHERSEED',
+    &#39;debug&#39;                   =&amp;gt; 2,
+    &#39;Cache.disable&#39;           =&amp;gt; true,
+    &#39;Security.salt&#39;           =&amp;gt; &#39;SALT&#39;,
+    &#39;Security.cipherSeed&#39;     =&amp;gt; &#39;CIPHERSEED&#39;,
   ),
   function() {
-    if (!defined('FULL_BASE_URL')) {
-      define('FULL_BASE_URL', Configure::read('Settings.FULL_BASE_URL'));
+    if (!defined(&#39;FULL_BASE_URL&#39;)) {
+      define(&#39;FULL_BASE_URL&#39;, Configure::read(&#39;Settings.FULL_BASE_URL&#39;));
     }
   }
 );
@@ -1829,7 +1829,7 @@ export TEMP_PATH=/mnt
 
 &lt;p&gt;Next, lets enable it in our &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;echo -e &quot;\nApp::import('Vendor', array('file' =&amp;gt; 'autoload'));&quot; &amp;gt;&amp;gt; app/Config/bootstrap.php;
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;echo -e &quot;\nApp::import(&#39;Vendor&#39;, array(&#39;file&#39; =&amp;gt; &#39;autoload&#39;));&quot; &amp;gt;&amp;gt; app/Config/bootstrap.php;
 echo -e &quot;\nCakePlugin::loadAll();&quot; &amp;gt;&amp;gt; app/Config/bootstrap.php;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1849,7 +1849,7 @@ echo -e &quot;\nCakePlugin::loadAll();&quot; &amp;gt;&amp;gt; app/Config/bootstr
 &lt;p&gt;Create a file in the path &lt;code&gt;app/Console/Command/MigrationGeneratorShell.php&lt;/code&gt; with the following content:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('AppShell', 'Console/Command');
+App::uses(&#39;AppShell&#39;, &#39;Console/Command&#39;);
 class MigrationGeneratorShell extends AppShell {
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -1869,10 +1869,10 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
   public function getOptionParser() {
     $parser = parent::getOptionParser();
     return $parser-&amp;gt;description(
-        'The Migration shell.' .
-        '')
-      -&amp;gt;addSubcommand('Create', array(
-        'help' =&amp;gt; __('Create a migration file.')));
+        &#39;The Migration shell.&#39; .
+        &#39;&#39;)
+      -&amp;gt;addSubcommand(&#39;Create&#39;, array(
+        &#39;help&#39; =&amp;gt; __(&#39;Create a migration file.&#39;)));
   }
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -1892,17 +1892,17 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
   public function create() {
     $fileName = array_shift($this-&amp;gt;args);
-    if (preg_match('/^(add|remove)_.*_(?:to|from)_(.*)/', $fileName, $matches)) {
-      $method = '_' . $matches[1] . 'Fields';
+    if (preg_match(&#39;/^(add|remove)_.*_(?:to|from)_(.*)/&#39;, $fileName, $matches)) {
+      $method = &#39;_&#39; . $matches[1] . &#39;Fields&#39;;
       $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
-    } elseif (preg_match('/^(join)_(.*)_(?:with)_(.*)/', $fileName, $matches)) {
-      $method = '_createJoinTable';
+    } elseif (preg_match(&#39;/^(join)_(.*)_(?:with)_(.*)/&#39;, $fileName, $matches)) {
+      $method = &#39;_createJoinTable&#39;;
       $tables = array($matches[2], $matches[3]);
-    } elseif (preg_match('/^(create)_(.*)/', $fileName, $matches)) {
-      $method = '_createTable';
+    } elseif (preg_match(&#39;/^(create)_(.*)/&#39;, $fileName, $matches)) {
+      $method = &#39;_createTable&#39;;
       $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
-    } elseif (preg_match('/^(remove)_(.*)/', $fileName, $matches)) {
-      $method = '_dropTable';
+    } elseif (preg_match(&#39;/^(remove)_(.*)/&#39;, $fileName, $matches)) {
+      $method = &#39;_dropTable&#39;;
       $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
     }
   }
@@ -1916,48 +1916,48 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
     $fields = array();
     $indexes = array();
     foreach ($this-&amp;gt;args as $field) {
-      if (preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?/', $field, $matches)) {
+      if (preg_match(&#39;/^(\w*)(?::(\w*))?(?::(\w*))?/&#39;, $field, $matches)) {
         $fields[$matches[1]] = array(
-          'type' =&amp;gt; 'string',
-          'null' =&amp;gt; false,
-          'default' =&amp;gt; null,
-          'key' =&amp;gt; null,
+          &#39;type&#39; =&amp;gt; &#39;string&#39;,
+          &#39;null&#39; =&amp;gt; false,
+          &#39;default&#39; =&amp;gt; null,
+          &#39;key&#39; =&amp;gt; null,
         );
 
         if (empty($matches[2])) {
-          $fields[$matches[1]]['type'] = $matches[2];
+          $fields[$matches[1]][&#39;type&#39;] = $matches[2];
         }
         if (empty($matches[3])) {
-          $fields[$matches[1]]['key'] = $matches[3];
+          $fields[$matches[1]][&#39;key&#39;] = $matches[3];
         }
 
-        if (!in_array($fields[$matches[1]]['type'], $this-&amp;gt;_validTypes)) {
+        if (!in_array($fields[$matches[1]][&#39;type&#39;], $this-&amp;gt;_validTypes)) {
           switch ($matches[1]) {
-            case 'id':
-              $fields[$matches[1]]['type'] = 'integer';
+            case &#39;id&#39;:
+              $fields[$matches[1]][&#39;type&#39;] = &#39;integer&#39;;
               break;
-            case 'created':
-            case 'modified':
-            case 'updated':
-              $fields[$matches[1]]['type'] = 'datetime';
+            case &#39;created&#39;:
+            case &#39;modified&#39;:
+            case &#39;updated&#39;:
+              $fields[$matches[1]][&#39;type&#39;] = &#39;datetime&#39;;
               break;
             default:
-              $fields[$matches[1]]['type'] = 'string';
+              $fields[$matches[1]][&#39;type&#39;] = &#39;string&#39;;
           }
         }
 
-        switch ($fields[$matches[1]]['type']) {
-          case 'primary_key':
-            $indexes['PRIMARY'] = array('column' =&amp;gt; $matches[1], 'unique' =&amp;gt; 1);
-            $fields[$matches[1]]['key'] = 'primary';
-          case 'string':
-            $fields[$matches[1]]['length'] = 255;
+        switch ($fields[$matches[1]][&#39;type&#39;]) {
+          case &#39;primary_key&#39;:
+            $indexes[&#39;PRIMARY&#39;] = array(&#39;column&#39; =&amp;gt; $matches[1], &#39;unique&#39; =&amp;gt; 1);
+            $fields[$matches[1]][&#39;key&#39;] = &#39;primary&#39;;
+          case &#39;string&#39;:
+            $fields[$matches[1]][&#39;length&#39;] = 255;
             break;
-          case 'integer':
-            $fields[$matches[1]]['length'] = 11;
+          case &#39;integer&#39;:
+            $fields[$matches[1]][&#39;length&#39;] = 11;
             break;
-          case 'biginteger':
-            $fields[$matches[1]]['length'] = 20;
+          case &#39;biginteger&#39;:
+            $fields[$matches[1]][&#39;length&#39;] = 20;
             break;
           default:
             break;
@@ -1966,7 +1966,7 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
     }
 
     if (!empty($indexes)) {
-      $fields['indexes'] = $indexes;
+      $fields[&#39;indexes&#39;] = $indexes;
     }
     return $fields;
   }
@@ -1979,16 +1979,16 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
   protected function _createTable($table) {
     $fields = $this-&amp;gt;_getFields();
     return array(
-      'up' =&amp;gt; array('create_table' =&amp;gt; array($table =&amp;gt; $fields)),
-      'down' =&amp;gt; array('drop_table' =&amp;gt; array($table)),
+      &#39;up&#39; =&amp;gt; array(&#39;create_table&#39; =&amp;gt; array($table =&amp;gt; $fields)),
+      &#39;down&#39; =&amp;gt; array(&#39;drop_table&#39; =&amp;gt; array($table)),
     );
   }
 
   protected function _dropTable($table) {
-    $this-&amp;gt;out('The `down` step must be manually created');
+    $this-&amp;gt;out(&#39;The `down` step must be manually created&#39;);
     return array(
-      'up' =&amp;gt; array('drop_table' =&amp;gt; array($table)),
-      'down' =&amp;gt; array('create_table' =&amp;gt; array()),
+      &#39;up&#39; =&amp;gt; array(&#39;drop_table&#39; =&amp;gt; array($table)),
+      &#39;down&#39; =&amp;gt; array(&#39;create_table&#39; =&amp;gt; array()),
     );
   }
 
@@ -1997,14 +1997,14 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
     sort($tables);
 
     $defaults = array(
-      'type' =&amp;gt; 'integer',
-      'null' =&amp;gt; false,
-      'default' =&amp;gt; null,
-      'key' =&amp;gt; null,
+      &#39;type&#39; =&amp;gt; &#39;integer&#39;,
+      &#39;null&#39; =&amp;gt; false,
+      &#39;default&#39; =&amp;gt; null,
+      &#39;key&#39; =&amp;gt; null,
     );
     foreach ($tables as $i =&amp;gt; $table) {
       $tableName = Inflector::tableize(Inflector::pluralize($table));
-      $fieldName = Inflector::underscore(Inflector::singularize($tableName)) . '_id';
+      $fieldName = Inflector::underscore(Inflector::singularize($tableName)) . &#39;_id&#39;;
       $tables[$i] = $tableName;
       if (isset($fields[$fieldName])) {
         $fields[$fieldName] = array_merge($defaults, $fields[$fieldName]);
@@ -2013,27 +2013,27 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
       }
     }
 
-    $joinTable = implode('_', $tables);
+    $joinTable = implode(&#39;_&#39;, $tables);
     return array(
-      'up' =&amp;gt; array('create_table' =&amp;gt; array($joinTable =&amp;gt; $fields)),
-      'down' =&amp;gt; array('drop_table' =&amp;gt; array($joinTable)),
+      &#39;up&#39; =&amp;gt; array(&#39;create_table&#39; =&amp;gt; array($joinTable =&amp;gt; $fields)),
+      &#39;down&#39; =&amp;gt; array(&#39;drop_table&#39; =&amp;gt; array($joinTable)),
     );
   }
 
   protected function _addFields($table) {
     $fields = $this-&amp;gt;_getFields();
     return array(
-      'up' =&amp;gt; array('create_field' =&amp;gt; array($table =&amp;gt; $fields)),
-      'down' =&amp;gt; array('drop_field' =&amp;gt; array($table =&amp;gt; array_keys($fields))),
+      &#39;up&#39; =&amp;gt; array(&#39;create_field&#39; =&amp;gt; array($table =&amp;gt; $fields)),
+      &#39;down&#39; =&amp;gt; array(&#39;drop_field&#39; =&amp;gt; array($table =&amp;gt; array_keys($fields))),
     );
   }
 
   protected function _removeFields($table) {
-    $this-&amp;gt;out('The `down` step must be manually created');
+    $this-&amp;gt;out(&#39;The `down` step must be manually created&#39;);
     $fields = $this-&amp;gt;_getFields();
     return array(
-      'up' =&amp;gt; array('drop_field' =&amp;gt; array($table =&amp;gt; array_keys($fields))),
-      'down' =&amp;gt; array('create_field' =&amp;gt; array()),
+      &#39;up&#39; =&amp;gt; array(&#39;drop_field&#39; =&amp;gt; array($table =&amp;gt; array_keys($fields))),
+      &#39;down&#39; =&amp;gt; array(&#39;create_field&#39; =&amp;gt; array()),
     );
   }
 
@@ -2054,7 +2054,7 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
     extract($vars);
     ob_start();
     ob_implicit_flush(0);
-    include (dirname(__FILE__) . DS . 'Templates' . DS . $template . '.ctp');
+    include (dirname(__FILE__) . DS . &#39;Templates&#39; . DS . $template . &#39;.ctp&#39;);
     $content = ob_get_clean();
 
     return $content;
@@ -2068,13 +2068,13 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
     $class = Inflector::classify($fileName);
     $migration = $this-&amp;gt;$method($tables);
     $content = var_export($migration);
-    $this-&amp;gt;path = APP . 'Config' . DS . 'Migration' . DS;
+    $this-&amp;gt;path = APP . &#39;Config&#39; . DS . &#39;Migration&#39; . DS;
 
-    $version = gmdate('U');
-    $content = $this-&amp;gt;__generateTemplate('migration', array('name' =&amp;gt; $class, 'class' =&amp;gt; $class, 'migration' =&amp;gt; $content));
-    $path = $this-&amp;gt;path . $version . '_' . strtolower($fileName) . '.php';
+    $version = gmdate(&#39;U&#39;);
+    $content = $this-&amp;gt;__generateTemplate(&#39;migration&#39;, array(&#39;name&#39; =&amp;gt; $class, &#39;class&#39; =&amp;gt; $class, &#39;migration&#39; =&amp;gt; $content));
+    $path = $this-&amp;gt;path . $version . &#39;_&#39; . strtolower($fileName) . &#39;.php&#39;;
     $File = new File($path, true);
-    $this-&amp;gt;out('File created at ' . $path);
+    $this-&amp;gt;out(&#39;File created at &#39; . $path);
     return $File-&amp;gt;write($content);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;

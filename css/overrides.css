@@ -55,17 +55,17 @@ pre code {
   .type-post .entry-content .ditaa-figure {
     margin-bottom: 2em; }
 
-.series-note ul {
+.series-note ol {
   background: #FCFCFC;
   border: 1px solid #E0E0E0;
   color: #575757;
   display: block;
   float: none;
   font: inherit;
+  list-style-type: decimal;
   margin: 20px 0;
-  padding: 20px 30px; }
+  padding: 20px 30px 20px 50px; }
 .series-note li {
-  list-style-type: none;
   margin: 0; }
 .series-note p {
   background-color: #F3F3F3;
