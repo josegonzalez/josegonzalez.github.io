@@ -61,7 +61,7 @@ pre code {
   .ebook-outer .ebook-inner {
     background-color: rgba(192, 224, 235, 0.8);
     border-radius: 4px;
-    padding: 10px; }
+    padding: 15px; }
     .ebook-outer .ebook-inner h3 {
       text-align: center; }
     .ebook-outer .ebook-inner img {
@@ -87,7 +87,7 @@ pre code {
     text-shadow: 0 -1px #35490e;
     text-decoration: none;
     display: inline-block;
-    margin: 20px 0 0 0;
+    margin: 10px 0 0 0;
     padding: 7px 25px 7px 25px;
     border-radius: 5px;
     -webkit-border-radius: 5px;
