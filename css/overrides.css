@@ -185,6 +185,7 @@ pre code {
 .widget-area .widget.widget_search .twitter-typeahead {
   background: white url(/images/search-icon.png) 5px -16px no-repeat;
   background-size: 41px 44px;
+  margin-bottom: 28px;
   width: 90%; }
   .widget-area .widget.widget_search .twitter-typeahead .tt-hint {
     color: #999;
