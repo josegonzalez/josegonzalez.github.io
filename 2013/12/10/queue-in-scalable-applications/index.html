@@ -8,247 +8,177 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>CakeAdvent: Queue in scalable applications</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high" />
-		<meta name="keywords" content="cakephp, queuing, background-jobs" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="CakeAdvent: Queue in scalable applications" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/10/queue-in-scalable-applications/" />
-		<meta property="og:description" content="Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="CakeAdvent: Queue in scalable applications" />
-		<meta name="twitter:description" content="Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high" />
-
-		<link rel="alternate" type="application/rss+xml" title="Queue in scalable applications » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent: Queue in scalable applications</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2013/12/10/queue-in-scalable-applications/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high" />
+    <meta name="keywords" content="cakephp, queuing, background-jobs" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent: Queue in scalable applications" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2013/12/10/queue-in-scalable-applications/" />
+    <meta property="og:description" content="Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent: Queue in scalable applications" />
+    <meta name="twitter:description" content="Don't make your users wait on the server. Instead, move long-running computations to the background and keep your conversions high" />
+    <link rel="alternate" type="application/rss+xml" title="Queue in scalable applications » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Queue in scalable applications
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Queue in scalable applications!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
 <div class="series-note">
-
 <p>This entry is <strong>part 10</strong> of <strong>25</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
-
   <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
-
   <li>Part 3 - <a href="/2013/12/03/hacking-the-cakephp-dispatch-system/">Hacking the CakePHP Dispatch System</a></li>
-
   <li>Part 4 - <a href="/2013/12/04/interactive-command-line-repl/">Interactive command-line REPL for CakePHP</a></li>
-
   <li>Part 5 - <a href="/2013/12/05/objectifying-cakephp-2-0-applications/">Objectifying CakePHP 2.0 applications</a></li>
-
   <li>Part 6 - <a href="/2013/12/06/building-service-classes/">Building Service Classes</a></li>
-
   <li>Part 7 - <a href="/2013/12/07/a-quick-rundown-on-asset-compression/">A quick rundown on Asset Compression</a></li>
-
   <li>Part 8 - <a href="/2013/12/08/composing-your-applications-from-plugins/">Composing your applications from plugins</a></li>
-
   <li>Part 9 - <a href="/2013/12/09/simplifying-oauth-integration/">Simplifying OAuth integration</a></li>
-
   <li>Part 10 - Queue in scalable applications</li>
-
   <li>Part 11 - <a href="/2013/12/11/giving-the-gift-of-cakephp-to-the-community/">Giving the gift of CakePHP to the Community</a></li>
-
   <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
-
   <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
-
   <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
-
   <li>Part 15 - <a href="/2013/12/15/payment-processing-using-stripe/">Payment Processing using Stripe</a></li>
-
   <li>Part 16 - <a href="/2013/12/16/simpler-cakephp-events/">Simpler CakePHP Events</a></li>
-
   <li>Part 17 - <a href="/2013/12/17/deploy-all-the-things-with-bash/">Deploy ALL the things using simple Bash scripts</a></li>
-
   <li>Part 18 - <a href="/2013/12/18/cakephp-testing-102/">CakePHP Testing 102</a></li>
-
   <li>Part 19 - <a href="/2013/12/19/tackling-database-migrations/">Tackling database migrations with one neat trick</a></li>
-
   <li>Part 20 - <a href="/2013/12/20/application-environment-configuration/">Application Environment Configuration</a></li>
-
   <li>Part 21 - <a href="/2013/12/21/building-a-behavior-with-cakephp/">Building a Behavior with CakePHP</a></li>
-
   <li>Part 22 - <a href="/2013/12/22/deploying-a-cakephp-application-to-heroku/">Deploying a CakePHP application to Heroku</a></li>
-
   <li>Part 23 - <a href="/2013/12/23/application-wide-event-management/">Application-wide event management</a></li>
-
   <li>Part 24 - <a href="/2013/12/24/writing-slimmer-controllers/">Writing Slimmer Controllers</a></li>
-
   <li>Part 25 - <a href="/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/">Local Development Environment using Vagrant and Virtualbox</a></li>
 </ul>
-
 </div>
-
     <blockquote>
-<p>This tutorial assumes you are using the FriendsOfCake/app-template project with Composer. Please see <a href="http://josediazgonzalez.com/2013/12/08/composing-your-applications-from-plugins/">this post for more information</a>.</p>
+  <p>This tutorial assumes you are using the FriendsOfCake/app-template project with Composer. Please see <a href="http://josediazgonzalez.com/2013/12/08/composing-your-applications-from-plugins/">this post for more information</a>.</p>
 </blockquote>
-
 <p>One of the things I find developers doing - CakePHP and otherwise - is performing longer tasks when the user clicks a button. For example, in the application I work on, our main source of income depends upon inserting a record into a database table that is rapidly growing larger and slower. Boo. Our application could otherwise run off of a readonly database, and if we have to migrate our primary database, we are SOL.</p>
-
-<p>A better way would be to use a queuing system. Instead of inserting into this table, we would chuck a job into our queuing system. This would both allow us to run in a readonly state as well as ensure that database issues don&#39;t affect our ability to make money.</p>
-
+<p>A better way would be to use a queuing system. Instead of inserting into this table, we would chuck a job into our queuing system. This would both allow us to run in a readonly state as well as ensure that database issues don’t affect our ability to make money.</p>
 <p>Many CakePHP developers do something similar: creating image thumbnails at image upload time. That is one of the worst things you can do, as it can fail in many ways. Instead, lets use a queuing system.</p>
-
-<h2>Choosing a queue</h2>
-
-<h3>Datastores</h3>
-
+<h2 id="choosing-a-queue">Choosing a queue</h2>
+<h3 id="datastores">Datastores</h3>
 <p>One of the toughest parts of choosing a background job system is what the datastore will be. There are many datastores which a job system can be built upon:</p>
-
 <ul>
-<li>Redis</li>
-<li>SQL (MySQL, Postgres, etc.)</li>
-<li>RabbitMQ</li>
-<li>Riak</li>
-<li>Starling</li>
-<li>SQS</li>
-<li>Unix Pipes!</li>
+  <li>Redis</li>
+  <li>SQL (MySQL, Postgres, etc.)</li>
+  <li>RabbitMQ</li>
+  <li>Riak</li>
+  <li>Starling</li>
+  <li>SQS</li>
+  <li>Unix Pipes!</li>
 </ul>
-
 <p>Choosing the one that will best serve you has to do with any and all of the following:</p>
-
 <ul>
-<li>Your companies ability to run a new datastore</li>
-<li>Your familiarity with maintaining the system</li>
-<li>The ability of the system to perform to your specifications</li>
-<li>Acceptible failure modes</li>
-<li>Patterns you&#39;d like to implement in your system (1 payload =&gt; Multiple jobs etc.)</li>
+  <li>Your companies ability to run a new datastore</li>
+  <li>Your familiarity with maintaining the system</li>
+  <li>The ability of the system to perform to your specifications</li>
+  <li>Acceptible failure modes</li>
+  <li>Patterns you’d like to implement in your system (1 payload =&gt; Multiple jobs etc.)</li>
 </ul>
-
-<p>The easiest choice is using SQL, as you likely have a database available and it&#39;s trivial to implement job-locking semantics in code. In fact, I wrote a wrapper called <a href="https://github.com/josegonzalez/cakephp-cake-djjob">CakeDjjob</a> for such a system.</p>
-
-<p>Generally speaking, always choose the easiest system to install, maintain, and develop against. If that happens to be MySQL, worse things have happened. You&#39;ll live.</p>
-
+<p>The easiest choice is using SQL, as you likely have a database available and it’s trivial to implement job-locking semantics in code. In fact, I wrote a wrapper called <a href="https://github.com/josegonzalez/cakephp-cake-djjob">CakeDjjob</a> for such a system.</p>
+<p>Generally speaking, always choose the easiest system to install, maintain, and develop against. If that happens to be MySQL, worse things have happened. You’ll live.</p>
 <p>I advocate for a system similar to RabbitMQ if at all possible, and it is what I use in production.</p>
-
-<h3>Background Job Systems</h3>
-
+<h3 id="background-job-systems">Background Job Systems</h3>
 <p>Do you want a job system, or a message queue? That is the main question when choosing a setup. For example, you might implement a job system <em>on top of</em> a messaging queue, so you can think of a message queue as a super-set of a job system.</p>
-
 <p>RabbitMQ - and other 0MQ systems - all implement message queues (MQ stands for message queue). You send a message into the system, and that message is shipped through multiple exchanges, finally landing on workers. This gives a single message the ability to spawn multiple jobs related to that message, depending upon the routing key and exchange the job is published on. For example, updating a database record would kick of a <code>database_update</code> on the <code>db</code> exchange, which makes it through to the <code>update_api</code> and <code>regenerate_image</code> queues. This is very powerful, in that new job workers can be created without needing to publish any additional queues.</p>
-
-<p>Redis/MySQL/MongoDB based job systems typically implement a single message payload =&gt; single job run. It&#39;s much easier to understand this as it&#39;s more typical of job systems people have used. For example, DJJob implements this in MySQL:</p>
-
+<p>Redis/MySQL/MongoDB based job systems typically implement a single message payload =&gt; single job run. It’s much easier to understand this as it’s more typical of job systems people have used. For example, DJJob implements this in MySQL:</p>
 <ul>
-<li>Insert a job into the <code>jobs</code> table under the <code>database_update</code> queue</li>
-<li>Have a worker read the latest record in the <code>database_update</code> queue.</li>
-<li>Worker acquires a lock on the job</li>
-<li>Worker queues up an <code>update_api</code> and a <code>regenerate_image</code> job to their respective queues.</li>
-<li>Worker deletes the job when done, and starts reading for a new job</li>
+  <li>Insert a job into the <code>jobs</code> table under the <code>database_update</code> queue</li>
+  <li>Have a worker read the latest record in the <code>database_update</code> queue.</li>
+  <li>Worker acquires a lock on the job</li>
+  <li>Worker queues up an <code>update_api</code> and a <code>regenerate_image</code> job to their respective queues.</li>
+  <li>Worker deletes the job when done, and starts reading for a new job</li>
 </ul>
-
 <p>This system would obviously perform more work, but is simpler for a developer to understand. Resque - a job system originating in Rubyland that has since been re-implemented in PHP and CakePHP - implements a similar pattern.</p>
-
-<p>Personally, I&#39;d choose RabbitMQ and implement my own system on top of it, then Resque or Djjob if I didn&#39;t want to setup/maintain RabbitMQ.</p>
-
-<h2>Queuing in CakePHP</h2>
-
-<h3>The setup</h3>
-
-<p>Given the above, lets play with a simple example. We&#39;ll use <a href="https://github.com/josegonzalez/php-queuesadilla">php-queuesadilla</a>, a project that is under development and is intended to showcase how Queues might work in CakePHP. Install it in your <code>composer.json</code>:</p>
-
-<pre class="rainbow-code"><code data-language="php">&quot;josegonzalez/queuesadilla&quot;: &quot;dev-master&quot;</code></pre>
-
-<p>And run <code>composer update</code>. Because it is framework-agnostic, it will serve our purposes well. We&#39;re going to utilize MySQL as the backing store for this project, so you&#39;ll want to run the following create table statement:</p>
-
-<pre class="rainbow-code"><code data-language="sql">CREATE TABLE IF NOT EXISTS `jobs` (
+<p>Personally, I’d choose RabbitMQ and implement my own system on top of it, then Resque or Djjob if I didn’t want to setup/maintain RabbitMQ.</p>
+<h2 id="queuing-in-cakephp">Queuing in CakePHP</h2>
+<h3 id="the-setup">The setup</h3>
+<p>Given the above, lets play with a simple example. We’ll use <a href="https://github.com/josegonzalez/php-queuesadilla">php-queuesadilla</a>, a project that is under development and is intended to showcase how Queues might work in CakePHP. Install it in your <code>composer.json</code>:</p>
+<pre><code class="language-php">"josegonzalez/queuesadilla": "dev-master"
+</code></pre>
+<p>And run <code>composer update</code>. Because it is framework-agnostic, it will serve our purposes well. We’re going to utilize MySQL as the backing store for this project, so you’ll want to run the following create table statement:</p>
+<pre><code class="language-sql">CREATE TABLE IF NOT EXISTS `jobs` (
     `id` mediumint(20) NOT NULL AUTO_INCREMENT,
     `queue` char(32) NULL DEFAULT 'default',
     `data` mediumtext NULL DEFAULT '',
     `locked` tinyint(1) NULL DEFAULT 0,
     PRIMARY KEY (`id`),
     KEY `queue` (`queue`, `locked`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;</code></pre>
-
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+</code></pre>
 <blockquote>
-<p>The library actually supports Mysql, in-memory and Redis as backing queues, in case you wanted to follow along with a different backend.</p>
+  <p>The library actually supports Mysql, in-memory and Redis as backing queues, in case you wanted to follow along with a different backend.</p>
 </blockquote>
-
-<h3>Wrapping the Library</h3>
-
-<p>Assuming you have composer autoloading available in CakePHP, the only thing left is to setup some simple CakePHP integration. We&#39;ll create a <code>CakeQueuesadilla</code> class:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<h3 id="wrapping-the-library">Wrapping the Library</h3>
+<p>Assuming you have composer autoloading available in CakePHP, the only thing left is to setup some simple CakePHP integration. We’ll create a <code>CakeQueuesadilla</code> class:</p>
+<pre><code class="language-php">&lt;?php
 class CakeQueuesadilla {
   public $settings = null;
-
   protected $_baseConfig = array(
     'backend' =&gt; 'josegonzalez\\Queuesadilla\\Backend\\MemoryBackend',
     'queue' =&gt; 'default'
   );
-
   protected $_backend = null;
-
   protected $_queue = null;
-
   public function __construct() {
     $this-&gt;settings = array_merge(
       $this-&gt;_baseConfig,
       Configure::read('Queuesadilla.backend')
     );
   }
-
   public function backend() {
     if (!$this-&gt;_backend) {
       $backendClass = $this-&gt;settings['backend'];
@@ -256,24 +186,20 @@ class CakeQueuesadilla {
     }
     return $this-&gt;_backend;
   }
-
   public function queue() {
     if (!$this-&gt;_queue) {
       $this-&gt;_queue = new josegonzalez\Queuesadilla\Queue($this-&gt;backend());
     }
-
     return $this-&gt;_queue;
   }
-
   public function push($callable, $data, $queue = null) {
     return $this-&gt;queue()-&gt;push($callable, $data, $queue);
   }
 }
-?&gt;</code></pre>
-
-<p>The above class is a wrapper around the Queuesadilla library to make it easier to consume. We&#39;ll configure it in our <code>bootstrap.php</code> as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+?&gt;
+</code></pre>
+<p>The above class is a wrapper around the Queuesadilla library to make it easier to consume. We’ll configure it in our <code>bootstrap.php</code> as follows:</p>
+<pre><code class="language-php">&lt;?php
 Configure::write('Queuesadilla.backend', array(
   'backend' =&gt; 'josegonzalez\\Queuesadilla\\Backend\\MysqlBackend',
   'persistent' =&gt; true,
@@ -285,16 +211,13 @@ Configure::write('Queuesadilla.backend', array(
   'table' =&gt; 'jobs',
   'queue' =&gt; 'default'
 ));
-?&gt;</code></pre>
-
-<h3>Queuing a Job</h3>
-
+?&gt;
+</code></pre>
+<h3 id="queuing-a-job">Queuing a Job</h3>
 <p>Now we will want to create a job! Lets send an email as a job:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 // app/Lib/Job/EmailJob.php
 App::uses('CakeEmail', 'Network/Email');
-
 class EmailJob {
   public static function run($job) {
     $Email = new CakeEmail();
@@ -302,19 +225,17 @@ class EmailJob {
     $Email-&gt;to($job-&gt;data('to'));
     $Email-&gt;subject($job-&gt;data('subject'));
     if ($Email-&gt;send($job-&gt;data('message'))) {
-      print(&quot;Email Sent!&quot;);
+      print("Email Sent!");
     }
   }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>And to send the email in controller code, we would do the following:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 App::uses('CakeQueuesadilla', 'Lib');
 App::uses('AppController', 'Controller');
 class UsersController extends AppController {
-
   public function signup() {
     // signup logic
     $queuesadilla = new CakeQueuesadilla;
@@ -324,26 +245,21 @@ class UsersController extends AppController {
       'message' =&gt; 'Example message'
     ));
   }
-
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Hitting <code>http://example.com/users/signup</code> would queue up an email job like so:</p>
-
-<pre class="rainbow-code"><code data-language="text">mysql&gt; select * from jobs;
+<pre><code class="language-text">mysql&gt; select * from jobs;
 +----+---------+--------------------------------------------------------------------------------------------------------------------+--------+
 | id | queue   | data                                                                                                               | locked |
 +----+---------+--------------------------------------------------------------------------------------------------------------------+--------+
-|  1 | default | {&quot;class&quot;:&quot;EmailJob::run&quot;,&quot;vars&quot;:{&quot;to&quot;:&quot;user@example.com&quot;,&quot;subject&quot;:&quot;Example subject&quot;,&quot;message&quot;:&quot;Example message&quot;}} |      0 |
-+----+---------+--------------------------------------------------------------------------------------------------------------------+--------+</code></pre>
-
-<h3>Running Jobs</h3>
-
-<p>Now that we&#39;ve queued up the jobs, we&#39;ll want to run them. If we use the built-in runner, we&#39;ll have <code>Class Not Found</code> errors, so we should take care of that.</p>
-
+|  1 | default | {"class":"EmailJob::run","vars":{"to":"user@example.com","subject":"Example subject","message":"Example message"}} |      0 |
++----+---------+--------------------------------------------------------------------------------------------------------------------+--------+
+</code></pre>
+<h3 id="running-jobs">Running Jobs</h3>
+<p>Now that we’ve queued up the jobs, we’ll want to run them. If we use the built-in runner, we’ll have <code>Class Not Found</code> errors, so we should take care of that.</p>
 <p>Any wrapper we create for the job system should be aware of our jobs. In PHP, you can specify multiple autoloaders, and doing so is likely the best way to handle this. Add the following to your bootstrap:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 spl_autoload_register(function($class) {
   // Check for anything that ends in `Job`
   if (strstr($class, 'Job') !== false) {
@@ -351,173 +267,149 @@ spl_autoload_register(function($class) {
     require APP . 'Lib/Job' . DS . $class . '.php';
   }
 });
-?&gt;</code></pre>
-
-<p>We now need to add a way to run a worker. We&#39;ll place the following worker-generation code in our <code>CakeQueuesadilla</code> class:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+?&gt;
+</code></pre>
+<p>We now need to add a way to run a worker. We’ll place the following worker-generation code in our <code>CakeQueuesadilla</code> class:</p>
+<pre><code class="language-php">&lt;?php
 // ...
-
   public function worker($options = array()) {
     $options = array_merge(array(
       'max_iterations' =&gt; 5
     ), $options);
-
     $worker = new josegonzalez\Queuesadilla\Worker($this-&gt;backend(), $options);
     return $worker;
   }
-
-?&gt;</code></pre>
-
-<p>Next, we&#39;ll need a simple wrapper. We&#39;ll place this in <code>app/Console/queuesadilla</code>:</p>
-
-<pre class="rainbow-code"><code data-language="php">#!/usr/bin/php -q
+?&gt;
+</code></pre>
+<p>Next, we’ll need a simple wrapper. We’ll place this in <code>app/Console/queuesadilla</code>:</p>
+<pre><code class="language-php">#!/usr/bin/php -q
 &lt;?php
 $ds = DIRECTORY_SEPARATOR;
 $dispatcher = 'Cake' . $ds . 'Console' . $ds . 'ShellDispatcher.php';
 if (function_exists('ini_set')) {
   $root = dirname(dirname(dirname(__FILE__))) . $ds . 'vendor' . $ds . 'cakephp' . $ds . 'cakephp';
-
   // the following line differs from its sibling
   // /lib/Cake/Console/Templates/skel/Console/cake.php
   ini_set('include_path', $root . $ds . 'lib' . PATH_SEPARATOR . ini_get('include_path'));
 }
-
 if (!include $dispatcher) {
   trigger_error('Could not locate CakePHP core files.', E_USER_ERROR);
 }
-
 // We must define these constants so class loading works properly with Composer
 define('ROOT', dirname(dirname(dirname(__FILE__))));
 define('APP', dirname(dirname(__FILE__)) . $ds);
 define('APP_DIR', basename(dirname(dirname(__FILE__))));
-
 unset($paths, $path, $dispatcher, $root, $ds);
-
 class QueuesadillaDispatcher extends ShellDispatcher {
   public function __construct($args = array(), $bootstrap = true) {
     set_time_limit(0);
     $this-&gt;parseParams($args);
-
     if ($bootstrap) {
       $this-&gt;_initConstants();
       $this-&gt;_bootstrap();
     }
   }
-
   public static function run($argv) {
     $dispatcher = new QueuesadillaDispatcher($argv);
   }
 }
-
 QueuesadillaDispatcher::run($argv);
-
 App::uses('CakeQueuesadilla', 'Lib');
-
 $queuesadilla = new CakeQueuesadilla;
 $worker = $queuesadilla-&gt;worker();
 $worker-&gt;work();
-?&gt;</code></pre>
-
-<p>You&#39;ll recognize much of the above from the tutorial on using <code>Boris</code> as a CakePHP REPL. There are some minor changes for improved support with the <code>friendsofcake/app-template</code> project, but nothing too scary.</p>
-
+?&gt;
+</code></pre>
+<p>You’ll recognize much of the above from the tutorial on using <code>Boris</code> as a CakePHP REPL. There are some minor changes for improved support with the <code>friendsofcake/app-template</code> project, but nothing too scary.</p>
 <p>To start a worker, simply run <code>Console/queuesadilla</code>. It will run a worker on the default queue:</p>
-
-<pre class="rainbow-code"><code data-language="shell">[Mysql Worker] Starting worker, max iterations 5
+<pre><code class="language-bash">[Mysql Worker] Starting worker, max iterations 5
 Email Sent!
 [Mysql Worker] Success. Deleting job from queue.
 [Mysql Worker] No job!
 [Mysql Worker] No job!
 [Mysql Worker] No job!
 [Mysql Worker] No job!
-[Mysql Worker] Max iterations reached, exiting</code></pre>
-
+[Mysql Worker] Max iterations reached, exiting
+</code></pre>
 <p>Great success!</p>
-
-<h3>Why use jobs</h3>
-
+<h3 id="why-use-jobs">Why use jobs</h3>
 <p>You generally want to chuck long-running processes, or expensive calculations, into background jobs. They are useful for tasks that can be delayed or do not need an immediate response. Here are a few things I use them for in production at my day job:</p>
-
 <ul>
-<li>Delayed Email Sending</li>
-<li>FTP Upload Processing</li>
-<li>Push Notifications for iOS/Android</li>
-<li>Creating large files for partners</li>
-<li>Regenerating api entries</li>
+  <li>Delayed Email Sending</li>
+  <li>FTP Upload Processing</li>
+  <li>Push Notifications for iOS/Android</li>
+  <li>Creating large files for partners</li>
+  <li>Regenerating api entries</li>
 </ul>
-
-<p>While <code>Queuesadilla</code> isn&#39;t quite ready for primetime, it does show how effective a queuing system can be when used properly. Using a Job system can help reduce the load on your web servers and increase the responsiveness of your web application. Hopefully this blog post helps push you towards more scalable applications :).</p>
-
+<p>While <code>Queuesadilla</code> isn’t quite ready for primetime, it does show how effective a queuing system can be when used properly. Using a Job system can help reduce the load on your web servers and increase the responsiveness of your web application. Hopefully this blog post helps push you towards more scalable applications :).</p>
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2013/12/10/queue-in-scalable-applications/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-10 02:37:00 +0000">10 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/12/10/queue-in-scalable-applications/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/12/10/queue-in-scalable-applications/';
-				var disqus_title      = 'CakeAdvent: Queue in scalable applications';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2013/12/10/queue-in-scalable-applications/';
+        var disqus_url        = 'http://josediazgonzalez.com/2013/12/10/queue-in-scalable-applications/';
+        var disqus_title      = "CakeAdvent: Queue in scalable applications";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

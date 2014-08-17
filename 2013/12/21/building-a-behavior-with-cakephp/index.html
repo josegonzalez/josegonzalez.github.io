@@ -8,248 +8,187 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>CakeAdvent: Building a Behavior with CakePHP</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field" />
-		<meta name="keywords" content="cakephp, behaviors, testing, plugins" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="CakeAdvent: Building a Behavior with CakePHP" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/" />
-		<meta property="og:description" content="Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="CakeAdvent: Building a Behavior with CakePHP" />
-		<meta name="twitter:description" content="Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field" />
-
-		<link rel="alternate" type="application/rss+xml" title="Building a Behavior with CakePHP » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent: Building a Behavior with CakePHP</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field" />
+    <meta name="keywords" content="cakephp, behaviors, testing, plugins" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent: Building a Behavior with CakePHP" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/" />
+    <meta property="og:description" content="Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent: Building a Behavior with CakePHP" />
+    <meta name="twitter:description" content="Covering the creation of a plugin, writing Unit Tests, and creating a Behavior to handle a `deleted` field" />
+    <link rel="alternate" type="application/rss+xml" title="Building a Behavior with CakePHP » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Building a Behavior with CakePHP
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Building a Behavior with CakePHP!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
 <div class="series-note">
-
 <p>This entry is <strong>part 21</strong> of <strong>25</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
-
   <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
-
   <li>Part 3 - <a href="/2013/12/03/hacking-the-cakephp-dispatch-system/">Hacking the CakePHP Dispatch System</a></li>
-
   <li>Part 4 - <a href="/2013/12/04/interactive-command-line-repl/">Interactive command-line REPL for CakePHP</a></li>
-
   <li>Part 5 - <a href="/2013/12/05/objectifying-cakephp-2-0-applications/">Objectifying CakePHP 2.0 applications</a></li>
-
   <li>Part 6 - <a href="/2013/12/06/building-service-classes/">Building Service Classes</a></li>
-
   <li>Part 7 - <a href="/2013/12/07/a-quick-rundown-on-asset-compression/">A quick rundown on Asset Compression</a></li>
-
   <li>Part 8 - <a href="/2013/12/08/composing-your-applications-from-plugins/">Composing your applications from plugins</a></li>
-
   <li>Part 9 - <a href="/2013/12/09/simplifying-oauth-integration/">Simplifying OAuth integration</a></li>
-
   <li>Part 10 - <a href="/2013/12/10/queue-in-scalable-applications/">Queue in scalable applications</a></li>
-
   <li>Part 11 - <a href="/2013/12/11/giving-the-gift-of-cakephp-to-the-community/">Giving the gift of CakePHP to the Community</a></li>
-
   <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
-
   <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
-
   <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
-
   <li>Part 15 - <a href="/2013/12/15/payment-processing-using-stripe/">Payment Processing using Stripe</a></li>
-
   <li>Part 16 - <a href="/2013/12/16/simpler-cakephp-events/">Simpler CakePHP Events</a></li>
-
   <li>Part 17 - <a href="/2013/12/17/deploy-all-the-things-with-bash/">Deploy ALL the things using simple Bash scripts</a></li>
-
   <li>Part 18 - <a href="/2013/12/18/cakephp-testing-102/">CakePHP Testing 102</a></li>
-
   <li>Part 19 - <a href="/2013/12/19/tackling-database-migrations/">Tackling database migrations with one neat trick</a></li>
-
   <li>Part 20 - <a href="/2013/12/20/application-environment-configuration/">Application Environment Configuration</a></li>
-
   <li>Part 21 - Building a Behavior with CakePHP</li>
-
   <li>Part 22 - <a href="/2013/12/22/deploying-a-cakephp-application-to-heroku/">Deploying a CakePHP application to Heroku</a></li>
-
   <li>Part 23 - <a href="/2013/12/23/application-wide-event-management/">Application-wide event management</a></li>
-
   <li>Part 24 - <a href="/2013/12/24/writing-slimmer-controllers/">Writing Slimmer Controllers</a></li>
-
   <li>Part 25 - <a href="/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/">Local Development Environment using Vagrant and Virtualbox</a></li>
 </ul>
-
 </div>
-
-    <p>I&#39;ve been meaning to create a <code>deleted_at</code> behavior, and today we&#39;ll go over that.</p>
-
-<h2>Creating Plugin Scaffolding</h2>
-
+    <p>I’ve been meaning to create a <code>deleted_at</code> behavior, and today we’ll go over that.</p>
+<h2 id="creating-plugin-scaffolding">Creating Plugin Scaffolding</h2>
 <p>I normally place non-application code in a plugin. Most extensions to your core logic - behaviors, components, helpers - fall into this category. You can normally tell if it is pluginizable if you can imagine reusing the logic within the context of a CMS and an Issue Tracker :)</p>
-
 <p>Lets create the followin directory structure:</p>
-
-<pre class="rainbow-code"><code data-language="shell">cd path/to/app
-mkdir -p app/Plugin/DeletedAt/Model/Behavior</code></pre>
-
-<p>Next, we&#39;ll initialize our plugin as a git repository. We&#39;re doing this with the aim of having the plugin within hosted Packagist:</p>
-
-<pre class="rainbow-code"><code data-language="shell">cd app/Plugin/DeletedAt
+<pre><code class="language-bash">cd path/to/app
+mkdir -p app/Plugin/DeletedAt/Model/Behavior
+</code></pre>
+<p>Next, we’ll initialize our plugin as a git repository. We’re doing this with the aim of having the plugin within hosted Packagist:</p>
+<pre><code class="language-bash">cd app/Plugin/DeletedAt
 touch Model/Behavior/empty
 git init
 git add Model/Behavior/empty
-git commit -m &quot;Initial commit&quot;
-git push origin master</code></pre>
-
+git commit -m "Initial commit"
+git push origin master
+</code></pre>
 <blockquote>
-<p>The above assumes you created a repository on github to push your code to. Github is where <em>most</em> CakePHP code exists, and it would be beneficial to the community to continue to use a single type of version control+code repository. Obviously, you can and should change this according to your needs.</p>
+  <p>The above assumes you created a repository on github to push your code to. Github is where <em>most</em> CakePHP code exists, and it would be beneficial to the community to continue to use a single type of version control+code repository. Obviously, you can and should change this according to your needs.</p>
 </blockquote>
-
-<p>And now we&#39;ll make this a <a href="http://friendsofcake.com/">FriendsOfCake-approved</a> plugin using the steps from the <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">first CakeAdvent post</a>:</p>
-
-<pre class="rainbow-code"><code data-language="shell">cd path/to/app
+<p>And now we’ll make this a <a href="http://friendsofcake.com/">FriendsOfCake-approved</a> plugin using the steps from the <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">first CakeAdvent post</a>:</p>
+<pre><code class="language-bash">cd path/to/app
 git clone git@github.com:FriendsOfCake/travis.git vendor/travis
 export COPYRIGHT_YEAR=2013
-export GITHUB_USERNAME=&quot;josegonzalez&quot;
-export PLUGIN_PATH=&quot;Plugin/DeletedAt&quot;
-export PLUGIN_NAME=&quot;DeletedAt&quot;
-export REPO_NAME=&quot;cakephp-deleted-at&quot;
-export YOUR_NAME=&quot;Jose Diaz-Gonzalez&quot;
+export GITHUB_USERNAME="josegonzalez"
+export PLUGIN_PATH="Plugin/DeletedAt"
+export PLUGIN_NAME="DeletedAt"
+export REPO_NAME="cakephp-deleted-at"
+export YOUR_NAME="Jose Diaz-Gonzalez"
 ./vendor/travis/setup.sh
 rm -rf vendor/travis
 cd Plugin/DeletedAt
 git add .
-git commit -m &quot;FriendsOfCake support&quot;
-git push origin master</code></pre>
-
+git commit -m "FriendsOfCake support"
+git push origin master
+</code></pre>
 <p>At this point, you should be able to enable support for the plugin within TravisCI, Packagist, and Coveralls.</p>
-
-<h2>Creating a simple Behavior</h2>
-
-<p>We&#39;ll first need to create the proper files. We will have both a <code>DeletedAtBehavior.php</code> and a <code>DeletedAtBehaviorTest.php</code>. Lets do that:</p>
-
-<pre class="rainbow-code"><code data-language="shell">cd app/Plugin/DeletedAt
+<h2 id="creating-a-simple-behavior">Creating a simple Behavior</h2>
+<p>We’ll first need to create the proper files. We will have both a <code>DeletedAtBehavior.php</code> and a <code>DeletedAtBehaviorTest.php</code>. Lets do that:</p>
+<pre><code class="language-bash">cd app/Plugin/DeletedAt
 mkdir -p Test/Case/Model/Behavior
 touch Model/Behavior/DeletedAtBehavior.php
-touch Test/Case/Model/Behavior/DeletedAtBehaviorTest.php</code></pre>
-
+touch Test/Case/Model/Behavior/DeletedAtBehaviorTest.php
+</code></pre>
 <p>The initial contents of each are pretty simple:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 App::uses('ModelBehavior', 'Model');
 class DeletedAtBehavior extends ModelBehavior {
 }
-?&gt;</code></pre>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+?&gt;
+</code></pre>
+<pre><code class="language-php">&lt;?php
 App::uses('Model', 'Model');
 App::uses('AppModel', 'Model');
 require_once CAKE . 'Test' . DS . 'CASE' . DS . 'Model' . DS . 'models.php';
 class DeletedAtBehaviorTest extends CakeTestCase {
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Finally, lets enable our plugin so that we can run tests. Add the following to your <code>bootstrap.php</code>:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 CakePlugin::load('DeletedAt');
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Now lets run tests!</p>
-
-<pre class="rainbow-code"><code data-language="shell">cd path/to/app
-Console/cake test DeletedAt AllDeletedAt --stderr</code></pre>
-
+<pre><code class="language-bash">cd path/to/app
+Console/cake test DeletedAt AllDeletedAt --stderr
+</code></pre>
 <p>You should see exactly 1 failure. We have no tests! But this is good. We now have a barebones behavior, tests that properly fail, and a goal in mind: fully passing tests for our new <code>DeletedAt</code> behavior.</p>
-
 <p>Commit your changes and read the next section.</p>
-
-<h2>Writing tests</h2>
-
+<h2 id="writing-tests">Writing tests</h2>
 <p>For our behavior, we want to be able to:</p>
-
 <ul>
-<li>Mark records as <code>deleted_at</code> with a timestamp</li>
-<li>Un-delete records</li>
+  <li>Mark records as <code>deleted_at</code> with a timestamp</li>
+  <li>Un-delete records</li>
 </ul>
-
-<p>We&#39;ll store this state within a <code>deleted_at</code> field on the record. It will be of type <code>datetime</code>, and if it is null, then the record is not deleted, otherwise we know when it was soft-deleted.</p>
-
-<p>We&#39;ll need a fixture to represent our test model. We should create it using the following:</p>
-
-<pre class="rainbow-code"><code data-language="shell">cd app/Plugin/DeletedAt
+<p>We’ll store this state within a <code>deleted_at</code> field on the record. It will be of type <code>datetime</code>, and if it is null, then the record is not deleted, otherwise we know when it was soft-deleted.</p>
+<p>We’ll need a fixture to represent our test model. We should create it using the following:</p>
+<pre><code class="language-bash">cd app/Plugin/DeletedAt
 mkdir -p Test/Fixture
-touch Test/Fixture/DeletedUserFixture.php</code></pre>
-
+touch Test/Fixture/DeletedUserFixture.php
+</code></pre>
 <blockquote>
-<p>Fixture classes are used to mock out test schemas in the database. They are useful for testing both real-world cases - using the database schema of your production tables - as well as for test-scenarios - as we will use for our plugin.</p>
+  <p>Fixture classes are used to mock out test schemas in the database. They are useful for testing both real-world cases - using the database schema of your production tables - as well as for test-scenarios - as we will use for our plugin.</p>
 </blockquote>
-
-<p>Fixture classes require two class attributes: <code>$fields</code> and <code>$records</code>. The <code>$fields</code> attribute is used to define the schema for the mocked out table. The <code>$records</code> attribute is an array of records to insert into your database. The <code>$records</code> attribute should have values specified for each field in <code>$fields</code>, otherwise the behavior would be unknown. We&#39;ll use the following for our fixture:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<p>Fixture classes require two class attributes: <code>$fields</code> and <code>$records</code>. The <code>$fields</code> attribute is used to define the schema for the mocked out table. The <code>$records</code> attribute is an array of records to insert into your database. The <code>$records</code> attribute should have values specified for each field in <code>$fields</code>, otherwise the behavior would be unknown. We’ll use the following for our fixture:</p>
+<pre><code class="language-php">&lt;?php
 App::uses('CakeTestFixture', 'TestSuite/Fixture');
 class DeletedUserFixture extends CakeTestFixture {
-
   public $fields = array(
     'id' =&gt; array('type' =&gt; 'integer', 'key' =&gt; 'primary'),
     'user' =&gt; array('type' =&gt; 'string', 'null' =&gt; true),
@@ -258,315 +197,267 @@ class DeletedUserFixture extends CakeTestFixture {
     'updated' =&gt; 'datetime',
     'deleted' =&gt; array('type' =&gt; 'datetime', 'null' =&gt; true),
   );
-
   public $records = array(
     array('user' =&gt; 'mariano', 'password' =&gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&gt; '2007-03-17 01:16:23', 'updated' =&gt; '2007-03-17 01:18:31', 'deleted' =&gt; '2007-03-18 10:45:31'),
     array('user' =&gt; 'nate', 'password' =&gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&gt; '2007-03-17 01:18:23', 'updated' =&gt; '2007-03-17 01:20:31', 'deleted' =&gt; null),
     array('user' =&gt; 'larry', 'password' =&gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&gt; '2007-03-17 01:20:23', 'updated' =&gt; '2007-03-17 01:22:31', 'deleted' =&gt; null),
   );
-
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Now lets write a test just for our sanity. We need to prepare our test class with the following:</p>
-
 <ul>
-<li>A <code>$fixtures</code> property to notify PHPUnit as to what fixtures to load for our tests</li>
-<li>A <code>setUp()</code> method to execute before each test. We&#39;ll setup our model here.</li>
-<li>A <code>tearDown()</code> method to execute after each test. We&#39;ll destroy our model here to ensure the next test case has a clean environment.</li>
+  <li>A <code>$fixtures</code> property to notify PHPUnit as to what fixtures to load for our tests</li>
+  <li>A <code>setUp()</code> method to execute before each test. We’ll setup our model here.</li>
+  <li>A <code>tearDown()</code> method to execute after each test. We’ll destroy our model here to ensure the next test case has a clean environment.</li>
 </ul>
-
-<p>I&#39;ve taken the liberty of writing these for you, and you can copy the following into your <code>DeletedAtBehavior</code> test file:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<p>I’ve taken the liberty of writing these for you, and you can copy the following into your <code>DeletedAtBehavior</code> test file:</p>
+<pre><code class="language-php">&lt;?php
   public $fixtures = array(
     'plugin.deleted_at.deleted_user'
   );
-
   public function setUp() {
     parent::setUp();
     $this-&gt;DeletedUser = ClassRegistry::init('User');
     $this-&gt;DeletedUser-&gt;useTable = 'deleted_users';
     $this-&gt;DeletedUser-&gt;Behaviors-&gt;load('DeletedAt.DeletedAt');
   }
-
   public function tearDown() {
     unset($this-&gt;DeletedUser);
     parent::tearDown();
   }
-?&gt;</code></pre>
-
-<p>Now lets add a test. We&#39;ll find all <code>deleted</code> and <code>non-deleted</code> records:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+?&gt;
+</code></pre>
+<p>Now lets add a test. We’ll find all <code>deleted</code> and <code>non-deleted</code> records:</p>
+<pre><code class="language-php">&lt;?php
   public function testFindDeleted() {
     $records = $this-&gt;DeletedUser-&gt;find('all', array(
       'conditions' =&gt; array('deleted &lt;&gt;' =&gt; null)
     ));
     $this-&gt;assertEqual(1, count($records));
   }
-
   public function testFindNonDeleted() {
     $records = $this-&gt;DeletedUser-&gt;find('all', array(
       'conditions' =&gt; array('deleted' =&gt; null)
     ));
     $this-&gt;assertEqual(2, count($records));
   }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Running <code>Console/cake test DeletedAt AllDeletedAt --stderr</code> should give you a single passing test! Yay! Now lets write some real model code.</p>
-
-<h2>Custom Finds</h2>
-
-<p>To simplify our logic, we will not be overriding the build-in <code>Model::delete()</code> method. Instead, we&#39;ll do the following:</p>
-
+<h2 id="custom-finds">Custom Finds</h2>
+<p>To simplify our logic, we will not be overriding the build-in <code>Model::delete()</code> method. Instead, we’ll do the following:</p>
 <ul>
-<li>Add a custom finder to find deleted and non-deleted records</li>
-<li>Add a custom method to softdelete and un-softdelete records</li>
+  <li>Add a custom finder to find deleted and non-deleted records</li>
+  <li>Add a custom method to softdelete and un-softdelete records</li>
 </ul>
-
 <p>Here is some code to handle custom finds in a behavior. It comes from my earlier post on <a href="/2010/12/01/embedding-custom-finds-in-behaviors/">embedding custom finds within behaviors</a>, with relevant updates for 2.x.</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
   public $mapMethods = array(
     '/findDeleted/' =&gt; 'findDeleted',
     '/findNon_deleted/' =&gt; 'findNonDeleted',
   );
-
   public function setup(Model $model, $config = array()) {
       $model-&gt;_findMethods['deleted'] = true;
       $model-&gt;_findMethods['non_deleted'] = true;
   }
-
   public function findDeleted(&amp;$model, $functionCall, $state, $query, $results = array()) {
       if ($state == 'before') {
         if (empty($query['conditions'])) {
           $query['conditions'] = array();
         }
-        $query['conditions'][&quot;{$model-&gt;alias}.deleted &lt;&gt;&quot;] = null;
+        $query['conditions']["{$model-&gt;alias}.deleted &lt;&gt;"] = null;
         return $query;
       }
       return $results;
   }
-
   public function findNonDeleted(&amp;$model, $functionCall, $state, $query, $results = array()) {
       if ($state == 'before') {
         if (empty($query['conditions'])) {
           $query['conditions'] = array();
         }
-        $query['conditions'][&quot;{$model-&gt;alias}.deleted&quot;] = null;
+        $query['conditions']["{$model-&gt;alias}.deleted"] = null;
         return $query;
       }
       return $results;
   }
-?&gt;</code></pre>
-
-<p>Now that we have our custom finds in place, let&#39;s modify our tests to use them:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+?&gt;
+</code></pre>
+<p>Now that we have our custom finds in place, let’s modify our tests to use them:</p>
+<pre><code class="language-php">&lt;?php
   public function testFindDeleted() {
     $records = $this-&gt;DeletedUser-&gt;find('deleted');
     $this-&gt;assertEqual(1, count($records));
   }
-
   public function testFindNonDeleted() {
     $records = $this-&gt;DeletedUser-&gt;find('non_deleted');
     $this-&gt;assertEqual(2, count($records));
   }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Running <code>Console/cake test DeletedAt AllDeletedAt --stderr</code> should give us two passing tests!</p>
-
-<h2>Deleting records</h2>
-
-<p>Now we&#39;ll add two custom methods. Create the following tests:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<h2 id="deleting-records">Deleting records</h2>
+<p>Now we’ll add two custom methods. Create the following tests:</p>
+<pre><code class="language-php">&lt;?php
   public function testSoftdelete() {
     $this-&gt;DeletedUser-&gt;softdelete(1);
     $deleted = $this-&gt;DeletedUser-&gt;find('deleted');
     $nonDeleted = $this-&gt;DeletedUser-&gt;find('non_deleted');
     $this-&gt;assertEqual(1, count($deleted));
     $this-&gt;assertEqual(2, count($nonDeleted));
-
     $this-&gt;DeletedUser-&gt;softdelete(2);
     $deleted = $this-&gt;DeletedUser-&gt;find('deleted');
     $nonDeleted = $this-&gt;DeletedUser-&gt;find('non_deleted');
     $this-&gt;assertEqual(2, count($deleted));
     $this-&gt;assertEqual(1, count($nonDeleted));
-
     $this-&gt;DeletedUser-&gt;softdelete(3);
     $deleted = $this-&gt;DeletedUser-&gt;find('deleted');
     $nonDeleted = $this-&gt;DeletedUser-&gt;find('non_deleted');
     $this-&gt;assertEqual(3, count($deleted));
     $this-&gt;assertEqual(0, count($nonDeleted));
   }
-
   public function testUnDelete() {
     $this-&gt;DeletedUser-&gt;undelete(3);
     $deleted = $this-&gt;DeletedUser-&gt;find('deleted');
     $nonDeleted = $this-&gt;DeletedUser-&gt;find('non_deleted');
     $this-&gt;assertEqual(1, count($deleted));
     $this-&gt;assertEqual(2, count($nonDeleted));
-
     $this-&gt;DeletedUser-&gt;undelete(2);
     $deleted = $this-&gt;DeletedUser-&gt;find('deleted');
     $nonDeleted = $this-&gt;DeletedUser-&gt;find('non_deleted');
     $this-&gt;assertEqual(1, count($deleted));
     $this-&gt;assertEqual(2, count($nonDeleted));
-
     $this-&gt;DeletedUser-&gt;undelete(1);
     $deleted = $this-&gt;DeletedUser-&gt;find('deleted');
     $nonDeleted = $this-&gt;DeletedUser-&gt;find('non_deleted');
     $this-&gt;assertEqual(0, count($deleted));
     $this-&gt;assertEqual(3, count($nonDeleted));
   }
-?&gt;</code></pre>
-
-<p>Running tests now should give you two successes - our previous tests - and two failures - the new tests. The new tests fail because CakePHP will map <code>undelete</code> and <code>softdelete</code> to database methods if they don&#39;t exist - which is useful in some cases, but in our case, we&#39;ll implement the methods.</p>
-
+?&gt;
+</code></pre>
+<p>Running tests now should give you two successes - our previous tests - and two failures - the new tests. The new tests fail because CakePHP will map <code>undelete</code> and <code>softdelete</code> to database methods if they don’t exist - which is useful in some cases, but in our case, we’ll implement the methods.</p>
 <p>The logic for these methods is below. Feel free to extend them to your hearts content:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
   public function softdelete(Model $model, $id = null) {
     if ($id) {
       $model-&gt;id = $id;
     }
-
     if (!$model-&gt;id) {
       return false;
     }
-
     $deleteCol = 'deleted';
     if (!$model-&gt;hasField($deleteCol)) {
       return false;
     }
-
     $db = $model-&gt;getDataSource();
     $now = time();
-
     $default = array('formatter' =&gt; 'date');
     $colType = array_merge($default, $db-&gt;columns[$model-&gt;getColumnType($deleteCol)]);
-
     $time = $now;
     if (array_key_exists('format', $colType)) {
       $time = call_user_func($colType['formatter'], $colType['format']);
     }
-
     if (!empty($model-&gt;whitelist)) {
       $model-&gt;whitelist[] = $deleteCol;
     }
     $model-&gt;set($deleteCol, $time);
     return $model-&gt;saveField($deleteCol, $time);
   }
-
   public function undelete(Model $model, $id = null) {
     if ($id) {
       $model-&gt;id = $id;
     }
-
     if (!$model-&gt;id) {
       return false;
     }
-
     $deleteCol = 'deleted';
     if (!$model-&gt;hasField($deleteCol)) {
       return false;
     }
-
     $model-&gt;set($deleteCol, null);
     return $model-&gt;saveField($deleteCol, null);
   }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Now lets run tests using <code>Console/cake test DeletedAt AllDeletedAt --stderr</code>. You should get the following output:</p>
-
-<p><img src="http://cl.ly/image/1T010S2J390f/Screen%20Shot%202013-12-21%20at%205.03.38%20PM.png" alt="http://cl.ly/image/1T010S2J390f"></p>
-
-<p>Commit your changes and push to github. We&#39;re done!</p>
-
-<h2>Going Further</h2>
-
+<p><img src="http://cl.ly/image/1T010S2J390f/Screen%20Shot%202013-12-21%20at%205.03.38%20PM.png" alt="http://cl.ly/image/1T010S2J390f" /></p>
+<p>Commit your changes and push to github. We’re done!</p>
+<h2 id="going-further">Going Further</h2>
 <p>Any of the following things would be cool to see:</p>
-
 <ul>
-<li>Moving the softdeletion code to <code>Model::delete()</code> and having two consecutive <code>delete()</code> calls actually delete the record</li>
-<li>Configuration for the <code>deleted</code> column.</li>
-<li>Tracking deletion state over time within a different table.</li>
+  <li>Moving the softdeletion code to <code>Model::delete()</code> and having two consecutive <code>delete()</code> calls actually delete the record</li>
+  <li>Configuration for the <code>deleted</code> column.</li>
+  <li>Tracking deletion state over time within a different table.</li>
 </ul>
-
 <p>Of course, you are free to continue with this plugin as you wish! Hopefully the above post clarified some things regarding writing testable CakePHP code, creating plugins, and using/abusing Behaviors within CakePHP.</p>
-
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-21 14:52:00 +0000">21 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/12/21/building-a-behavior-with-cakephp/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/';
-				var disqus_title      = 'CakeAdvent: Building a Behavior with CakePHP';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2013/12/21/building-a-behavior-with-cakephp/';
+        var disqus_url        = 'http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/';
+        var disqus_title      = "CakeAdvent: Building a Behavior with CakePHP";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

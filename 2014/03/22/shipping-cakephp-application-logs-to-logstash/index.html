@@ -8,84 +8,72 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>Shipping CakePHP App Logs to Logstash via Syslog</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="If you've never written a CakePHP Logger, here is a simple post on how to do so" />
-		<meta name="keywords" content="cakephp, logging, logstash" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="Shipping CakePHP App Logs to Logstash via Syslog" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/" />
-		<meta property="og:description" content="If you've never written a CakePHP Logger, here is a simple post on how to do so" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="Shipping CakePHP App Logs to Logstash via Syslog" />
-		<meta name="twitter:description" content="If you've never written a CakePHP Logger, here is a simple post on how to do so" />
-
-		<link rel="alternate" type="application/rss+xml" title="Shipping CakePHP App Logs to Logstash via Syslog » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Shipping CakePHP App Logs to Logstash via Syslog</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="If you've never written a CakePHP Logger, here is a simple post on how to do so" />
+    <meta name="keywords" content="cakephp, logging, logstash" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Shipping CakePHP App Logs to Logstash via Syslog" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/" />
+    <meta property="og:description" content="If you've never written a CakePHP Logger, here is a simple post on how to do so" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Shipping CakePHP App Logs to Logstash via Syslog" />
+    <meta name="twitter:description" content="If you've never written a CakePHP Logger, here is a simple post on how to do so" />
+    <link rel="alternate" type="application/rss+xml" title="Shipping CakePHP App Logs to Logstash via Syslog » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Shipping CakePHP App Logs to Logstash via Syslog
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Shipping CakePHP App Logs to Logstash via Syslog!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
-    <p>Writing a logger for CakePHP isn&#39;t very difficult. The work lies in implementing the <code>CakeLogInterface</code>, which requires that you implement a <code>write</code> method as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+    <p>Writing a logger for CakePHP isn’t very difficult. The work lies in implementing the <code>CakeLogInterface</code>, which requires that you implement a <code>write</code> method as follows:</p>
+<pre><code class="language-php">&lt;?php
 App::uses('BaseLog', 'Log/Engine');
 class LogstashLog extends BaseLog
 {
@@ -94,27 +82,23 @@ class LogstashLog extends BaseLog
         // write to some output.
     }
 }
-?&gt;</code></pre>
-
-<p>The above class can go into <code>app/Lib/Log/Engine/LogstashLog.php</code>. Once you&#39;ve implemented the interface - and I recommend you do so by extending BaseLog - you may want to actually write the logs to some location. In our case, we want to ship these logs to <code>Logstash</code>, a log processing tool that can take logs and decompose them into useful information.</p>
-
-<p>At the very base, log messages should have some context about the logs - specifically a timestamp. Rather than invent our own format, we&#39;ll use <a href="http://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a>, which Logstash can handle natively. We can represent this using the following bit of code:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+?&gt;
+</code></pre>
+<p>The above class can go into <code>app/Lib/Log/Engine/LogstashLog.php</code>. Once you’ve implemented the interface - and I recommend you do so by extending BaseLog - you may want to actually write the logs to some location. In our case, we want to ship these logs to <code>Logstash</code>, a log processing tool that can take logs and decompose them into useful information.</p>
+<p>At the very base, log messages should have some context about the logs - specifically a timestamp. Rather than invent our own format, we’ll use <a href="http://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a>, which Logstash can handle natively. We can represent this using the following bit of code:</p>
+<pre><code class="language-php">&lt;?php
 $format = 'Y-m-d\TH:i:s.uP';
 echo date($format); // ISO-8601 compliant datetime
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Logstash also represents message as <code>json</code> in a specific format. Pre-formatting our log messages would allow Logstash to skip any regular expression parsing of our log messages. The following is the current format:</p>
-
-<pre class="rainbow-code"><code data-language="javascript">{
-    &quot;@timestamp&quot;: &quot;2012-12-18T01:01:46.092538Z&quot;,
-    &quot;@version&quot;: 1,
-}</code></pre>
-
+<pre><code class="language-javascript">{
+    "@timestamp": "2012-12-18T01:01:46.092538Z",
+    "@version": 1,
+}
+</code></pre>
 <p>All other fields are optional, and therefore our <code>LogstashLog</code> would look as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 App::uses('BaseLog', 'Log/Engine');
 class LogstashLog extends BaseLog
 {
@@ -130,24 +114,20 @@ class LogstashLog extends BaseLog
         // write to some output.
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>We can use <code>syslog</code> to ship our logs. PHP defines the following three methods to interface with <code>syslog</code>, and I recommend reading up on them:</p>
-
 <ul>
-<li><code>openlog</code>: opens a connection to the system logger for a program</li>
-<li><code>syslog</code>: generates a log message that will be distributed by the system logger</li>
-<li><code>closelog</code>: closes the descriptor being used to write to the system logger</li>
+  <li><code>openlog</code>: opens a connection to the system logger for a program</li>
+  <li><code>syslog</code>: generates a log message that will be distributed by the system logger</li>
+  <li><code>closelog</code>: closes the descriptor being used to write to the system logger</li>
 </ul>
-
 <p>Adding in <code>syslog</code> support will change our logger as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 App::uses('BaseLog', 'Log/Engine');
 class LogstashLog extends BaseLog
 {
     protected $format = 'Y-m-d\TH:i:s.uP';
-
     protected $logLevels = [
         'emergency' =&gt; LOG_EMERG,
         'alert' =&gt; LOG_ALERT,
@@ -158,7 +138,6 @@ class LogstashLog extends BaseLog
         'info' =&gt; LOG_INFO,
         'debug' =&gt; LOG_DEBUG,
     ];
-
     public function write($type, $message)
     {
         $data = [
@@ -167,51 +146,42 @@ class LogstashLog extends BaseLog
             'message' =&gt; $message,
             'tags' =&gt; [$type],
         ];
-
         if (!openlog('app', LOG_PID, LOG_USER)) {
             // Handle your logging error...
             return;
         }
-
         syslog($this-&gt;logLevels[$type], json_encode($data));
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>What if we wanted to include extra metadata? Well, we can modify our <code>write</code> method to allow <code>$message</code> to be an array as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">public function write($type, $message)
+<pre><code class="language-php">public function write($type, $message)
 {
     $message = is_array($message) ? $message : compact('message');
     $data = array_merge(array(
         '@timestamp' =&gt; date($this-&gt;format),
         '@version' =&gt; 1,
     ), $message);
-
     if (isset($data['tags'])) {
         $data['tags'][] = $type;
     } else {
         $data['tags'] = [$type];
     }
-
     if (!openlog('app', LOG_PID, LOG_USER)) {
         // Handle your logging error...
         return;
     }
-
     syslog($this-&gt;logLevels[$type], json_encode($data));
-}</code></pre>
-
-<p>We never want to drop logs, so we&#39;ll fallback to using <code>FileLog</code> as our parent class. When <code>openlog</code> returns false, we&#39;ll simply call <code>return parent::write($type, json_ecode($message));</code>. We can then later go back with a different log shipper and reprocess anything that couldn&#39;t be shipped to Logstash.</p>
-
+}
+</code></pre>
+<p>We never want to drop logs, so we’ll fallback to using <code>FileLog</code> as our parent class. When <code>openlog</code> returns false, we’ll simply call <code>return parent::write($type, json_ecode($message));</code>. We can then later go back with a different log shipper and reprocess anything that couldn’t be shipped to Logstash.</p>
 <p>Here is what our log engine will look like at the end of the day:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 App::uses('FileLog', 'Log');
 class LogstashLog extends FileLog
 {
     protected $format = 'Y-m-d\TH:i:s.uP';
-
     protected $logLevels = [
         'emergency' =&gt; LOG_EMERG,
         'alert' =&gt; LOG_ALERT,
@@ -222,7 +192,6 @@ class LogstashLog extends FileLog
         'info' =&gt; LOG_INFO,
         'debug' =&gt; LOG_DEBUG,
     ];
-
     public function write($type, $message)
     {
         $message = is_array($message) ? $message : compact('message');
@@ -230,25 +199,21 @@ class LogstashLog extends FileLog
             '@timestamp' =&gt; date($this-&gt;format),
             '@version' =&gt; 1,
         ), $message);
-
         if (isset($data['tags'])) {
             $data['tags'][] = $type;
         } else {
             $data['tags'] = [$type];
         }
-
         if (!openlog('app', LOG_PID, LOG_USER)) {
             return parent::write($type, json_ecode($data));
         }
-
         return syslog($this-&gt;logLevels[$type], json_encode($data));
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>We can now configure our custom logging engine the same way we would any other logging engine:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 // in our app/Config/bootstrap.php
 App::uses('CakeLog', 'Log');
 CakeLog::config('debug', [
@@ -261,82 +226,78 @@ CakeLog::config('error', [
     'types' =&gt; ['warning', 'error', 'critical', 'alert', 'emergency'],
     'file' =&gt; 'error',
 ]);
-?&gt;</code></pre>
-
-<p>You&#39;ll notice that we included some extra configuration information. This is primarily used for routing messages - we could in theory create a <code>Null</code> engine and use that for <code>debug</code> messages - though we also specify a <code>file</code> so that the parent <code>FileLog</code> class is properly configured.</p>
-
+?&gt;
+</code></pre>
+<p>You’ll notice that we included some extra configuration information. This is primarily used for routing messages - we could in theory create a <code>Null</code> engine and use that for <code>debug</code> messages - though we also specify a <code>file</code> so that the parent <code>FileLog</code> class is properly configured.</p>
 <p>Creating custom logging engines is quite simple with CakePHP, and it would be easy to extend this system to have log handlers and formatters.</p>
-
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-03-22 06:28:00 +0000">22 Mar 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2014/03/22/shipping-cakephp-application-logs-to-logstash/';
-				var disqus_url        = 'http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/';
-				var disqus_title      = 'Shipping CakePHP App Logs to Logstash via Syslog';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2014/03/22/shipping-cakephp-application-logs-to-logstash/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/';
+        var disqus_title      = "Shipping CakePHP App Logs to Logstash via Syslog";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

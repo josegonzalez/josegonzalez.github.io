@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
   <url>
       <loc>http://josediazgonzalez.com/about/</loc>
       <lastmod>2014-05-19</lastmod>
   </url>
-
   <url>
       <loc>http://josediazgonzalez.com/cakephp-book/</loc>
       <lastmod>2014-08-16</lastmod>
   </url>
-
   <url>
       <loc>http://josediazgonzalez.com/hire-me/</loc>
       <lastmod>2014-05-19</lastmod>
   </url>
+
 
   <url>
       <loc>http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/</loc>
@@ -353,3 +351,4 @@
 
 
 </urlset>
+

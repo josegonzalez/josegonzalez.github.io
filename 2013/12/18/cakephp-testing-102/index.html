@@ -8,170 +8,124 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>CakeAdvent: CakePHP Testing 102</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="Some personal thoughts on testing your CakePHP code to get maximum efficiency" />
-		<meta name="keywords" content="cakephp, testing" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="CakeAdvent: CakePHP Testing 102" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/18/cakephp-testing-102/" />
-		<meta property="og:description" content="Some personal thoughts on testing your CakePHP code to get maximum efficiency" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="CakeAdvent: CakePHP Testing 102" />
-		<meta name="twitter:description" content="Some personal thoughts on testing your CakePHP code to get maximum efficiency" />
-
-		<link rel="alternate" type="application/rss+xml" title="CakePHP Testing 102 » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent: CakePHP Testing 102</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2013/12/18/cakephp-testing-102/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Some personal thoughts on testing your CakePHP code to get maximum efficiency" />
+    <meta name="keywords" content="cakephp, testing" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent: CakePHP Testing 102" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2013/12/18/cakephp-testing-102/" />
+    <meta property="og:description" content="Some personal thoughts on testing your CakePHP code to get maximum efficiency" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent: CakePHP Testing 102" />
+    <meta name="twitter:description" content="Some personal thoughts on testing your CakePHP code to get maximum efficiency" />
+    <link rel="alternate" type="application/rss+xml" title="CakePHP Testing 102 » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         CakePHP Testing 102
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on CakePHP Testing 102!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
 <div class="series-note">
-
 <p>This entry is <strong>part 18</strong> of <strong>25</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
-
   <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
-
   <li>Part 3 - <a href="/2013/12/03/hacking-the-cakephp-dispatch-system/">Hacking the CakePHP Dispatch System</a></li>
-
   <li>Part 4 - <a href="/2013/12/04/interactive-command-line-repl/">Interactive command-line REPL for CakePHP</a></li>
-
   <li>Part 5 - <a href="/2013/12/05/objectifying-cakephp-2-0-applications/">Objectifying CakePHP 2.0 applications</a></li>
-
   <li>Part 6 - <a href="/2013/12/06/building-service-classes/">Building Service Classes</a></li>
-
   <li>Part 7 - <a href="/2013/12/07/a-quick-rundown-on-asset-compression/">A quick rundown on Asset Compression</a></li>
-
   <li>Part 8 - <a href="/2013/12/08/composing-your-applications-from-plugins/">Composing your applications from plugins</a></li>
-
   <li>Part 9 - <a href="/2013/12/09/simplifying-oauth-integration/">Simplifying OAuth integration</a></li>
-
   <li>Part 10 - <a href="/2013/12/10/queue-in-scalable-applications/">Queue in scalable applications</a></li>
-
   <li>Part 11 - <a href="/2013/12/11/giving-the-gift-of-cakephp-to-the-community/">Giving the gift of CakePHP to the Community</a></li>
-
   <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
-
   <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
-
   <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
-
   <li>Part 15 - <a href="/2013/12/15/payment-processing-using-stripe/">Payment Processing using Stripe</a></li>
-
   <li>Part 16 - <a href="/2013/12/16/simpler-cakephp-events/">Simpler CakePHP Events</a></li>
-
   <li>Part 17 - <a href="/2013/12/17/deploy-all-the-things-with-bash/">Deploy ALL the things using simple Bash scripts</a></li>
-
   <li>Part 18 - CakePHP Testing 102</li>
-
   <li>Part 19 - <a href="/2013/12/19/tackling-database-migrations/">Tackling database migrations with one neat trick</a></li>
-
   <li>Part 20 - <a href="/2013/12/20/application-environment-configuration/">Application Environment Configuration</a></li>
-
   <li>Part 21 - <a href="/2013/12/21/building-a-behavior-with-cakephp/">Building a Behavior with CakePHP</a></li>
-
   <li>Part 22 - <a href="/2013/12/22/deploying-a-cakephp-application-to-heroku/">Deploying a CakePHP application to Heroku</a></li>
-
   <li>Part 23 - <a href="/2013/12/23/application-wide-event-management/">Application-wide event management</a></li>
-
   <li>Part 24 - <a href="/2013/12/24/writing-slimmer-controllers/">Writing Slimmer Controllers</a></li>
-
   <li>Part 25 - <a href="/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/">Local Development Environment using Vagrant and Virtualbox</a></li>
 </ul>
-
 </div>
-
     <blockquote>
-<p>Note: I have typically approached testing as <code>TODO: test this</code>. Meaning I cowboy code a lot. So I take lots of shortcuts. Keep that in mind as you read this post.</p>
+  <p>Note: I have typically approached testing as <code>TODO: test this</code>. Meaning I cowboy code a lot. So I take lots of shortcuts. Keep that in mind as you read this post.</p>
 </blockquote>
-
 <p>Here are a few tips that will help guide you on your testing path:</p>
-
-<h2>Use composer to install PHPUnit</h2>
-
+<h2 id="use-composer-to-install-phpunit">Use composer to install PHPUnit</h2>
 <p>I hate having to deal with Pear and pear discovery etc. Instead, lets just use composer. Add the following to your <code>composer.json</code>:</p>
-
-<pre class="rainbow-code"><code data-language="javascript">{
-  &quot;config&quot;: {
-    &quot;vendor-dir&quot;: &quot;vendors&quot;
+<pre><code class="language-javascript">{
+  "config": {
+    "vendor-dir": "vendors"
   },
-  &quot;require-dev&quot;: {
-    &quot;phpunit/phpunit&quot;: &quot;3.7.*&quot;
+  "require-dev": {
+    "phpunit/phpunit": "3.7.*"
   }
-}</code></pre>
-
-<p>Next, run <code>composer update</code> to install dependencies. You&#39;ll finally need the following line in your <code>app/Config/bootstrap.php</code>:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+}
+</code></pre>
+<p>Next, run <code>composer update</code> to install dependencies. You’ll finally need the following line in your <code>app/Config/bootstrap.php</code>:</p>
+<pre><code class="language-php">&lt;?php
 App::import('Vendor', array('file' =&gt; 'autoload'));
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Presto-chango! You now have PHPUnit setup and ready to go.</p>
-
-<h2>Don&#39;t test your controllers (mostly)</h2>
-
+<h2 id="dont-test-your-controllers-mostly">Don’t test your controllers (mostly)</h2>
 <p>I <em>hate</em> testing my controllers, because they all look like this:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class OrdersController extends AppController {
   public function checkout () {
     $order = $this-&gt;OrderSession-&gt;get();
@@ -180,23 +134,19 @@ class OrdersController extends AppController {
     return $this-&gt;redirect($order-&gt;successUrl());
   }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>I use exceptions to handle error states, which makes my controller logic look a bit plain. Instead, I test the output of the methods I call. Test Components, Behaviors and Models, not controllers.</p>
-
 <blockquote>
-<p>Note: This does not mean you should ignore controller testing altogether. Rather, you want to avoid testing things that would be outside of the scope of your function, such as testing that authentication works in all your controller tests. That should be factored out into it&#39;s own set of tests, otherwise you are polluting your application logic tests.</p>
-
-<p>Testing controller logic requires mocking out the full request/response cycle, which is a pain to do. You retain some sanity if you don&#39;t do that.</p>
+  <p>Note: This does not mean you should ignore controller testing altogether. Rather, you want to avoid testing things that would be outside of the scope of your function, such as testing that authentication works in all your controller tests. That should be factored out into it’s own set of tests, otherwise you are polluting your application logic tests.</p>
 </blockquote>
-
-<h2>Learn to Mock</h2>
-
+<blockquote>
+  <p>Testing controller logic requires mocking out the full request/response cycle, which is a pain to do. You retain some sanity if you don’t do that.</p>
+</blockquote>
+<h2 id="learn-to-mock">Learn to Mock</h2>
 <p>Mocking is incredibly powerful. It allows you to pretend a class exists and acts one way or another. For instance, you would mock a database, or mock an external service, which allows you to test code where there might otherwise not be a staging or testing environment.</p>
-
 <p>Here is a mock deconstructed:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 // Create a mock within your test
 $mock = $this-&gt;getMock(
   // (Required) Name of the class to mock
@@ -210,7 +160,6 @@ $mock = $this-&gt;getMock(
   // (Optional) Whether to call the original constructor
   $booleanCallConstructorOrNot
 );
-
 // (Required) How often do we expect this to run?
 // Options: [never(), once(), any(), atLeastOnce(), exactly(3)]
 // You can also specify the order at which a call is made
@@ -223,128 +172,115 @@ $mock-&gt;expects($this-&gt;once())
      -&gt;with($args, $for, $method)
      // (Optional) Return value for the method.
      -&gt;will($this-&gt;returnValue(TRUE));
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>There are many good examples of mocking in the <a href="https://github.com/friendsofcake/crud">Crud component</a></p>
-
-<h2>Run tests automatically</h2>
-
+<h2 id="run-tests-automatically">Run tests automatically</h2>
 <p>Use <a href="http://travis-ci.com/">TravisCI</a> to automatically run tests. I detailed this in a <a href="http://josediazgonzalez.com/2013/12/01/testing-your-cakephp-plugins-with-travis/">blog post for plugins earlier</a>, but you should definitely consider doing it for your application as well.</p>
-
-<h2>Use githooks for checking syntax</h2>
-
+<h2 id="use-githooks-for-checking-syntax">Use githooks for checking syntax</h2>
 <p>Testing should include whether your code is valid PHP. Rather than pushing bad code, test it before you make a commit in GIT. Here is a <code>pre-commit</code> hook you can use from <a href="http://www.phil-barker.com/2013/07/syntax-check-your-php-before-git-commit/">Phil Barker</a>:</p>
-
-<pre class="rainbow-code"><code data-language="php">#!/usr/bin/php
+<pre><code class="language-php">#!/usr/bin/php
 &lt;?php
 // Grab all added, copied or modified files into $output array
 exec('git diff --cached --name-status --diff-filter=ACM', $output);
-
 foreach ($output as $file) {
     $fileName = trim(substr($file, 1));
     // We only want to check PHP files
-    if (pathinfo($fileName,PATHINFO_EXTENSION) == &quot;php&quot;) {
+    if (pathinfo($fileName,PATHINFO_EXTENSION) == "php") {
         $lint_output = array();
         // Check syntax with PHP lint
-        exec(&quot;php -l &quot; . escapeshellarg($fileName), $lint_output, $return);
-
+        exec("php -l " . escapeshellarg($fileName), $lint_output, $return);
         if ($return == 0) {
             continue;
         } else {
-            echo implode(&quot;\n&quot;, $lint_output), &quot;\n&quot;;
+            echo implode("\n", $lint_output), "\n";
             exit(1);
         }
     }
 }
-
 exit(0);
-?&gt;</code></pre>
-
-<p>Simply add the above to your <code>.git/hooks/pre-commit</code> and you&#39;ll be off to the races!</p>
-
-<h2>Find failing commits</h2>
-
-<p>Do you have a test that fails and you don&#39;t know when the regression was introduced? Use <code>git-bisect</code> to find it.</p>
-
-<pre class="rainbow-code"><code data-language="shell"># start a bisect
+?&gt;
+</code></pre>
+<p>Simply add the above to your <code>.git/hooks/pre-commit</code> and you’ll be off to the races!</p>
+<h2 id="find-failing-commits">Find failing commits</h2>
+<p>Do you have a test that fails and you don’t know when the regression was introduced? Use <code>git-bisect</code> to find it.</p>
+<pre><code class="language-bash"># start a bisect
 git bisect state
 # mark a commit as passing
 git bisect good b0ac325
 # mark a commit as failing
 git bisect bad d09cf21
 # tell git how to run your tests
-git bisect run ./Console/cake test app Model/Post</code></pre>
-
+git bisect run ./Console/cake test app Model/Post
+</code></pre>
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2013/12/18/cakephp-testing-102/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-18 14:17:00 +0000">18 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/12/18/cakephp-testing-102/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/12/18/cakephp-testing-102/';
-				var disqus_title      = 'CakeAdvent: CakePHP Testing 102';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2013/12/18/cakephp-testing-102/';
+        var disqus_url        = 'http://josediazgonzalez.com/2013/12/18/cakephp-testing-102/';
+        var disqus_title      = "CakeAdvent: CakePHP Testing 102";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

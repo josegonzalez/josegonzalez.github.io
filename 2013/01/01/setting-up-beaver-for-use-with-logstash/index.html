@@ -8,117 +8,93 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>Using Beaver to ship log files to Redis/Logstash</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="This post will guide you through a simple Beaver installation." />
-		<meta name="keywords" content="logstash, beaver, logs" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="Using Beaver to ship log files to Redis/Logstash" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/" />
-		<meta property="og:description" content="This post will guide you through a simple Beaver installation." />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="Using Beaver to ship log files to Redis/Logstash" />
-		<meta name="twitter:description" content="This post will guide you through a simple Beaver installation." />
-
-		<link rel="alternate" type="application/rss+xml" title="Using Beaver to ship log files to Redis/Logstash » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Using Beaver to ship log files to Redis/Logstash</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="This post will guide you through a simple Beaver installation." />
+    <meta name="keywords" content="logstash, beaver, logs" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Using Beaver to ship log files to Redis/Logstash" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/" />
+    <meta property="og:description" content="This post will guide you through a simple Beaver installation." />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Using Beaver to ship log files to Redis/Logstash" />
+    <meta name="twitter:description" content="This post will guide you through a simple Beaver installation." />
+    <link rel="alternate" type="application/rss+xml" title="Using Beaver to ship log files to Redis/Logstash » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Using Beaver to ship log files to Redis/Logstash
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Using Beaver to ship log files to Redis/Logstash!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
     <p>Beaver is a lightweight python log file shipper that is used to send logs to an intermediate broker for further processing by Logstash. Brokers are simply middlemen that hold one or more log lines in josn_event format. I like to think of them as a staging area from which one or more logstash-indexers can retrieve events for further processing.</p>
-
-<p>Beaver&#39;s explicit goal is to provide a shipper that can be used in environments where one or more of the following is true:</p>
-
+<p>Beaver’s explicit goal is to provide a shipper that can be used in environments where one or more of the following is true:</p>
 <ul>
-<li>Operations cannot support the JVM on an instance</li>
-<li>Developers are more experienced with debugging Python performance issues</li>
-<li>The server does not have enough memory for a large JVM application</li>
-<li>Simply shipping logs to an intermediary for later processing is enough</li>
+  <li>Operations cannot support the JVM on an instance</li>
+  <li>Developers are more experienced with debugging Python performance issues</li>
+  <li>The server does not have enough memory for a large JVM application</li>
+  <li>Simply shipping logs to an intermediary for later processing is enough</li>
 </ul>
-
 <p>I actually built it for all of the above reasons. I wanted to process all application logs, but my webapp instances were <code>c1.medium</code> instances on AWS, and I needed both the memory and cpu for PHP. My service boxes were already overloaded, and I wanted to ensure any instances running varnish were not impacted by stupidities in just shipping logs.</p>
-
 <p>I did, however, still want those log lines, so I set about writing a small daemon to send log lines to Redis. Redis is my preferred broker, because insertion is very fast and it is easy to inspect.</p>
-
 <p>To start, we need to install Beaver:</p>
-
-<pre class="rainbow-code"><code data-language="shell">pip install --update Beaver</code></pre>
-
-<p>This will retrieve the latest version of Beaver - version 18 as of this writing - via pip. It&#39;s possible to install via <code>easy_install</code>, but pip will ensure requirements are set.</p>
-
+<pre><code class="language-bash">pip install --update Beaver
+</code></pre>
+<p>This will retrieve the latest version of Beaver - version 18 as of this writing - via pip. It’s possible to install via <code>easy_install</code>, but pip will ensure requirements are set.</p>
 <blockquote>
-
 Please note that while I specify `Python 2.7`, you *may* actually be able to get away with `Python 2.6`. Every so often a build will break compatibility because I don't test against 2.6, but it currently does work just fine.
-
 </blockquote>
-
 <p>Running beaver is relatively straightforward:</p>
-
-<pre class="rainbow-code"><code data-language="shell">beaver -c /etc/beaver/beaver.conf</code></pre>
-
-<p>In the above example, I tell beaver to run using a configuration file located at <code>/etc/beaver/beaver.conf</code>. Beaver takes configuration via arguments as well as via a configuration file, though I&#39;ve found using a configuration file is much more flexible. Certain options can only be set via configuration file, so the above is how I recommend running beaver.</p>
-
+<pre><code class="language-bash">beaver -c /etc/beaver/beaver.conf
+</code></pre>
+<p>In the above example, I tell beaver to run using a configuration file located at <code>/etc/beaver/beaver.conf</code>. Beaver takes configuration via arguments as well as via a configuration file, though I’ve found using a configuration file is much more flexible. Certain options can only be set via configuration file, so the above is how I recommend running beaver.</p>
 <p>Once running, it will read your configuration from that file. An example for an api running under varnish is as follows:</p>
-
-<pre class="rainbow-code"><code data-language="generic">[beaver]
+<pre><code class="language-generic">[beaver]
 transport: redis
 redis_url: redis://localhost:6380/0
 redis_namespace: logstash:cache:production
@@ -129,17 +105,13 @@ ssh_remote_host: redis-internal
 ssh_remote_port: 6379
 [/mnt/varnish/log/*.log]
 tags: cache,varnish
-type: cache:production</code></pre>
-
+type: cache:production
+</code></pre>
 <p>My configuration file has two stanzas. The first is a general configuration stanza. Beaver supports optional ssh tunneling, which is useful if you are going across datacenters. Those options are prefixed with <code>ssh_</code>. I also specify the url for redis, in this case using the tunnel port.</p>
-
-<p>Note that for most transports that preserve some state, you can configure the exchange/namespace used. I&#39;ve set a namespace of <code>logstash:cache:production</code> for this application, and use a different namespace for other apps. This is very useful for multiline logs that need to be later parsed by logstash as a single event.</p>
-
-<p>I also have a stanza for a particular glob path for beaver to follow. In this case, it&#39;s following any logfile in <code>/mnt/varnish/log</code>. I can also specify tags and the type for the logs that fall under this globpath, which is quite useful when later processing in logstash.</p>
-
+<p>Note that for most transports that preserve some state, you can configure the exchange/namespace used. I’ve set a namespace of <code>logstash:cache:production</code> for this application, and use a different namespace for other apps. This is very useful for multiline logs that need to be later parsed by logstash as a single event.</p>
+<p>I also have a stanza for a particular glob path for beaver to follow. In this case, it’s following any logfile in <code>/mnt/varnish/log</code>. I can also specify tags and the type for the logs that fall under this globpath, which is quite useful when later processing in logstash.</p>
 <p>Once started, beaver will ship my logs via a redis <code>pipeline</code> to my redis instance, where logstash picks up the work quite easily. The following is my logstash <code>indexer.conf</code>:</p>
-
-<pre class="rainbow-code"><code data-language="generic">input {
+<pre><code class="language-generic">input {
   # Read from the redis list
   redis {
     host =&gt; 'redis-internal'
@@ -149,144 +121,131 @@ type: cache:production</code></pre>
     threads =&gt; 2
   }
 }
-
 filter {
   # Pull out my varnish logs in combined apache log format
   grok {
-    patterns_dir =&gt; &quot;/etc/logstash/patterns&quot;
-    tags =&gt; [&quot;cache&quot;]
-    pattern =&gt; &quot;%{COMBINEDAPACHELOG}&quot;
+    patterns_dir =&gt; "/etc/logstash/patterns"
+    tags =&gt; ["cache"]
+    pattern =&gt; "%{COMBINEDAPACHELOG}"
   }
-
   # Override the beaver provided timestamp info in favor of a more correct one
   date {
-    tags =&gt; [&quot;cache&quot;]
-    timestamp =&gt; &quot;dd/MMM/yyyy:HH:mm:ss Z&quot;
+    tags =&gt; ["cache"]
+    timestamp =&gt; "dd/MMM/yyyy:HH:mm:ss Z"
   }
-
   # Properly parse the request uri as a url
   grok {
-    patterns_dir =&gt; &quot;/etc/logstash/patterns&quot;
-    tags =&gt; [&quot;cache&quot;]
+    patterns_dir =&gt; "/etc/logstash/patterns"
+    tags =&gt; ["cache"]
     match =&gt; [
-      &quot;request&quot;, &quot;%{URIPROTO:uriproto}://(?:%{USER:user}(?::[^@]*)?@)?(?:%{URIHOST:urihost})?(?:%{URIPATHPARAM:querystring})?&quot;
+      "request", "%{URIPROTO:uriproto}://(?:%{USER:user}(?::[^@]*)?@)?(?:%{URIHOST:urihost})?(?:%{URIPATHPARAM:querystring})?"
     ]
   }
-
   # Remove unneeded fields and fix up the querystring a bit
   mutate {
-    tags =&gt; [&quot;cache&quot;]
-    remove =&gt; [ &quot;agent&quot;, &quot;auth&quot;, &quot;bytes&quot;, &quot;httpversion&quot;, &quot;ident&quot;, &quot;referrer&quot;, &quot;timestamp&quot;, &quot;verb&quot; ]
+    tags =&gt; ["cache"]
+    remove =&gt; [ "agent", "auth", "bytes", "httpversion", "ident", "referrer", "timestamp", "verb" ]
     gsub =&gt; [
-      &quot;querystring&quot;, &quot;&amp;&quot;, &quot; &quot;,
-      &quot;querystring&quot;, &quot;/events\?&quot;, &quot;&quot;
+      "querystring", "&amp;", " ",
+      "querystring", "/events\?", ""
     ]
   }
-
   # Parse out the querystring as a key =&gt; value hash so that we can analyze this later
   kv {
-    tags =&gt; [&quot;cache&quot;]
-    fields =&gt; [&quot;querystring&quot;]
+    tags =&gt; ["cache"]
+    fields =&gt; ["querystring"]
   }
-
   # Url Decode the query. Would be nice to be able to specify this on a glob of fields, but whatever
   urldecode {
-    tags =&gt; [&quot;jerry&quot;, &quot;varnish&quot;]
-    field =&gt; &quot;q&quot;
+    tags =&gt; ["jerry", "varnish"]
+    field =&gt; "q"
   }
-
   # Remove some unneeded apache log info, as well as the duplicative @source field
   # Also add a q_analyzed field so that we have both an analyzed and non-analyzed version of the search query
   mutate {
-    tags =&gt; [&quot;cache&quot;]
-    remove =&gt; [ &quot;port&quot;, &quot;querystring&quot;, &quot;request&quot;, &quot;urihost&quot;, &quot;uriproto&quot;, &quot;@source&quot; ]
-    replace =&gt; [ &quot;q_analyzed&quot;, &quot;%{q}&quot;, ]
+    tags =&gt; ["cache"]
+    remove =&gt; [ "port", "querystring", "request", "urihost", "uriproto", "@source" ]
+    replace =&gt; [ "q_analyzed", "%{q}", ]
   }
 }
-
 output {
   # Output everything to my logstash cluster sitting behind haproxy
   elasticsearch {
-    host =&gt; &quot;localhost:1337&quot;
+    host =&gt; "localhost:1337"
   }
-}</code></pre>
-
-<p>I&#39;ve documented everything above, and it&#39;s fairly straightforward as to whats happening. There are some gotchas with creating key-value pairs - I had to replace the <code>&amp;</code> characters in the querystring with space <code></code> characters - but nothing that won&#39;t be fixed in logstash in the future.</p>
-
+}
+</code></pre>
+<p>I’ve documented everything above, and it’s fairly straightforward as to whats happening. There are some gotchas with creating key-value pairs - I had to replace the <code>&amp;</code> characters in the querystring with space ` ` characters - but nothing that won’t be fixed in logstash in the future.</p>
 <p>For those looking to get into grok, there is a <a href="http://grokdebug.herokuapp.com/">grokdebug heroku app</a> for testing grok filters. Note that sometimes the patterns shipped with your version of logstash will be out of date with <code>grokdebug</code>, and so I recommend retrieving the patterns from the logstash repo and placing them in <code>/etc/logstash/patterns</code>. I do so and you can see I specified a pattern directory above in my grok usage.</p>
-
 <p>Getting into log parsing is a bit of trail and error at first, and while I hope the process gets better in the future, hopefully this guide helps others get going.</p>
-
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/opschops" title="View all posts in Opschops" rel="category">Opschops</a> on <a href="http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-01-01 23:34:00 +0000">01 Jan 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/01/01/setting-up-beaver-for-use-with-logstash/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/';
-				var disqus_title      = 'Using Beaver to ship log files to Redis/Logstash';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2013/01/01/setting-up-beaver-for-use-with-logstash/';
+        var disqus_url        = 'http://josediazgonzalez.com/2013/01/01/setting-up-beaver-for-use-with-logstash/';
+        var disqus_title      = "Using Beaver to ship log files to Redis/Logstash";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

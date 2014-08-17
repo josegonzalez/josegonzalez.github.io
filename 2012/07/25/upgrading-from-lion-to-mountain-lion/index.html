@@ -8,216 +8,185 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>Upgrading from Lion to Mountain Lion</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="A guide to fixing all the breaking php and ruby packages in Mountain Lion" />
-		<meta name="keywords" content="mountain-lion, os-x, upgrade, development" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="Upgrading from Lion to Mountain Lion" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2012/07/25/upgrading-from-lion-to-mountain-lion/" />
-		<meta property="og:description" content="A guide to fixing all the breaking php and ruby packages in Mountain Lion" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="Upgrading from Lion to Mountain Lion" />
-		<meta name="twitter:description" content="A guide to fixing all the breaking php and ruby packages in Mountain Lion" />
-
-		<link rel="alternate" type="application/rss+xml" title="Upgrading from Lion to Mountain Lion » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Upgrading from Lion to Mountain Lion</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2012/07/25/upgrading-from-lion-to-mountain-lion/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="A guide to fixing all the breaking php and ruby packages in Mountain Lion" />
+    <meta name="keywords" content="mountain-lion, os-x, upgrade, development" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Upgrading from Lion to Mountain Lion" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2012/07/25/upgrading-from-lion-to-mountain-lion/" />
+    <meta property="og:description" content="A guide to fixing all the breaking php and ruby packages in Mountain Lion" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Upgrading from Lion to Mountain Lion" />
+    <meta name="twitter:description" content="A guide to fixing all the breaking php and ruby packages in Mountain Lion" />
+    <link rel="alternate" type="application/rss+xml" title="Upgrading from Lion to Mountain Lion » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Upgrading from Lion to Mountain Lion
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Upgrading from Lion to Mountain Lion!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
     <p>Lots of things broke.</p>
-
 <p>The installer restarted my machine, went through the install process, and then went through the install process again. Wut?</p>
-
 <p>Boots into OS X, and my terminal takes FOREVER to boot. Fixing permissions on the <code>/usr/local</code> directory fixed most of that:</p>
-
-<pre class="rainbow-code"><code data-language="shell">sudo chown -R `whoami` /usr/local</code></pre>
-
+<pre><code class="language-bash">sudo chown -R `whoami` /usr/local
+</code></pre>
 <p>Next up was upgrading XCode, which took an hour to download/install. Installed the CLI tools as well.</p>
-
-<p>Chrome was busted, kept having weird issues with it&#39;s cache retrieval, and not properly formatting pages I had in cache. Just clear your cache bro.</p>
-
-<p>PHP was broken, both in Apache - Web Sharing went away as an option... - and in CLI - derped about a dynamic library not being linked in.</p>
-
-<pre class="rainbow-code"><code data-language="shell">brew update
+<p>Chrome was busted, kept having weird issues with it’s cache retrieval, and not properly formatting pages I had in cache. Just clear your cache bro.</p>
+<p>PHP was broken, both in Apache - Web Sharing went away as an option… - and in CLI - derped about a dynamic library not being linked in.</p>
+<pre><code class="language-bash">brew update
 brew outdated|xargs brew install
 brew tap homebrew/dupes
-brew install apple-gcc42</code></pre>
-
-<p>Now I&#39;m cooking. <code>foreman start</code> in our work repository failed, some error about Java needing to be installed to run ElasticSearch. Thankfully, OS X showed a prompt to download and install that.</p>
-
+brew install apple-gcc42
+</code></pre>
+<p>Now I’m cooking. <code>foreman start</code> in our work repository failed, some error about Java needing to be installed to run ElasticSearch. Thankfully, OS X showed a prompt to download and install that.</p>
 <p>Now I tried to reinstall php54. <code>brew install php54 --with-mysql</code> failed, with errors about not having <code>png.h</code>. Installing <code>libpng</code> from <code>homebrew-dupes</code> was unhelpful, but searching online brought up the fact that X11 is needed for that library - some people had issues installing Imagemagick, and installing <a href="http://xquartz.macosforge.org/landing">XQuartz</a> fixed the issue.</p>
-
-<pre class="rainbow-code"><code data-language="shell">brew install php54 --with-mysql
+<pre><code class="language-bash">brew install php54 --with-mysql
 # re-enable php in apache's httpd.conf
-sudo apachectl start</code></pre>
-
+sudo apachectl start
+</code></pre>
 <p>It also derped on my virtualhosts. VirtualHostX usually sets this up. I simply had to re-include the vhost.conf file in my <code>httpd.conf</code></p>
-
 <p>RVM shit itself:</p>
-
-<pre class="rainbow-code"><code data-language="shell">/Users/jose/.rvm/gems/ruby-1.9.2-p318/gems/eventmachine-1.0.0.rc.1/lib/rubyeventmachine.bundle: [BUG] Segmentation fault
+<pre><code class="language-bash">/Users/jose/.rvm/gems/ruby-1.9.2-p318/gems/eventmachine-1.0.0.rc.1/lib/rubyeventmachine.bundle: [BUG] Segmentation fault
 ruby 1.8.7 (2012-02-08 patchlevel 358) [universal-darwin12.0]
-
-Abort trap: 6</code></pre>
-
+Abort trap: 6
+</code></pre>
 <p>This is for things that are compiled against certain libraries. Eff this, uninstall ALL the things.</p>
-
-<pre class="rainbow-code"><code data-language="shell">rvm implode</code></pre>
-
+<pre><code class="language-bash">rvm implode
+</code></pre>
 <p>Now reinstall that fucker using <a href="http://unfiniti.com/software/mac/jewelrybox">Jewelry Box</a> and laugh maniacally as you type out <code>bundle install</code> in ALL the things.</p>
-
 <p>Wait, it broke. Alright, lets try <code>rbenv</code>?</p>
-
-<pre class="rainbow-code"><code data-language="shell">brew install rbenv
+<pre><code class="language-bash">brew install rbenv
 brew install ruby-build
-rbenv global 1.9.2-p290</code></pre>
-
+rbenv global 1.9.2-p290
+</code></pre>
 <p>Now to gem install ALL the things!</p>
-
-<pre class="rainbow-code"><code data-language="shell"># in your project dir
-bundle install</code></pre>
-
-<p>If you are depending upon something like Imagemagick, you&#39;ll need to reinstall:</p>
-
-<pre class="rainbow-code"><code data-language="shell">brew remove imagemagick
+<pre><code class="language-bash"># in your project dir
+bundle install
+</code></pre>
+<p>If you are depending upon something like Imagemagick, you’ll need to reinstall:</p>
+<pre><code class="language-bash">brew remove imagemagick
 brew install imagemagick
-bundle install</code></pre>
-
+bundle install
+</code></pre>
 <p>Lets run brew doctor:</p>
-
-<pre class="rainbow-code"><code data-language="shell">brew doctor</code></pre>
-
+<pre><code class="language-bash">brew doctor
+</code></pre>
 <p>Fix ALL the bugs.</p>
-
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/installation" title="View all posts in Installation" rel="category">Installation</a> on <a href="http://josediazgonzalez.com/2012/07/25/upgrading-from-lion-to-mountain-lion/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2012-07-25 00:00:00 +0000">25 Jul 2012</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2012/07/25/upgrading-from-lion-to-mountain-lion/';
-				var disqus_url        = 'http://josediazgonzalez.com/2012/07/25/upgrading-from-lion-to-mountain-lion/';
-				var disqus_title      = 'Upgrading from Lion to Mountain Lion';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2012/07/25/upgrading-from-lion-to-mountain-lion/';
+        var disqus_url        = 'http://josediazgonzalez.com/2012/07/25/upgrading-from-lion-to-mountain-lion/';
+        var disqus_title      = "Upgrading from Lion to Mountain Lion";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

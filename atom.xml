@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-08-16T16:58:37+00:00</updated>
+ <updated>2014-08-17T16:26:32+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -413,27 +413,11 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[Carl Sutton of Infinitas CMS]]></title>
-   <link href="http://josediazgonzalez.com/2011/03/27/carl-sutton-of-infinitas-cms/"/>
-   <updated>2011-03-27T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2011/03/27/carl-sutton-of-infinitas-cms/</id>
-   <content type="html"><![CDATA[Infinitas CMS is a pretty well-built and performant CMS, and Carl Sutton has a few thoughts to share on CakePHP in general.]]></content>
- </entry>
-
- <entry>
    <title type="html"><![CDATA[Embedding Custom Finds in Behaviors]]></title>
    <link href="http://josediazgonzalez.com/2010/12/01/embedding-custom-finds-in-behaviors/"/>
    <updated>2010-12-01T00:00:00+00:00</updated>
    <id>http://josediazgonzalez.com/2010/12/01/embedding-custom-finds-in-behaviors/</id>
    <content type="html"><![CDATA[Embedding custom finds in behaviors is extremely useful, but not the most straight-forward thing to do. Here's how.]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Fahad Ibnay Heylaal, creator of Croogo CMS]]></title>
-   <link href="http://josediazgonzalez.com/2010/10/30/fahad-ibnay-heylaal-creator-of-croogo-cms/"/>
-   <updated>2010-10-30T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2010/10/30/fahad-ibnay-heylaal-creator-of-croogo-cms/</id>
-   <content type="html"><![CDATA[What does Fahad think about Croogo, CakePHP, and the CakePHP community in general?]]></content>
  </entry>
 
  <entry>
@@ -477,14 +461,6 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[Drop-down select fields in CakePHP]]></title>
-   <link href="http://josediazgonzalez.com/2010/02/09/drop-down-select-fields-in-cakephp/"/>
-   <updated>2010-02-09T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2010/02/09/drop-down-select-fields-in-cakephp/</id>
-   <content type="html"><![CDATA[For anyone wishing to make dropdown select fields in CakePHP forms happen automagically, here are some facts.]]></content>
- </entry>
-
- <entry>
    <title type="html"><![CDATA[Your username/password should never be a lastname/uid]]></title>
    <link href="http://josediazgonzalez.com/2010/02/05/your-username-password-should-never-be-a-lastname-uid/"/>
    <updated>2010-02-05T00:00:00+00:00</updated>
@@ -517,38 +493,6 @@
  </entry>
 
  <entry>
-   <title type="html"><![CDATA[How CakePHP Automagic fails me (or How I failed at the FormHelper)]]></title>
-   <link href="http://josediazgonzalez.com/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/"/>
-   <updated>2009-12-10T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/12/10/how-cakephp-automagic-fails-me-or-how-i-failed-at-the-formhelper/</id>
-   <content type="html"><![CDATA[Getting CakePHP form urls to generate correctly might be difficult if you don't know how the default url is created.]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Quick Tip - Bring Out Yer Queries]]></title>
-   <link href="http://josediazgonzalez.com/2009/11/30/quick-tip-bring-out-yer-queries/"/>
-   <updated>2009-11-30T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/11/30/quick-tip-bring-out-yer-queries/</id>
-   <content type="html"><![CDATA[Log your queries to find out what CakePHP is doing when it has 9 million blobs or is taking 34234 years to process.]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Quick Tip - Translating Model Variables]]></title>
-   <link href="http://josediazgonzalez.com/2009/11/28/quick-tip-translating-model-variables/"/>
-   <updated>2009-11-28T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/11/28/quick-tip-translating-model-variables/</id>
-   <content type="html"><![CDATA[Translating CakePHP Model variables and validation rules isn't straight-forward to new developers. However, it is possible through the use of the class constructor.]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Inflect Shell - Inflect the heck out of your word(s)]]></title>
-   <link href="http://josediazgonzalez.com/2009/11/28/inflect-the-heck-out-of-your-words/"/>
-   <updated>2009-11-28T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/11/28/inflect-the-heck-out-of-your-words/</id>
-   <content type="html"><![CDATA[CakePHP provides us with a nice little Inflector class. It's quite useful in creating slugs, but can't be used for testing purposes without creating a dummy page.]]></content>
- </entry>
-
- <entry>
    <title type="html"><![CDATA[Thoughts - An API for Plugin Installation]]></title>
    <link href="http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/"/>
    <updated>2009-11-27T00:00:00+00:00</updated>
@@ -562,14 +506,6 @@
    <updated>2009-11-27T00:00:00+00:00</updated>
    <id>http://josediazgonzalez.com/2009/11/27/quick-tip-save-isnt-saveall/</id>
    <content type="html"><![CDATA[A very small example on when to use Model::save() versus Model::saveAll()]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Rails-Style Error Messages in CakePHP]]></title>
-   <link href="http://josediazgonzalez.com/2009/11/26/rails-style-error-messages-in-cakephp/"/>
-   <updated>2009-11-26T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/11/26/rails-style-error-messages-in-cakephp/</id>
-   <content type="html"><![CDATA[A simple CakePHP helper for outputting grouped error messages as in the Ruby on Rails framework.]]></content>
  </entry>
 
  <entry>
@@ -612,100 +548,5 @@
    <content type="html"><![CDATA[Extremely simple JSON Layout for your application]]></content>
  </entry>
 
- <entry>
-   <title type="html"><![CDATA[Cacheable Behavior]]></title>
-   <link href="http://josediazgonzalez.com/2009/09/04/cacheable-behavior/"/>
-   <updated>2009-09-04T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/09/04/cacheable-behavior/</id>
-   <content type="html"><![CDATA[Cacheable Model behavior caches views pertaining to model records to the disk via a RequestAction hack.]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[ResourceHelper]]></title>
-   <link href="http://josediazgonzalez.com/2009/09/03/resource-helper/"/>
-   <updated>2009-09-03T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/09/03/resource-helper/</id>
-   <content type="html"><![CDATA[A general purpose helper to support random functionality that need not be in it's own helper. Has BlueprintCSS support, jQuery ASM HABTM, File displaying, jQuery Error displaying and Google Maps support.]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Hide Plugin Prefixes in Routed Urls]]></title>
-   <link href="http://josediazgonzalez.com/2009/09/03/hide-plugin-prefixes-in-routed-urls/"/>
-   <updated>2009-09-03T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/09/03/hide-plugin-prefixes-in-routed-urls/</id>
-   <content type="html"><![CDATA[Hack on the CakePHP Router to hide the plugin prefix in connected routes]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Conditionally Load Javascript]]></title>
-   <link href="http://josediazgonzalez.com/2009/09/03/conditionally-load-js/"/>
-   <updated>2009-09-03T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/09/03/conditionally-load-js/</id>
-   <content type="html"><![CDATA[Example of loading javascript files in 1.2 based on the current controller/action path]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Conditional Loading of Helpers]]></title>
-   <link href="http://josediazgonzalez.com/2009/09/03/conditional-loading-of-helpers/"/>
-   <updated>2009-09-03T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/09/03/conditional-loading-of-helpers/</id>
-   <content type="html"><![CDATA[Example of conditionally loading helpers in a view]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Application Settings]]></title>
-   <link href="http://josediazgonzalez.com/2009/09/03/application-settings/"/>
-   <updated>2009-09-03T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/09/03/application-settings/</id>
-   <content type="html"><![CDATA[Snippet of code to load application-level settings from the database]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Auto-Building your ACOs table with Plugins]]></title>
-   <link href="http://josediazgonzalez.com/2009/08/26/autobuilding-your-acos-table-with-plugins/"/>
-   <updated>2009-08-26T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/08/26/autobuilding-your-acos-table-with-plugins/</id>
-   <content type="html"><![CDATA[Snippet of code that can automatically build CakePHP ACL ACOs for plugins]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Adding a Helper/Behavior/Component on the fly]]></title>
-   <link href="http://josediazgonzalez.com/2009/08/14/adding-a-helper-behavior-component-on-the-fly/"/>
-   <updated>2009-08-14T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/08/14/adding-a-helper-behavior-component-on-the-fly/</id>
-   <content type="html"><![CDATA[A short tutorial on adding behaviors/components/helpers to your application in a dynamic fashion]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Toggle Behavior]]></title>
-   <link href="http://josediazgonzalez.com/2009/08/13/toggle-behavior/"/>
-   <updated>2009-08-13T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/08/13/toggle-behavior/</id>
-   <content type="html"><![CDATA[Toggle CakePHP Behavior for toggling boolean model fields in CakePHP]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Trackable Behavior]]></title>
-   <link href="http://josediazgonzalez.com/2009/06/15/trackable-behavior/"/>
-   <updated>2009-06-15T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/06/15/trackable-behavior/</id>
-   <content type="html"><![CDATA[Trackable Behavior for CakePHP 1.2/1.3]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Commentable Behavior]]></title>
-   <link href="http://josediazgonzalez.com/2009/06/15/commentable-behavior/"/>
-   <updated>2009-06-15T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/06/15/commentable-behavior/</id>
-   <content type="html"><![CDATA[Commentable Behavior for CakePHP 1.2]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Yahoo Maps-based Geocoding]]></title>
-   <link href="http://josediazgonzalez.com/2009/06/14/yahoo-maps-based-geocoding/"/>
-   <updated>2009-06-14T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/06/14/yahoo-maps-based-geocoding/</id>
-   <content type="html"><![CDATA[Very crude integration of Yahoo Maps and CakePHP using CURL]]></content>
- </entry>
-
 </feed>
+

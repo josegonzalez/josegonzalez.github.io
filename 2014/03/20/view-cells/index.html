@@ -8,91 +8,76 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>Using View Cells in your CakePHP applications</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes" />
-		<meta name="keywords" content="cakephp, views, service" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="Using View Cells in your CakePHP applications" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2014/03/20/view-cells/" />
-		<meta property="og:description" content="A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="Using View Cells in your CakePHP applications" />
-		<meta name="twitter:description" content="A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes" />
-
-		<link rel="alternate" type="application/rss+xml" title="Using View Cells in your CakePHP applications » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Using View Cells in your CakePHP applications</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/03/20/view-cells/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes" />
+    <meta name="keywords" content="cakephp, views, service" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Using View Cells in your CakePHP applications" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/03/20/view-cells/" />
+    <meta property="og:description" content="A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Using View Cells in your CakePHP applications" />
+    <meta name="twitter:description" content="A look forward at writing CakePHP 3.x applications, as well as a throwback to Service classes" />
+    <link rel="alternate" type="application/rss+xml" title="Using View Cells in your CakePHP applications » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Using View Cells in your CakePHP applications
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Using View Cells in your CakePHP applications!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
     <p>There is an <a href="https://github.com/cakephp/cakephp/issues/3052">interesting ticket</a> in 3.x describing View Cells. Lets dive right in and figure out what they mean for CakePHP applications.</p>
-
-<h2>What is a view cell?</h2>
-
+<h2 id="what-is-a-view-cell">What is a view cell?</h2>
 <p>View cells are like mini templates that are assigned to variables. A good use case for them would be to decorate entities of data. For example, consider the following example:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class PostCell extends ViewCell {
     public $view = 'single_post';
-
     // I am renaming the method `render` to `run` for a specific reason...
     public function run(array $options = [])
     {
@@ -102,27 +87,22 @@ class PostCell extends ViewCell {
         return $this; // So I can chain the `run` method
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>The above class would retrieve the data necessary to render a <code>PostCell</code> using the <code>single_post</code> template file. Our template file could be as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;h1&gt;&lt;?= $post-&gt;get('title') ?&gt;&lt;/h1&gt;
-&lt;div class=&quot;post-content&quot;&gt;
+<pre><code class="language-php">&lt;h1&gt;&lt;?= $post-&gt;get('title') ?&gt;&lt;/h1&gt;
+&lt;div class="post-content"&gt;
     &lt;?= $post-&gt;get('content') ?&gt;
-&lt;/div&gt;</code></pre>
-
+&lt;/div&gt;
+</code></pre>
 <p>In order to use this view cell, we might do the following in our <code>view.ctp</code>:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?= $this-&gt;cell('PostCell', array('id' =&gt; 10)) ?&gt;</code></pre>
-
-<h2>Reusing cells with existing data</h2>
-
+<pre><code class="language-php">&lt;?= $this-&gt;cell('PostCell', array('id' =&gt; 10)) ?&gt;
+</code></pre>
+<h2 id="reusing-cells-with-existing-data">Reusing cells with existing data</h2>
 <p>What if we already have the data, and just want to re-use our cell? This is similar to using an element, though it would be possible with some hackery:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class PostCell extends ViewCell {
     public $view = 'single_post';
-
     public function run(array $options = [])
     {
         // Short-circuit the cell and return any passed data
@@ -130,76 +110,61 @@ class PostCell extends ViewCell {
             $this-&gt;set('post', $options['post']);
             return $this; // So I can chain the `run` method
         }
-
         $this-&gt;loadModel('Posts');
         $post = $this-&gt;Posts-&gt;findById($options['id']
         $this-&gt;set(compact('post'));
         return $this; // So I can chain the `run` method
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Our use case would be to show this on an <code>index.ctp</code> like the following:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;? foreach ($posts as $post) : ?&gt;
+<pre><code class="language-php">&lt;? foreach ($posts as $post) : ?&gt;
     &lt;?= $this-&gt;cell('PostCell', compact('post')) ?&gt;
-&lt;? endforeach; ?&gt;</code></pre>
-
-<h2>Returning cells directly from the controller</h2>
-
+&lt;? endforeach; ?&gt;
+</code></pre>
+<h2 id="returning-cells-directly-from-the-controller">Returning cells directly from the controller</h2>
 <p>We might also want to include the cell directly from the controller. We could do this by constructing the cell directly within the controller:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class PostsController extends Controller
 {
     use CellTrait;
-
     public function view($id)
     {
         $post = $this-&gt;Post-&gt;findById($id);
         if (!$post) {
             throw new NotFoundException('Post not found');
         }
-
         $this-&gt;set('post', $this-&gt;decorate('PostCell', $post));
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>And our <code>view.ctp</code> would be as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?= $post ?&gt;</code></pre>
-
-<h2>Retrieving Cell data from a controller</h2>
-
+<pre><code class="language-php">&lt;?= $post ?&gt;
+</code></pre>
+<h2 id="retrieving-cell-data-from-a-controller">Retrieving Cell data from a controller</h2>
 <p>You might want to reuse <em>just</em> the cell data, and not the representation, within a controller. The following could be what the api for this looks like:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class PostsController extends Controller
 {
     use CellTrait;
-
     public function view($id)
     {
         $data = (new PostCell())-&gt;run(compact('id'))-&gt;data();
         if (empty($data['post'])) {
             throw new NotFoundException('Post not found');
         }
-
         // do things to $data['post']
-
         $this-&gt;set('post', $this-&gt;decorate('PostCell', $data['post']));
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>If the above looks familiar, it is because a PostCell can be pretty analagous to a service class, which I <a href="/2013/12/06/building-service-classes/">previously blogged about</a> during CakeAdvent.</p>
-
-<h3>Containing state within your service class</h3>
-
+<h3 id="containing-state-within-your-service-class">Containing state within your service class</h3>
 <p>In the vein of reusing cells for service classes, what if we want to contain the success and failure state of the cell? We might extend our base <code>ViewCell</code> class:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class AppViewCell extends ViewCell
 {
     public static function perform(array $options = [])
@@ -210,21 +175,18 @@ class AppViewCell extends ViewCell
         return $klass;
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>If you change the parent class of <code>PostCell</code> to <code>AppViewCell</code>, we can now do:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 $cell = PostCell::perform(array('id' =&gt; 10));
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Lets make this a bit more interesting by adding <code>successful</code> and <code>failed</code> methods:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class AppViewCell extends ViewCell
 {
     protected $success = null;
-
     public static function perform(array $options = [])
     {
         $klass = get_called_class();
@@ -232,30 +194,25 @@ class AppViewCell extends ViewCell
         $klass-&gt;run($options);
         return $klass;
     }
-
     public function successful()
     {
         return $successful === true;
     }
-
     public function failed()
     {
         return $successful === false;
     }
-
     public function performed()
     {
         return $successful === null;
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>We can now modify our <code>PostCell</code> class to be as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class PostCell extends ViewCell {
     public $view = 'single_post';
-
     public function run(array $options = [])
     {
         // Short-circuit the cell and return any passed data
@@ -263,115 +220,104 @@ class PostCell extends ViewCell {
             $this-&gt;set('post', $options['post']);
             return $this; // So I can chain the `run` method
         }
-
         $this-&gt;loadModel('Posts');
         $post = $this-&gt;Posts-&gt;findById($options['id']
         $this-&gt;success = !!$post;
-
         if ($this-&gt;success) {
             $this-&gt;set(compact('post'));
         }
-
         return $this; // So I can chain the `run` method
     }
 }
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>And now our controller action could become the following:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 class PostsController extends Controller
 {
     use CellTrait;
-
     public function view($id)
     {
         $cell = PostCell::perform(compact('id'));
         if ($cell-&gt;successful()) {
             $this-&gt;set('post', $this-&gt;decorate('PostCell', $cell-&gt;data()));
         }
-
         throw new NotFoundException('Post not found');
     }
 }
-?&gt;</code></pre>
-
-<h2>Why use a cell?</h2>
-
+?&gt;
+</code></pre>
+<h2 id="why-use-a-cell">Why use a cell?</h2>
 <p>One of the most ill-used features of CakePHP is <code>View::requestAction()</code>. Developers frequently use this all over their applications, causing convoluted cases where you need to figure out if you are within a web request or an internal action request, cluttering controllers. You also need to invoke a new CakePHP request, which can add some unneeded overhead.</p>
-
 <p>You could think of View cells as lightweight request containers. Rather than constructing a new request to get at some request data, you could simply reuse cells to get at useful data without having all of the overhead involved in invoking a controller. And as I showed above, they would make excellent containers for service classes.</p>
-
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/03/20/view-cells/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-03-20 16:54:00 +0000">20 Mar 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2014/03/20/view-cells/';
-				var disqus_url        = 'http://josediazgonzalez.com/2014/03/20/view-cells/';
-				var disqus_title      = 'Using View Cells in your CakePHP applications';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2014/03/20/view-cells/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/03/20/view-cells/';
+        var disqus_title      = "Using View Cells in your CakePHP applications";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

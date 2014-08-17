@@ -8,109 +8,88 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>Using CakeAdmin to generate backend applications</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions." />
-		<meta name="keywords" content="cake_admin, admin, cakephp-1.3" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="Using CakeAdmin to generate backend applications" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2011/05/17/using-cakeadmin-to-generate-backend-applications/" />
-		<meta property="og:description" content="CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions." />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="Using CakeAdmin to generate backend applications" />
-		<meta name="twitter:description" content="CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions." />
-
-		<link rel="alternate" type="application/rss+xml" title="Using CakeAdmin to generate backend applications » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Using CakeAdmin to generate backend applications</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2011/05/17/using-cakeadmin-to-generate-backend-applications/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions." />
+    <meta name="keywords" content="cake_admin, admin, cakephp-1.3" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Using CakeAdmin to generate backend applications" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2011/05/17/using-cakeadmin-to-generate-backend-applications/" />
+    <meta property="og:description" content="CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions." />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Using CakeAdmin to generate backend applications" />
+    <meta name="twitter:description" content="CakeAdmin is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running `cake bake` which generating your basic application structure with a series of questions." />
+    <link rel="alternate" type="application/rss+xml" title="Using CakeAdmin to generate backend applications » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Using CakeAdmin to generate backend applications
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Using CakeAdmin to generate backend applications!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
     <p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> is a CakePHP 1.3 plugin for building web application backends quickly and easily. It is most analogous to running <code>cake bake</code> which generating your basic application structure with a series of questions.</p>
-
 <blockquote class="pullquote">
-
 Future development may allow for rollout of CakeAdmin classes with built-in schemas, or in conjunction with migrations.
-
 </blockquote>
-
-<p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> differs from the Bake tool in that it allows the developer to centralize this set of answers into a single file for every model. It still requires the sql tables to be available for each model, but it doesn&#39;t require that you re-answer every single question each time you&#39;d like to regenerate your application.</p>
-
-<p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> also allows you to specify special properties for both Models, Views and Controllers, depending upon the configuration file you specify. Because a given backend is generated through composition, you can specify all the behavior configuration, special component instructions, and any other related data quickly and easily. As well, <a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> separates the built files from your regular application and places them into a plugin so there isn&#39;t any potential weird interaction between them, meaning your backend application logic can stay nicely removed from your frontend application.</p>
-
+<p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> differs from the Bake tool in that it allows the developer to centralize this set of answers into a single file for every model. It still requires the sql tables to be available for each model, but it doesn’t require that you re-answer every single question each time you’d like to regenerate your application.</p>
+<p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> also allows you to specify special properties for both Models, Views and Controllers, depending upon the configuration file you specify. Because a given backend is generated through composition, you can specify all the behavior configuration, special component instructions, and any other related data quickly and easily. As well, <a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> separates the built files from your regular application and places them into a plugin so there isn’t any potential weird interaction between them, meaning your backend application logic can stay nicely removed from your frontend application.</p>
 <p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> works by specifying a series of properties on a <code>*CakeAdmin</code> class. For example, we might have a <code>PostCakeAdmin</code> class - available in <code>app/libs/admin/post_cake_admin.php</code> - that builds an administrative section for your <code>Post</code> model. The simplest example is below:</p>
-
-<pre class="rainbow-code"><code data-language="php">class PostCakeAdmin extends CakeAdmin {
-}</code></pre>
-
+<pre><code class="language-php">class PostCakeAdmin extends CakeAdmin {
+}
+</code></pre>
 <p>The above admin file would create the <code>index</code>, <code>add</code>, <code>edit</code>, and <code>delete</code> actions for your backend in <code>app/plugins/admin/</code>. This means you would be able to access it at <code>localhost/admin/posts</code>, without having to turn on prefix routing. For those who wish to use prefix routing as well as <code>cake_admin</code>, it would be possible to specify additional routes to ensure everything in your new plugin works.</p>
-
-<p>It&#39;s also possible to specify special behaviors on a given <code>*CakeAdmin</code> class. Given a Post model that would normally have a <code>photo</code> field storing a photo name, we might have the following <code>PostCakeAdmin</code> class:</p>
-
-<pre class="rainbow-code"><code data-language="php">class PostCakeAdmin extends CakeAdmin {
+<p>It’s also possible to specify special behaviors on a given <code>*CakeAdmin</code> class. Given a Post model that would normally have a <code>photo</code> field storing a photo name, we might have the following <code>PostCakeAdmin</code> class:</p>
+<pre><code class="language-php">class PostCakeAdmin extends CakeAdmin {
     var $actsAs = array('Upload.Upload' =&gt; array('photo'));
-}</code></pre>
-
-<p>The above assumes we&#39;re using the <a href="https://github.com/josegonzalez/upload">Upload Plugin</a>, but we could extend this idea to pretty much any other behavior. We would still need to modify our forms to ensure that the form fields are correct for this particular plugin like so:</p>
-
-<pre class="rainbow-code"><code data-language="php">class PostCakeAdmin extends CakeAdmin {
+}
+</code></pre>
+<p>The above assumes we’re using the <a href="https://github.com/josegonzalez/upload">Upload Plugin</a>, but we could extend this idea to pretty much any other behavior. We would still need to modify our forms to ensure that the form fields are correct for this particular plugin like so:</p>
+<pre><code class="language-php">class PostCakeAdmin extends CakeAdmin {
     var $actsAs = array('Upload.Upload' =&gt; array('photo'));
     var $actions = array(
         'edit' =&gt; array(
@@ -142,92 +121,83 @@ Future development may allow for rollout of CakeAdmin classes with built-in sche
             ),
         )
     );
-}</code></pre>
-
+}
+</code></pre>
 <blockquote class="pullquote">
-
 Built-in actions include index, add, edit, delete, view, history, changelog. Since each action has a very specific, and likely peculiar configuration setup, you may want to delve further into each class for more information.
-
 </blockquote>
-
-<p>You&#39;ll notice we specify both the formType, as well as fields to include in a particular config. When we want to give specific instructions to an action, we do it by specifying an <code>actionAlias</code> mapping to an <code>actionConfig</code>. The <code>actionConfig</code> determines the type of the action, whether it is <code>enabled</code> or not - <code>enabled</code> is set to true for the <code>[index, add, edit, delete]</code> actions by default - as well as a <code>config</code> array. If any of these is missing, the action defaults are merged in and we can continue processing, so it is not necessary to specify them for every action. It is also important to note that the format of these actions is different depending upon your specific needs</p>
-
-<p>So why would you want to use <a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a>? It&#39;s primarily for building boring backend applications. Sometimes your application needs a bit of CRUD, regardless of how custom it is. I&#39;ve spent many hours working on CRUD-like utilities at work for <a href="http://seatgeek.com">SeatGeek</a>, and having something like <a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> would have been a lifesaver.</p>
-
-<p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> is also meant to facilitate future admin panel development. There are lots of things it does not yet support - TreeBehavior, TranslateBehavior - and items that I&#39;d like to see implemented - fully Ajax forms, Model Inlines - so the road ahead might be quite bumpy. It&#39;s important to note that you can implement your own custom actions now, like a Gallery action, or a Revision Viewer, so in a sense it is production ready. It&#39;s been used in at least 2 of my own projects to some success, and I am aware of a few people currently looking at it as an option.</p>
-
-<p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> isn&#39;t for everyone, but it&#39;s definitely already a great alternative to the built-in BakeTool. Try it out, leave comments, open bugs, contribute to the built-in actions, make cash off of it. Hope you enjoy it as much as I do.</p>
-
+<p>You’ll notice we specify both the formType, as well as fields to include in a particular config. When we want to give specific instructions to an action, we do it by specifying an <code>actionAlias</code> mapping to an <code>actionConfig</code>. The <code>actionConfig</code> determines the type of the action, whether it is <code>enabled</code> or not - <code>enabled</code> is set to true for the <code>[index, add, edit, delete]</code> actions by default - as well as a <code>config</code> array. If any of these is missing, the action defaults are merged in and we can continue processing, so it is not necessary to specify them for every action. It is also important to note that the format of these actions is different depending upon your specific needs</p>
+<p>So why would you want to use <a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a>? It’s primarily for building boring backend applications. Sometimes your application needs a bit of CRUD, regardless of how custom it is. I’ve spent many hours working on CRUD-like utilities at work for <a href="http://seatgeek.com">SeatGeek</a>, and having something like <a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> would have been a lifesaver.</p>
+<p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> is also meant to facilitate future admin panel development. There are lots of things it does not yet support - TreeBehavior, TranslateBehavior - and items that I’d like to see implemented - fully Ajax forms, Model Inlines - so the road ahead might be quite bumpy. It’s important to note that you can implement your own custom actions now, like a Gallery action, or a Revision Viewer, so in a sense it is production ready. It’s been used in at least 2 of my own projects to some success, and I am aware of a few people currently looking at it as an option.</p>
+<p><a href="https://github.com/josegonzalez/cake_admin">CakeAdmin</a> isn’t for everyone, but it’s definitely already a great alternative to the built-in BakeTool. Try it out, leave comments, open bugs, contribute to the built-in actions, make cash off of it. Hope you enjoy it as much as I do.</p>
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2011/05/17/using-cakeadmin-to-generate-backend-applications/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2011-05-17 00:00:00 +0000">17 May 2011</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2011/05/17/using-cakeadmin-to-generate-backend-applications/';
-				var disqus_url        = 'http://josediazgonzalez.com/2011/05/17/using-cakeadmin-to-generate-backend-applications/';
-				var disqus_title      = 'Using CakeAdmin to generate backend applications';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2011/05/17/using-cakeadmin-to-generate-backend-applications/';
+        var disqus_url        = 'http://josediazgonzalez.com/2011/05/17/using-cakeadmin-to-generate-backend-applications/';
+        var disqus_title      = "Using CakeAdmin to generate backend applications";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

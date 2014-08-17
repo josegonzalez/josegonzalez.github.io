@@ -8,648 +8,513 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>Insane Server Management: Deploying your infrastructure to AWS</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores" />
-		<meta name="keywords" content="aws, provisioning, chef, heroku" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="Insane Server Management: Deploying your infrastructure to AWS" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/10/17/deploying-your-infrastructure-to-aws/" />
-		<meta property="og:description" content="Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="Insane Server Management: Deploying your infrastructure to AWS" />
-		<meta name="twitter:description" content="Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores" />
-
-		<link rel="alternate" type="application/rss+xml" title="Deploying your infrastructure to AWS » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Insane Server Management: Deploying your infrastructure to AWS</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2013/10/17/deploying-your-infrastructure-to-aws/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores" />
+    <meta name="keywords" content="aws, provisioning, chef, heroku" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Insane Server Management: Deploying your infrastructure to AWS" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2013/10/17/deploying-your-infrastructure-to-aws/" />
+    <meta property="og:description" content="Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Insane Server Management: Deploying your infrastructure to AWS" />
+    <meta name="twitter:description" content="Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores" />
+    <link rel="alternate" type="application/rss+xml" title="Deploying your infrastructure to AWS » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Deploying your infrastructure to AWS
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Deploying your infrastructure to AWS!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
 <div class="series-note">
-
 <p>This entry is <strong>part 1</strong> of <strong>3</strong> in the series "Insane Server Management".</p>
 <ul>
   <li>Part 1 - Deploying your infrastructure to AWS</li>
-
   <li>Part 2 - <a href="/2013/10/17/resource-reconfiguration/">Resource reconfiguration</a></li>
-
   <li>Part 3 - <a href="/2013/10/18/service-definitions/">Service Definitions</a></li>
 </ul>
-
 </div>
-
     <p>This document refers to the deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores.</p>
-
 <blockquote>
-<p>This is the result of about 6 hours of rambling thought and a few diagrams, as well as 2+ years of fiddling with servers and seeing what definitely does not work. That is to say, there is no guarantee any of the following is <code>[truthful, working, awesome]</code>.</p>
+  <p>This is the result of about 6 hours of rambling thought and a few diagrams, as well as 2+ years of fiddling with servers and seeing what definitely does not work. That is to say, there is no guarantee any of the following is <code>[truthful, working, awesome]</code>.</p>
 </blockquote>
-
-<h2>Important</h2>
-
+<h2 id="important">Important</h2>
 <p>With respect to datastores, it is easier to consider them attached services, and thus not manage them in this setup. The following are recommendations re: datastores:</p>
-
 <ul>
-<li>RDS for SQL-based applications. It has many desirable qualities, including snapshots, automatic replication, automated failover, easy version upgrades.</li>
-<li>Redshift for large-scale analytics. This can be useful for ie. user-level tracking, or computation across large amounts of data. Please research this before using it, as it may not apply to your case!</li>
-<li>ElastiCache for inter-service caching eases the pain for many (<em>most?</em>) applications. It provides an interface to both Memcached and Redis, with similar features to RDS in terms of datastorage management.</li>
+  <li>RDS for SQL-based applications. It has many desirable qualities, including snapshots, automatic replication, automated failover, easy version upgrades.</li>
+  <li>Redshift for large-scale analytics. This can be useful for ie. user-level tracking, or computation across large amounts of data. Please research this before using it, as it may not apply to your case!</li>
+  <li>ElastiCache for inter-service caching eases the pain for many (<em>most?</em>) applications. It provides an interface to both Memcached and Redis, with similar features to RDS in terms of datastorage management.</li>
 </ul>
-
-<p>Not having used CloudSearch, I cannot recommend it. The same for SQS - though I&#39;ve been told it is quite expensive for some workloads.</p>
-
+<p>Not having used CloudSearch, I cannot recommend it. The same for SQS - though I’ve been told it is quite expensive for some workloads.</p>
 <p>If you:</p>
-
 <ul>
-<li>desire total control over the care and maintenance of your data</li>
-<li>have a special use-case that wouldn&#39;t be covered</li>
-<li>cannot afford the potentially large overhead of your usage</li>
+  <li>desire total control over the care and maintenance of your data</li>
+  <li>have a special use-case that wouldn’t be covered</li>
+  <li>cannot afford the potentially large overhead of your usage</li>
 </ul>
-
 <p>then feel free to manage your own datastores. Again, the notes below may not wholly apply to you, <strong>YMMV</strong>.</p>
-
-<h2>Requirements</h2>
-
+<h2 id="requirements">Requirements</h2>
 <ul>
-<li>All nodes generated from a single file</li>
-<li>Should generate base packer images</li>
-<li>Should be able to specify a node as a packer group</li>
-<li>Should notify a central system of it&#39;s existence</li>
-<li>Should query central system for reconfiguration based on dependencies of other systems</li>
-<li>Should integrate with autoscale groups (optional)</li>
+  <li>All nodes generated from a single file</li>
+  <li>Should generate base packer images</li>
+  <li>Should be able to specify a node as a packer group</li>
+  <li>Should notify a central system of it’s existence</li>
+  <li>Should query central system for reconfiguration based on dependencies of other systems</li>
+  <li>Should integrate with autoscale groups (optional)</li>
 </ul>
-
-<h2>Node Configuration</h2>
-
+<h2 id="node-configuration">Node Configuration</h2>
 <p>Note that we use json here arbitrarily. Implementation is not yet set in stone.</p>
-
-<pre class="rainbow-code"><code data-language="javascript">{
-  &quot;__base__&quot;: {
-    &quot;autoscale&quot;: false,
-    &quot;type&quot;: &quot;amazon-ebs&quot;,
-    &quot;region&quot;: &quot;us-east-1&quot;,
-    &quot;instance_type&quot;: &quot;m1.large&quot;,
-    &quot;source_ami&quot;: &quot;ami-1ebb2077&quot;,
-    &quot;security_groups&quot;: [&quot;external&quot;, &quot;internal&quot;],
-    &quot;default_attributes&quot;: {
-      &quot;environment&quot;: &quot;production&quot;,
-      &quot;key&quot;: &quot;value&quot;
+<pre><code class="language-javascript">{
+  "__base__": {
+    "autoscale": false,
+    "type": "amazon-ebs",
+    "region": "us-east-1",
+    "instance_type": "m1.large",
+    "source_ami": "ami-1ebb2077",
+    "security_groups": ["external", "internal"],
+    "default_attributes": {
+      "environment": "production",
+      "key": "value"
     },
-    &quot;run_list&quot;: [
-      &quot;recipe[seatgeek::base-server]&quot;,
-      &quot;recipe[seatgeek::collect-services]&quot;,
-      &quot;recipe[seatgeek::decommission-services]&quot;
+    "run_list": [
+      "recipe[seatgeek::base-server]",
+      "recipe[seatgeek::collect-services]",
+      "recipe[seatgeek::decommission-services]"
     ],
-    &quot;post_run_list&quot;: [
-      &quot;recipe[seatgeek::notify-services]&quot;,
-      &quot;recipe[sudo]&quot;
+    "post_run_list": [
+      "recipe[seatgeek::notify-services]",
+      "recipe[sudo]"
     ]
   },
-  &quot;12_04-bee&quot;: {
-    &quot;description&quot;: '12_04-bee-ec2 instance, responsible for worker processes',
-    &quot;autoscale&quot;: {
-      &quot;timeout&quot;: 120,
-      &quot;node_min&quot;: 2,
-      &quot;node_max&quot;: 2
+  "12_04-bee": {
+    "description": '12_04-bee-ec2 instance, responsible for worker processes',
+    "autoscale": {
+      "timeout": 120,
+      "node_min": 2,
+      "node_max": 2
     },
-    &quot;instance_type&quot;: &quot;m1.large&quot;,
-    &quot;security_groups&quot;: [&quot;bee&quot;],
-    &quot;default_attributes&quot;: {
-      &quot;other_key&quot;: &quot;value&quot;
+    "instance_type": "m1.large",
+    "security_groups": ["bee"],
+    "default_attributes": {
+      "other_key": "value"
     },
-    &quot;run_list&quot;: [
-      &quot;recipe[seatgeek-service::api-workers]&quot;,
-      &quot;recipe[seatgeek-service::cronq-workers]&quot;,
-      &quot;recipe[seatgeek-service::djjob]&quot;
+    "run_list": [
+      "recipe[seatgeek-service::api-workers]",
+      "recipe[seatgeek-service::cronq-workers]",
+      "recipe[seatgeek-service::djjob]"
     ]
   },
-  &quot;12_04-www&quot;: {
-    &quot;description&quot;: &quot;www-ec2 instance, responsible for the seatgeek frontend site&quot;,
-    &quot;instance_type&quot;: &quot;m3.xlarge&quot;,
-    &quot;security_groups&quot;: [&quot;www&quot;],
-    &quot;run_list&quot;: [
-      &quot;recipe[seatgeek::customer-web]&quot;
+  "12_04-www": {
+    "description": "www-ec2 instance, responsible for the seatgeek frontend site",
+    "instance_type": "m3.xlarge",
+    "security_groups": ["www"],
+    "run_list": [
+      "recipe[seatgeek::customer-web]"
     ]
   }
-}</code></pre>
-
-<h3>Merge rules</h3>
-
+}
+</code></pre>
+<h3 id="merge-rules">Merge rules</h3>
 <p>Each node <em>group</em> inherits from <code>__base__</code>, with some rules:</p>
-
 <ul>
-<li>Lists of items are appended to each other. <code>__base__</code> + <code>www</code></li>
-<li>Dicts are merged at level 1.</li>
-<li>For all other other types, the child overrides the parent.</li>
+  <li>Lists of items are appended to each other. <code>__base__</code> + <code>www</code></li>
+  <li>Dicts are merged at level 1.</li>
+  <li>For all other other types, the child overrides the parent.</li>
 </ul>
-
-<h2>Command line utility</h2>
-
+<h2 id="command-line-utility">Command line utility</h2>
 <p>We will have a simple command (name tbd):</p>
-
-<pre class="rainbow-code"><code data-language="shell">package</code></pre>
-
+<pre><code class="language-bash">package
+</code></pre>
 <p>That can take a <code>namespace:action</code>:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package &lt;namespace&gt;:&lt;action&gt;</code></pre>
-
+<pre><code class="language-bash">package &lt;namespace&gt;:&lt;action&gt;
+</code></pre>
 <p>And then optional group name filtering:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package &lt;namespace&gt;:&lt;action&gt; (group)</code></pre>
-
+<pre><code class="language-bash">package &lt;namespace&gt;:&lt;action&gt; (group)
+</code></pre>
 <p>Of course, there would be other command line arguments:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package &lt;namespace&gt;:&lt;action&gt; (group) --arg value</code></pre>
-
-<h3>Available actions</h3>
-
-<pre class="rainbow-code"><code data-language="shell">package packer:create (group)
+<pre><code class="language-bash">package &lt;namespace&gt;:&lt;action&gt; (group) --arg value
+</code></pre>
+<h3 id="available-actions">Available actions</h3>
+<pre><code class="language-bash">package packer:create (group)
 package packer:run (group)
 package packer:clean (group) -n 10
 package packer:delete (group)
-
 package role:create (group)
-
 package autoscale:create (group)
 package autoscale:run (group)
 package autoscale:update (group)
-
 package instance:create (group) --key path/to/key.pem --name INSTANCE-NAME  (--zone name-of-zone)
-package instance:deploy (group) -n 10</code></pre>
-
-<h3>Generating chef roles</h3>
-
+package instance:deploy (group) -n 10
+</code></pre>
+<h3 id="generating-chef-roles">Generating chef roles</h3>
 <p>Each node group should be able to generate a role:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package role:create 12_04-bee</code></pre>
-
+<pre><code class="language-bash">package role:create 12_04-bee
+</code></pre>
 <p>For our above example, this would provide the following:</p>
-
-<pre class="rainbow-code"><code data-language="javascript">{
-    &quot;name&quot;: &quot;role-12_04-bee&quot;,
-    &quot;chef_type&quot;: &quot;role&quot;,
-    &quot;json_class&quot;: &quot;Chef::Role&quot;,
-    &quot;description&quot;: &quot;12_04-bee-ec2 instance, responsible for worker processes&quot;,
-    &quot;override_attributes&quot;: {},
-    &quot;default_attributes&quot;: {
-        &quot;environment&quot;: &quot;production&quot;,
-        &quot;key&quot;: &quot;value&quot;,
-        &quot;other_key&quot;: &quot;value&quot;
+<pre><code class="language-javascript">{
+    "name": "role-12_04-bee",
+    "chef_type": "role",
+    "json_class": "Chef::Role",
+    "description": "12_04-bee-ec2 instance, responsible for worker processes",
+    "override_attributes": {},
+    "default_attributes": {
+        "environment": "production",
+        "key": "value",
+        "other_key": "value"
     },
-    &quot;run_list&quot;: [
-        &quot;role[seatgeek::server]&quot;,
-        &quot;recipe[seatgeek::collect-services]&quot;,
-        &quot;recipe[seatgeek::decommission-services]&quot;,
-        &quot;recipe[seatgeek-service::api-workers]&quot;,
-        &quot;recipe[seatgeek-service::cronq-workers]&quot;,
-        &quot;recipe[seatgeek-service::djjob]&quot;,
-        &quot;recipe[seatgeek::notify-services]&quot;,
-        &quot;recipe[sudo::default]&quot;
+    "run_list": [
+        "role[seatgeek::server]",
+        "recipe[seatgeek::collect-services]",
+        "recipe[seatgeek::decommission-services]",
+        "recipe[seatgeek-service::api-workers]",
+        "recipe[seatgeek-service::cronq-workers]",
+        "recipe[seatgeek-service::djjob]",
+        "recipe[seatgeek::notify-services]",
+        "recipe[sudo::default]"
     ]
-}</code></pre>
-
+}
+</code></pre>
 <p>Some notes:</p>
-
 <ul>
-<li>There is a <code>post_run_list</code> in the <code>__base__</code> group. This is appended to the end of the <code>12_04-bee</code> run list, which is quite useful in terms of ensuring things happen in the appropriate order.</li>
-<li> Node groups should strive to avoid using sub-roles for anything. Doing so makes it a bit difficult to traverse the structure of what is occuring.</li>
-<li> The run_list should avoid the inclusion of recipes such as <code>vftp::default</code> or <code>git::client</code>. Instead, we should include these dependencies in the service we are running. If <code>seatgeek::api-workers</code> requires <code>vftp::default</code>, then we should have that dependency within that recipe.</li>
+  <li>There is a <code>post_run_list</code> in the <code>__base__</code> group. This is appended to the end of the <code>12_04-bee</code> run list, which is quite useful in terms of ensuring things happen in the appropriate order.</li>
+  <li>Node groups should strive to avoid using sub-roles for anything. Doing so makes it a bit difficult to traverse the structure of what is occuring.</li>
+  <li>The run_list should avoid the inclusion of recipes such as <code>vftp::default</code> or <code>git::client</code>. Instead, we should include these dependencies in the service we are running. If <code>seatgeek::api-workers</code> requires <code>vftp::default</code>, then we should have that dependency within that recipe.</li>
 </ul>
-
-<h4>Updating a role</h4>
-
-<p>If you ever touch <code>nodes.json</code> to add extra capabilities, you&#39;ll want to update your existing roles:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package roles:update 12_04-bee</code></pre>
-
-<p>Of course, this won&#39;t update nodes, which you&#39;ll have to do separately.</p>
-
-<h3>Generating Packer images</h3>
-
+<h4 id="updating-a-role">Updating a role</h4>
+<p>If you ever touch <code>nodes.json</code> to add extra capabilities, you’ll want to update your existing roles:</p>
+<pre><code class="language-bash">package roles:update 12_04-bee
+</code></pre>
+<p>Of course, this won’t update nodes, which you’ll have to do separately.</p>
+<h3 id="generating-packer-images">Generating Packer images</h3>
 <p>Running the following command:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package packer:create 12_04-bee</code></pre>
-
+<pre><code class="language-bash">package packer:create 12_04-bee
+</code></pre>
 <p>Will generate the following packer json:</p>
-
-<pre class="rainbow-code"><code data-language="javascript">{
-  &quot;builders&quot;: [{
-    &quot;type&quot;: &quot;amazon-ebs&quot;,
-    &quot;access_key&quot;: &quot;ACCESS_KEY&quot;,
-    &quot;secret_key&quot;: &quot;SECRET_KEY&quot;,
-    &quot;region&quot;: &quot;us-east-1&quot;,
-    &quot;source_ami&quot;: &quot;ami-1ebb2077&quot;,
-    &quot;instance_type&quot;: &quot;m1.large&quot;,
-    &quot;ssh_username&quot;: &quot;ubuntu&quot;,
-    &quot;ami_name&quot;: &quot;12_04-bee &quot;
+<pre><code class="language-javascript">{
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "ACCESS_KEY",
+    "secret_key": "SECRET_KEY",
+    "region": "us-east-1",
+    "source_ami": "ami-1ebb2077",
+    "instance_type": "m1.large",
+    "ssh_username": "ubuntu",
+    "ami_name": "12_04-bee "
   }],
   ... # TBD: other stuff here related to building the ami
-}</code></pre>
-
+}
+</code></pre>
 <p>The above would be based on some sort of templating language.</p>
-
-<h4>Running</h4>
-
+<h4 id="running">Running</h4>
 <p>Actually creating the ami on AWS for later use would be nice:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package packer:run 12_04-bee</code></pre>
-
+<pre><code class="language-bash">package packer:run 12_04-bee
+</code></pre>
 <p>We will likely want to clean up older versions of the ami to save money:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package packer:clean 12_04-bee -n 10 # keep the last 10 amis</code></pre>
-
+<pre><code class="language-bash">package packer:clean 12_04-bee -n 10 # keep the last 10 amis
+</code></pre>
 <p>If a node group will never be used again, we can simply delete all amis from aws and the related packer.json:</p>
-
-<pre class="rainbow-code"><code data-language="shell"># this will not delete any other local files or any ASGs
-package packer:delete 12_04-bee</code></pre>
-
-<h3>Autoscale Group Integration</h3>
-
-<h4>Creating an ASG</h4>
-
+<pre><code class="language-bash"># this will not delete any other local files or any ASGs
+package packer:delete 12_04-bee
+</code></pre>
+<h3 id="autoscale-group-integration">Autoscale Group Integration</h3>
+<h4 id="creating-an-asg">Creating an ASG</h4>
 <p>If we want to create an autoscale group, you could run the following command:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package autoscale:create 12_04-bee</code></pre>
-
+<pre><code class="language-bash">package autoscale:create 12_04-bee
+</code></pre>
 <p>This would create the following asg <code>dna</code> file in <code>dna/asg/12_04-bee.json</code>:</p>
-
-<pre class="rainbow-code"><code data-language="javascript">{
-  &quot;id&quot;: &quot;12_04-bee&quot;,
-  &quot;run_list&quot;: [
-    &quot;role[role-12_04-bee]&quot;
+<pre><code class="language-javascript">{
+  "id": "12_04-bee",
+  "run_list": [
+    "role[role-12_04-bee]"
   ]
-}</code></pre>
-
+}
+</code></pre>
 <p>It would also run <code>package role:create 12_04-bee</code> for the role dependency. Your tooling could then do as it likes regarding the running of this dna file.</p>
-
-<p>Next you&#39;ll want to actually start any ASGs:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package autoscale:run 12_04-bee</code></pre>
-
+<p>Next you’ll want to actually start any ASGs:</p>
+<pre><code class="language-bash">package autoscale:run 12_04-bee
+</code></pre>
 <p>This will create the required ASG - or error if one exists! - with the tag <code>group:12_04-bee</code>. Integrating chef runs wih bootstrapped data is outside of the scope of this document.</p>
-
 <blockquote>
-<p>Undefined behavior: What are the ASG defaults? We should use sane ones.</p>
+  <p>Undefined behavior: What are the ASG defaults? We should use sane ones.</p>
 </blockquote>
-
-<h4>Updating an ASG</h4>
-
+<h4 id="updating-an-asg">Updating an ASG</h4>
 <blockquote>
-<p>This is slightly messy, and due to the notification system (see next section), it may not be entirely necessary.</p>
+  <p>This is slightly messy, and due to the notification system (see next section), it may not be entirely necessary.</p>
 </blockquote>
-
 <p>If a node significantly changes - such as the size of the instance, or even base ami - we will likely want to reprovision the autoscale group:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package autoscale:update 12_04-bee</code></pre>
-
+<pre><code class="language-bash">package autoscale:update 12_04-bee
+</code></pre>
 <p>This would:</p>
-
 <ul>
-<li>provision a new <code>12_04-bee</code> asg</li>
-<li>wait until all the nodes in this asg are up and running - <strong>(how?)</strong></li>
-<li>turn off the old autoscale group after a configurable timeout so that every other node has a chance to update - <strong>(how?)</strong></li>
+  <li>provision a new <code>12_04-bee</code> asg</li>
+  <li>wait until all the nodes in this asg are up and running - <strong>(how?)</strong></li>
+  <li>turn off the old autoscale group after a configurable timeout so that every other node has a chance to update - <strong>(how?)</strong></li>
 </ul>
-
-<h3>Procuring an instance</h3>
-
-<p>There will be cases where an ASG makes no sense, or we&#39;d like to run a node in a one-off fashion:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package instance:create &lt;group&gt; --key path/to/key.pem --name INSTANCE-NAME  (--zone name-of-zone)</code></pre>
-
+<h3 id="procuring-an-instance">Procuring an instance</h3>
+<p>There will be cases where an ASG makes no sense, or we’d like to run a node in a one-off fashion:</p>
+<pre><code class="language-bash">package instance:create &lt;group&gt; --key path/to/key.pem --name INSTANCE-NAME  (--zone name-of-zone)
+</code></pre>
 <p>This will:</p>
-
 <ul>
-<li>Create an instance of type <code>&lt;group&gt;</code> with the name specified by the <code>--name</code> flag in the <code>--zone</code> (random if unspecified) using the key available at <code>--key</code>.</li>
+  <li>Create an instance of type <code>&lt;group&gt;</code> with the name specified by the <code>--name</code> flag in the <code>--zone</code> (random if unspecified) using the key available at <code>--key</code>.</li>
 </ul>
-
 <p>You can then run <code>chef-solo</code> using whatever tool you feel necessary.</p>
-
 <blockquote>
-<p>This does not create a DNA file, so running things will be weird. Should create some sort of dna file, even if it&#39;s not an ASG. Could be named <code>&lt;group&gt;-&lt;instance-id&gt;.json</code>.</p>
+  <p>This does not create a DNA file, so running things will be weird. Should create some sort of dna file, even if it’s not an ASG. Could be named <code>&lt;group&gt;-&lt;instance-id&gt;.json</code>.</p>
 </blockquote>
-
-<h3>Deploying instances</h3>
-
+<h3 id="deploying-instances">Deploying instances</h3>
 <p>It would be nice to be able to kick off a deployment of all nodes:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package instance:deploy</code></pre>
-
+<pre><code class="language-bash">package instance:deploy
+</code></pre>
 <p>Or a specific subset of nodes:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package instance:deploy 12_04-bee</code></pre>
-
+<pre><code class="language-bash">package instance:deploy 12_04-bee
+</code></pre>
 <p>This could be helpful in the following circumstances:</p>
-
 <ul>
-<li>catastrophic events, such as an AWS zone going away</li>
-<li>adding a new person&#39;s key</li>
-<li>adding an infrastructure-wide dependency (<code>fail2ban</code> for instance)</li>
+  <li>catastrophic events, such as an AWS zone going away</li>
+  <li>adding a new person’s key</li>
+  <li>adding an infrastructure-wide dependency (<code>fail2ban</code> for instance)</li>
 </ul>
-
-<h2>Chef running</h2>
-
-<h3>Sample recipe</h3>
-
+<h2 id="chef-running">Chef running</h2>
+<h3 id="sample-recipe">Sample recipe</h3>
 <p>The following is an example for <code>recipe[seatgeek-service::api-workers]</code>:</p>
-
-<pre class="rainbow-code"><code data-language="ruby">include_recipe &quot;python::default&quot;
-
+<pre><code class="language-ruby">include_recipe "python::default"
 codebase = data_bag_item('codebases', 'api')
-
-s3_file &quot;shared/seatgeek/geoip.db&quot; do
-    path &quot;/data/shared/geoip.db&quot;
+s3_file "shared/seatgeek/geoip.db" do
+    path "/data/shared/geoip.db"
 end
-
 # pulls from the api-workers databag
 # retrieves the required codebase
 # sets up the circus watchers
 # starts the service
-seatgeek_circus &quot;api-workers&quot; do
+seatgeek_circus "api-workers" do
     action :create
-end</code></pre>
-
-<p>In our case, running an api worker would require the geoip database, as well as the <code>api</code> codebase. We also set <code>node[&#39;services&#39;][&#39;api-workers&#39;] = true</code> in order to notify further applications that this is available.</p>
-
-<h3>Service collection</h3>
-
+end
+</code></pre>
+<p>In our case, running an api worker would require the geoip database, as well as the <code>api</code> codebase. We also set <code>node['services']['api-workers'] = true</code> in order to notify further applications that this is available.</p>
+<h3 id="service-collection">Service collection</h3>
 <p>The <code>seatgeek::collect-services</code> recipe would parse the <code>run_list</code> to figure out what services are running on this box:</p>
-
-<pre class="rainbow-code"><code data-language="ruby"># psuedo-code
+<pre><code class="language-ruby"># psuedo-code
 for item in run_list:
     if item not in cookbook[seatgeek-service]:
         continue
-
     node.default['seatgeek-services']['available'][item] = true
-
 for service in cookbook[seatgeek-service]:
     # configuration is some library that talks to an external service, such as etcd
     where = configuration.get_servers(service)
     if node['seatgeek-services']['available'][service]:
         where = where + current_node
-
-    node.default['seatgeek-services']['services'][service] = where</code></pre>
-
-<p>Consequently, we could depend upon <code>node[&#39;seatgeek-services&#39;][&#39;services&#39;][&#39;api-workers&#39;]</code> containing a list of servers where <code>api-workers</code> is available. This is more useful for web contexts, where we might depend upon the exist of a <code>recommendation</code> service, for example.</p>
-
+    node.default['seatgeek-services']['services'][service] = where
+</code></pre>
+<p>Consequently, we could depend upon <code>node['seatgeek-services']['services']['api-workers']</code> containing a list of servers where <code>api-workers</code> is available. This is more useful for web contexts, where we might depend upon the exist of a <code>recommendation</code> service, for example.</p>
 <blockquote>
-<p>This has no provisions for services/datastores that must be synced. For example, it would be difficult to maintain the state of a rabbitmq cluster in this method. Also, if nodes are being provisioned simultaneously, it would similarly be annoying to reprovision things.</p>
+  <p>This has no provisions for services/datastores that must be synced. For example, it would be difficult to maintain the state of a rabbitmq cluster in this method. Also, if nodes are being provisioned simultaneously, it would similarly be annoying to reprovision things.</p>
 </blockquote>
-
-<h3>Service decommissioning</h3>
-
-<p>If you are decommissioning a service, you should delete anything that service depends upon. This is important because you don&#39;t want to run code where it does not belong.</p>
-
-<pre class="rainbow-code"><code data-language="ruby"># psuedo-code
+<h3 id="service-decommissioning">Service decommissioning</h3>
+<p>If you are decommissioning a service, you should delete anything that service depends upon. This is important because you don’t want to run code where it does not belong.</p>
+<pre><code class="language-ruby"># psuedo-code
 for service, available in node['seatgeek-services']['available']:
     if not available:
-        include_recipe &quot;seatgeek-service::delete-#{service}&quot;
-        configuration.notify(service, available)</code></pre>
-
+        include_recipe "seatgeek-service::delete-#{service}"
+        configuration.notify(service, available)
+</code></pre>
 <blockquote>
-<p>If a service continues to maintain it&#39;s state on a node - for example, a the <code>api-worker</code> service was never removed from this service - then the notification system actually doesn&#39;t do anything.</p>
+  <p>If a service continues to maintain it’s state on a node - for example, a the <code>api-worker</code> service was never removed from this service - then the notification system actually doesn’t do anything.</p>
 </blockquote>
-
-<p>All services should be deletable. Chef doesn&#39;t make it easy to contain the creation/deletion code for a particular thing in a single recipe, thus the hack of using a separate recipe.</p>
-
+<p>All services should be deletable. Chef doesn’t make it easy to contain the creation/deletion code for a particular thing in a single recipe, thus the hack of using a separate recipe.</p>
 <blockquote>
-<p>This could result in service drift, where the deployment of a service does not necessarily match up with it&#39;s undeployment</p>
+  <p>This could result in service drift, where the deployment of a service does not necessarily match up with it’s undeployment</p>
 </blockquote>
-
 <p>We want to notify everyone that a service is unavailable BEFORE taking the service away. This will hopefully ensure those services stop pointing at this resource, potentially helping with uptime.</p>
-
-<h3>Service notification</h3>
-
-<p>This bit is actually quite easy. Once a server is deployed, we can notify all other servers of it&#39;s existence:</p>
-
-<pre class="rainbow-code"><code data-language="ruby"># psuedo-code
+<h3 id="service-notification">Service notification</h3>
+<p>This bit is actually quite easy. Once a server is deployed, we can notify all other servers of it’s existence:</p>
+<pre><code class="language-ruby"># psuedo-code
 for item, available in node['seatgeek-services']['available']:
     if available:
-        configuration.notify(item, available)</code></pre>
-
+        configuration.notify(item, available)
+</code></pre>
 <p>We essentially want to notify everyone that we are <em>running</em> a service.</p>
-
 <blockquote>
-<p>If a service continues to maintain it&#39;s state on a node - for example, a the <code>api-worker</code> service was never removed from this service - then the notification system actually doesn&#39;t do anything.</p>
+  <p>If a service continues to maintain it’s state on a node - for example, a the <code>api-worker</code> service was never removed from this service - then the notification system actually doesn’t do anything.</p>
 </blockquote>
-
 <p>The interesting thing here would be to run a daemon on every server that listens on this queue. Whenever a service becomes available/unavailable on a server, other servers can simply queue up the provision step of <code>chef-solo</code>.</p>
-
-<h2>Workflow</h2>
-
-<p>Generally speaking, we would want to simplify ops-life. I don&#39;t know if the following workflow is necessarily:</p>
-
+<h2 id="workflow">Workflow</h2>
+<p>Generally speaking, we would want to simplify ops-life. I don’t know if the following workflow is necessarily:</p>
 <ul>
-<li>simple</li>
-<li>good</li>
-<li>a solid workflow</li>
+  <li>simple</li>
+  <li>good</li>
+  <li>a solid workflow</li>
 </ul>
-
 <p>Having not tried it, I cannot endorse it. It <em>seems</em> legit.</p>
-
-<h3>Completely new, standalone services</h3>
-
+<h3 id="completely-new-standalone-services">Completely new, standalone services</h3>
 <p>An operations engineer should be able to go about his day, working on a feature:</p>
-
-<pre class="rainbow-code"><code data-language="shell">git add data_bags
+<pre><code class="language-bash">git add data_bags
 git add vftp
 git add seatgeek-service/recipes/ftp-listener.rb
 git add seatgeek-service/recipes/ftp-processor.rb
-git commit -m &quot;added service to process ftp uploads&quot;</code></pre>
-
+git commit -m "added service to process ftp uploads"
+</code></pre>
 <p>And then setup instances for this:</p>
-
-<pre class="rainbow-code"><code data-language="shell"># edit nodes.json to add ftp-processor and ftp-listener roles
-
+<pre><code class="language-bash"># edit nodes.json to add ftp-processor and ftp-listener roles
 package role:create ftp-listener
 package role:create ftp-processor
-
 git add nodes.json
 git add roles/ftp-processor.json roles/ftp-listener.json
-git commit -m &quot;ftp-processor and ftp-listener role&quot;
-
+git commit -m "ftp-processor and ftp-listener role"
 package packer:create ftp-listener
 package packer:run ftp-listener
-
 package packer:create ftp-processor
-package packer:run ftp-processor</code></pre>
-
+package packer:run ftp-processor
+</code></pre>
 <p>And finally bring them up in an autoscale group:</p>
-
-<pre class="rainbow-code"><code data-language="shell">package autoscale:create ftp-processor
+<pre><code class="language-bash">package autoscale:create ftp-processor
 package autoscale:run ftp-processor
-
 package autoscale:create ftp-processor
-package autoscale:run ftp-processor</code></pre>
-
-<h3>Existing services</h3>
-
+package autoscale:run ftp-processor
+</code></pre>
+<h3 id="existing-services">Existing services</h3>
 <p>What if we had catch-all background workers, and were just deploying some new background worker that processes user analytics?</p>
-
-<pre class="rainbow-code"><code data-language="shell"># work on seatgeek-service::process-users which requires access to temporary storage
+<pre><code class="language-bash"># work on seatgeek-service::process-users which requires access to temporary storage
 # meaning we want to ensure the temporary storage is there, in addition to the service itself running.
-
 git add data_bags
 git add seatgeek-service/recipes/process-users.rb
-git commit -m &quot;create a process for playing with user&quot;
-
+git commit -m "create a process for playing with user"
 # add the role to the 12_04-bee entry in nodes.json
 package roles:update 12_04-bee
 git add nodes.json roles/12_04-bee.json
-git commit -m &quot;added user processing to 12_04-bee machines&quot;</code></pre>
-
+git commit -m "added user processing to 12_04-bee machines"
+</code></pre>
 <p>We should be able to notify nodes to redeploy in some fashion.</p>
-
-<pre class="rainbow-code"><code data-language="shell">package instance:deploy 12_04-bee</code></pre>
-
-<h2>Final Thoughts</h2>
-
+<pre><code class="language-bash">package instance:deploy 12_04-bee
+</code></pre>
+<h2 id="final-thoughts">Final Thoughts</h2>
 <p>This is likely step 1 towards a PaaS. Managing services here is still difficult, though relatively less so due to the tooling built around it. And the tooling does not exist yet.</p>
-
 <p>Services are not completely isolated from each other, so it is possible for a single service to consume all the resources on a node. By the same token, it is possible for a node to consume no resources yet still be deployed to a server, thus costing the company money for no reason. Further integration with Autoscale groups <em>could</em> ameliorate this issue, but not without some sort of resource monitoring to figure out if processes are:</p>
-
 <ul>
-<li>doing enough work to warrant staying alive</li>
-<li>flooded with work</li>
+  <li>doing enough work to warrant staying alive</li>
+  <li>flooded with work</li>
 </ul>
-
-<p>I have yet to see a heroku-like service that allows you to tie services together as dependencies. Likely you&#39;ll have some background workers that consumes an HTTP service, which I have not seen be autoconfigurable on something like Heroku. Being able to specify what you expose is <em>quite</em> useful, and a possible solution is to tie something like <code>haproxy</code>+<code>etcd</code> on each node to do service-level proxying. I am unsure as to whether this will flood nodes at any scale, though haproxy alone has worked well enough. This also means all your web services should expose some sort of status endpoint.</p>
-
+<p>I have yet to see a heroku-like service that allows you to tie services together as dependencies. Likely you’ll have some background workers that consumes an HTTP service, which I have not seen be autoconfigurable on something like Heroku. Being able to specify what you expose is <em>quite</em> useful, and a possible solution is to tie something like <code>haproxy</code>+<code>etcd</code> on each node to do service-level proxying. I am unsure as to whether this will flood nodes at any scale, though haproxy alone has worked well enough. This also means all your web services should expose some sort of status endpoint.</p>
 <blockquote>
-<p>The above applies to datastores, and luckily enough, if you are using a managed datastore by AWS, most of the issues are covered, though if they have an outage, you have an outage, so be warned.</p>
+  <p>The above applies to datastores, and luckily enough, if you are using a managed datastore by AWS, most of the issues are covered, though if they have an outage, you have an outage, so be warned.</p>
 </blockquote>
-
-<p>Scaling up resources using the above workflow would be a challenge, as would moving services around. It could work well if everything was on it&#39;s own server, but that&#39;s unlikely to be economically feasible. That&#39;s essentially how Heroku works - you pay per dyno, though they probably have large instances hosting said dynos - so you can see some of the economics in action there.</p>
-
+<p>Scaling up resources using the above workflow would be a challenge, as would moving services around. It could work well if everything was on it’s own server, but that’s unlikely to be economically feasible. That’s essentially how Heroku works - you pay per dyno, though they probably have large instances hosting said dynos - so you can see some of the economics in action there.</p>
 <p>This setup does not currently advocate immutable servers, though it does not preclude their usage. It actually <em>should</em> work, provided network traffic could be migrated from live nodes to dead nodes easily. The way to do that would be to remove a service from a node, which would trigger a deploy event across your infrastructure.</p>
-
 <p>Testing deploys would be difficult. What if you deployed a bad configuration, bringing that node into production? Ideally you deploy to a testing/staging environment to shake out any cobwebs, but this might not be feasible depending upon your size. It could also be possible to test everything out locally through the use of Vagrant, but stuff like datastores and ebs volumes might be more difficult to fake out.</p>
-
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/opschops" title="View all posts in Opschops" rel="category">Opschops</a> on <a href="http://josediazgonzalez.com/2013/10/17/deploying-your-infrastructure-to-aws/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-10-17 00:29:00 +0000">17 Oct 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/10/17/deploying-your-infrastructure-to-aws/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/10/17/deploying-your-infrastructure-to-aws/';
-				var disqus_title      = 'Insane Server Management: Deploying your infrastructure to AWS';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2013/10/17/deploying-your-infrastructure-to-aws/';
+        var disqus_url        = 'http://josediazgonzalez.com/2013/10/17/deploying-your-infrastructure-to-aws/';
+        var disqus_title      = "Insane Server Management: Deploying your infrastructure to AWS";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

@@ -8,221 +8,191 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>Thoughts - An API for Plugin Installation</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago." />
-		<meta name="keywords" content="thoughts, cakephp, plugins, side-projects" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="Thoughts - An API for Plugin Installation" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/" />
-		<meta property="og:description" content="One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago." />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="Thoughts - An API for Plugin Installation" />
-		<meta name="twitter:description" content="One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago." />
-
-		<link rel="alternate" type="application/rss+xml" title="Thoughts - An API for Plugin Installation » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Thoughts - An API for Plugin Installation</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago." />
+    <meta name="keywords" content="thoughts, cakephp, plugins, side-projects" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Thoughts - An API for Plugin Installation" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/" />
+    <meta property="og:description" content="One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago." />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Thoughts - An API for Plugin Installation" />
+    <meta name="twitter:description" content="One of my current projects is a CakePHP plugin server. The existing sample was created by John David Anderson of http://www.thoughtglade.com. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago." />
+    <link rel="alternate" type="application/rss+xml" title="Thoughts - An API for Plugin Installation » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Thoughts - An API for Plugin Installation
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Thoughts - An API for Plugin Installation!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
     <p>One of my current projects is a CakePHP plugin server. <a href="http://www.thoughtglade.com/posts/plugin-server">The existing sample</a> was created by John David Anderson of <a href="http://www.thoughtglade.com/posts/plugin-server">http://www.thoughtglade.com</a>. It is neat and all, and one of the first things I came across when looking at CakePHP 11 months ago.</p>
-
-<p>The idea behind a plugin server is simple. There are hundreds of open-source CakePHP code that would be great to use in one&#39;s own personal web applications. CakePHP provides Behaviors, Components, Helpers, etc. that will allow one to place this reusable code where needed, but also provides &quot;plugins&quot; that allow users to package up related things into neat little bundles. Sort of like mini-applications. So you could build parts of your applications in plugins, then just bash them together to create websites to a clients specifications with little-to-no work.</p>
-
-<p>Unfortunately, there hasn&#39;t been a rash of mini-application releases. I suspect this is because no one cares to release their hard-worked for code, but it doesn&#39;t matter. There <em>has</em> been a lot of snippets released, and plenty of components, behaviors, helpers <a href="http://bakery.cakephp.org">on the cakephp bakery</a>, as well as <a href="http://thechaw.com">on thechaw.com</a>, and even <a href="http://github.com">on github</a>. Github&#39;s gist feature would go great with this, as it provides a nice way to diff, fork, etc. a file (or package of files) within the browser. If this were integrated with <a href="http://thechaw.com">thechaw.com</a> and <a href="http://bakery.cakephp.org">bakery</a> articles, then we&#39;d have a great potential win. Unfortunately, the <a href="http://bakery.cakephp.org/articles/view/the-cake-is-still-rising">recent split of the CakePHP Core Team</a> between <a href="http://cakephp.org">CakePHP</a> and <a href="http://rad-dev.org/">Lithium</a> has me doubting that such a thing would ever happen, as Gwoo, the maintainer of <a href="http://thechaw.com">thechaw.com</a>, went to the Lithium camp. Feel free to contribute to <a href="http://thechaw.com/bakery">Bakery 2.0</a> and prove me wrong :)</p>
-
-<p>Regardless, it would be nice to have any code that is already plugin-ready to be available to a user via git, hg, svn etc. I personally use git, so I&#39;m going to concentrate on that, although the paradigms are almost all the same across each platform. A project has a url, a main maintainer, some branches, a readme, and perhaps some links. In some cases, a plugin may require another, so just another thing to keep track of. Andy Dawson of CakePHP and Lithium fame actually was working on something of an api for this. You can read his proposal at <a href="http://code.assembla.com/mi/subversion/node/live/1858/branches/mi_plugin/vendors/packages.txt">http://code.assembla.com/mi/subversion/node/live/1858/branches/mi_plugin/vendors/packages.txt</a>.</p>
-
+<p>The idea behind a plugin server is simple. There are hundreds of open-source CakePHP code that would be great to use in one’s own personal web applications. CakePHP provides Behaviors, Components, Helpers, etc. that will allow one to place this reusable code where needed, but also provides “plugins” that allow users to package up related things into neat little bundles. Sort of like mini-applications. So you could build parts of your applications in plugins, then just bash them together to create websites to a clients specifications with little-to-no work.</p>
+<p>Unfortunately, there hasn’t been a rash of mini-application releases. I suspect this is because no one cares to release their hard-worked for code, but it doesn’t matter. There <em>has</em> been a lot of snippets released, and plenty of components, behaviors, helpers <a href="http://bakery.cakephp.org">on the cakephp bakery</a>, as well as <a href="http://thechaw.com">on thechaw.com</a>, and even <a href="http://github.com">on github</a>. Github’s gist feature would go great with this, as it provides a nice way to diff, fork, etc. a file (or package of files) within the browser. If this were integrated with <a href="http://thechaw.com">thechaw.com</a> and <a href="http://bakery.cakephp.org">bakery</a> articles, then we’d have a great potential win. Unfortunately, the <a href="http://bakery.cakephp.org/articles/view/the-cake-is-still-rising">recent split of the CakePHP Core Team</a> between <a href="http://cakephp.org">CakePHP</a> and <a href="http://rad-dev.org/">Lithium</a> has me doubting that such a thing would ever happen, as Gwoo, the maintainer of <a href="http://thechaw.com">thechaw.com</a>, went to the Lithium camp. Feel free to contribute to <a href="http://thechaw.com/bakery">Bakery 2.0</a> and prove me wrong :)</p>
+<p>Regardless, it would be nice to have any code that is already plugin-ready to be available to a user via git, hg, svn etc. I personally use git, so I’m going to concentrate on that, although the paradigms are almost all the same across each platform. A project has a url, a main maintainer, some branches, a readme, and perhaps some links. In some cases, a plugin may require another, so just another thing to keep track of. Andy Dawson of CakePHP and Lithium fame actually was working on something of an api for this. You can read his proposal at <a href="http://code.assembla.com/mi/subversion/node/live/1858/branches/mi_plugin/vendors/packages.txt">http://code.assembla.com/mi/subversion/node/live/1858/branches/mi_plugin/vendors/packages.txt</a>.</p>
 <p>Anyways, here is what I think. JSON.</p>
-
-<pre class="rainbow-code"><code data-language="javascript">{
-    &quot;id&quot; : &quot;123&quot;,
-    &quot;slug&quot; : &quot;trackable-behavior&quot;,
-    &quot;package&quot; : &quot;Trackable Behavior&quot;,
-    &quot;description&quot; : &quot;Who created or modified this record?&quot;
-    &quot;maintainer&quot; : &quot;someemail[a]savant[dot]be&quot;,
-    &quot;website&quot; : &quot;http://josegonzalez/tracker/cakephp/trackable-behavior&quot;,
-    &quot;type&quot; : &quot;behavior&quot;,
-    &quot;dependencies&quot; : &quot;&quot;,
-    &quot;created&quot; : &quot;2009-08-22 18: 38: 17&quot;,
-    &quot;modified&quot; : &quot;2009-11-27 03: 44: 32&quot;,
-    &quot;main-scm&quot; : &quot;git&quot;,
-    &quot;repository&quot; : &quot;git://josegonzalez.com/cakephp/trackable-behavior.git&quot;,
-    &quot;other-scm&quot; : {
-        &quot;svn&quot; : &quot;http://josediazgonzalez.com/svn/cakephp/trackable&quot;
+<pre><code class="language-javascript">{
+    "id" : "123",
+    "slug" : "trackable-behavior",
+    "package" : "Trackable Behavior",
+    "description" : "Who created or modified this record?"
+    "maintainer" : "someemail[a]savant[dot]be",
+    "website" : "http://josegonzalez/tracker/cakephp/trackable-behavior",
+    "type" : "behavior",
+    "dependencies" : "",
+    "created" : "2009-08-22 18: 38: 17",
+    "modified" : "2009-11-27 03: 44: 32",
+    "main-scm" : "git",
+    "repository" : "git://josegonzalez.com/cakephp/trackable-behavior.git",
+    "other-scm" : {
+        "svn" : "http://josediazgonzalez.com/svn/cakephp/trackable"
     },
-    &quot;branches&quot; : {
-        &quot;main&quot; : &quot;master&quot;,
-        &quot;1.2&quot; : &quot;1.2-release&quot;,
-        &quot;1.3&quot; : &quot;1.3-dev&quot;,
-        &quot;dev&quot; : &quot;experimental&quot;
+    "branches" : {
+        "main" : "master",
+        "1.2" : "1.2-release",
+        "1.3" : "1.3-dev",
+        "dev" : "experimental"
     }
-}</code></pre>
-
+}
+</code></pre>
 <p>Ideally, the plugin would be standalone, both a server and a set of shell scripts. The server would output JSON similar to the above for each record. A user would be able to log onto the site, register a plugin of theirs (with the appropriate links for repository browsing, branches where necessary, dependencies, etc.) and that plugin would be available immediately via a JSON api. Users would also be able to browse the plugin server, check out available plugins, perhaps see screenshots or readme files where appropriate, and more information about the author. Maybe even a download in zip or tar format of the plugin. So something akin to Github, except explicitly for CakePHP code.</p>
-
-<p>The server, upon aggregating the new plugin, would attempt to mirror the plugin for future reference. In the case that a plugin is no longer available at it&#39;s original source, the plugin server provider would have the option of mirroring the plugin on their own server, and also replicating it across HG and SVN, or whatever other SCM they intend to implement. If done properly, they could also be made aware of other plugin servers, so in the case that the user cannot find the plugin at the original source nor at the plugin server, a different server can kick in and act as a backup if the plugin is available there. This way, we do not overburden any one server, and we do not force providers to become one-stop shops. It also lets developers forget about how others may want to use their code, so if I am on a team that uses HG exclusively, I do not have to worry about the fact that all the plugins are stored on github and vice versa.</p>
-
+<p>The server, upon aggregating the new plugin, would attempt to mirror the plugin for future reference. In the case that a plugin is no longer available at it’s original source, the plugin server provider would have the option of mirroring the plugin on their own server, and also replicating it across HG and SVN, or whatever other SCM they intend to implement. If done properly, they could also be made aware of other plugin servers, so in the case that the user cannot find the plugin at the original source nor at the plugin server, a different server can kick in and act as a backup if the plugin is available there. This way, we do not overburden any one server, and we do not force providers to become one-stop shops. It also lets developers forget about how others may want to use their code, so if I am on a team that uses HG exclusively, I do not have to worry about the fact that all the plugins are stored on github and vice versa.</p>
 <p>Each SCM library would be implemented via a small PHP class. The class would simply provide definitions for accessing local repositories and serving the correct url for a remote repository. So the class would handle serving and requesting specific branches if necessary. It would also mean that if I were too lazy to implement an SVN (heaven forbid someone is using CVS or even Darcs, <em>shudder</em>), then anyone else would be able to do so and thereby extend the core plugin installer. A common library API will need to be settled upon, but it should not be a big deal.</p>
-
 <p>The final thing would be a cake shell that will be able to query this API and install plugins. The basic tasks are as follows</p>
-
 <ul>
-<li>Search for a plugin</li>
-<li>Install/Remove plugin(s)</li>
-<li>Upload a plugin to a plugin server</li>
-<li>Update all installed plugins</li>
-<li>Configure settings for project/plugin installer</li>
+  <li>Search for a plugin</li>
+  <li>Install/Remove plugin(s)</li>
+  <li>Upload a plugin to a plugin server</li>
+  <li>Update all installed plugins</li>
+  <li>Configure settings for project/plugin installer</li>
 </ul>
-
 <p>Ideally, one would be able to specify a server from which to grab a plugin. The following is a sample cake shell call:</p>
-
-<pre class="rainbow-code"><code data-language="shell">cake plugin install -server http://thechaw.com/plugins -name trackable-behavior -branch 1.3 -scm git -basepath app/plugins/trackable</code></pre>
-
+<pre><code class="language-bash">cake plugin install -server "http://thechaw.com/plugins" -name trackable-behavior -branch 1.3 -scm git -basepath app/plugins/trackable
+</code></pre>
 <p>The above would query <a href="http://thechaw.com/plugins">http://thechaw.com/plugins</a> for a plugin matching the slug <em>trackable-behavior</em> and, using git, install the <em>1.3</em> branch in <em>app/plugins/trackable</em>. Updating <em>only</em> the trackable behavior plugin would be a breeze (assuming we cached the installed plugins somewhere, like in a database or something):</p>
-
-<pre class="rainbow-code"><code data-language="shell">cake plugin update -server http://thechaw.com/plugins -name trackable-behavior</code></pre>
-
-<p>If you don&#39;t like typing out the server, scm, branch, or base install path, one might do the following</p>
-
-<pre class="rainbow-code"><code data-language="shell">cake plugin configure -server http://thechaw.com/plugins -branch 1.3 -scm git -path app/plugins/</code></pre>
-
+<pre><code class="language-bash">cake plugin update -server "http://thechaw.com/plugins" -name trackable-behavior
+</code></pre>
+<p>If you don’t like typing out the server, scm, branch, or base install path, one might do the following</p>
+<pre><code class="language-bash">cake plugin configure -server "http://thechaw.com/plugins" -branch 1.3 -scm git -path app/plugins/
+</code></pre>
 <p>New plugins would be installed using the 1.3 branch where possible (master in all other cases) from thechaw.com into app/plugins (we would be able to specify a directory name using something like -relpath later).</p>
-
-<p>Of course, the cake shell would request a new list of all plugins at least once a week, or could be configured to refresh it&#39;s cache. Would be cool to store all of this in either a cache file, a raw json dump, or even Sqlite (CakePHP <em>does</em> have a datasource for that). I&#39;m still evaluating this, and I should be able to make some incremental progress on at least the server portion soon.</p>
-
-<p>I know I don&#39;t have commenting on this blog, but if anyone has any ideas, feel free to send me a message on twitter or github.</p>
-
-<p><em>Note: I currently have a plugin installer at <a href="http://github.com/josegonzalez/cakephp-github-plugin-plugin/">http://github.com/josegonzalez/cakephp-github-plugin-plugin/</a>. I&#39;m not even going to go into it&#39;s workings on this post. Lets just say it is quite silly. You WILL need git for this to work, but it currently tracks around 80 plugins available on github.</em></p>
-
+<p>Of course, the cake shell would request a new list of all plugins at least once a week, or could be configured to refresh it’s cache. Would be cool to store all of this in either a cache file, a raw json dump, or even Sqlite (CakePHP <em>does</em> have a datasource for that). I’m still evaluating this, and I should be able to make some incremental progress on at least the server portion soon.</p>
+<p>I know I don’t have commenting on this blog, but if anyone has any ideas, feel free to send me a message on twitter or github.</p>
+<p><em>Note: I currently have a plugin installer at <a href="http://github.com/josegonzalez/cakephp-github-plugin-plugin/">http://github.com/josegonzalez/cakephp-github-plugin-plugin/</a>. I’m not even going to go into it’s workings on this post. Lets just say it is quite silly. You WILL need git for this to work, but it currently tracks around 80 plugins available on github.</em></p>
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2009-11-27 00:00:00 +0000">27 Nov 2009</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2009/11/27/thoughts-an-api-for-plugin-installation/';
-				var disqus_url        = 'http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/';
-				var disqus_title      = 'Thoughts - An API for Plugin Installation';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2009/11/27/thoughts-an-api-for-plugin-installation/';
+        var disqus_url        = 'http://josediazgonzalez.com/2009/11/27/thoughts-an-api-for-plugin-installation/';
+        var disqus_title      = "Thoughts - An API for Plugin Installation";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

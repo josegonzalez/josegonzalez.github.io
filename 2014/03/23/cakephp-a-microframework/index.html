@@ -8,122 +8,102 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>CakePHP as a Microframework</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="Using CakePHP as a library to build applications microframework-style" />
-		<meta name="keywords" content="cakephp, dispatcher, microframeworks" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="CakePHP as a Microframework" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/" />
-		<meta property="og:description" content="Using CakePHP as a library to build applications microframework-style" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="CakePHP as a Microframework" />
-		<meta name="twitter:description" content="Using CakePHP as a library to build applications microframework-style" />
-
-		<link rel="alternate" type="application/rss+xml" title="CakePHP as a Microframework » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakePHP as a Microframework</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Using CakePHP as a library to build applications microframework-style" />
+    <meta name="keywords" content="cakephp, dispatcher, microframeworks" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakePHP as a Microframework" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/" />
+    <meta property="og:description" content="Using CakePHP as a library to build applications microframework-style" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakePHP as a Microframework" />
+    <meta name="twitter:description" content="Using CakePHP as a library to build applications microframework-style" />
+    <link rel="alternate" type="application/rss+xml" title="CakePHP as a Microframework » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         CakePHP as a Microframework
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on CakePHP as a Microframework!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
     <p>One of the features that most frameworks toute is the ability to respond to a request from the route file immediately. For instance, here is how SlimPHP applications are structured (at least initially):</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 $app = new \Slim\Slim();
 $app-&gt;get('/hello/:name', function ($name) {
-    echo &quot;Hello, $name&quot;;
+    echo "Hello, $name";
 });
 $app-&gt;run();
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <blockquote>
-<p>People familiar with this type of application are likely familiar with the <code>Sinatra</code> microframework.</p>
+  <p>People familiar with this type of application are likely familiar with the <code>Sinatra</code> microframework.</p>
 </blockquote>
-
-<p>CakePHP has typically been in the opposite camp. Lots of classes to wire up to get a response on the page. Kind of lame, and then you <em>have</em> to integrate with CakePHP&#39;s conventions, which can be frustrating if you simply want to use the framework as a library. It&#39;s quite straightforward to turn CakePHP into a microframework using dispatch filters.</p>
-
-<p>Lets define a simple api. We&#39;ll want to be able to connect arbitrary routes to a <code>callable</code> or a class that has a <code>respond</code> method. This can look like the following:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<p>CakePHP has typically been in the opposite camp. Lots of classes to wire up to get a response on the page. Kind of lame, and then you <em>have</em> to integrate with CakePHP’s conventions, which can be frustrating if you simply want to use the framework as a library. It’s quite straightforward to turn CakePHP into a microframework using dispatch filters.</p>
+<p>Lets define a simple api. We’ll want to be able to connect arbitrary routes to a <code>callable</code> or a class that has a <code>respond</code> method. This can look like the following:</p>
+<pre><code class="language-php">&lt;?php
 class ResponseInterface {
     public abstract function respond($request, $response);
 }
-
 class HelloWorld implements ResponseInterface {
     public function respond($request, $response) {
         $response-&gt;body('Hello World');
     }
 }
-
 Router::connect('/hello/*', ['callable' =&gt; function($request, $response) {
     $response-&gt;body('Hello World');
 }]);
-
 Router::connect('/world/*', ['callable' =&gt; 'HelloWorld']);
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Controller classes have plumbing to auto-generate responses based on <em>just</em> the <code>CakeRequest</code> and <code>CakeResponse</code> objects, hence why they are necessary. We also implement the <code>ResponseInterface</code> class to make the PHPJava people happy :)</p>
-
-<p>To route these properly, we&#39;ll hook into CakePHP&#39;s dispatch cycle using a custom dispatch filter as follows:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<p>To route these properly, we’ll hook into CakePHP’s dispatch cycle using a custom dispatch filter as follows:</p>
+<pre><code class="language-php">&lt;?php
 App::uses('DispatcherFilter', 'Routing');
 class CallableFilter extends DispatcherFilter {
     public function beforeDispatch(CakeEvent $event) {
@@ -131,7 +111,6 @@ class CallableFilter extends DispatcherFilter {
         if (isset($event-&gt;data['request']-&gt;params['callable'])) {
             $callable = $event-&gt;data['request']-&gt;params['callable'];
         }
-
         if (is_string($callable) &amp;&amp; class_exists($callable)) {
             $callable = new $callable;
             $callable-&gt;respond($event-&gt;data['request'], $event-&gt;data['response']);
@@ -140,109 +119,100 @@ class CallableFilter extends DispatcherFilter {
         } else {
             return null;
         }
-
         $event-&gt;stopPropagation();
         return $event-&gt;data['response'];
     }
 }
-?&gt;</code></pre>
-
-<p>In our CallableFilter, we check for the existence of a <code>callable</code>. For practicality, we&#39;re a bit flexible in this definition and also allow class names to be &quot;callables&quot;. All <code>callable</code> executions are given <code>CakeRequest</code> and a <code>CakeResponse</code> objects, and we automatically call <code>$event-&gt;stopPropagation()</code> should the callable be invoked.</p>
-
+?&gt;
+</code></pre>
+<p>In our CallableFilter, we check for the existence of a <code>callable</code>. For practicality, we’re a bit flexible in this definition and also allow class names to be “callables”. All <code>callable</code> executions are given <code>CakeRequest</code> and a <code>CakeResponse</code> objects, and we automatically call <code>$event-&gt;stopPropagation()</code> should the callable be invoked.</p>
 <p>To configure our filter, simply attach it to your DispatcherFilter configuration in <code>app/Config/bootstrap.php</code> like so:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 Configure::write('Dispatcher.filters', [
     'AssetDispatcher',
     'CacheDispatcher',
     'CallableFilter'
 ]);
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>And voila! You have a CakePHP microframework.</p>
-
 <p>Some things you can now do with this setup:</p>
-
 <ul>
-<li>Configure before and after request filters</li>
-<li>Setup a templating system (with helper loading)</li>
-<li>Automatically load model classes based on class name and configuration</li>
-<li>Figure out how to do reverse routing</li>
-<li>Reimplement all of the CakePHP dispatching because you refuse to use a full framework ;)</li>
+  <li>Configure before and after request filters</li>
+  <li>Setup a templating system (with helper loading)</li>
+  <li>Automatically load model classes based on class name and configuration</li>
+  <li>Figure out how to do reverse routing</li>
+  <li>Reimplement all of the CakePHP dispatching because you refuse to use a full framework ;)</li>
 </ul>
-
-<p>Microframeworks have their place, and while I don&#39;t recommend you implement <em>all</em> of your CakePHP applications using the above setup, it can be a powerful tool in your arsenal.</p>
-
+<p>Microframeworks have their place, and while I don’t recommend you implement <em>all</em> of your CakePHP applications using the above setup, it can be a powerful tool in your arsenal.</p>
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-03-23 20:37:00 +0000">23 Mar 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2014/03/23/cakephp-a-microframework/';
-				var disqus_url        = 'http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/';
-				var disqus_title      = 'CakePHP as a Microframework';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2014/03/23/cakephp-a-microframework/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/';
+        var disqus_title      = "CakePHP as a Microframework";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>

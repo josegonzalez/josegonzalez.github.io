@@ -1,0 +1,2114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jose Diaz-Gonzalez</title>
+    <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
+    <link>http://josediazgonzalez.com/</link>
+    <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Sun, 17 Aug 2014 16:26:32 +0000</pubDate>
+    <lastBuildDate>Sun, 17 Aug 2014 16:26:32 +0000</lastBuildDate>
+    <generator>Jekyll v2.3.0</generator>
+    
+      <item>
+        <title>CakePHP as a Microframework</title>
+        <description>&lt;p&gt;One of the features that most frameworks toute is the ability to respond to a request from the route file immediately. For instance, here is how SlimPHP applications are structured (at least initially):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$app = new \Slim\Slim();
+$app-&amp;gt;get('/hello/:name', function ($name) {
+    echo &quot;Hello, $name&quot;;
+});
+$app-&amp;gt;run();
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;People familiar with this type of application are likely familiar with the &lt;code&gt;Sinatra&lt;/code&gt; microframework.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;CakePHP has typically been in the opposite camp. Lots of classes to wire up to get a response on the page. Kind of lame, and then you &lt;em&gt;have&lt;/em&gt; to integrate with CakePHP’s conventions, which can be frustrating if you simply want to use the framework as a library. It’s quite straightforward to turn CakePHP into a microframework using dispatch filters.&lt;/p&gt;
+
+&lt;p&gt;Lets define a simple api. We’ll want to be able to connect arbitrary routes to a &lt;code&gt;callable&lt;/code&gt; or a class that has a &lt;code&gt;respond&lt;/code&gt; method. This can look like the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class ResponseInterface {
+    public abstract function respond($request, $response);
+}
+
+class HelloWorld implements ResponseInterface {
+    public function respond($request, $response) {
+        $response-&amp;gt;body('Hello World');
+    }
+}
+
+Router::connect('/hello/*', ['callable' =&amp;gt; function($request, $response) {
+    $response-&amp;gt;body('Hello World');
+}]);
+
+Router::connect('/world/*', ['callable' =&amp;gt; 'HelloWorld']);
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Controller classes have plumbing to auto-generate responses based on &lt;em&gt;just&lt;/em&gt; the &lt;code&gt;CakeRequest&lt;/code&gt; and &lt;code&gt;CakeResponse&lt;/code&gt; objects, hence why they are necessary. We also implement the &lt;code&gt;ResponseInterface&lt;/code&gt; class to make the PHPJava people happy :)&lt;/p&gt;
+
+&lt;p&gt;To route these properly, we’ll hook into CakePHP’s dispatch cycle using a custom dispatch filter as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('DispatcherFilter', 'Routing');
+class CallableFilter extends DispatcherFilter {
+    public function beforeDispatch(CakeEvent $event) {
+        $callable = null;
+        if (isset($event-&amp;gt;data['request']-&amp;gt;params['callable'])) {
+            $callable = $event-&amp;gt;data['request']-&amp;gt;params['callable'];
+        }
+
+        if (is_string($callable) &amp;amp;&amp;amp; class_exists($callable)) {
+            $callable = new $callable;
+            $callable-&amp;gt;respond($event-&amp;gt;data['request'], $event-&amp;gt;data['response']);
+        } elseif (is_callable($callable)) {
+            $callable($event-&amp;gt;data['request'], $event-&amp;gt;data['response']);
+        } else {
+            return null;
+        }
+
+        $event-&amp;gt;stopPropagation();
+        return $event-&amp;gt;data['response'];
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In our CallableFilter, we check for the existence of a &lt;code&gt;callable&lt;/code&gt;. For practicality, we’re a bit flexible in this definition and also allow class names to be “callables”. All &lt;code&gt;callable&lt;/code&gt; executions are given &lt;code&gt;CakeRequest&lt;/code&gt; and a &lt;code&gt;CakeResponse&lt;/code&gt; objects, and we automatically call &lt;code&gt;$event-&amp;gt;stopPropagation()&lt;/code&gt; should the callable be invoked.&lt;/p&gt;
+
+&lt;p&gt;To configure our filter, simply attach it to your DispatcherFilter configuration in &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt; like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+Configure::write('Dispatcher.filters', [
+    'AssetDispatcher',
+    'CacheDispatcher',
+    'CallableFilter'
+]);
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And voila! You have a CakePHP microframework.&lt;/p&gt;
+
+&lt;p&gt;Some things you can now do with this setup:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Configure before and after request filters&lt;/li&gt;
+  &lt;li&gt;Setup a templating system (with helper loading)&lt;/li&gt;
+  &lt;li&gt;Automatically load model classes based on class name and configuration&lt;/li&gt;
+  &lt;li&gt;Figure out how to do reverse routing&lt;/li&gt;
+  &lt;li&gt;Reimplement all of the CakePHP dispatching because you refuse to use a full framework ;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Microframeworks have their place, and while I don’t recommend you implement &lt;em&gt;all&lt;/em&gt; of your CakePHP applications using the above setup, it can be a powerful tool in your arsenal.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 23 Mar 2014 20:37:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>dispatcher</category>
+        
+        <category>microframeworks</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Shipping CakePHP App Logs to Logstash via Syslog</title>
+        <description>&lt;p&gt;Writing a logger for CakePHP isn’t very difficult. The work lies in implementing the &lt;code&gt;CakeLogInterface&lt;/code&gt;, which requires that you implement a &lt;code&gt;write&lt;/code&gt; method as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('BaseLog', 'Log/Engine');
+class LogstashLog extends BaseLog
+{
+    public function write($type, $message)
+    {
+        // write to some output.
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above class can go into &lt;code&gt;app/Lib/Log/Engine/LogstashLog.php&lt;/code&gt;. Once you’ve implemented the interface - and I recommend you do so by extending BaseLog - you may want to actually write the logs to some location. In our case, we want to ship these logs to &lt;code&gt;Logstash&lt;/code&gt;, a log processing tool that can take logs and decompose them into useful information.&lt;/p&gt;
+
+&lt;p&gt;At the very base, log messages should have some context about the logs - specifically a timestamp. Rather than invent our own format, we’ll use &lt;a href=&quot;http://en.wikipedia.org/wiki/ISO_8601&quot;&gt;ISO-8601&lt;/a&gt;, which Logstash can handle natively. We can represent this using the following bit of code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$format = 'Y-m-d\TH:i:s.uP';
+echo date($format); // ISO-8601 compliant datetime
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Logstash also represents message as &lt;code&gt;json&lt;/code&gt; in a specific format. Pre-formatting our log messages would allow Logstash to skip any regular expression parsing of our log messages. The following is the current format:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;{
+    &quot;@timestamp&quot;: &quot;2012-12-18T01:01:46.092538Z&quot;,
+    &quot;@version&quot;: 1,
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All other fields are optional, and therefore our &lt;code&gt;LogstashLog&lt;/code&gt; would look as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('BaseLog', 'Log/Engine');
+class LogstashLog extends BaseLog
+{
+    protected $format = 'Y-m-d\TH:i:s.uP';
+    public function write($type, $message)
+    {
+        $data = [
+            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
+            '@version' =&amp;gt; 1,
+            'message' =&amp;gt; $message,
+            'tags' =&amp;gt; [$type],
+        ];
+        // write to some output.
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can use &lt;code&gt;syslog&lt;/code&gt; to ship our logs. PHP defines the following three methods to interface with &lt;code&gt;syslog&lt;/code&gt;, and I recommend reading up on them:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;openlog&lt;/code&gt;: opens a connection to the system logger for a program&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;syslog&lt;/code&gt;: generates a log message that will be distributed by the system logger&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;closelog&lt;/code&gt;: closes the descriptor being used to write to the system logger&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Adding in &lt;code&gt;syslog&lt;/code&gt; support will change our logger as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('BaseLog', 'Log/Engine');
+class LogstashLog extends BaseLog
+{
+    protected $format = 'Y-m-d\TH:i:s.uP';
+
+    protected $logLevels = [
+        'emergency' =&amp;gt; LOG_EMERG,
+        'alert' =&amp;gt; LOG_ALERT,
+        'critical' =&amp;gt; LOG_CRIT,
+        'error' =&amp;gt; LOG_ERR,
+        'warning' =&amp;gt; LOG_WARNING,
+        'notice' =&amp;gt; LOG_NOTICE,
+        'info' =&amp;gt; LOG_INFO,
+        'debug' =&amp;gt; LOG_DEBUG,
+    ];
+
+    public function write($type, $message)
+    {
+        $data = [
+            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
+            '@version' =&amp;gt; 1,
+            'message' =&amp;gt; $message,
+            'tags' =&amp;gt; [$type],
+        ];
+
+        if (!openlog('app', LOG_PID, LOG_USER)) {
+            // Handle your logging error...
+            return;
+        }
+
+        syslog($this-&amp;gt;logLevels[$type], json_encode($data));
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;What if we wanted to include extra metadata? Well, we can modify our &lt;code&gt;write&lt;/code&gt; method to allow &lt;code&gt;$message&lt;/code&gt; to be an array as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function write($type, $message)
+{
+    $message = is_array($message) ? $message : compact('message');
+    $data = array_merge(array(
+        '@timestamp' =&amp;gt; date($this-&amp;gt;format),
+        '@version' =&amp;gt; 1,
+    ), $message);
+
+    if (isset($data['tags'])) {
+        $data['tags'][] = $type;
+    } else {
+        $data['tags'] = [$type];
+    }
+
+    if (!openlog('app', LOG_PID, LOG_USER)) {
+        // Handle your logging error...
+        return;
+    }
+
+    syslog($this-&amp;gt;logLevels[$type], json_encode($data));
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We never want to drop logs, so we’ll fallback to using &lt;code&gt;FileLog&lt;/code&gt; as our parent class. When &lt;code&gt;openlog&lt;/code&gt; returns false, we’ll simply call &lt;code&gt;return parent::write($type, json_ecode($message));&lt;/code&gt;. We can then later go back with a different log shipper and reprocess anything that couldn’t be shipped to Logstash.&lt;/p&gt;
+
+&lt;p&gt;Here is what our log engine will look like at the end of the day:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('FileLog', 'Log');
+class LogstashLog extends FileLog
+{
+    protected $format = 'Y-m-d\TH:i:s.uP';
+
+    protected $logLevels = [
+        'emergency' =&amp;gt; LOG_EMERG,
+        'alert' =&amp;gt; LOG_ALERT,
+        'critical' =&amp;gt; LOG_CRIT,
+        'error' =&amp;gt; LOG_ERR,
+        'warning' =&amp;gt; LOG_WARNING,
+        'notice' =&amp;gt; LOG_NOTICE,
+        'info' =&amp;gt; LOG_INFO,
+        'debug' =&amp;gt; LOG_DEBUG,
+    ];
+
+    public function write($type, $message)
+    {
+        $message = is_array($message) ? $message : compact('message');
+        $data = array_merge(array(
+            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
+            '@version' =&amp;gt; 1,
+        ), $message);
+
+        if (isset($data['tags'])) {
+            $data['tags'][] = $type;
+        } else {
+            $data['tags'] = [$type];
+        }
+
+        if (!openlog('app', LOG_PID, LOG_USER)) {
+            return parent::write($type, json_ecode($data));
+        }
+
+        return syslog($this-&amp;gt;logLevels[$type], json_encode($data));
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can now configure our custom logging engine the same way we would any other logging engine:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+// in our app/Config/bootstrap.php
+App::uses('CakeLog', 'Log');
+CakeLog::config('debug', [
+    'engine' =&amp;gt; 'Logstash',
+    'types' =&amp;gt; ['notice', 'info', 'debug'],
+    'file' =&amp;gt; 'debug',
+]);
+CakeLog::config('error', [
+    'engine' =&amp;gt; 'Logstash',
+    'types' =&amp;gt; ['warning', 'error', 'critical', 'alert', 'emergency'],
+    'file' =&amp;gt; 'error',
+]);
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You’ll notice that we included some extra configuration information. This is primarily used for routing messages - we could in theory create a &lt;code&gt;Null&lt;/code&gt; engine and use that for &lt;code&gt;debug&lt;/code&gt; messages - though we also specify a &lt;code&gt;file&lt;/code&gt; so that the parent &lt;code&gt;FileLog&lt;/code&gt; class is properly configured.&lt;/p&gt;
+
+&lt;p&gt;Creating custom logging engines is quite simple with CakePHP, and it would be easy to extend this system to have log handlers and formatters.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 22 Mar 2014 06:28:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>logging</category>
+        
+        <category>logstash</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Using View Cells in your CakePHP applications</title>
+        <description>&lt;p&gt;There is an &lt;a href=&quot;https://github.com/cakephp/cakephp/issues/3052&quot;&gt;interesting ticket&lt;/a&gt; in 3.x describing View Cells. Lets dive right in and figure out what they mean for CakePHP applications.&lt;/p&gt;
+
+&lt;h2 id=&quot;what-is-a-view-cell&quot;&gt;What is a view cell?&lt;/h2&gt;
+
+&lt;p&gt;View cells are like mini templates that are assigned to variables. A good use case for them would be to decorate entities of data. For example, consider the following example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class PostCell extends ViewCell {
+    public $view = 'single_post';
+
+    // I am renaming the method `render` to `run` for a specific reason...
+    public function run(array $options = [])
+    {
+        $this-&amp;gt;loadModel('Posts');
+        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
+        $this-&amp;gt;set(compact('post'));
+        return $this; // So I can chain the `run` method
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above class would retrieve the data necessary to render a &lt;code&gt;PostCell&lt;/code&gt; using the &lt;code&gt;single_post&lt;/code&gt; template file. Our template file could be as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h1&amp;gt;&amp;lt;?= $post-&amp;gt;get('title') ?&amp;gt;&amp;lt;/h1&amp;gt;
+&amp;lt;div class=&quot;post-content&quot;&amp;gt;
+    &amp;lt;?= $post-&amp;gt;get('content') ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In order to use this view cell, we might do the following in our &lt;code&gt;view.ctp&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;cell('PostCell', array('id' =&amp;gt; 10)) ?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;reusing-cells-with-existing-data&quot;&gt;Reusing cells with existing data&lt;/h2&gt;
+
+&lt;p&gt;What if we already have the data, and just want to re-use our cell? This is similar to using an element, though it would be possible with some hackery:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class PostCell extends ViewCell {
+    public $view = 'single_post';
+
+    public function run(array $options = [])
+    {
+        // Short-circuit the cell and return any passed data
+        if (!empty($options['post'])) {
+            $this-&amp;gt;set('post', $options['post']);
+            return $this; // So I can chain the `run` method
+        }
+
+        $this-&amp;gt;loadModel('Posts');
+        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
+        $this-&amp;gt;set(compact('post'));
+        return $this; // So I can chain the `run` method
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Our use case would be to show this on an &lt;code&gt;index.ctp&lt;/code&gt; like the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;? foreach ($posts as $post) : ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;cell('PostCell', compact('post')) ?&amp;gt;
+&amp;lt;? endforeach; ?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;returning-cells-directly-from-the-controller&quot;&gt;Returning cells directly from the controller&lt;/h2&gt;
+
+&lt;p&gt;We might also want to include the cell directly from the controller. We could do this by constructing the cell directly within the controller:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class PostsController extends Controller
+{
+    use CellTrait;
+
+    public function view($id)
+    {
+        $post = $this-&amp;gt;Post-&amp;gt;findById($id);
+        if (!$post) {
+            throw new NotFoundException('Post not found');
+        }
+
+        $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $post));
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And our &lt;code&gt;view.ctp&lt;/code&gt; would be as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $post ?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;retrieving-cell-data-from-a-controller&quot;&gt;Retrieving Cell data from a controller&lt;/h2&gt;
+
+&lt;p&gt;You might want to reuse &lt;em&gt;just&lt;/em&gt; the cell data, and not the representation, within a controller. The following could be what the api for this looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class PostsController extends Controller
+{
+    use CellTrait;
+
+    public function view($id)
+    {
+        $data = (new PostCell())-&amp;gt;run(compact('id'))-&amp;gt;data();
+        if (empty($data['post'])) {
+            throw new NotFoundException('Post not found');
+        }
+
+        // do things to $data['post']
+
+        $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $data['post']));
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If the above looks familiar, it is because a PostCell can be pretty analagous to a service class, which I &lt;a href=&quot;/2013/12/06/building-service-classes/&quot;&gt;previously blogged about&lt;/a&gt; during CakeAdvent.&lt;/p&gt;
+
+&lt;h3 id=&quot;containing-state-within-your-service-class&quot;&gt;Containing state within your service class&lt;/h3&gt;
+
+&lt;p&gt;In the vein of reusing cells for service classes, what if we want to contain the success and failure state of the cell? We might extend our base &lt;code&gt;ViewCell&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class AppViewCell extends ViewCell
+{
+    public static function perform(array $options = [])
+    {
+        $klass = get_called_class();
+        $cell = new $klass;
+        $klass-&amp;gt;run($options);
+        return $klass;
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you change the parent class of &lt;code&gt;PostCell&lt;/code&gt; to &lt;code&gt;AppViewCell&lt;/code&gt;, we can now do:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$cell = PostCell::perform(array('id' =&amp;gt; 10));
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lets make this a bit more interesting by adding &lt;code&gt;successful&lt;/code&gt; and &lt;code&gt;failed&lt;/code&gt; methods:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class AppViewCell extends ViewCell
+{
+    protected $success = null;
+
+    public static function perform(array $options = [])
+    {
+        $klass = get_called_class();
+        $cell = new $klass;
+        $klass-&amp;gt;run($options);
+        return $klass;
+    }
+
+    public function successful()
+    {
+        return $successful === true;
+    }
+
+    public function failed()
+    {
+        return $successful === false;
+    }
+
+    public function performed()
+    {
+        return $successful === null;
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can now modify our &lt;code&gt;PostCell&lt;/code&gt; class to be as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class PostCell extends ViewCell {
+    public $view = 'single_post';
+
+    public function run(array $options = [])
+    {
+        // Short-circuit the cell and return any passed data
+        if (!empty($options['post'])) {
+            $this-&amp;gt;set('post', $options['post']);
+            return $this; // So I can chain the `run` method
+        }
+
+        $this-&amp;gt;loadModel('Posts');
+        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
+        $this-&amp;gt;success = !!$post;
+
+        if ($this-&amp;gt;success) {
+            $this-&amp;gt;set(compact('post'));
+        }
+
+        return $this; // So I can chain the `run` method
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And now our controller action could become the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class PostsController extends Controller
+{
+    use CellTrait;
+
+    public function view($id)
+    {
+        $cell = PostCell::perform(compact('id'));
+        if ($cell-&amp;gt;successful()) {
+            $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $cell-&amp;gt;data()));
+        }
+
+        throw new NotFoundException('Post not found');
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;why-use-a-cell&quot;&gt;Why use a cell?&lt;/h2&gt;
+
+&lt;p&gt;One of the most ill-used features of CakePHP is &lt;code&gt;View::requestAction()&lt;/code&gt;. Developers frequently use this all over their applications, causing convoluted cases where you need to figure out if you are within a web request or an internal action request, cluttering controllers. You also need to invoke a new CakePHP request, which can add some unneeded overhead.&lt;/p&gt;
+
+&lt;p&gt;You could think of View cells as lightweight request containers. Rather than constructing a new request to get at some request data, you could simply reuse cells to get at useful data without having all of the overhead involved in invoking a controller. And as I showed above, they would make excellent containers for service classes.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 20 Mar 2014 16:54:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/03/20/view-cells/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/03/20/view-cells/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>views</category>
+        
+        <category>service</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Local Development Environment using Vagrant and Virtualbox</title>
+        <description>&lt;p&gt;One thing developers have issues with is setting up their local development environment. You install a piece of software, it breaks something, and then rolling back is annoying. Or perhaps you have a new laptop, and now you need to reinstall the entire kitchen sink.&lt;/p&gt;
+
+&lt;p&gt;I’ve been using &lt;a href=&quot;http://www.vagrantup.com/&quot;&gt;Vagrant&lt;/a&gt; for the past few months to great success. Vagrant allows you to automate the creation and lifecycle of a virtual machine. You can &lt;em&gt;provision&lt;/em&gt; a new machine, automatically run code, and have a fully working environment in a few miinutes. The hard part is figuring out the exact steps needed to get your development environment up to speed.&lt;/p&gt;
+
+&lt;p&gt;My Christmas gift to CakePHP developers is the &lt;em&gt;&lt;a href=&quot;https://github.com/FriendsOfCake/vagrant-chef&quot;&gt;FriendsOfCake/vagrant-chef&lt;/a&gt;&lt;/em&gt; repository, a vagrant installation custom-built for CakePHP applications. It will automatically setup the following within a virtual machine:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Ubuntu 12.04 Precise Pangolin&lt;/li&gt;
+  &lt;li&gt;Ningx 1.1&lt;/li&gt;
+  &lt;li&gt;PHP 5.5&lt;/li&gt;
+  &lt;li&gt;Percona MySQL 5.5&lt;/li&gt;
+  &lt;li&gt;Redis 2.8&lt;/li&gt;
+  &lt;li&gt;Memcached 1.4&lt;/li&gt;
+  &lt;li&gt;Git 1.7&lt;/li&gt;
+  &lt;li&gt;Composer&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;How do we do it?&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Install &lt;a href=&quot;http://www.vagrantup.com/downloads.html&quot;&gt;Vagrant&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Install &lt;a href=&quot;https://www.virtualbox.org/wiki/Downloads&quot;&gt;Virtualbox&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;git clone https://github.com/FriendsOfCake/vagrant-chef.git&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;cd vagrant-chef&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;vagrant up&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Once it’s up, you can simply replace your &lt;code&gt;app&lt;/code&gt; directory with your application and visit &lt;code&gt;192.168.13.37&lt;/code&gt;. Your application should be ready and raring to go!&lt;/p&gt;
+
+&lt;p&gt;For more information, please visit the  &lt;em&gt;&lt;a href=&quot;https://github.com/FriendsOfCake/vagrant-chef&quot;&gt;FriendsOfCake/vagrant-chef&lt;/a&gt;&lt;/em&gt; repository! Happy Holidays!&lt;/p&gt;
+</description>
+        <pubDate>Wed, 25 Dec 2013 16:29:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>vagrant</category>
+        
+        <category>development</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Writing Slimmer Controllers</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;Note: I am using the CakeEntity plugin &lt;a href=&quot;/2013/12/05/objectifying-cakephp-2-0-applications/&quot;&gt;from a previous post&lt;/a&gt; in this example. Feel free to ignore that code if it helps simplify what is going on.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I want to take a little time and go over ways in which we can slim down model code. Below is some early code from an application I developed - it handles lunch scheduling for small companies and teams.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+public function add($restaurant_id = null) {
+  if (empty($restaurant_id)) {
+    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+  }
+
+  $lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('first', array(
+    'entity' =&amp;gt; true,
+    'conditions' =&amp;gt; array('Lunch.date' =&amp;gt; date('Y-m-d')),
+    'contain' =&amp;gt; array('Restaurant'),
+  ));
+
+  if (!empty($lunchDate)) {
+    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'update', $restaurant_id));
+  }
+
+  $this-&amp;gt;_breadcrumbs[] = array(
+    'name', =&amp;gt; 'Create Lunch Date',
+    'url' =&amp;gt; array(),
+  );
+
+  $this-&amp;gt;set(compact('restaurant_id'));
+
+  if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
+    $this-&amp;gt;Session-&amp;gt;info('Lunch canceled');
+    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+  }
+
+  if (!$this-&amp;gt;request-&amp;gt;is('post')) {
+    $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
+    return $this-&amp;gt;set($data);
+  }
+
+  try {
+    $entity = $this-&amp;gt;Lunch-&amp;gt;addEntity($this-&amp;gt;request-&amp;gt;data);
+    $this-&amp;gt;Session-&amp;gt;success(__('The Lunch has been saved.'));
+    return $this-&amp;gt;redirect($entity-&amp;gt;route());
+  } catch (Exception $e) {
+    $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
+    if ($entity) {
+      $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray();
+    }
+
+    $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
+    return $this-&amp;gt;set($data);
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above is about 50 lines of code that essentially handles:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Finding an associated lunchdate&lt;/li&gt;
+  &lt;li&gt;Form cancelation&lt;/li&gt;
+  &lt;li&gt;Breadcrumbs for the view&lt;/li&gt;
+  &lt;li&gt;Creating a lunchdate&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This could and should be way smaller, and more reusable. Lets take a look at this in chunks.&lt;/p&gt;
+
+&lt;h2 id=&quot;requiring-action-arguments&quot;&gt;Requiring action arguments&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+if (empty($restaurant_id)) {
+  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Some people will have issues with how I do this, but because I use &lt;a href=&quot;/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/&quot;&gt;exceptions to handle redirection&lt;/a&gt;, this method works out well for me. I normally have a helper method in my AppController, &lt;code&gt;AppController::redirectUnless()&lt;/code&gt;, with the following contents:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+public function redirectUnless($variable, $redirectTo = null) {
+  if (!empty($variable)) {
+    return;
+  }
+
+  if (empty($redirectTo)) {
+    $redirectTo = array('action' =&amp;gt; 'index');
+  }
+
+  return $this-&amp;gt;redirect($redirectTo);
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then my code sample becomes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$this-&amp;gt;redirectUnless($restaurant_id);
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;If your tests excepted a return, this won’t work because PHP does not have conditional returns without guard statements.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;custom-finds&quot;&gt;Custom finds:&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('first', array(
+  'entity' =&amp;gt; true,
+  'conditions' =&amp;gt; array('Lunch.date' =&amp;gt; date('Y-m-d')),
+  'contain' =&amp;gt; array('Restaurant'),
+));
+
+if (!empty($lunchDate)) {
+  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'update', $restaurant_id));
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I absolutely hate writing finds in my view. Instead, I use custom finds:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('EntityModel', 'Entity.Model');
+App::uses('LunchEntity', 'Model/Entity');
+class Lunch extends EntityModel {
+  public $findMethods = array(
+    'lunchDate' =&amp;gt; true,
+  );
+
+  public function _findLunchDate($state, $query, $results = array()) {
+    if ($state == 'before') {
+      $query['entity'] = true;
+      $query['conditions'] = array('Lunch.date' =&amp;gt; date('Y-m-d'));
+      $query['contain'] = array('Restaurant');
+      $query['limit'] = 1;
+      return $query;
+    }
+
+    if (empty($results[0])) {
+      return false;
+    }
+
+    return $results[0];
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It’s quite easy to setup a custom find - they have &lt;code&gt;before&lt;/code&gt; and &lt;code&gt;after&lt;/code&gt; states, and can have logic that applies to both. Please &lt;a href=&quot;http://book.cakephp.org/2.0/en/models/retrieving-your-data.html#creating-custom-find-types&quot;&gt;read the docs for more information&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Our code sample would finally become:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('lunchDate');
+$this-&amp;gt;redirectUnless($lunchDate, array('action' =&amp;gt; 'update', $restaurant_id));
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;handling-common-view-data&quot;&gt;Handling common view data&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$this-&amp;gt;_breadcrumbs[] = array(
+  'name', =&amp;gt; 'Create Lunch Date',
+  'url' =&amp;gt; array(),
+);
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I usually have some common view data, such as meta tags, breadcrumbs, etc. that are set from each controller. Rather than have the underlying datastructure be exposed to each controller - the &lt;code&gt;_breadcrumbs&lt;/code&gt; array - I use a helper method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+protected function _addBreadcrumb($name, $url = array()) {
+  $this-&amp;gt;_breadcrumbs[] = compact('name', 'url');
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then my controller code becomes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$this-&amp;gt;_addBreadcrumb('Create Lunch Date');
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;handling-form-cancellation&quot;&gt;Handling Form Cancellation&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
+  $this-&amp;gt;Session-&amp;gt;info(__('Lunch canceled'));
+  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;My forms commonly have some sort of &lt;em&gt;cancel&lt;/em&gt; button on them. If pressed, the user will be brought back to the index action.&lt;/p&gt;
+
+&lt;p&gt;Instead, I use some generic code in my &lt;code&gt;AppController::beforeFilter()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+public function beforeFilter() {
+  if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
+    $this-&amp;gt;Session-&amp;gt;info(__('%s canceled', $this-&amp;gt;modelClass));
+    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now I do not need to worry about having this logic in any of my actions.&lt;/p&gt;
+
+&lt;h2 id=&quot;generic-form-handling&quot;&gt;Generic Form Handling&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+if (!$this-&amp;gt;request-&amp;gt;is('post')) {
+  $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
+  return $this-&amp;gt;set($data);
+}
+
+try {
+  $entity = $this-&amp;gt;Lunch-&amp;gt;addEntity($this-&amp;gt;request-&amp;gt;data);
+  $this-&amp;gt;Session-&amp;gt;success(__('The Lunch has been saved.'));
+  return $this-&amp;gt;redirect($entity-&amp;gt;route());
+} catch (Exception $e) {
+  $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
+  if ($entity) {
+    $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray();
+  }
+
+  $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
+  return $this-&amp;gt;set($data);
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The trick to generic form handling is doing it in such a way to allow developers to override the functionality. Note that this means &lt;em&gt;all&lt;/em&gt; your forms &lt;em&gt;should&lt;/em&gt; be handled similarly. If not, there is no gain from creating a generic form handling method. The following is what I used in this application:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+protected function _form($entity = null, $modelClass = null) {
+  if (empty($modelClass)) {
+    $modelClass = $this-&amp;gt;modelClass;
+  }
+
+  $_action = $this-&amp;gt;request-&amp;gt;params['action'];
+  if ($entity &amp;amp;&amp;amp; empty($this-&amp;gt;request-&amp;gt;data)) {
+    $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray($_action);
+  }
+
+  if (!$this-&amp;gt;request-&amp;gt;is($entity ? 'put' : 'post')) {
+    $data = $this-&amp;gt;{$modelClass}-&amp;gt;getData($_action);
+    return $this-&amp;gt;set($data);
+  }
+
+  try {
+    $method = $entity ? 'updateEntity' : 'addEntity';
+    $entity = $this-&amp;gt;{$modelClass}-&amp;gt;$method($this-&amp;gt;request-&amp;gt;data, $entity);
+    $this-&amp;gt;Session-&amp;gt;success(__('The %s has been saved.', Inflector::humanize($modelClass)));
+    return $this-&amp;gt;redirect($entity-&amp;gt;route());
+  } catch (Exception $e) {
+    $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
+    if ($entity) {
+      $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray();
+    }
+
+    $data = $this-&amp;gt;{$modelClass}-&amp;gt;getData($_action);
+    return $this-&amp;gt;set($data);
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above bit of code handles:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Existing records being passed in&lt;/li&gt;
+  &lt;li&gt;Models that are not the default model associated to the controller&lt;/li&gt;
+  &lt;li&gt;Both creation and updating records&lt;/li&gt;
+  &lt;li&gt;Session flash messages&lt;/li&gt;
+  &lt;li&gt;Updating post data on failure&lt;/li&gt;
+  &lt;li&gt;Retrieving data for the view&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Using the above helper method would simplify our action code to:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+return $this-&amp;gt;_form();
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;all-together&quot;&gt;All Together&lt;/h2&gt;
+
+&lt;p&gt;Our previous codeblock of 49 lines is now the following, beautiful 10 line method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+public function add($restaurant_id = null) {
+  $this-&amp;gt;redirectUnless($restaurant_id);
+
+  $lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('lunchDate');
+  $this-&amp;gt;redirectUnless($lunchDate, array('action' =&amp;gt; 'update', $restaurant_id));
+
+  $this-&amp;gt;_addBreadcrumb('Create Lunch Date');
+  $this-&amp;gt;set(compact('restaurant_id'));
+  return $this-&amp;gt;_form();
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;What we gain from the new code:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Simpler design&lt;/li&gt;
+  &lt;li&gt;Easier to understand for new developers&lt;/li&gt;
+  &lt;li&gt;Unit tests for the parts can be created as opposed for the whole&lt;/li&gt;
+  &lt;li&gt;Reusable methods have been created for other places across the codebase&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Refactoring code is easy to get carried away with - as we did above - but also serves to freshen up a codebase and allow you to get more stuff done in less time.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 24 Dec 2013 13:27:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2013/12/24/writing-slimmer-controllers/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/24/writing-slimmer-controllers/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>controllers</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Application-wide event management</title>
+        <description>&lt;p&gt;Today’s post is a simple, application-wide event manager. Listening and firing events usually requires some thought as to where the event should be attached. Do we want it on a model? What if I make a custom class? What if I don’t have access to something because I am in a plugin?&lt;/p&gt;
+
+&lt;p&gt;One thing I do is make a generic event dispatcher that can be used everywhere. Here’s how you can do the same.&lt;/p&gt;
+
+&lt;h2 id=&quot;appeventdispatcher&quot;&gt;AppEventDispatcher&lt;/h2&gt;
+
+&lt;p&gt;We discussed an &lt;code&gt;AppEventDispatcher&lt;/code&gt; in a &lt;a href=&quot;/2013/12/16/simpler-cakephp-events/&quot;&gt;previous post&lt;/a&gt;. If you are using that, you can continue doing so. Everything from here will be additive.&lt;/p&gt;
+
+&lt;p&gt;First, the &lt;code&gt;CakeEventManager&lt;/code&gt; has a method &lt;code&gt;instance()&lt;/code&gt; which returns a globale &lt;code&gt;CakeEventManager&lt;/code&gt;. This is useful for a global hooks system. We’ll use this in our own methods.&lt;/p&gt;
+
+&lt;p&gt;To handle the entire cycle, we will use both a &lt;code&gt;listen&lt;/code&gt; and &lt;code&gt;fire&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;listen&lt;/code&gt;: Handles the attachment of a listener to the specified event. If the listener is an instance of &lt;code&gt;EventListener&lt;/code&gt;, event names can be omitted.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;fire&lt;/code&gt;: Handles the dispatching of a given event. Keep in mind that &lt;code&gt;$subject&lt;/code&gt; and &lt;code&gt;$data&lt;/code&gt; are optional arguments to this method.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here is our &lt;code&gt;Lib/Event/AppEventDispatcher.php&lt;/code&gt; class with the above methods:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('CakeEvent', 'Event');
+App::uses('CakeEventManager', 'Event');
+
+class AppEventDispatcher {
+  public static function listen($callable, $eventKey = null, $options = array()) {
+    $manager = CakeEventManager::instance();
+    $manager-&amp;gt;attach($callable, $eventKey, $options);
+  }
+
+  public static function fire($name, $subject = null, $data = null) {
+    $manager = CakeEventManager::instance();
+    $event = new CakeEvent($name, $subject, $data);
+    $manager-&amp;gt;dispatch($event);
+    return $event;
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that we have our AppEventDispatcher in place, we can start using it.&lt;/p&gt;
+
+&lt;h2 id=&quot;global-startup-events&quot;&gt;Global Startup Events&lt;/h2&gt;
+
+&lt;p&gt;You may wish to create global events before most of the app has started. We’ll create a new file, &lt;code&gt;app/Config/events.php&lt;/code&gt;, which will contain our events. Include this file in your &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+include dirname(__FILE__) . DS . 'events.php';
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, create the file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;touch app/Config/events.php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we’ll add the following as content:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('AppEventDispatcher', 'Lib/Event');
+App::uses('CakeEvent', 'Event');
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we’re ready to test our global event system&lt;/p&gt;
+
+&lt;h2 id=&quot;test-the-whole-thing&quot;&gt;Test the whole thing&lt;/h2&gt;
+
+&lt;p&gt;Lets add the following to &lt;code&gt;app/Config/events.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+AppEventDispatcher::listen(function(CakeEvent $event) {
+  debug($event-&amp;gt;name());
+  debug($event-&amp;gt;subject());
+  debug($event-&amp;gt;data);
+  die;
+}, 'foo');
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is the initial setup for a dummy event &lt;code&gt;foo&lt;/code&gt; that triggers a callback which prints out the event and then exits the app. Not too fantastic, but for the purposes of our demo, it will do.&lt;/p&gt;
+
+&lt;p&gt;Now we need to fire the event. While not super exciting, I am placing the following at the bottom of my &lt;code&gt;app/Config/routes.php&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+AppEventDispatcher::fire('foo', null, array('baz'));
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And if we start our app, here is the output:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://cl.ly/image/1Q1O252X323d/Screen%20Shot%202013-12-23%20at%202.30.04%20PM.png&quot; alt=&quot;http://cl.ly/image/1Q1O252X323d&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;going-further&quot;&gt;Going further&lt;/h2&gt;
+
+&lt;p&gt;The following things are not available in our current implementation:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Queued events. These events would wait for a &lt;code&gt;AppEventDispatcher::flush()&lt;/code&gt; before firing.&lt;/li&gt;
+  &lt;li&gt;Subscriber classes that can be subscribed to any specified event&lt;/li&gt;
+  &lt;li&gt;Wildcard event names.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Some of the above may be tricky, but all are doable, and if you find them useful, feel free to extend my implementation to include your use cases :)&lt;/p&gt;
+</description>
+        <pubDate>Mon, 23 Dec 2013 14:15:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2013/12/23/application-wide-event-management/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/23/application-wide-event-management/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>events</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Deploying a CakePHP application to Heroku</title>
+        <description>&lt;p&gt;These are some notes from my deploy of an application I am developing to Heroku. There are some specialized things you need to do to make everything work, so hopefully I catch everything.&lt;/p&gt;
+
+&lt;h2 id=&quot;use-friendsofcakeapp-template&quot;&gt;Use FriendsOfCake/app-template&lt;/h2&gt;
+
+&lt;p&gt;The biggest bit here is to ensure that we are properly using composer for everything but our application logic. Most people tend to bundle the CakePHP core with their app in version control, but we can safely rely on Composer to be run before the application is deployed. Having CakePHP installed via composer allows us to safely and quickly test upgrades from one release to another.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;composer -sdev create-project friendsofcake/app-template your_app
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;add-a-root-indexphp&quot;&gt;Add a root &lt;code&gt;index.php&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;We’ll need it to make the CakePHP app compatible with the buildpack we’ll be using:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+define('APP_DIR', 'app');
+define('DS', DIRECTORY_SEPARATOR);
+define('ROOT', dirname(__FILE__));
+define('WEBROOT_DIR', 'webroot');
+define('WWW_ROOT', ROOT . DS . APP_DIR . DS . WEBROOT_DIR . DS);
+
+require APP_DIR . DS . WEBROOT_DIR . DS . 'index.php';
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;use-environment-variables-for-configuration&quot;&gt;Use environment variables for Configuration&lt;/h2&gt;
+
+&lt;p&gt;We’ll be using Postgres in production - a big change for many CakePHP developers - because it’s what much of the heroku tooling works around. However, we still need to connect to the database, so here is what I have in my application’s &lt;code&gt;database.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+class DATABASE_CONFIG {
+
+  public $default;
+
+  public $test = array(
+    'persistent' =&amp;gt; false,
+    'host' =&amp;gt; '',
+    'login' =&amp;gt; '',
+    'password' =&amp;gt; '',
+    'database' =&amp;gt; 'cakephp_test',
+    'prefix' =&amp;gt; ''
+  );
+
+  public function __construct() {
+    $DATABASE_URL = parse_url(getenv('DATABASE_URL'));
+    $this-&amp;gt;default = array(
+      'datasource' =&amp;gt; 'Database/Postgres',
+      'persistent' =&amp;gt; false,
+      'host'       =&amp;gt; $DATABASE_URL['host'],
+      'login'      =&amp;gt; $DATABASE_URL['user'],
+      'password'   =&amp;gt; $DATABASE_URL['pass'],
+      'database'   =&amp;gt; substr($DATABASE_URL['path'], 1),
+      'prefix'     =&amp;gt; '',
+      'encoding'   =&amp;gt; 'utf8',
+    );
+  }
+
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This does mean you’ll need to do extra work to get the app running locally, but it shouldn’t be too difficult.&lt;/p&gt;
+
+&lt;h2 id=&quot;use-chhheroku-buildpack-phphttpsgithubcomchhheroku-buildpack-php&quot;&gt;Use &lt;a href=&quot;https://github.com/CHH/heroku-buildpack-php&quot;&gt;CHH/heroku-buildpack-php&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;This buildpack does a lot of the gruntwork to get a PHP app running to current community standards. Built-in support for Composer, PHP 5.5, PHP-FPM and Nginx. I approve.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;heroku config:set BUILDPACK_URL=https://github.com/CHH/heroku-buildpack-php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;configure-a-cakephp-app-in-your-composerjson&quot;&gt;Configure a CakePHP app in your &lt;code&gt;composer.json&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;CHH/heroku-buildpack-php&lt;/code&gt; uses our &lt;code&gt;composer.json&lt;/code&gt; to figure out how to serve the application. I add an &lt;code&gt;extra&lt;/code&gt; key to ensure my app is properly routed.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;&quot;extra&quot;: {
+  &quot;heroku&quot;: {
+    &quot;document-root&quot;: &quot;app/webroot&quot;,
+    &quot;index-document&quot;: &quot;index.php&quot;
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;use-redis-or-memcached-for-caching&quot;&gt;Use Redis or Memcached for Caching&lt;/h2&gt;
+
+&lt;p&gt;Both of these are available in the buildpack we use. Distributed caching is &lt;em&gt;much&lt;/em&gt; nicer, especially if your dyno can go to sleep. Here is what I use to parse the DSN:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$login = null;
+$password = null;
+$server = null;
+$servers = null;
+
+if (extension_loaded('apc') &amp;amp;&amp;amp; function_exists('apc_dec') &amp;amp;&amp;amp; (php_sapi_name() !== 'cli')) {
+  $engine = 'Apc';
+}
+
+if (getenv('MEMCACHED_URL')) {
+  // Custom Memcached implementation
+  include ROOT . DS . APP_DIR . DS . 'Lib' . DS . 'Memcached.php';
+  $engine = 'Memcached';
+  $MEMCACHED_URL = parse_url(getenv('MEMCACHED_URL'));
+  $servers = Hash::get($MEMCACHED_URL, 'host');
+  $port = Hash::get($MEMCACHED_URL, 'port');
+  $login = Hash::get($MEMCACHED_URL, 'user');
+  $password = Hash::get($MEMCACHED_URL, 'pass');
+} elseif (getenv('REDIS_URL')) {
+  // Custom Redis implementation
+  include ROOT . DS . APP_DIR . DS . 'Lib' . DS . 'Redis.php';
+  $engine = 'Redis';
+  $REDIS_URL = parse_url(getenv('REDIS_URL'));
+  $server = Hash::get($REDIS_URL, 'host');
+  $port = Hash::get($REDIS_URL, 'port');
+  $login = Hash::get($REDIS_URL, 'user');
+  $password = Hash::get($REDIS_URL, 'pass');
+}
+
+$prefix = 'app_';
+
+// In development mode, caches should expire quickly.
+$duration = '+999 days';
+if (Configure::read('debug') &amp;gt; 0) {
+  $duration = '+10 seconds';
+}
+
+// Setup a 'default' cache configuration for use in the application.
+Cache::config('default', array(
+  'engine' =&amp;gt; $engine,
+  'prefix' =&amp;gt; $prefix . 'default_',
+  'path' =&amp;gt; CACHE . 'persistent' . DS,
+  'serialize' =&amp;gt; ($engine === 'File'),
+  'duration' =&amp;gt; $duration,
+  'login' =&amp;gt; $login,
+  'password' =&amp;gt; $password,
+  'server' =&amp;gt; $server,
+  'servers' =&amp;gt; $servers,
+));
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;log-to-a-custom-path&quot;&gt;Log to a custom path&lt;/h2&gt;
+
+&lt;p&gt;Your application will not be able to stream logs to you unless you use a custom logging path. Here is how I configured it in my &lt;code&gt;bootstrap.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+CakeLog::config('default', array(
+    'engine' =&amp;gt; 'FileLog',
+    'file' =&amp;gt; 'stdout.log',
+    'path' =&amp;gt;  getenv('LOG_PATH'),
+    'types' =&amp;gt; array('notice', 'info', 'debug'),
+));
+
+CakeLog::config('error', array(
+    'engine' =&amp;gt; 'FileLog',
+    'file' =&amp;gt; 'error.log',
+    'path' =&amp;gt;  getenv('LOG_PATH'),
+    'types' =&amp;gt; array('emergency', 'alert', 'critical', 'error', 'warning'),
+));
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And the configuration:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;heroku config:set LOG_PATH=/app/vendor/php/var/log/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;use-utc-date-time&quot;&gt;Use UTC Date Time&lt;/h2&gt;
+
+&lt;p&gt;If you’re building a new application, do it correctly. In your &lt;code&gt;core.php&lt;/code&gt;, uncomment the datetime call:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;date_default_timezone_set('UTC');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;copy-plugin-assets-into-the-webroot&quot;&gt;Copy plugin assets into the webroot&lt;/h2&gt;
+
+&lt;p&gt;Because of our virtualhost configuration, plugins will not have their assets served up properly. Here is what I have in my composer.json (under the &lt;code&gt;extra&lt;/code&gt; key):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;&quot;extra&quot;: {
+  &quot;heroku&quot;: {
+    &quot;document-root&quot;: &quot;app/webroot&quot;,
+    &quot;index-document&quot;: &quot;index.php&quot;,
+    &quot;compile&quot;: [
+      &quot;echo 'Copying DebugKit webroot directory' &amp;amp;&amp;amp; cp -rfp $BUILD_DIR/Plugin/DebugKit/webroot $BUILD_DIR/app/webroot/debug_kit&quot;
+    ]
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Sun, 22 Dec 2013 15:18:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2013/12/22/deploying-a-cakephp-application-to-heroku/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/22/deploying-a-cakephp-application-to-heroku/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>heroku</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Building a Behavior with CakePHP</title>
+        <description>&lt;p&gt;I’ve been meaning to create a &lt;code&gt;deleted_at&lt;/code&gt; behavior, and today we’ll go over that.&lt;/p&gt;
+
+&lt;h2 id=&quot;creating-plugin-scaffolding&quot;&gt;Creating Plugin Scaffolding&lt;/h2&gt;
+
+&lt;p&gt;I normally place non-application code in a plugin. Most extensions to your core logic - behaviors, components, helpers - fall into this category. You can normally tell if it is pluginizable if you can imagine reusing the logic within the context of a CMS and an Issue Tracker :)&lt;/p&gt;
+
+&lt;p&gt;Lets create the followin directory structure:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd path/to/app
+mkdir -p app/Plugin/DeletedAt/Model/Behavior
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll initialize our plugin as a git repository. We’re doing this with the aim of having the plugin within hosted Packagist:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd app/Plugin/DeletedAt
+touch Model/Behavior/empty
+git init
+git add Model/Behavior/empty
+git commit -m &quot;Initial commit&quot;
+git push origin master
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The above assumes you created a repository on github to push your code to. Github is where &lt;em&gt;most&lt;/em&gt; CakePHP code exists, and it would be beneficial to the community to continue to use a single type of version control+code repository. Obviously, you can and should change this according to your needs.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;And now we’ll make this a &lt;a href=&quot;http://friendsofcake.com/&quot;&gt;FriendsOfCake-approved&lt;/a&gt; plugin using the steps from the &lt;a href=&quot;/2013/12/01/testing-your-cakephp-plugins-with-travis/&quot;&gt;first CakeAdvent post&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd path/to/app
+git clone git@github.com:FriendsOfCake/travis.git vendor/travis
+export COPYRIGHT_YEAR=2013
+export GITHUB_USERNAME=&quot;josegonzalez&quot;
+export PLUGIN_PATH=&quot;Plugin/DeletedAt&quot;
+export PLUGIN_NAME=&quot;DeletedAt&quot;
+export REPO_NAME=&quot;cakephp-deleted-at&quot;
+export YOUR_NAME=&quot;Jose Diaz-Gonzalez&quot;
+./vendor/travis/setup.sh
+rm -rf vendor/travis
+cd Plugin/DeletedAt
+git add .
+git commit -m &quot;FriendsOfCake support&quot;
+git push origin master
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At this point, you should be able to enable support for the plugin within TravisCI, Packagist, and Coveralls.&lt;/p&gt;
+
+&lt;h2 id=&quot;creating-a-simple-behavior&quot;&gt;Creating a simple Behavior&lt;/h2&gt;
+
+&lt;p&gt;We’ll first need to create the proper files. We will have both a &lt;code&gt;DeletedAtBehavior.php&lt;/code&gt; and a &lt;code&gt;DeletedAtBehaviorTest.php&lt;/code&gt;. Lets do that:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd app/Plugin/DeletedAt
+mkdir -p Test/Case/Model/Behavior
+touch Model/Behavior/DeletedAtBehavior.php
+touch Test/Case/Model/Behavior/DeletedAtBehaviorTest.php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The initial contents of each are pretty simple:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('ModelBehavior', 'Model');
+class DeletedAtBehavior extends ModelBehavior {
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('Model', 'Model');
+App::uses('AppModel', 'Model');
+require_once CAKE . 'Test' . DS . 'CASE' . DS . 'Model' . DS . 'models.php';
+class DeletedAtBehaviorTest extends CakeTestCase {
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, lets enable our plugin so that we can run tests. Add the following to your &lt;code&gt;bootstrap.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+CakePlugin::load('DeletedAt');
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now lets run tests!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd path/to/app
+Console/cake test DeletedAt AllDeletedAt --stderr
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see exactly 1 failure. We have no tests! But this is good. We now have a barebones behavior, tests that properly fail, and a goal in mind: fully passing tests for our new &lt;code&gt;DeletedAt&lt;/code&gt; behavior.&lt;/p&gt;
+
+&lt;p&gt;Commit your changes and read the next section.&lt;/p&gt;
+
+&lt;h2 id=&quot;writing-tests&quot;&gt;Writing tests&lt;/h2&gt;
+
+&lt;p&gt;For our behavior, we want to be able to:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Mark records as &lt;code&gt;deleted_at&lt;/code&gt; with a timestamp&lt;/li&gt;
+  &lt;li&gt;Un-delete records&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll store this state within a &lt;code&gt;deleted_at&lt;/code&gt; field on the record. It will be of type &lt;code&gt;datetime&lt;/code&gt;, and if it is null, then the record is not deleted, otherwise we know when it was soft-deleted.&lt;/p&gt;
+
+&lt;p&gt;We’ll need a fixture to represent our test model. We should create it using the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd app/Plugin/DeletedAt
+mkdir -p Test/Fixture
+touch Test/Fixture/DeletedUserFixture.php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Fixture classes are used to mock out test schemas in the database. They are useful for testing both real-world cases - using the database schema of your production tables - as well as for test-scenarios - as we will use for our plugin.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Fixture classes require two class attributes: &lt;code&gt;$fields&lt;/code&gt; and &lt;code&gt;$records&lt;/code&gt;. The &lt;code&gt;$fields&lt;/code&gt; attribute is used to define the schema for the mocked out table. The &lt;code&gt;$records&lt;/code&gt; attribute is an array of records to insert into your database. The &lt;code&gt;$records&lt;/code&gt; attribute should have values specified for each field in &lt;code&gt;$fields&lt;/code&gt;, otherwise the behavior would be unknown. We’ll use the following for our fixture:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('CakeTestFixture', 'TestSuite/Fixture');
+class DeletedUserFixture extends CakeTestFixture {
+
+  public $fields = array(
+    'id' =&amp;gt; array('type' =&amp;gt; 'integer', 'key' =&amp;gt; 'primary'),
+    'user' =&amp;gt; array('type' =&amp;gt; 'string', 'null' =&amp;gt; true),
+    'password' =&amp;gt; array('type' =&amp;gt; 'string', 'null' =&amp;gt; true),
+    'created' =&amp;gt; 'datetime',
+    'updated' =&amp;gt; 'datetime',
+    'deleted' =&amp;gt; array('type' =&amp;gt; 'datetime', 'null' =&amp;gt; true),
+  );
+
+  public $records = array(
+    array('user' =&amp;gt; 'mariano', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:16:23', 'updated' =&amp;gt; '2007-03-17 01:18:31', 'deleted' =&amp;gt; '2007-03-18 10:45:31'),
+    array('user' =&amp;gt; 'nate', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:18:23', 'updated' =&amp;gt; '2007-03-17 01:20:31', 'deleted' =&amp;gt; null),
+    array('user' =&amp;gt; 'larry', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:20:23', 'updated' =&amp;gt; '2007-03-17 01:22:31', 'deleted' =&amp;gt; null),
+  );
+
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now lets write a test just for our sanity. We need to prepare our test class with the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A &lt;code&gt;$fixtures&lt;/code&gt; property to notify PHPUnit as to what fixtures to load for our tests&lt;/li&gt;
+  &lt;li&gt;A &lt;code&gt;setUp()&lt;/code&gt; method to execute before each test. We’ll setup our model here.&lt;/li&gt;
+  &lt;li&gt;A &lt;code&gt;tearDown()&lt;/code&gt; method to execute after each test. We’ll destroy our model here to ensure the next test case has a clean environment.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I’ve taken the liberty of writing these for you, and you can copy the following into your &lt;code&gt;DeletedAtBehavior&lt;/code&gt; test file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  public $fixtures = array(
+    'plugin.deleted_at.deleted_user'
+  );
+
+  public function setUp() {
+    parent::setUp();
+    $this-&amp;gt;DeletedUser = ClassRegistry::init('User');
+    $this-&amp;gt;DeletedUser-&amp;gt;useTable = 'deleted_users';
+    $this-&amp;gt;DeletedUser-&amp;gt;Behaviors-&amp;gt;load('DeletedAt.DeletedAt');
+  }
+
+  public function tearDown() {
+    unset($this-&amp;gt;DeletedUser);
+    parent::tearDown();
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now lets add a test. We’ll find all &lt;code&gt;deleted&lt;/code&gt; and &lt;code&gt;non-deleted&lt;/code&gt; records:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  public function testFindDeleted() {
+    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('all', array(
+      'conditions' =&amp;gt; array('deleted &amp;lt;&amp;gt;' =&amp;gt; null)
+    ));
+    $this-&amp;gt;assertEqual(1, count($records));
+  }
+
+  public function testFindNonDeleted() {
+    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('all', array(
+      'conditions' =&amp;gt; array('deleted' =&amp;gt; null)
+    ));
+    $this-&amp;gt;assertEqual(2, count($records));
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running &lt;code&gt;Console/cake test DeletedAt AllDeletedAt --stderr&lt;/code&gt; should give you a single passing test! Yay! Now lets write some real model code.&lt;/p&gt;
+
+&lt;h2 id=&quot;custom-finds&quot;&gt;Custom Finds&lt;/h2&gt;
+
+&lt;p&gt;To simplify our logic, we will not be overriding the build-in &lt;code&gt;Model::delete()&lt;/code&gt; method. Instead, we’ll do the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Add a custom finder to find deleted and non-deleted records&lt;/li&gt;
+  &lt;li&gt;Add a custom method to softdelete and un-softdelete records&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here is some code to handle custom finds in a behavior. It comes from my earlier post on &lt;a href=&quot;/2010/12/01/embedding-custom-finds-in-behaviors/&quot;&gt;embedding custom finds within behaviors&lt;/a&gt;, with relevant updates for 2.x.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  public $mapMethods = array(
+    '/findDeleted/' =&amp;gt; 'findDeleted',
+    '/findNon_deleted/' =&amp;gt; 'findNonDeleted',
+  );
+
+  public function setup(Model $model, $config = array()) {
+      $model-&amp;gt;_findMethods['deleted'] = true;
+      $model-&amp;gt;_findMethods['non_deleted'] = true;
+  }
+
+  public function findDeleted(&amp;amp;$model, $functionCall, $state, $query, $results = array()) {
+      if ($state == 'before') {
+        if (empty($query['conditions'])) {
+          $query['conditions'] = array();
+        }
+        $query['conditions'][&quot;{$model-&amp;gt;alias}.deleted &amp;lt;&amp;gt;&quot;] = null;
+        return $query;
+      }
+      return $results;
+  }
+
+  public function findNonDeleted(&amp;amp;$model, $functionCall, $state, $query, $results = array()) {
+      if ($state == 'before') {
+        if (empty($query['conditions'])) {
+          $query['conditions'] = array();
+        }
+        $query['conditions'][&quot;{$model-&amp;gt;alias}.deleted&quot;] = null;
+        return $query;
+      }
+      return $results;
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that we have our custom finds in place, let’s modify our tests to use them:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  public function testFindDeleted() {
+    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
+    $this-&amp;gt;assertEqual(1, count($records));
+  }
+
+  public function testFindNonDeleted() {
+    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $this-&amp;gt;assertEqual(2, count($records));
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running &lt;code&gt;Console/cake test DeletedAt AllDeletedAt --stderr&lt;/code&gt; should give us two passing tests!&lt;/p&gt;
+
+&lt;h2 id=&quot;deleting-records&quot;&gt;Deleting records&lt;/h2&gt;
+
+&lt;p&gt;Now we’ll add two custom methods. Create the following tests:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  public function testSoftdelete() {
+    $this-&amp;gt;DeletedUser-&amp;gt;softdelete(1);
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $this-&amp;gt;assertEqual(1, count($deleted));
+    $this-&amp;gt;assertEqual(2, count($nonDeleted));
+
+    $this-&amp;gt;DeletedUser-&amp;gt;softdelete(2);
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $this-&amp;gt;assertEqual(2, count($deleted));
+    $this-&amp;gt;assertEqual(1, count($nonDeleted));
+
+    $this-&amp;gt;DeletedUser-&amp;gt;softdelete(3);
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $this-&amp;gt;assertEqual(3, count($deleted));
+    $this-&amp;gt;assertEqual(0, count($nonDeleted));
+  }
+
+  public function testUnDelete() {
+    $this-&amp;gt;DeletedUser-&amp;gt;undelete(3);
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $this-&amp;gt;assertEqual(1, count($deleted));
+    $this-&amp;gt;assertEqual(2, count($nonDeleted));
+
+    $this-&amp;gt;DeletedUser-&amp;gt;undelete(2);
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $this-&amp;gt;assertEqual(1, count($deleted));
+    $this-&amp;gt;assertEqual(2, count($nonDeleted));
+
+    $this-&amp;gt;DeletedUser-&amp;gt;undelete(1);
+    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
+    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
+    $this-&amp;gt;assertEqual(0, count($deleted));
+    $this-&amp;gt;assertEqual(3, count($nonDeleted));
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running tests now should give you two successes - our previous tests - and two failures - the new tests. The new tests fail because CakePHP will map &lt;code&gt;undelete&lt;/code&gt; and &lt;code&gt;softdelete&lt;/code&gt; to database methods if they don’t exist - which is useful in some cases, but in our case, we’ll implement the methods.&lt;/p&gt;
+
+&lt;p&gt;The logic for these methods is below. Feel free to extend them to your hearts content:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  public function softdelete(Model $model, $id = null) {
+    if ($id) {
+      $model-&amp;gt;id = $id;
+    }
+
+    if (!$model-&amp;gt;id) {
+      return false;
+    }
+
+    $deleteCol = 'deleted';
+    if (!$model-&amp;gt;hasField($deleteCol)) {
+      return false;
+    }
+
+    $db = $model-&amp;gt;getDataSource();
+    $now = time();
+
+    $default = array('formatter' =&amp;gt; 'date');
+    $colType = array_merge($default, $db-&amp;gt;columns[$model-&amp;gt;getColumnType($deleteCol)]);
+
+    $time = $now;
+    if (array_key_exists('format', $colType)) {
+      $time = call_user_func($colType['formatter'], $colType['format']);
+    }
+
+    if (!empty($model-&amp;gt;whitelist)) {
+      $model-&amp;gt;whitelist[] = $deleteCol;
+    }
+    $model-&amp;gt;set($deleteCol, $time);
+    return $model-&amp;gt;saveField($deleteCol, $time);
+  }
+
+  public function undelete(Model $model, $id = null) {
+    if ($id) {
+      $model-&amp;gt;id = $id;
+    }
+
+    if (!$model-&amp;gt;id) {
+      return false;
+    }
+
+    $deleteCol = 'deleted';
+    if (!$model-&amp;gt;hasField($deleteCol)) {
+      return false;
+    }
+
+    $model-&amp;gt;set($deleteCol, null);
+    return $model-&amp;gt;saveField($deleteCol, null);
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now lets run tests using &lt;code&gt;Console/cake test DeletedAt AllDeletedAt --stderr&lt;/code&gt;. You should get the following output:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://cl.ly/image/1T010S2J390f/Screen%20Shot%202013-12-21%20at%205.03.38%20PM.png&quot; alt=&quot;http://cl.ly/image/1T010S2J390f&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Commit your changes and push to github. We’re done!&lt;/p&gt;
+
+&lt;h2 id=&quot;going-further&quot;&gt;Going Further&lt;/h2&gt;
+
+&lt;p&gt;Any of the following things would be cool to see:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Moving the softdeletion code to &lt;code&gt;Model::delete()&lt;/code&gt; and having two consecutive &lt;code&gt;delete()&lt;/code&gt; calls actually delete the record&lt;/li&gt;
+  &lt;li&gt;Configuration for the &lt;code&gt;deleted&lt;/code&gt; column.&lt;/li&gt;
+  &lt;li&gt;Tracking deletion state over time within a different table.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Of course, you are free to continue with this plugin as you wish! Hopefully the above post clarified some things regarding writing testable CakePHP code, creating plugins, and using/abusing Behaviors within CakePHP.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 21 Dec 2013 14:52:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>behaviors</category>
+        
+        <category>testing</category>
+        
+        <category>plugins</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Application Environment Configuration</title>
+        <description>&lt;p&gt;Something I see a lot of developers struggle with is handling various environments separate from one other. I’ll go over a few methods here, specific to CakePHP applications.&lt;/p&gt;
+
+&lt;h2 id=&quot;switch-on-hostname&quot;&gt;Switch on hostname&lt;/h2&gt;
+
+&lt;p&gt;This version is the least likely to work alone. Essentially, you switch configuration based on whatever hostname is requesting your application. For instance, you might configure your cache as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+if (in_array(env('SERVER_NAME'), array('example.com', 'staging.example.com'))) {
+  // production
+  Cache::config('default', array('engine' =&amp;gt; 'Apc'));
+} else {
+  // staging
+  Cache::config('default', array('engine' =&amp;gt; 'File'));
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Why won’t this work?&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;You probably do not have the &lt;code&gt;SERVER_NAME&lt;/code&gt; environment variable set in CLI mode. If you do specify it, that isn’t intuitive and it is likely that someone will forget to specify it at one point or another&lt;/li&gt;
+  &lt;li&gt;If you add more hostnames - which can and will happen - you have to go back and respecify this everywhere&lt;/li&gt;
+  &lt;li&gt;This is likely to be sprinkled throughout your application&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;use-the-environment-plugin&quot;&gt;Use the Environment Plugin&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;This method can be used by using the &lt;a href=&quot;https://github.com/octobear/cakephp-environments&quot;&gt;Environment Plugin&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Early on in my CakePHP usage, I started using environment files. I would have a different environment file for each configuration:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;app/Config/bootstrap/environments.php&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;app/Config/bootstrap/environments/production.php&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;app/Config/bootstrap/environments/staging.php&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;app/Config/bootstrap/environments/development.php&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Your &lt;code&gt;environments.php&lt;/code&gt; file would contain the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+CakePlugin::load('Environments');
+App::uses('Environment', 'Environments.Lib');
+
+include dirname(__FILE__) . DS . 'environments' . DS . 'production.php';
+include dirname(__FILE__) . DS . 'environments' . DS . 'staging.php';
+include dirname(__FILE__) . DS . 'environments' . DS . 'development.php';
+
+Environment::start();
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;An example &lt;code&gt;development.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+Environment::configure('development',
+  true, // Defaults to development
+  array(
+    'Settings.FULL_BASE_URL'  =&amp;gt; 'http://example.dev',
+
+    'Email.username'          =&amp;gt; 'email@example.com',
+    'Email.password'          =&amp;gt; 'password',
+    'Email.test'              =&amp;gt; 'email@example.com',
+    'Email.from'              =&amp;gt; 'email@example.com',
+
+    'logQueries'              =&amp;gt; true,
+
+    'debug'                   =&amp;gt; 2,
+    'Cache.disable'           =&amp;gt; true,
+    'Security.salt'           =&amp;gt; 'SALT',
+    'Security.cipherSeed'     =&amp;gt; 'CIPHERSEED',
+  ),
+  function() {
+    if (!defined('FULL_BASE_URL')) {
+      define('FULL_BASE_URL', Configure::read('Settings.FULL_BASE_URL'));
+    }
+  }
+);
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This was great, because now all my configuration was in one place, and all I needed to do was redeploy the app and every configuration would be picked up.&lt;/p&gt;
+
+&lt;p&gt;The environment switching was done by the existing of a &lt;code&gt;CAKE_ENV&lt;/code&gt; environment variable or by hostname, so I could get away with local development pretty easily as well as with command-line tools:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;CAKE_ENV=production app/Console/cake Migrations.migration run all -p Migrations
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One draw-back to this method is that now we assume that all developers will locally have the same environment. This is likely to be false - if we work on different projects, our database usernames might collide, or perhaps your Windows laptop can use WinCache and mine can use Opcache.&lt;/p&gt;
+
+&lt;p&gt;The other big issue is that this exposes production credentials for everything to all developers. While you may trust your developers, the day might come when you have an untrusted user - non-developer, or a new guy, or even a security auditor - that you’d rather not have complete access to your system, and thus it’s preferable to avoid specifying production environment information within the repository.&lt;/p&gt;
+
+&lt;h2 id=&quot;environment-variable-all-the-things&quot;&gt;Environment Variable all the things&lt;/h2&gt;
+
+&lt;p&gt;This is my current favorite. Essentially, all configuration is retrieved from an environment variable. You would, for instance, retrieve cache configuration from the &lt;code&gt;CACHE_URL&lt;/code&gt; environment variable:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;CACHE_URL=redis://localhost:6379/0 app/Console/cake Migrations.migration run all -p Migrations
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Your CakePHP code would parse environment variables as necessary to retrieve the data and configure your app.&lt;/p&gt;
+
+&lt;p&gt;Some benefits:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Easily swap between one config and another.&lt;/li&gt;
+  &lt;li&gt;No need to force one user to use a configuration in their environment&lt;/li&gt;
+  &lt;li&gt;Can be used across multiple frameworks and languages, not just CakePHP&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;However, it’s more annoying to specify multiple config values:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;export CACHE_URL=redis://localhost:6379/0
+export DATABASE_URL=mysql://localhost:3306/example
+export TEMP_PATH=/mnt
+app/Console/cake Migrations.migration run all -p Migrations
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I normally create a file in &lt;code&gt;/etc/services/my-service&lt;/code&gt; with the exports:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;export CACHE_URL=redis://localhost:6379/0
+export DATABASE_URL=mysql://localhost:3306/example
+export TEMP_PATH=/mnt
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And then source the file in:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;. /etc/services/my-service app/Console/cake Migrations.migration run all -p Migrations
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Fri, 20 Dec 2013 13:31:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2013/12/20/application-environment-configuration/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/20/application-environment-configuration/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>configuration</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Tackling database migrations with one neat trick</title>
+        <description>&lt;p&gt;Database schema migrations are a tricky topic. Luckily, CakePHP has the excellent &lt;a href=&quot;https://github.com/CakeDC/migrations&quot;&gt;Migrations plugin by CakeDC&lt;/a&gt;, but creating a new migration file is often obtuse. Rather than diffing the schema, or trying to manually create it, lets automate some of the process with a custom Cakeshell&lt;/p&gt;
+
+&lt;h2 id=&quot;setup&quot;&gt;Setup&lt;/h2&gt;
+
+&lt;p&gt;First up, we’ll install the &lt;a href=&quot;https://github.com/CakeDC/migrations&quot;&gt;Migrations plugin&lt;/a&gt;. Run the following command in your shell to install it via composer:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;composer require cakedc/migrations 2.2.*
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, lets enable it in our &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;echo -e &quot;\nApp::import('Vendor', array('file' =&amp;gt; 'autoload'));&quot; &amp;gt;&amp;gt; app/Config/bootstrap.php;
+echo -e &quot;\nCakePlugin::loadAll();&quot; &amp;gt;&amp;gt; app/Config/bootstrap.php;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that it is enabled, we will setup the initial database migrations needed for the plugin itself:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;app/Console/cake Migrations.migration run all -p Migrations
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;cli-migration-creation&quot;&gt;CLI Migration creation&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;tl;dr Skip this section and copy the contents of &lt;a href=&quot;https://gist.github.com/josegonzalez/e800ea3a7cc3db3ca56a&quot;&gt;this gist&lt;/a&gt; to app/Console/Command/MigrationGeneratorShell.php.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;At the moment, there is no way to create migrations directly from the command line. Let’s build a way to do so!&lt;/p&gt;
+
+&lt;p&gt;Create a file in the path &lt;code&gt;app/Console/Command/MigrationGeneratorShell.php&lt;/code&gt; with the following content:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+App::uses('AppShell', 'Console/Command');
+class MigrationGeneratorShell extends AppShell {
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There isn’t much here. We’ll want the following interface to the shell:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;# creates a migration that adds a user_id to the testers table
+app/Console/cake migration_generator create add_user_id_to_tester user_id:integer:index
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So we need to add a few methods:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  public function create() {
+  }
+
+  public function getOptionParser() {
+    $parser = parent::getOptionParser();
+    return $parser-&amp;gt;description(
+        'The Migration shell.' .
+        '')
+      -&amp;gt;addSubcommand('Create', array(
+        'help' =&amp;gt; __('Create a migration file.')));
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’re going to support the following methods:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;add fields to a table&lt;/li&gt;
+  &lt;li&gt;remove fields from a table&lt;/li&gt;
+  &lt;li&gt;create a join table&lt;/li&gt;
+  &lt;li&gt;create a table&lt;/li&gt;
+  &lt;li&gt;drop a table&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So we’ll add the following content to our &lt;code&gt;create()&lt;/code&gt; function:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  public function create() {
+    $fileName = array_shift($this-&amp;gt;args);
+    if (preg_match('/^(add|remove)_.*_(?:to|from)_(.*)/', $fileName, $matches)) {
+      $method = '_' . $matches[1] . 'Fields';
+      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
+    } elseif (preg_match('/^(join)_(.*)_(?:with)_(.*)/', $fileName, $matches)) {
+      $method = '_createJoinTable';
+      $tables = array($matches[2], $matches[3]);
+    } elseif (preg_match('/^(create)_(.*)/', $fileName, $matches)) {
+      $method = '_createTable';
+      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
+    } elseif (preg_match('/^(remove)_(.*)/', $fileName, $matches)) {
+      $method = '_dropTable';
+      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
+    }
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that we know what methods we’re going to support, and what tables they will apply to, we need some field parsing magic. Below is a semi-intelligent way of getting specified fields, according to our cli schema of &lt;code&gt;fieldName:type:indexType&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  protected function _getFields() {
+    $fields = array();
+    $indexes = array();
+    foreach ($this-&amp;gt;args as $field) {
+      if (preg_match('/^(\w*)(?::(\w*))?(?::(\w*))?/', $field, $matches)) {
+        $fields[$matches[1]] = array(
+          'type' =&amp;gt; 'string',
+          'null' =&amp;gt; false,
+          'default' =&amp;gt; null,
+          'key' =&amp;gt; null,
+        );
+
+        if (empty($matches[2])) {
+          $fields[$matches[1]]['type'] = $matches[2];
+        }
+        if (empty($matches[3])) {
+          $fields[$matches[1]]['key'] = $matches[3];
+        }
+
+        if (!in_array($fields[$matches[1]]['type'], $this-&amp;gt;_validTypes)) {
+          switch ($matches[1]) {
+            case 'id':
+              $fields[$matches[1]]['type'] = 'integer';
+              break;
+            case 'created':
+            case 'modified':
+            case 'updated':
+              $fields[$matches[1]]['type'] = 'datetime';
+              break;
+            default:
+              $fields[$matches[1]]['type'] = 'string';
+          }
+        }
+
+        switch ($fields[$matches[1]]['type']) {
+          case 'primary_key':
+            $indexes['PRIMARY'] = array('column' =&amp;gt; $matches[1], 'unique' =&amp;gt; 1);
+            $fields[$matches[1]]['key'] = 'primary';
+          case 'string':
+            $fields[$matches[1]]['length'] = 255;
+            break;
+          case 'integer':
+            $fields[$matches[1]]['length'] = 11;
+            break;
+          case 'biginteger':
+            $fields[$matches[1]]['length'] = 20;
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    if (!empty($indexes)) {
+      $fields['indexes'] = $indexes;
+    }
+    return $fields;
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now lets add the logic for how retrieved fields act within the migration file itself. Note that because we are having a very quick pass at this, both &lt;code&gt;up&lt;/code&gt; and &lt;code&gt;down&lt;/code&gt; schema migrations will not be implemented in all cases. Certainly there are ways to improve this as well!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+  protected function _createTable($table) {
+    $fields = $this-&amp;gt;_getFields();
+    return array(
+      'up' =&amp;gt; array('create_table' =&amp;gt; array($table =&amp;gt; $fields)),
+      'down' =&amp;gt; array('drop_table' =&amp;gt; array($table)),
+    );
+  }
+
+  protected function _dropTable($table) {
+    $this-&amp;gt;out('The `down` step must be manually created');
+    return array(
+      'up' =&amp;gt; array('drop_table' =&amp;gt; array($table)),
+      'down' =&amp;gt; array('create_table' =&amp;gt; array()),
+    );
+  }
+
+  protected function _createJoinTable($tables) {
+    $fields = $this-&amp;gt;_getFields();
+    sort($tables);
+
+    $defaults = array(
+      'type' =&amp;gt; 'integer',
+      'null' =&amp;gt; false,
+      'default' =&amp;gt; null,
+      'key' =&amp;gt; null,
+    );
+    foreach ($tables as $i =&amp;gt; $table) {
+      $tableName = Inflector::tableize(Inflector::pluralize($table));
+      $fieldName = Inflector::underscore(Inflector::singularize($tableName)) . '_id';
+      $tables[$i] = $tableName;
+      if (isset($fields[$fieldName])) {
+        $fields[$fieldName] = array_merge($defaults, $fields[$fieldName]);
+      } else {
+        $fields[$fieldName] = $defaults;
+      }
+    }
+
+    $joinTable = implode('_', $tables);
+    return array(
+      'up' =&amp;gt; array('create_table' =&amp;gt; array($joinTable =&amp;gt; $fields)),
+      'down' =&amp;gt; array('drop_table' =&amp;gt; array($joinTable)),
+    );
+  }
+
+  protected function _addFields($table) {
+    $fields = $this-&amp;gt;_getFields();
+    return array(
+      'up' =&amp;gt; array('create_field' =&amp;gt; array($table =&amp;gt; $fields)),
+      'down' =&amp;gt; array('drop_field' =&amp;gt; array($table =&amp;gt; array_keys($fields))),
+    );
+  }
+
+  protected function _removeFields($table) {
+    $this-&amp;gt;out('The `down` step must be manually created');
+    $fields = $this-&amp;gt;_getFields();
+    return array(
+      'up' =&amp;gt; array('drop_field' =&amp;gt; array($table =&amp;gt; array_keys($fields))),
+      'down' =&amp;gt; array('create_field' =&amp;gt; array()),
+    );
+  }
+
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And now for the glue to create the file. We need a single method to create the file contents. Note that you’ll need to copy the &lt;code&gt;migration.ctp&lt;/code&gt; from the migrations plugin into &lt;code&gt;app/Console/Templates/migration.ctp&lt;/code&gt; for this to work:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+/**
+ * Include and generate a template string based on a template file
+ *
+ * @param string $template Template file name
+ * @param array $vars List of variables to be used on tempalte
+ * @return string
+ */
+  private function __generateTemplate($template, $vars) {
+    extract($vars);
+    ob_start();
+    ob_implicit_flush(0);
+    include (dirname(__FILE__) . DS . 'Templates' . DS . $template . '.ctp');
+    $content = ob_get_clean();
+
+    return $content;
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Add the following to the end of your &lt;code&gt;create&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+    $class = Inflector::classify($fileName);
+    $migration = $this-&amp;gt;$method($tables);
+    $content = var_export($migration);
+    $this-&amp;gt;path = APP . 'Config' . DS . 'Migration' . DS;
+
+    $version = gmdate('U');
+    $content = $this-&amp;gt;__generateTemplate('migration', array('name' =&amp;gt; $class, 'class' =&amp;gt; $class, 'migration' =&amp;gt; $content));
+    $path = $this-&amp;gt;path . $version . '_' . strtolower($fileName) . '.php';
+    $File = new File($path, true);
+    $this-&amp;gt;out('File created at ' . $path);
+    return $File-&amp;gt;write($content);
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;create-a-schema-file&quot;&gt;Create a schema file&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;app/Console/cake migration_generator create create_users id:primary_key name:string created:datetime modified:datetime
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Success! You should have a new file in &lt;code&gt;app/Config/Migration&lt;/code&gt; with your migrations in it. Now you can run them:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;app/Console/cake Migrations.migration run all
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;more-notes&quot;&gt;More notes&lt;/h2&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://github.com/CakeDC/migrations&quot;&gt;CakeDC Migrations readme&lt;/a&gt; is pretty comprehensive in terms of what it supports. I personally like using &lt;code&gt;app/Console/cake Migrations.migration status&lt;/code&gt; to check on the status of my migrations in production.&lt;/p&gt;
+
+&lt;p&gt;You should definitely look into using &lt;a href=&quot;https://github.com/CakeDC/migrations#callbacks&quot;&gt;migration callbacks&lt;/a&gt;. Callbacks are a simple way of populating your production database with relevant information before or after a database migration. For instance, if you are creating a new name field that combines all the users names, you might want to run an update statement in the &lt;code&gt;afterMigration&lt;/code&gt; callback to populate that field for all existing users.&lt;/p&gt;
+
+&lt;p&gt;I’ve hooked up migrations into the deploy process of most of my applications. It’s pretty trivial to run migrations automatically - just do &lt;code&gt;run all&lt;/code&gt; - and there is no reason to not do so after an application deployment.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 19 Dec 2013 00:54:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2013/12/19/tackling-database-migrations/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/19/tackling-database-migrations/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>migrations</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+  </channel>
+</rss>

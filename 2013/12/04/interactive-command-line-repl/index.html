@@ -8,153 +8,111 @@
 <!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
 <!--<![endif]-->
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width">
-		<title>CakeAdvent: Interactive command-line REPL for CakePHP</title>
-		<link rel="profile" href="http://gmpg.org/xfn/11">
-		<!--[if lt IE 9]>
-			<script src="/javascripts/html5.js" type="text/javascript"></script>
-		<![endif]-->
-		<meta name="robots" content="all" />
-		<meta name="robots" content="index, follow" />
-		<meta name="revisit-after" content="7 days" />
-		<meta name="version" content="1.0" />
-
-		<meta name="description" content="Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code" />
-		<meta name="keywords" content="cakephp, cli, repl" />
-
-		<meta property="fb:app_id" content="775202682501320" />
-		<meta property="og:title" content="CakeAdvent: Interactive command-line REPL for CakePHP" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/" />
-		<meta property="og:description" content="Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code" />
-
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@savant">
-		<meta name="twitter:creator" content="@savant">
-		<meta name="twitter:title" content="CakeAdvent: Interactive command-line REPL for CakePHP" />
-		<meta name="twitter:description" content="Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code" />
-
-		<link rel="alternate" type="application/rss+xml" title="Interactive command-line REPL for CakePHP » Feed" href="/atom.xml">
-		<link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-		<link rel="stylesheet" id="twentytwelve-style-css" href="/stylesheets/style.css" type="text/css" media="all">
-		<!--[if lt IE 9]>
-			<link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-		<![endif]-->
-
-			<script type="text/javascript">
-				var _gaq = _gaq || [];
-				_gaq.push(['_setAccount', 'UA-8668344-3']);
-				_gaq.push(['_trackPageview']);
-			</script>
-
-	</head>
-
-	<body class="home  ">
-		<div class="site">
-			<header class="site-header" role="banner">
-				<hgroup>
-					<h1 class="site-title">
-						<a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
-					</h1>
-					<h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-				</hgroup>
-
-			</header>
-
-			<div class="wrapper">
-				<div class="site-content">
-					<div role="main">
-						<article class="type-post">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent: Interactive command-line REPL for CakePHP</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code" />
+    <meta name="keywords" content="cakephp, cli, repl" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent: Interactive command-line REPL for CakePHP" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/" />
+    <meta property="og:description" content="Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent: Interactive command-line REPL for CakePHP" />
+    <meta name="twitter:description" content="Lets explore different ways in which we could implement an interactive command-line for the purposes of quickly testing code" />
+    <link rel="alternate" type="application/rss+xml" title="Interactive command-line REPL for CakePHP » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
   <header class="entry-header">
-
       <h1 class="entry-title">
         Interactive command-line REPL for CakePHP
       </h1>
-
       <div class="comments-link">
         <a href="#comments" title="Comment on Interactive command-line REPL for CakePHP!">
           Comments
         </a>
       </div>
-
   </header>
-
   <div class="entry-content">
-
 <div class="series-note">
-
 <p>This entry is <strong>part 4</strong> of <strong>25</strong> in the series "CakeAdvent".</p>
 <ul>
   <li>Part 1 - <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">Testing your CakePHP Plugins with Travis</a></li>
-
   <li>Part 2 - <a href="/2013/12/02/fun-with-cakephp-views/">Fun with CakePHP Views</a></li>
-
   <li>Part 3 - <a href="/2013/12/03/hacking-the-cakephp-dispatch-system/">Hacking the CakePHP Dispatch System</a></li>
-
   <li>Part 4 - Interactive command-line REPL for CakePHP</li>
-
   <li>Part 5 - <a href="/2013/12/05/objectifying-cakephp-2-0-applications/">Objectifying CakePHP 2.0 applications</a></li>
-
   <li>Part 6 - <a href="/2013/12/06/building-service-classes/">Building Service Classes</a></li>
-
   <li>Part 7 - <a href="/2013/12/07/a-quick-rundown-on-asset-compression/">A quick rundown on Asset Compression</a></li>
-
   <li>Part 8 - <a href="/2013/12/08/composing-your-applications-from-plugins/">Composing your applications from plugins</a></li>
-
   <li>Part 9 - <a href="/2013/12/09/simplifying-oauth-integration/">Simplifying OAuth integration</a></li>
-
   <li>Part 10 - <a href="/2013/12/10/queue-in-scalable-applications/">Queue in scalable applications</a></li>
-
   <li>Part 11 - <a href="/2013/12/11/giving-the-gift-of-cakephp-to-the-community/">Giving the gift of CakePHP to the Community</a></li>
-
   <li>Part 12 - <a href="/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/">Abusing Exceptions to provide model-layer redirection</a></li>
-
   <li>Part 13 - <a href="/2013/12/13/simple-application-maintenance-mode/">Simple application maintenance mode</a></li>
-
   <li>Part 14 - <a href="/2013/12/14/creating-a-custom-session-flash-handler/">Creating a custom session flash handler</a></li>
-
   <li>Part 15 - <a href="/2013/12/15/payment-processing-using-stripe/">Payment Processing using Stripe</a></li>
-
   <li>Part 16 - <a href="/2013/12/16/simpler-cakephp-events/">Simpler CakePHP Events</a></li>
-
   <li>Part 17 - <a href="/2013/12/17/deploy-all-the-things-with-bash/">Deploy ALL the things using simple Bash scripts</a></li>
-
   <li>Part 18 - <a href="/2013/12/18/cakephp-testing-102/">CakePHP Testing 102</a></li>
-
   <li>Part 19 - <a href="/2013/12/19/tackling-database-migrations/">Tackling database migrations with one neat trick</a></li>
-
   <li>Part 20 - <a href="/2013/12/20/application-environment-configuration/">Application Environment Configuration</a></li>
-
   <li>Part 21 - <a href="/2013/12/21/building-a-behavior-with-cakephp/">Building a Behavior with CakePHP</a></li>
-
   <li>Part 22 - <a href="/2013/12/22/deploying-a-cakephp-application-to-heroku/">Deploying a CakePHP application to Heroku</a></li>
-
   <li>Part 23 - <a href="/2013/12/23/application-wide-event-management/">Application-wide event management</a></li>
-
   <li>Part 24 - <a href="/2013/12/24/writing-slimmer-controllers/">Writing Slimmer Controllers</a></li>
-
   <li>Part 25 - <a href="/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/">Local Development Environment using Vagrant and Virtualbox</a></li>
 </ul>
-
 </div>
-
     <blockquote>
-<p>REPL: A read–eval–print loop. It allows developers to test, write and run code interactively from the command-line.</p>
+  <p>REPL: A read–eval–print loop. It allows developers to test, write and run code interactively from the command-line.</p>
 </blockquote>
-
-<p>One constant annoyance I have with PHP is it&#39;s lack of a decent, built-in REPL. PHP does have a REPL, but it:</p>
-
+<p>One constant annoyance I have with PHP is it’s lack of a decent, built-in REPL. PHP does have a REPL, but it:</p>
 <ul>
-<li>doesn&#39;t automatically print the output of each command</li>
-<li>auto-exits on fatal errors, causing you to lose work</li>
-<li>doesn&#39;t have pretty output by default :(</li>
+  <li>doesn’t automatically print the output of each command</li>
+  <li>auto-exits on fatal errors, causing you to lose work</li>
+  <li>doesn’t have pretty output by default :(</li>
 </ul>
-
 <p>All I want to do is the following:</p>
-
-<pre class="rainbow-code"><code data-language="shell">Console/shell
+<pre><code class="language-bash">Console/shell
 cakephp&gt; App::uses('ClassRegistry', 'Utility');
 cakephp&gt; App::uses('Post', 'Model');
 cakephp&gt; $posts = ClassRegistry::init('Post');
@@ -169,213 +127,173 @@ cakephp&gt; $posts-&gt;find('first');
       'modified' =&gt; NULL
     )
   )
-)</code></pre>
-
+)
+</code></pre>
 <p>Luckily, there are a few options for CakePHP:</p>
-
-<h1>Console Shell</h1>
-
+<h1 id="console-shell">Console Shell</h1>
 <p>There is a Console Shell in CakePHP. It allows you do the following:</p>
-
-<p><img src="http://f.cl.ly/items/1b0M3V033f043d2K110o/Screen%20Shot%202013-12-04%20at%203.38.17%20AM.png" alt="http://cl.ly/image/1H0X3g2k3I27"></p>
-
+<p><img src="http://f.cl.ly/items/1b0M3V033f043d2K110o/Screen%20Shot%202013-12-04%20at%203.38.17%20AM.png" alt="http://cl.ly/image/1H0X3g2k3I27" /></p>
 <p>Thats cool. A few issues though:</p>
-
 <ul>
-<li>Very limited. Basically only useful for Model finds and routes. Doesn&#39;t do much else. For example, <code>echo &quot;hi&quot;;</code> returns <code>Invalid command</code></li>
-<li>Not native PHP output. Try copy-pasting the output into an editor. Then spend the rest of your life reformating it.</li>
-<li>Deprecated as of 2.4, and will be removed in 3.x</li>
+  <li>Very limited. Basically only useful for Model finds and routes. Doesn’t do much else. For example, <code>echo "hi";</code> returns <code>Invalid command</code></li>
+  <li>Not native PHP output. Try copy-pasting the output into an editor. Then spend the rest of your life reformating it.</li>
+  <li>Deprecated as of 2.4, and will be removed in 3.x</li>
 </ul>
-
-<h1>Boris</h1>
-
-<p>Boris is a relative newcomer to PHP repl land. It&#39;s a pure-php REPL with some interesting code behind the implementation. We&#39;ll first need to install it:</p>
-
-<pre class="rainbow-code"><code data-language="shell">cd path/to/app/Vendor
-git clone git@github.com:d11wtq/boris.git</code></pre>
-
-<p>Next we&#39;ll need something to bootstrap the CakePHP codebase. We will create a file called <code>app/Console/boris</code>. You&#39;ll need to set proper permissions on it:</p>
-
-<pre class="rainbow-code"><code data-language="shell">chmod +x app/Console/boris</code></pre>
-
-<p>Next, we need to bootstrap some constants. The CakePHP <code>ShellDispatcher</code> class does this, though we&#39;ll need to make a few exceptions to it. Lets ensure we can include it (the code snippets here will all be in the same file!):</p>
-
-<pre class="rainbow-code"><code data-language="php">#!/usr/bin/php -q
+<h1 id="boris">Boris</h1>
+<p>Boris is a relative newcomer to PHP repl land. It’s a pure-php REPL with some interesting code behind the implementation. We’ll first need to install it:</p>
+<pre><code class="language-bash">cd path/to/app/Vendor
+git clone git@github.com:d11wtq/boris.git
+</code></pre>
+<p>Next we’ll need something to bootstrap the CakePHP codebase. We will create a file called <code>app/Console/boris</code>. You’ll need to set proper permissions on it:</p>
+<pre><code class="language-bash">chmod +x app/Console/boris
+</code></pre>
+<p>Next, we need to bootstrap some constants. The CakePHP <code>ShellDispatcher</code> class does this, though we’ll need to make a few exceptions to it. Lets ensure we can include it (the code snippets here will all be in the same file!):</p>
+<pre><code class="language-php">#!/usr/bin/php -q
 &lt;?php
 $ds = DIRECTORY_SEPARATOR;
 $dispatcher = 'Cake' . $ds . 'Console' . $ds . 'ShellDispatcher.php';
 if (function_exists('ini_set')) {
   $root = dirname(dirname(dirname(__FILE__)));
-
   // the following line differs from its sibling
   // /lib/Cake/Console/Templates/skel/Console/cake.php
   ini_set('include_path', $root . $ds . 'lib' . PATH_SEPARATOR . ini_get('include_path'));
 }
-
 if (!include $dispatcher) {
   trigger_error('Could not locate CakePHP core files.', E_USER_ERROR);
 }
 unset($paths, $path, $dispatcher, $root, $ds);
-?&gt;</code></pre>
-
-<p>Next, we&#39;ll create a wrapper <code>BorisShellDispatcher</code> which will contain our customizations:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+?&gt;
+</code></pre>
+<p>Next, we’ll create a wrapper <code>BorisShellDispatcher</code> which will contain our customizations:</p>
+<pre><code class="language-php">&lt;?php
 class BorisShellDispatcher extends ShellDispatcher {
   public function __construct($args = array(), $bootstrap = true) {
     set_time_limit(0);
     $this-&gt;parseParams($args);
-
     if ($bootstrap) {
       $this-&gt;_initConstants();
       $this-&gt;_bootstrap();
     }
   }
-
   public static function run($argv) {
     $dispatcher = new BorisShellDispatcher($argv);
   }
 }
-?&gt;</code></pre>
-
-<p>The customizations are enforced because we don&#39;t want to run a CakePHP shell, we simply want to borrow the initialization code for constants etc.</p>
-
+?&gt;
+</code></pre>
+<p>The customizations are enforced because we don’t want to run a CakePHP shell, we simply want to borrow the initialization code for constants etc.</p>
 <p>Finally, lets run our custom dispatcher and start the boris runner:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<pre><code class="language-php">&lt;?php
 BorisShellDispatcher::run($argv);
-
 if (!include (ROOT . DS . 'app' . DS . 'vendor' . DS . 'boris' . DS . 'lib' . DS . 'autoload.php')) {
-  trigger_error(&quot;Unable to load boris autoload.&quot;, E_USER_ERROR);
+  trigger_error("Unable to load boris autoload.", E_USER_ERROR);
   exit(1);
 }
-
 $boris = new \Boris\Boris('cakephp&gt; ');
-
 $config = new \Boris\Config();
 $config-&gt;apply($boris);
-
 $options = new \Boris\CLIOptionsHandler();
 $options-&gt;handle($boris);
-
 $boris-&gt;start();
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>Lets run it!</p>
-
-<p><img src="http://cl.ly/image/1R2a0Y2b0710/Screen%20Shot%202013-12-04%20at%203.58.28%20AM.png" alt="http://cl.ly/image/1R2a0Y2b0710"></p>
-
+<p><img src="http://cl.ly/image/1R2a0Y2b0710/Screen%20Shot%202013-12-04%20at%203.58.28%20AM.png" alt="http://cl.ly/image/1R2a0Y2b0710" /></p>
 <p>Pretty slick, but a few (minor) quirks:</p>
-
 <ul>
-<li>Doesn&#39;t seem like you can call <code>App::uses()</code> before <code>$boris-&gt;start()</code> and have the loaded files persist.</li>
-<li>Output is sometimes verbose. If you just do <code>$posts = ClassRegistry::init(&#39;Post&#39;)</code>, it outputs the <code>$posts</code> object</li>
-<li>Doesn&#39;t work on Windows. Using Vagrant would solve this!</li>
+  <li>Doesn’t seem like you can call <code>App::uses()</code> before <code>$boris-&gt;start()</code> and have the loaded files persist.</li>
+  <li>Output is sometimes verbose. If you just do <code>$posts = ClassRegistry::init('Post')</code>, it outputs the <code>$posts</code> object</li>
+  <li>Doesn’t work on Windows. Using Vagrant would solve this!</li>
 </ul>
-
-<h2>Interactive shell for CakePHP</h2>
-
-<p>This is something from <a href="https://github.com/nodesagency">@nodesagency</a>. It is a CakePHP shell, similar to the <code>Console</code> shell, but in plugin format. We&#39;ll need to install it first:</p>
-
-<pre class="rainbow-code"><code data-language="shell">git clone git://github.com/nodesagency/cake-interactive-shell.git app/Plugin/Interactive</code></pre>
-
-<p>We&#39;ll also need to enable it:</p>
-
-<pre class="rainbow-code"><code data-language="php">&lt;?php
+<h2 id="interactive-shell-for-cakephp">Interactive shell for CakePHP</h2>
+<p>This is something from <a href="https://github.com/nodesagency">@nodesagency</a>. It is a CakePHP shell, similar to the <code>Console</code> shell, but in plugin format. We’ll need to install it first:</p>
+<pre><code class="language-bash">git clone git://github.com/nodesagency/cake-interactive-shell.git app/Plugin/Interactive
+</code></pre>
+<p>We’ll also need to enable it:</p>
+<pre><code class="language-php">&lt;?php
 // in app/Config/bootstrap.php
 CakePlugin::load('Interactive');
-?&gt;</code></pre>
-
+?&gt;
+</code></pre>
 <p>And now install it:</p>
-
-<pre class="rainbow-code"><code data-language="shell">Console/cake Interactive.Install</code></pre>
-
+<pre><code class="language-bash">Console/cake Interactive.Install
+</code></pre>
 <p>Lets try our commands:</p>
-
-<p><img src="http://cl.ly/image/0F21373g0v2d/Screen%20Shot%202013-12-04%20at%204.45.51%20AM.png" alt="http://cl.ly/image/0F21373g0v2d"></p>
-
-<p>Well that didn&#39;t work. Guess there are a few bugs, or we need to make our own database connection?</p>
-
+<p><img src="http://cl.ly/image/0F21373g0v2d/Screen%20Shot%202013-12-04%20at%204.45.51%20AM.png" alt="http://cl.ly/image/0F21373g0v2d" /></p>
+<p>Well that didn’t work. Guess there are a few bugs, or we need to make our own database connection?</p>
 <p>One other (small) issue. This shell appears to require <code>phpsh</code> from Facebook. That project has been unmaintained for 3 years, and requires <code>readline</code>, <code>ncurses</code>, and <code>emacs</code> to build properly. I know because I had to go down a thirty-minute rabbit hole to figure that out. Annoying, but if you ever get it working, the above information is important if you ever want to actually install <code>phpsh</code>.</p>
-
-<p>The plugin didn&#39;t load any required files without <code>phpsh</code>, so it appears to be unmaintained. Boo.</p>
-
-<h2>The straight skinny</h2>
-
-<p>I think your current best bet is to use <code>Boris</code>. It&#39;s quite easy to install, and other than not having an official CakePHP integration, is the best of the group atm.</p>
-
-<p>Going forward, I expect to see CakePHP get a more officially-sanctioned integration with REPLs such as Boris - and I expect there will be more like them - so we&#39;ll see where 3.0 brings us!</p>
-
+<p>The plugin didn’t load any required files without <code>phpsh</code>, so it appears to be unmaintained. Boo.</p>
+<h2 id="the-straight-skinny">The straight skinny</h2>
+<p>I think your current best bet is to use <code>Boris</code>. It’s quite easy to install, and other than not having an official CakePHP integration, is the best of the group atm.</p>
+<p>Going forward, I expect to see CakePHP get a more officially-sanctioned integration with REPLs such as Boris - and I expect there will be more like them - so we’ll see where 3.0 brings us!</p>
   </div>
-
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-04 00:53:00 +0000">04 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
-
 </article>
-
   <div id="comments">
     <div id="disqus_thread" name="#comments"></div>
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-
-					</div>
-				</div>
-				<div class="widget-area" role="complementary">
-
-					<aside class="widget widget_categories widget_search">
-							<input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-							<br />
-							<br />
-							<br />
-						<h3 class="widget-title">Categories</h3>
-						<ul>
-
-								<li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
-
-								<li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
-
-								<li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
-
-								<li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
-
-								<li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
-
-						</ul>
-					</aside>
-
-				</div>
-			</div>
-			<footer class="colophon" role="contentinfo">
-				<div class="site-info">
-					<a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
-				</div>
-			</footer>
-		</div>
-
-		<script type="text/javascript" src="/javascripts/style.js"></script>
-		<script type="text/javascript">
-
-			if ($('#disqus_thread').length) {
-				var disqus_shortname  = 'josediazgonzalez';
-				var disqus_identifier = '/2013/12/04/interactive-command-line-repl/';
-				var disqus_url        = 'http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/';
-				var disqus_title      = 'CakeAdvent: Interactive command-line REPL for CakePHP';
-
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			}
-
-				(function() {
-					var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-		</script>
-	</body>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+            <br />
+            <br />
+            <br />
+        <h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://github.com/josegonzalez/cimino" title="Semantic Personal Publishing Platform">Proudly powered by Cimino</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2013/12/04/interactive-command-line-repl/';
+        var disqus_url        = 'http://josediazgonzalez.com/2013/12/04/interactive-command-line-repl/';
+        var disqus_title      = "CakeAdvent: Interactive command-line REPL for CakePHP";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
 </html>
