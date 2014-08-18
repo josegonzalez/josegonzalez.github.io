@@ -79,8 +79,16 @@ a img {
 }
 
 .hint {
-    font-size:0.9em;
     color:#ffffff;
+    font-size:0.9em;
+}
+
+.hint-two {
+    color: #fda042;
+    font-size:0.9em;
+}
+.hint-two:hover {
+    color: #e49f44;
 }
 
 .last {
