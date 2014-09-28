@@ -1,6 +1,7 @@
 @charset "UTF-8";
 /* =Customizations
 ----------------------------------------------- */
+/* Mixins */
 body {
   background: none; }
   body .site {
@@ -275,6 +276,105 @@ pre code {
     .widget-area .widget.widget_search .twitter-typeahead .tt-suggestion.tt-is-under-cursor {
       color: #fff;
       background-color: #0097cf; }
+
+.open-source-page h3 {
+  font-size: 1.5em;
+  margin-bottom: 2em;
+  padding-top: 0.8em; }
+.open-source-page .project {
+  position: relative;
+  margin-bottom: 3em; }
+.open-source-page .project {
+  padding-left: 70px; }
+  .open-source-page .project h4 {
+    font-size: 1em;
+    padding-bottom: .5em;
+    padding-top: .5em; }
+  .open-source-page .project h4 a {
+    font-size: 100%;
+    white-space: nowrap;
+    font-size: 1.2em;
+    color: #555555;
+    -webkit-transition: color 0.3s;
+    -moz-transition: color 0.3s;
+    -o-transition: color 0.3s;
+    transition: color 0.3s;
+    -webkit-transition: background-color 0.3s;
+    -moz-transition: background-color 0.3s;
+    -o-transition: background-color 0.3s;
+    transition: background-color 0.3s; }
+  .open-source-page .project .icon {
+    background-position: 0% 0%;
+    background-repeat: repeat;
+    color: #fff;
+    display: inline-block;
+    height: 50px;
+    float: left;
+    font-family: FontAwesome;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: normal;
+    left: 0;
+    line-height: 50px;
+    margin-right: .75em;
+    margin-top: 0;
+    position: absolute;
+    text-align: center;
+    text-decoration: inherit;
+    vertical-align: baseline;
+    width: 50px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    -webkit-font-smoothing: antialiased; }
+  .open-source-page .project .icon-cakephp {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #92b2b5), color-stop(100%, #376475));
+    background-image: -webkit-radial-gradient(5% 5%, #92b2b5 0%, #376475 50px);
+    background-image: -moz-radial-gradient(5% 5%, #92b2b5 0%, #376475 50px);
+    background-image: -o-radial-gradient(5% 5%, #92b2b5 0%, #376475 50px);
+    background-image: radial-gradient(5% 5%, #92b2b5 0%, #376475 50px); }
+  .open-source-page .project .icon-cakephp2 {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #5ca0a5), color-stop(100%, #003c4b));
+    background-image: -webkit-radial-gradient(5% 5%, #5ca0a5 0%, #003c4b 50px);
+    background-image: -moz-radial-gradient(5% 5%, #5ca0a5 0%, #003c4b 50px);
+    background-image: -o-radial-gradient(5% 5%, #5ca0a5 0%, #003c4b 50px);
+    background-image: radial-gradient(5% 5%, #5ca0a5 0%, #003c4b 50px); }
+  .open-source-page .project .icon-cakephp3 {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #1ca0a5), color-stop(100%, #2b5f6a));
+    background-image: -webkit-radial-gradient(5% 5%, #1ca0a5 0%, #2b5f6a 50px);
+    background-image: -moz-radial-gradient(5% 5%, #1ca0a5 0%, #2b5f6a 50px);
+    background-image: -o-radial-gradient(5% 5%, #1ca0a5 0%, #2b5f6a 50px);
+    background-image: radial-gradient(5% 5%, #1ca0a5 0%, #2b5f6a 50px); }
+  .open-source-page .project .icon-java {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #edd243), color-stop(100%, #e89e4f));
+    background-image: -webkit-radial-gradient(5% 5%, #edd243 0%, #e89e4f 50px);
+    background-image: -moz-radial-gradient(5% 5%, #edd243 0%, #e89e4f 50px);
+    background-image: -o-radial-gradient(5% 5%, #edd243 0%, #e89e4f 50px);
+    background-image: radial-gradient(5% 5%, #edd243 0%, #e89e4f 50px); }
+  .open-source-page .project .icon-php {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #6a68a7), color-stop(100%, #3f3976));
+    background-image: -webkit-radial-gradient(5% 5%, #6a68a7 0%, #3f3976 50px);
+    background-image: -moz-radial-gradient(5% 5%, #6a68a7 0%, #3f3976 50px);
+    background-image: -o-radial-gradient(5% 5%, #6a68a7 0%, #3f3976 50px);
+    background-image: radial-gradient(5% 5%, #6a68a7 0%, #3f3976 50px); }
+  .open-source-page .project .icon-python {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #528947), color-stop(100%, #34572d));
+    background-image: -webkit-radial-gradient(5% 5%, #528947 0%, #34572d 50px);
+    background-image: -moz-radial-gradient(5% 5%, #528947 0%, #34572d 50px);
+    background-image: -o-radial-gradient(5% 5%, #528947 0%, #34572d 50px);
+    background-image: radial-gradient(5% 5%, #528947 0%, #34572d 50px); }
+  .open-source-page .project .icon-ruby {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #cc3333), color-stop(100%, #8f2424));
+    background-image: -webkit-radial-gradient(5% 5%, #cc3333 0%, #8f2424 50px);
+    background-image: -moz-radial-gradient(5% 5%, #cc3333 0%, #8f2424 50px);
+    background-image: -o-radial-gradient(5% 5%, #cc3333 0%, #8f2424 50px);
+    background-image: radial-gradient(5% 5%, #cc3333 0%, #8f2424 50px); }
+  .open-source-page .project .icon-shell {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #3273a9), color-stop(100%, #214b6e));
+    background-image: -webkit-radial-gradient(5% 5%, #3273a9 0%, #214b6e 50px);
+    background-image: -moz-radial-gradient(5% 5%, #3273a9 0%, #214b6e 50px);
+    background-image: -o-radial-gradient(5% 5%, #3273a9 0%, #214b6e 50px);
+    background-image: radial-gradient(5% 5%, #3273a9 0%, #214b6e 50px); }
 
 .mobile-show {
   display: none; }
