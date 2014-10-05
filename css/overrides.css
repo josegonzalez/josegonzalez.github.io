@@ -328,53 +328,59 @@ pre code {
     border-radius: 3px;
     -webkit-font-smoothing: antialiased; }
   .open-source-page .project .icon-cakephp {
-    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #92b2b5), color-stop(100%, #376475));
-    background-image: -webkit-radial-gradient(5% 5%, #92b2b5 0%, #376475 50px);
-    background-image: -moz-radial-gradient(5% 5%, #92b2b5 0%, #376475 50px);
-    background-image: -o-radial-gradient(5% 5%, #92b2b5 0%, #376475 50px);
-    background-image: radial-gradient(5% 5%, #92b2b5 0%, #376475 50px); }
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #92b2b5), color-stop(100%, #3e6c70));
+    background-image: -webkit-radial-gradient(5% 5%, #92b2b5 0%, #3e6c70 50px);
+    background-image: -moz-radial-gradient(5% 5%, #92b2b5 0%, #3e6c70 50px);
+    background-image: -o-radial-gradient(5% 5%, #92b2b5 0%, #3e6c70 50px);
+    background-image: radial-gradient(5% 5%, #92b2b5 0%, #3e6c70 50px); }
   .open-source-page .project .icon-cakephp2 {
-    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #5ca0a5), color-stop(100%, #003c4b));
-    background-image: -webkit-radial-gradient(5% 5%, #5ca0a5 0%, #003c4b 50px);
-    background-image: -moz-radial-gradient(5% 5%, #5ca0a5 0%, #003c4b 50px);
-    background-image: -o-radial-gradient(5% 5%, #5ca0a5 0%, #003c4b 50px);
-    background-image: radial-gradient(5% 5%, #5ca0a5 0%, #003c4b 50px); }
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #5ca0a5), color-stop(100%, #204548));
+    background-image: -webkit-radial-gradient(5% 5%, #5ca0a5 0%, #204548 50px);
+    background-image: -moz-radial-gradient(5% 5%, #5ca0a5 0%, #204548 50px);
+    background-image: -o-radial-gradient(5% 5%, #5ca0a5 0%, #204548 50px);
+    background-image: radial-gradient(5% 5%, #5ca0a5 0%, #204548 50px); }
   .open-source-page .project .icon-cakephp3 {
-    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #1ca0a5), color-stop(100%, #2b5f6a));
-    background-image: -webkit-radial-gradient(5% 5%, #1ca0a5 0%, #2b5f6a 50px);
-    background-image: -moz-radial-gradient(5% 5%, #1ca0a5 0%, #2b5f6a 50px);
-    background-image: -o-radial-gradient(5% 5%, #1ca0a5 0%, #2b5f6a 50px);
-    background-image: radial-gradient(5% 5%, #1ca0a5 0%, #2b5f6a 50px); }
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #1ca0a5), color-stop(100%, #042324));
+    background-image: -webkit-radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px);
+    background-image: -moz-radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px);
+    background-image: -o-radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px);
+    background-image: radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px); }
   .open-source-page .project .icon-java {
-    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #edd243), color-stop(100%, #e89e4f));
-    background-image: -webkit-radial-gradient(5% 5%, #edd243 0%, #e89e4f 50px);
-    background-image: -moz-radial-gradient(5% 5%, #edd243 0%, #e89e4f 50px);
-    background-image: -o-radial-gradient(5% 5%, #edd243 0%, #e89e4f 50px);
-    background-image: radial-gradient(5% 5%, #edd243 0%, #e89e4f 50px); }
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #edd243), color-stop(100%, #917b06));
+    background-image: -webkit-radial-gradient(5% 5%, #edd243 0%, #917b06 50px);
+    background-image: -moz-radial-gradient(5% 5%, #edd243 0%, #917b06 50px);
+    background-image: -o-radial-gradient(5% 5%, #edd243 0%, #917b06 50px);
+    background-image: radial-gradient(5% 5%, #edd243 0%, #917b06 50px); }
+  .open-source-page .project .icon-go {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #63a1d9), color-stop(100%, #18548b));
+    background-image: -webkit-radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px);
+    background-image: -moz-radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px);
+    background-image: -o-radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px);
+    background-image: radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px); }
   .open-source-page .project .icon-php {
-    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #6a68a7), color-stop(100%, #3f3976));
-    background-image: -webkit-radial-gradient(5% 5%, #6a68a7 0%, #3f3976 50px);
-    background-image: -moz-radial-gradient(5% 5%, #6a68a7 0%, #3f3976 50px);
-    background-image: -o-radial-gradient(5% 5%, #6a68a7 0%, #3f3976 50px);
-    background-image: radial-gradient(5% 5%, #6a68a7 0%, #3f3976 50px); }
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #6a68a7), color-stop(100%, #272650));
+    background-image: -webkit-radial-gradient(5% 5%, #6a68a7 0%, #272650 50px);
+    background-image: -moz-radial-gradient(5% 5%, #6a68a7 0%, #272650 50px);
+    background-image: -o-radial-gradient(5% 5%, #6a68a7 0%, #272650 50px);
+    background-image: radial-gradient(5% 5%, #6a68a7 0%, #272650 50px); }
   .open-source-page .project .icon-python {
-    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #528947), color-stop(100%, #34572d));
-    background-image: -webkit-radial-gradient(5% 5%, #528947 0%, #34572d 50px);
-    background-image: -moz-radial-gradient(5% 5%, #528947 0%, #34572d 50px);
-    background-image: -o-radial-gradient(5% 5%, #528947 0%, #34572d 50px);
-    background-image: radial-gradient(5% 5%, #528947 0%, #34572d 50px); }
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #528947), color-stop(100%, #142710));
+    background-image: -webkit-radial-gradient(5% 5%, #528947 0%, #142710 50px);
+    background-image: -moz-radial-gradient(5% 5%, #528947 0%, #142710 50px);
+    background-image: -o-radial-gradient(5% 5%, #528947 0%, #142710 50px);
+    background-image: radial-gradient(5% 5%, #528947 0%, #142710 50px); }
   .open-source-page .project .icon-ruby {
-    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #cc3333), color-stop(100%, #8f2424));
-    background-image: -webkit-radial-gradient(5% 5%, #cc3333 0%, #8f2424 50px);
-    background-image: -moz-radial-gradient(5% 5%, #cc3333 0%, #8f2424 50px);
-    background-image: -o-radial-gradient(5% 5%, #cc3333 0%, #8f2424 50px);
-    background-image: radial-gradient(5% 5%, #cc3333 0%, #8f2424 50px); }
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #cc3333), color-stop(100%, #570f0f));
+    background-image: -webkit-radial-gradient(5% 5%, #cc3333 0%, #570f0f 50px);
+    background-image: -moz-radial-gradient(5% 5%, #cc3333 0%, #570f0f 50px);
+    background-image: -o-radial-gradient(5% 5%, #cc3333 0%, #570f0f 50px);
+    background-image: radial-gradient(5% 5%, #cc3333 0%, #570f0f 50px); }
   .open-source-page .project .icon-shell {
-    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #3273a9), color-stop(100%, #214b6e));
-    background-image: -webkit-radial-gradient(5% 5%, #3273a9 0%, #214b6e 50px);
-    background-image: -moz-radial-gradient(5% 5%, #3273a9 0%, #214b6e 50px);
-    background-image: -o-radial-gradient(5% 5%, #3273a9 0%, #214b6e 50px);
-    background-image: radial-gradient(5% 5%, #3273a9 0%, #214b6e 50px); }
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #3273a9), color-stop(100%, #0c2336));
+    background-image: -webkit-radial-gradient(5% 5%, #3273a9 0%, #0c2336 50px);
+    background-image: -moz-radial-gradient(5% 5%, #3273a9 0%, #0c2336 50px);
+    background-image: -o-radial-gradient(5% 5%, #3273a9 0%, #0c2336 50px);
+    background-image: radial-gradient(5% 5%, #3273a9 0%, #0c2336 50px); }
 
 .mobile-show {
   display: none; }
