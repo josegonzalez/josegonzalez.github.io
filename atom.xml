@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-11-09T00:08:18+00:00</updated>
+ <updated>2014-11-18T05:07:53+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Work Items]]></title>
+   <link href="http://josediazgonzalez.com/2014/11/16/work-items/"/>
+   <updated>2014-11-16T19:47:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/11/16/work-items/</id>
+   <content type="html"><![CDATA[Big projects I will screw up over the next few months]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[CakePHP as a Microframework]]></title>
@@ -506,14 +514,6 @@
    <updated>2009-11-27T00:00:00+00:00</updated>
    <id>http://josediazgonzalez.com/2009/11/27/quick-tip-save-isnt-saveall/</id>
    <content type="html"><![CDATA[A very small example on when to use Model::save() versus Model::saveAll()]]></content>
- </entry>
-
- <entry>
-   <title type="html"><![CDATA[Trees Versus Graphs versus Vines]]></title>
-   <link href="http://josediazgonzalez.com/2009/11/22/trees-versus-graphs-versus-vines/"/>
-   <updated>2009-11-22T00:00:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2009/11/22/trees-versus-graphs-versus-vines/</id>
-   <content type="html"><![CDATA[Trees Versus Graphs versus Vines]]></content>
  </entry>
 
  <entry>

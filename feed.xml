@@ -5,9 +5,144 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 09 Nov 2014 00:08:18 +0000</pubDate>
-    <lastBuildDate>Sun, 09 Nov 2014 00:08:18 +0000</lastBuildDate>
+    <pubDate>Tue, 18 Nov 2014 05:07:53 +0000</pubDate>
+    <lastBuildDate>Tue, 18 Nov 2014 05:07:53 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
+    
+      <item>
+        <title>Work Items</title>
+        <description>&lt;p&gt;Areas of active interest over the next few months. This is a brain dump, and a much better way of tracking wtf I want to do than the current todo-list method I’ve been using. I doubt I’ll get half this crap done.&lt;/p&gt;
+
+&lt;h2 id=&quot;software-as-a-service&quot;&gt;Software as a Service&lt;/h2&gt;
+
+&lt;p&gt;Some day I would like to have tens of dollars come into my bank account every month. Here are two pieces of software I am writing in the hopes that people will want to pay me:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Writing a SaaS Wiki platform.
+    &lt;ul&gt;
+      &lt;li&gt;Needs some sort of inline wiki editor. Haven’t looked too hard, and I figure I could write one if need be.&lt;/li&gt;
+      &lt;li&gt;Need to extend the markdown parser (cebe/markdown) to support lots of extensions useful wiki extensions. Yes, it’s markdown based, and yes, I realize you can use a Github repo/wiki or something instead. Or an existing wiki solution.&lt;/li&gt;
+      &lt;li&gt;Should probably hire people to audit cebe/markdown for security issues&lt;/li&gt;
+      &lt;li&gt;I need a better styling than the bullshit I came up with when drunk. Not that it’s bad, but I was drunk.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Writing a SaaS Book Editing tool.
+    &lt;ul&gt;
+      &lt;li&gt;I originally wrote one to make it easy for me to allow people to edit my own book, and I figure it might be useful to other people.&lt;/li&gt;
+      &lt;li&gt;Needs to support context for comments&lt;/li&gt;
+      &lt;li&gt;Missing comment notifications&lt;/li&gt;
+      &lt;li&gt;No way to currently mark a comment as “resolved”, which makes it a pita to have to review old comments.&lt;/li&gt;
+      &lt;li&gt;Need to support giving users access to books as well as limiting them to certain chapters. Currently I need to insert a database record, and that won’t work in production.&lt;/li&gt;
+      &lt;li&gt;Need to support multiple “owners” of a book. Maybe like book organizations or something. Might need to rework the permission system.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;fun-side-projects&quot;&gt;Fun side projects&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A yes/no domain hosting platform. You point a domain at the yes/no generator, pay $10 a year, and get stats/an api to switch the yes/no to something else.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://humanslol.org/&quot;&gt;humanslol.org&lt;/a&gt; needs to be a thing.&lt;/li&gt;
+  &lt;li&gt;Making &lt;a href=&quot;https://twitter.com/savant/status/520684357946994688&quot;&gt;more 8-bit paintings&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;blogging&quot;&gt;Blogging&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;CakeAdvent 2014 is going to be a thing - &lt;a href=&quot;/tags/cakeadvent-2014/&quot;&gt;last year&lt;/a&gt; was tres excellent - and I’m currently gathering material&lt;/li&gt;
+  &lt;li&gt;Bringing back my &lt;a href=&quot;/tags/daily-dev-log/&quot;&gt;daily dev log&lt;/a&gt; in some fashion. It helped me formulate my plans - most work ended up being spread out over a series of a few days.&lt;/li&gt;
+  &lt;li&gt;A few tutorial posts I started but never completed, plus things people ask about in my issue tracker.&lt;/li&gt;
+  &lt;li&gt;Writing more tutorials on operations-type things, which will give me an excuse to learn how to use said tools.&lt;/li&gt;
+  &lt;li&gt;Updates to my blog to make discovering content a bit easier, as well as styling and blah blah fucking blah.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;books&quot;&gt;Books&lt;/h2&gt;
+
+&lt;p&gt;I’m writing/rewriting a few books, mostly on CakePHP.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A book on using &lt;a href=&quot;http://www.fabfile.org/&quot;&gt;Python Fabric&lt;/a&gt; for various things.
+    &lt;ul&gt;
+      &lt;li&gt;Based on some of the things I’ve done at work/to support work.&lt;/li&gt;
+      &lt;li&gt;Using it as an api, writing custom decorators, integrating with AWS, fixing logging, writing Web UIs, etc. Should be a small but fun one.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Updating my &lt;a href=&quot;/cakephp-book/&quot;&gt;current CakePHP book&lt;/a&gt; to 3.x.
+    &lt;ul&gt;
+      &lt;li&gt;I’m about half-way done, but need to redo certain chapters as the CakePHP apis change a bit in certain cases.&lt;/li&gt;
+      &lt;li&gt;Want to also add two new chapters:
+        &lt;ul&gt;
+          &lt;li&gt;Versioning Pastes&lt;/li&gt;
+          &lt;li&gt;Adding a simple api with oauth integration&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Converting a tutorial series to CakePHP 3.x.
+    &lt;ul&gt;
+      &lt;li&gt;The original writer has given me permission, just need to actually write the content.&lt;/li&gt;
+      &lt;li&gt;Aimed towards intro CakePHP users, so different target from my first one.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;open-source&quot;&gt;Open Source&lt;/h2&gt;
+
+&lt;p&gt;As always, I’m heavily involved in both my own and community projects. Poop.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://beaver.readthedocs.org/&quot;&gt;Beaver&lt;/a&gt; needs a whole lot of love :( . I wish I had time to work on it/improve it, as I learned a lot during the process and I know there are things I can improve.&lt;/li&gt;
+  &lt;li&gt;I started helping maintain &lt;a href=&quot;https://github.com/progrium/dokku&quot;&gt;Dokku&lt;/a&gt; - a single-server heroku alternative.
+    &lt;ul&gt;
+      &lt;li&gt;The original maintainer was burned out I guess. NBD, shit happens. I think he’s starting to pickup some steam, so hopefully we can continue on with this.&lt;/li&gt;
+      &lt;li&gt;Lots of pull requests and issues to triage. I closed ~60 issues and merged ~19 pull requests over the past week. My goal is zero bugs by the time we hit our 0.4.0 release, so stabilizing the external api is pretty important.&lt;/li&gt;
+      &lt;li&gt;I personally made 22 commits over the past few days. It’s been a good way to exercise my bash-fu.&lt;/li&gt;
+      &lt;li&gt;Tests still fail, and I don’t have access to the webserver that runs them or even the script that handles test-running :( . We’ll get that sorted out though, I’m sure.&lt;/li&gt;
+      &lt;li&gt;I’d like to write a simple web ui for it and integrate it with AWS services - RDS, ElastiCache, backups - and potentially sell that web ui as a product. Not that anyone would/should buy it. I’ve always wanted to write web tools to automate servers…&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Lots of &lt;a href=&quot;/open-source/&quot;&gt;CakePHP open source&lt;/a&gt;…
+    &lt;ul&gt;
+      &lt;li&gt;Move &lt;a href=&quot;https://github.com/friendsofcake/vagrant-chef&quot;&gt;friendsofcake/vagrant-chef&lt;/a&gt; to support more of a heroku-style deploy for any PHP framework. Would be extremely nice if users of the project could just have their framework auto-detected and be able to work.&lt;/li&gt;
+      &lt;li&gt;Work on &lt;a href=&quot;https://github.com/friendsofcake/crud-view&quot;&gt;friendsofcake/crud-view&lt;/a&gt;. I started a while back, but it needs a lot of love and a dedicated developer. It’s basically scaffolding on steroids.&lt;/li&gt;
+      &lt;li&gt;Updating a bunch of plugins to CakePHP 3.x.&lt;/li&gt;
+      &lt;li&gt;Marking a bunch of plugins as deprecated and pointing users to alternatives&lt;/li&gt;
+      &lt;li&gt;Adding support to filter out 3.x from 2.x plugins on the CakePHP plugins site&lt;/li&gt;
+      &lt;li&gt;Making a new version of the &lt;a href=&quot;https://github.com/friendsofcake/app-template/&quot;&gt;friendsofcake/app-template&lt;/a&gt; project for 3.x. Much simpler now that CakePHP 3 has built-in support for using DSNs for connection strings, but still has to be done at some point. Will be necessary for my book.&lt;/li&gt;
+      &lt;li&gt;Contributing cli-based migration generation for &lt;a href=&quot;https://phinx.org/&quot;&gt;phinx&lt;/a&gt;. We have r&lt;a href=&quot;https://github.com/CakeDC/migrations/blob/master/Docs/Documentation/Generate-Migrations-Without-DB-Interaction.md&quot;&gt;ails-like migration generation&lt;/a&gt; in CakePHP 2.x, but now that we’re adopting a community library, we need to port that feature. Won’t be hard as the basic structure is already there.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Generic PHP queuing library.
+    &lt;ul&gt;
+      &lt;li&gt;I already have a version I stopped working on last year called &lt;a href=&quot;https://github.com/josegonzalez/php-queuesadilla&quot;&gt;php-queuesadilla&lt;/a&gt;, though it needs some love and care before it can be considered general use. It also needs to use proper queuing systems (rabbit and zero are missing).&lt;/li&gt;
+      &lt;li&gt;All the existing ones suck or pull in quite a few requirements.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;work-related-stuff&quot;&gt;Work-related stuff&lt;/h2&gt;
+
+&lt;p&gt;There’s other, more important crap, but one does not simply post all the things. The stuff here will likely be open source if it already isn’t.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;An integration between ruby’s ERB templates and consul. Should let me re-use chef templates rather than needing to maintain them in two places.&lt;/li&gt;
+  &lt;li&gt;Make it easier to interact with &lt;a href=&quot;https://github.com/seatgeek/cronq&quot;&gt;cronq&lt;/a&gt;, a distributed cron-like system. Also have a few logging improvements to make, and the codebase isn’t the greatest thing…&lt;/li&gt;
+  &lt;li&gt;Making &lt;a href=&quot;https://github.com/seatgeek/graphite-pager&quot;&gt;graphite-pager&lt;/a&gt; scale slightly better, perhaps by rewriting it to be a statsd clone so that it can introspect on data rather than retreiving it during a check.&lt;/li&gt;
+  &lt;li&gt;Clean up a php-aqmp job system we have (unrelated to my own open source work). You know, to be good open-source citizens.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;tldr-im-hella-busy&quot;&gt;tl;dr I’m hella busy&lt;/h4&gt;
+</description>
+        <pubDate>Sun, 16 Nov 2014 19:47:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/11/16/work-items/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/11/16/work-items/</guid>
+        
+        <category>development</category>
+        
+        
+        <category>dev log</category>
+        
+      </item>
     
       <item>
         <title>CakePHP as a Microframework</title>
@@ -615,11 +750,13 @@ class PostsController extends Controller
         <link>http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/</guid>
         
+        <category>CakeAdvent-2014</category>
+        
         <category>cakephp</category>
         
-        <category>vagrant</category>
-        
         <category>development</category>
+        
+        <category>vagrant</category>
         
         
         <category>cakephp</category>
@@ -949,6 +1086,8 @@ public function add($restaurant_id = null) {
         <link>http://josediazgonzalez.com/2013/12/24/writing-slimmer-controllers/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/24/writing-slimmer-controllers/</guid>
         
+        <category>CakeAdvent-2014</category>
+        
         <category>cakephp</category>
         
         <category>controllers</category>
@@ -1067,6 +1206,8 @@ AppEventDispatcher::fire(&#39;foo&#39;, null, array(&#39;baz&#39;));
         <pubDate>Mon, 23 Dec 2013 14:15:00 +0000</pubDate>
         <link>http://josediazgonzalez.com/2013/12/23/application-wide-event-management/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/23/application-wide-event-management/</guid>
+        
+        <category>CakeAdvent-2014</category>
         
         <category>cakephp</category>
         
@@ -1268,6 +1409,8 @@ CakeLog::config(&#39;error&#39;, array(
         <pubDate>Sun, 22 Dec 2013 15:18:00 +0000</pubDate>
         <link>http://josediazgonzalez.com/2013/12/22/deploying-a-cakephp-application-to-heroku/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/22/deploying-a-cakephp-application-to-heroku/</guid>
+        
+        <category>CakeAdvent-2014</category>
         
         <category>cakephp</category>
         
@@ -1657,13 +1800,15 @@ class DeletedUserFixture extends CakeTestFixture {
         <link>http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/</guid>
         
+        <category>CakeAdvent-2014</category>
+        
         <category>cakephp</category>
         
         <category>behaviors</category>
         
-        <category>testing</category>
-        
         <category>plugins</category>
+        
+        <category>testing</category>
         
         
         <category>cakephp</category>
@@ -1807,303 +1952,11 @@ export TEMP_PATH=/mnt
         <link>http://josediazgonzalez.com/2013/12/20/application-environment-configuration/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/20/application-environment-configuration/</guid>
         
+        <category>CakeAdvent-2014</category>
+        
         <category>cakephp</category>
         
         <category>configuration</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Tackling database migrations with one neat trick</title>
-        <description>&lt;p&gt;Database schema migrations are a tricky topic. Luckily, CakePHP has the excellent &lt;a href=&quot;https://github.com/CakeDC/migrations&quot;&gt;Migrations plugin by CakeDC&lt;/a&gt;, but creating a new migration file is often obtuse. Rather than diffing the schema, or trying to manually create it, lets automate some of the process with a custom Cakeshell&lt;/p&gt;
-
-&lt;h2 id=&quot;setup&quot;&gt;Setup&lt;/h2&gt;
-
-&lt;p&gt;First up, we’ll install the &lt;a href=&quot;https://github.com/CakeDC/migrations&quot;&gt;Migrations plugin&lt;/a&gt;. Run the following command in your shell to install it via composer:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;composer require cakedc/migrations 2.2.*
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, lets enable it in our &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;echo -e &quot;\nApp::import(&#39;Vendor&#39;, array(&#39;file&#39; =&amp;gt; &#39;autoload&#39;));&quot; &amp;gt;&amp;gt; app/Config/bootstrap.php;
-echo -e &quot;\nCakePlugin::loadAll();&quot; &amp;gt;&amp;gt; app/Config/bootstrap.php;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that it is enabled, we will setup the initial database migrations needed for the plugin itself:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;app/Console/cake Migrations.migration run all -p Migrations
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;cli-migration-creation&quot;&gt;CLI Migration creation&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;tl;dr Skip this section and copy the contents of &lt;a href=&quot;https://gist.github.com/josegonzalez/e800ea3a7cc3db3ca56a&quot;&gt;this gist&lt;/a&gt; to app/Console/Command/MigrationGeneratorShell.php.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;At the moment, there is no way to create migrations directly from the command line. Let’s build a way to do so!&lt;/p&gt;
-
-&lt;p&gt;Create a file in the path &lt;code&gt;app/Console/Command/MigrationGeneratorShell.php&lt;/code&gt; with the following content:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses(&#39;AppShell&#39;, &#39;Console/Command&#39;);
-class MigrationGeneratorShell extends AppShell {
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;There isn’t much here. We’ll want the following interface to the shell:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;# creates a migration that adds a user_id to the testers table
-app/Console/cake migration_generator create add_user_id_to_tester user_id:integer:index
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;So we need to add a few methods:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  public function create() {
-  }
-
-  public function getOptionParser() {
-    $parser = parent::getOptionParser();
-    return $parser-&amp;gt;description(
-        &#39;The Migration shell.&#39; .
-        &#39;&#39;)
-      -&amp;gt;addSubcommand(&#39;Create&#39;, array(
-        &#39;help&#39; =&amp;gt; __(&#39;Create a migration file.&#39;)));
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’re going to support the following methods:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;add fields to a table&lt;/li&gt;
-  &lt;li&gt;remove fields from a table&lt;/li&gt;
-  &lt;li&gt;create a join table&lt;/li&gt;
-  &lt;li&gt;create a table&lt;/li&gt;
-  &lt;li&gt;drop a table&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;So we’ll add the following content to our &lt;code&gt;create()&lt;/code&gt; function:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  public function create() {
-    $fileName = array_shift($this-&amp;gt;args);
-    if (preg_match(&#39;/^(add|remove)_.*_(?:to|from)_(.*)/&#39;, $fileName, $matches)) {
-      $method = &#39;_&#39; . $matches[1] . &#39;Fields&#39;;
-      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
-    } elseif (preg_match(&#39;/^(join)_(.*)_(?:with)_(.*)/&#39;, $fileName, $matches)) {
-      $method = &#39;_createJoinTable&#39;;
-      $tables = array($matches[2], $matches[3]);
-    } elseif (preg_match(&#39;/^(create)_(.*)/&#39;, $fileName, $matches)) {
-      $method = &#39;_createTable&#39;;
-      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
-    } elseif (preg_match(&#39;/^(remove)_(.*)/&#39;, $fileName, $matches)) {
-      $method = &#39;_dropTable&#39;;
-      $tables = Inflector::tableize(Inflector::pluralize($matches[2]));
-    }
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that we know what methods we’re going to support, and what tables they will apply to, we need some field parsing magic. Below is a semi-intelligent way of getting specified fields, according to our cli schema of &lt;code&gt;fieldName:type:indexType&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  protected function _getFields() {
-    $fields = array();
-    $indexes = array();
-    foreach ($this-&amp;gt;args as $field) {
-      if (preg_match(&#39;/^(\w*)(?::(\w*))?(?::(\w*))?/&#39;, $field, $matches)) {
-        $fields[$matches[1]] = array(
-          &#39;type&#39; =&amp;gt; &#39;string&#39;,
-          &#39;null&#39; =&amp;gt; false,
-          &#39;default&#39; =&amp;gt; null,
-          &#39;key&#39; =&amp;gt; null,
-        );
-
-        if (empty($matches[2])) {
-          $fields[$matches[1]][&#39;type&#39;] = $matches[2];
-        }
-        if (empty($matches[3])) {
-          $fields[$matches[1]][&#39;key&#39;] = $matches[3];
-        }
-
-        if (!in_array($fields[$matches[1]][&#39;type&#39;], $this-&amp;gt;_validTypes)) {
-          switch ($matches[1]) {
-            case &#39;id&#39;:
-              $fields[$matches[1]][&#39;type&#39;] = &#39;integer&#39;;
-              break;
-            case &#39;created&#39;:
-            case &#39;modified&#39;:
-            case &#39;updated&#39;:
-              $fields[$matches[1]][&#39;type&#39;] = &#39;datetime&#39;;
-              break;
-            default:
-              $fields[$matches[1]][&#39;type&#39;] = &#39;string&#39;;
-          }
-        }
-
-        switch ($fields[$matches[1]][&#39;type&#39;]) {
-          case &#39;primary_key&#39;:
-            $indexes[&#39;PRIMARY&#39;] = array(&#39;column&#39; =&amp;gt; $matches[1], &#39;unique&#39; =&amp;gt; 1);
-            $fields[$matches[1]][&#39;key&#39;] = &#39;primary&#39;;
-          case &#39;string&#39;:
-            $fields[$matches[1]][&#39;length&#39;] = 255;
-            break;
-          case &#39;integer&#39;:
-            $fields[$matches[1]][&#39;length&#39;] = 11;
-            break;
-          case &#39;biginteger&#39;:
-            $fields[$matches[1]][&#39;length&#39;] = 20;
-            break;
-          default:
-            break;
-        }
-      }
-    }
-
-    if (!empty($indexes)) {
-      $fields[&#39;indexes&#39;] = $indexes;
-    }
-    return $fields;
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now lets add the logic for how retrieved fields act within the migration file itself. Note that because we are having a very quick pass at this, both &lt;code&gt;up&lt;/code&gt; and &lt;code&gt;down&lt;/code&gt; schema migrations will not be implemented in all cases. Certainly there are ways to improve this as well!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  protected function _createTable($table) {
-    $fields = $this-&amp;gt;_getFields();
-    return array(
-      &#39;up&#39; =&amp;gt; array(&#39;create_table&#39; =&amp;gt; array($table =&amp;gt; $fields)),
-      &#39;down&#39; =&amp;gt; array(&#39;drop_table&#39; =&amp;gt; array($table)),
-    );
-  }
-
-  protected function _dropTable($table) {
-    $this-&amp;gt;out(&#39;The `down` step must be manually created&#39;);
-    return array(
-      &#39;up&#39; =&amp;gt; array(&#39;drop_table&#39; =&amp;gt; array($table)),
-      &#39;down&#39; =&amp;gt; array(&#39;create_table&#39; =&amp;gt; array()),
-    );
-  }
-
-  protected function _createJoinTable($tables) {
-    $fields = $this-&amp;gt;_getFields();
-    sort($tables);
-
-    $defaults = array(
-      &#39;type&#39; =&amp;gt; &#39;integer&#39;,
-      &#39;null&#39; =&amp;gt; false,
-      &#39;default&#39; =&amp;gt; null,
-      &#39;key&#39; =&amp;gt; null,
-    );
-    foreach ($tables as $i =&amp;gt; $table) {
-      $tableName = Inflector::tableize(Inflector::pluralize($table));
-      $fieldName = Inflector::underscore(Inflector::singularize($tableName)) . &#39;_id&#39;;
-      $tables[$i] = $tableName;
-      if (isset($fields[$fieldName])) {
-        $fields[$fieldName] = array_merge($defaults, $fields[$fieldName]);
-      } else {
-        $fields[$fieldName] = $defaults;
-      }
-    }
-
-    $joinTable = implode(&#39;_&#39;, $tables);
-    return array(
-      &#39;up&#39; =&amp;gt; array(&#39;create_table&#39; =&amp;gt; array($joinTable =&amp;gt; $fields)),
-      &#39;down&#39; =&amp;gt; array(&#39;drop_table&#39; =&amp;gt; array($joinTable)),
-    );
-  }
-
-  protected function _addFields($table) {
-    $fields = $this-&amp;gt;_getFields();
-    return array(
-      &#39;up&#39; =&amp;gt; array(&#39;create_field&#39; =&amp;gt; array($table =&amp;gt; $fields)),
-      &#39;down&#39; =&amp;gt; array(&#39;drop_field&#39; =&amp;gt; array($table =&amp;gt; array_keys($fields))),
-    );
-  }
-
-  protected function _removeFields($table) {
-    $this-&amp;gt;out(&#39;The `down` step must be manually created&#39;);
-    $fields = $this-&amp;gt;_getFields();
-    return array(
-      &#39;up&#39; =&amp;gt; array(&#39;drop_field&#39; =&amp;gt; array($table =&amp;gt; array_keys($fields))),
-      &#39;down&#39; =&amp;gt; array(&#39;create_field&#39; =&amp;gt; array()),
-    );
-  }
-
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now for the glue to create the file. We need a single method to create the file contents. Note that you’ll need to copy the &lt;code&gt;migration.ctp&lt;/code&gt; from the migrations plugin into &lt;code&gt;app/Console/Templates/migration.ctp&lt;/code&gt; for this to work:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-/**
- * Include and generate a template string based on a template file
- *
- * @param string $template Template file name
- * @param array $vars List of variables to be used on tempalte
- * @return string
- */
-  private function __generateTemplate($template, $vars) {
-    extract($vars);
-    ob_start();
-    ob_implicit_flush(0);
-    include (dirname(__FILE__) . DS . &#39;Templates&#39; . DS . $template . &#39;.ctp&#39;);
-    $content = ob_get_clean();
-
-    return $content;
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Add the following to the end of your &lt;code&gt;create&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-    $class = Inflector::classify($fileName);
-    $migration = $this-&amp;gt;$method($tables);
-    $content = var_export($migration);
-    $this-&amp;gt;path = APP . &#39;Config&#39; . DS . &#39;Migration&#39; . DS;
-
-    $version = gmdate(&#39;U&#39;);
-    $content = $this-&amp;gt;__generateTemplate(&#39;migration&#39;, array(&#39;name&#39; =&amp;gt; $class, &#39;class&#39; =&amp;gt; $class, &#39;migration&#39; =&amp;gt; $content));
-    $path = $this-&amp;gt;path . $version . &#39;_&#39; . strtolower($fileName) . &#39;.php&#39;;
-    $File = new File($path, true);
-    $this-&amp;gt;out(&#39;File created at &#39; . $path);
-    return $File-&amp;gt;write($content);
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;create-a-schema-file&quot;&gt;Create a schema file&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;app/Console/cake migration_generator create create_users id:primary_key name:string created:datetime modified:datetime
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Success! You should have a new file in &lt;code&gt;app/Config/Migration&lt;/code&gt; with your migrations in it. Now you can run them:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;app/Console/cake Migrations.migration run all
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;more-notes&quot;&gt;More notes&lt;/h2&gt;
-
-&lt;p&gt;The &lt;a href=&quot;https://github.com/CakeDC/migrations&quot;&gt;CakeDC Migrations readme&lt;/a&gt; is pretty comprehensive in terms of what it supports. I personally like using &lt;code&gt;app/Console/cake Migrations.migration status&lt;/code&gt; to check on the status of my migrations in production.&lt;/p&gt;
-
-&lt;p&gt;You should definitely look into using &lt;a href=&quot;https://github.com/CakeDC/migrations#callbacks&quot;&gt;migration callbacks&lt;/a&gt;. Callbacks are a simple way of populating your production database with relevant information before or after a database migration. For instance, if you are creating a new name field that combines all the users names, you might want to run an update statement in the &lt;code&gt;afterMigration&lt;/code&gt; callback to populate that field for all existing users.&lt;/p&gt;
-
-&lt;p&gt;I’ve hooked up migrations into the deploy process of most of my applications. It’s pretty trivial to run migrations automatically - just do &lt;code&gt;run all&lt;/code&gt; - and there is no reason to not do so after an application deployment.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 19 Dec 2013 00:54:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2013/12/19/tackling-database-migrations/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/19/tackling-database-migrations/</guid>
-        
-        <category>cakephp</category>
-        
-        <category>migrations</category>
         
         
         <category>cakephp</category>

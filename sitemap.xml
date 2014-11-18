@@ -15,6 +15,11 @@
 
 
   <url>
+      <loc>http://josediazgonzalez.com/2014/11/16/work-items/</loc>
+      <lastmod>2014-11-16</lastmod>
+  </url>
+
+  <url>
       <loc>http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/</loc>
       <lastmod>2014-03-23</lastmod>
   </url>
@@ -322,11 +327,6 @@
   <url>
       <loc>http://josediazgonzalez.com/2009/11/27/quick-tip-save-isnt-saveall/</loc>
       <lastmod>2009-11-27</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/11/22/trees-versus-graphs-versus-vines/</loc>
-      <lastmod>2009-11-22</lastmod>
   </url>
 
   <url>
