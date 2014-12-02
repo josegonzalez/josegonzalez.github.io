@@ -5,13 +5,13 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 02 Dec 2014 02:24:26 +0000</pubDate>
-    <lastBuildDate>Tue, 02 Dec 2014 02:24:26 +0000</lastBuildDate>
+    <pubDate>Tue, 02 Dec 2014 02:29:09 +0000</pubDate>
+    <lastBuildDate>Tue, 02 Dec 2014 02:29:09 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
     
       <item>
         <title>CakePHP Advent Calendar 2014</title>
-        <description>&lt;p&gt;Last year for the Advent Calendar, I brought to you &lt;a href=&quot;/2013/12/01/testing-your-cakephp-plugins-with-travis/&quot;&gt;24 delicious posts&lt;/a&gt; surrounding writing better CakePHP applications. Those posts catered to both the beginner and advanced CakePHP developer, and hopefully can still be of some use to you.&lt;/p&gt;
+        <description>&lt;p&gt;Last year for the Advent Calendar, I brought to you &lt;a href=&quot;/2013/12/01/testing-your-cakephp-plugins-with-travis/&quot;&gt;25 delicious posts&lt;/a&gt; surrounding writing better CakePHP applications. Those posts catered to both the beginner and advanced CakePHP developer, and hopefully can still be of some use to you.&lt;/p&gt;
 
 &lt;p&gt;This year, however, we’re going to kick it up a notch and actually use our skills to design 3 custom &lt;a href=&quot;http://cakephp.org/&quot;&gt;CakePHP&lt;/a&gt; applications:&lt;/p&gt;
 
