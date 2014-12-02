@@ -15,6 +15,11 @@
 
 
   <url>
+      <loc>http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/</loc>
+      <lastmod>2014-12-01</lastmod>
+  </url>
+
+  <url>
       <loc>http://josediazgonzalez.com/2014/11/16/work-items/</loc>
       <lastmod>2014-11-16</lastmod>
   </url>
@@ -280,11 +285,6 @@
   </url>
 
   <url>
-      <loc>http://josediazgonzalez.com/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/</loc>
-      <lastmod>2010-09-13</lastmod>
-  </url>
-
-  <url>
       <loc>http://josediazgonzalez.com/2010/09/04/cakefest-conference-notes/</loc>
       <lastmod>2010-09-04</lastmod>
   </url>
@@ -337,16 +337,6 @@
   <url>
       <loc>http://josediazgonzalez.com/2009/11/21/first-post/</loc>
       <lastmod>2009-11-21</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/09/07/allow-subdirectories-apache/</loc>
-      <lastmod>2009-09-07</lastmod>
-  </url>
-
-  <url>
-      <loc>http://josediazgonzalez.com/2009/09/04/simple-json-layout/</loc>
-      <lastmod>2009-09-04</lastmod>
   </url>
 
 

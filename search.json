@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "CakePHP Advent Calendar 2014",
+    "url": "/2014/12/01/cakephp-advent-calendar-2014/",
+    "description": "Introducing a slightly different CakePHP Advent Calendar.",
+    "tokens": ["advent","cakephp","calendar","different","introducing","slightly"]
+  },
+  {
+    "type": "post",
     "title": "Work Items",
     "url": "/2014/11/16/work-items/",
     "description": "Big projects I will screw up over the next few months",
@@ -372,13 +379,6 @@
   },
   {
     "type": "post",
-    "title": "Why CakePHP documentation sucks and what I'm doing about it",
-    "url": "/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/",
-    "description": "When people complain about documentation, the solution is to write more, and better, documentation.",
-    "tokens": ["better","cakephp","complain","documentation","people","solution","sucks","write"]
-  },
-  {
-    "type": "post",
     "title": "Cakefest Conference Notes",
     "url": "/2010/09/04/cakefest-conference-notes/",
     "description": "CakeFest 2010 Conference notes and links",
@@ -455,30 +455,16 @@
     "tokens": ["first","post"]
   },
   {
-    "type": "post",
-    "title": "Allow Subdirectories Apache",
-    "url": "/2009/09/07/allow-subdirectories-apache/",
-    "description": "Example .htaccess file for allowing custom subdirectories in your CakePHP application under Apache",
-    "tokens": ["allow","allowing","apache","application","cakephp","custom","example","file","htaccess","subdirectories"]
-  },
-  {
-    "type": "post",
-    "title": "Simple JSON Layout",
-    "url": "/2009/09/04/simple-json-layout/",
-    "description": "Extremely simple JSON Layout for your application",
-    "tokens": ["application","extremely","json","layout","simple"]
+    "type": "category",
+    "title": "other",
+    "url": "/categories/other/",
+    "tokens": []
   },
   {
     "type": "category",
     "title": "cakephp",
     "url": "/categories/cakephp/",
     "tokens": ["cakephp"]
-  },
-  {
-    "type": "category",
-    "title": "other",
-    "url": "/categories/other/",
-    "tokens": []
   },
   {
     "type": "category",
@@ -500,51 +486,15 @@
   },
   {
     "type": "tag",
-    "title": "cakephp",
-    "url": "/tags/cakephp/",
-    "tokens": ["cakephp"]
-  },
-  {
-    "type": "tag",
-    "title": "json",
-    "url": "/tags/json/",
-    "tokens": ["json"]
-  },
-  {
-    "type": "tag",
-    "title": "layout",
-    "url": "/tags/layout/",
-    "tokens": ["layout"]
-  },
-  {
-    "type": "tag",
-    "title": "quicktip",
-    "url": "/tags/quicktip/",
-    "tokens": ["quicktip"]
-  },
-  {
-    "type": "tag",
-    "title": "view",
-    "url": "/tags/view/",
-    "tokens": ["view"]
-  },
-  {
-    "type": "tag",
-    "title": "apache",
-    "url": "/tags/apache/",
-    "tokens": ["apache"]
-  },
-  {
-    "type": "tag",
-    "title": "htaccess",
-    "url": "/tags/htaccess/",
-    "tokens": ["htaccess"]
-  },
-  {
-    "type": "tag",
     "title": "blog",
     "url": "/tags/blog/",
     "tokens": ["blog"]
+  },
+  {
+    "type": "tag",
+    "title": "cakephp",
+    "url": "/tags/cakephp/",
+    "tokens": ["cakephp"]
   },
   {
     "type": "tag",
@@ -593,6 +543,12 @@
     "title": "relationships",
     "url": "/tags/relationships/",
     "tokens": ["relationships"]
+  },
+  {
+    "type": "tag",
+    "title": "quicktip",
+    "url": "/tags/quicktip/",
+    "tokens": ["quicktip"]
   },
   {
     "type": "tag",
@@ -932,8 +888,8 @@
   },
   {
     "type": "tag",
-    "title": "CakeAdvent-2014",
-    "url": "/tags/cakeadvent-2014/",
+    "title": "CakeAdvent-2013",
+    "url": "/tags/cakeadvent-2013/",
     "tokens": ["cakeadvent"]
   },
   {
@@ -947,6 +903,12 @@
     "title": "identicon",
     "url": "/tags/identicon/",
     "tokens": ["identicon"]
+  },
+  {
+    "type": "tag",
+    "title": "view",
+    "url": "/tags/view/",
+    "tokens": ["view"]
   },
   {
     "type": "tag",
@@ -1145,6 +1107,12 @@
     "title": "microframeworks",
     "url": "/tags/microframeworks/",
     "tokens": ["microframeworks"]
+  },
+  {
+    "type": "tag",
+    "title": "CakeAdvent-2014",
+    "url": "/tags/cakeadvent-2014/",
+    "tokens": ["cakeadvent"]
   },
   false
 ]

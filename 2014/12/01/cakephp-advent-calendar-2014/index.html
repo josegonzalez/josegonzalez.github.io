@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>Why CakePHP documentation sucks and what I'm doing about it</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/">
+    <title>CakeAdvent-2014: CakePHP Advent Calendar 2014</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -21,19 +21,19 @@
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
-    <meta name="description" content="When people complain about documentation, the solution is to write more, and better, documentation." />
-    <meta name="keywords" content="cakephp, github, side-projects" />
+    <meta name="description" content="Introducing a slightly different CakePHP Advent Calendar." />
+    <meta name="keywords" content="cakeadvent-2014, cakephp" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="Why CakePHP documentation sucks and what I'm doing about it" />
+    <meta property="og:title" content="CakeAdvent-2014: CakePHP Advent Calendar 2014" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/" />
-    <meta property="og:description" content="When people complain about documentation, the solution is to write more, and better, documentation." />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/" />
+    <meta property="og:description" content="Introducing a slightly different CakePHP Advent Calendar." />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="Why CakePHP documentation sucks and what I'm doing about it" />
-    <meta name="twitter:description" content="When people complain about documentation, the solution is to write more, and better, documentation." />
-    <link rel="alternate" type="application/rss+xml" title="Why CakePHP documentation sucks and what I'm doing about it » Feed" href="/atom.xml">
+    <meta name="twitter:title" content="CakeAdvent-2014: CakePHP Advent Calendar 2014" />
+    <meta name="twitter:description" content="Introducing a slightly different CakePHP Advent Calendar." />
+    <link rel="alternate" type="application/rss+xml" title="CakePHP Advent Calendar 2014 » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,21 +64,45 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Why CakePHP documentation sucks and what I'm doing about it
+        CakePHP Advent Calendar 2014
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Why CakePHP documentation sucks and what I'm doing about it!">
+        <a href="#comments" title="Comment on CakePHP Advent Calendar 2014!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>The CakePHP documentation <em>sucks</em>. By sucks I mean dumbasses are unable to read/use/search it. Which translates into more support in IRC, more ass-kicking on my part, and more repetition. I would like a <em>DRY</em> IRC channel. Also, I assume people do not appreciate my smart-ass remarks.</p>
-<p>So I’m rewriting the <a href="http://bakery.cakephp.org">CakePHP Bakery Documentation</a> as a <a href="http://github.com/josegonzalez/documentation">set of tutorials on github</a>. I’ve been in contact with a few small publishers in the past year, and asked a few questions of an editor, and I realize that rather than trying to get a book published, I’ll just offer the stuff for free. Fewer deadlines - actually, none as I don’t give a rats ass if I finish - but it also means I can improve it or fix it as time goes on. If I choose to publish it later, and it is any good, I’ll just go to a Book-on-Demand service or sell it on Amazon or similar.</p>
-<p>It’s Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License, fyi. Don’t sell it please, I’m not making any money off of it atm and don’t plan to for a long time.</p>
+    <p>Last year for the Advent Calendar, I brought to you <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">24 delicious posts</a> surrounding writing better CakePHP applications. Those posts catered to both the beginner and advanced CakePHP developer, and hopefully can still be of some use to you.</p>
+<p>This year, however, we’re going to kick it up a notch and actually use our skills to design 3 custom <a href="http://cakephp.org/">CakePHP</a> applications:</p>
+<ul>
+  <li>An anonymous markdown-based issue tracker capable of sending email notifications and exposing webhooks</li>
+  <li>A simple cart system with user authentication and payment processing</li>
+  <li>A simple tumblr clone with support for post type extensions</li>
+</ul>
+<h2 id="a-bit-of-background">A bit of background</h2>
+<p>As some of you may be aware, <a href="http://bakery.cakephp.org/articles/markstory/2014/11/17/cakephp_3_0_0-beta3_released">CakePHP 3</a> is right around the corner. With just two RCs left, it’s almost ready for prime-time with lots of great changes. Unfortunately, this also means that some of the old knowledge we had is no longer applicable, and so rather than try to introduce CakePHP 3 features in one-off tutorials, we will showcase the power of the new framework to build working applications.</p>
+<h2 id="why-3-tutorials">Why 3 tutorials?</h2>
+<p>CakePHP 3 is coming out, so we should match it with the same number. It also helps that an Advent Calendar is 25 days, so we’ll have an interlude between each tutorial series.</p>
+<h2 id="who-are-these-tutorials-aimed-at">Who are these tutorials aimed at?</h2>
+<p>You should have some knowledge of the PHP language, and knowledge of any MVC framework will help. That said, new CakePHP developers will hopefully grow more comfortable as we progress with the tutorials.  We’ll be laying the foundation for effective application development - via working local development environments and production code deployment.</p>
+<p>For experienced CakePHP developers, these series of tutorials will be designed to point out changes from the 2.x series. Note that we’ll be a bit light on tests - this is a purposeful change to make following the tutorials a bit easier, but don’t be afraid to practice TDD.</p>
+<p>For CakePHP haters, these tutorials are meant to show development practices in another framework. We will be using community libraries where possible, and thus most of the applications we are building will be possible to build in other frameworks. As CakePHP 3 is quite modular, you are welcome to incorporate both developed application code as well as CakePHP 3 libraries in your non-CakePHP projects.</p>
+<h2 id="what-do-i-need">What do I need?</h2>
+<p>These tutorials are completely free, and there will be no cost for any of the tools we use (other than your computer!). You’ll want to setup the following before reading these tutorials:</p>
+<ul>
+  <li>A <a href="https://github.com/">Github account</a></li>
+  <li>A <a href="https://www.heroku.com/">Heroku account</a></li>
+  <li>Install <a href="https://www.vagrantup.com/">Vagrant</a></li>
+  <li>Install <a href="https://www.virtualbox.org/">Virtualbox</a> or <a href="http://www.vmware.com/products/fusion">Vmware Fusion</a></li>
+</ul>
+<p>Please ensure you have all of the above setup, as otherwise certain portions of the tutorials will not make sense.</p>
+<p>Note that not every tutorial will use the above tools, and you are free to use alternatives if you so desire.</p>
+<h2 id="how-do-i-get-started">How do I get started?</h2>
+<p>I’ll be posting new posts in the series each day of the Advent Calendar, and tweeting about it as <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 1st of December!) for more delicious content.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2010-09-13 00:00:00 +0000">13 Sep 2010</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-01 17:24:00 +0000">01 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -97,6 +121,12 @@
     <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
     <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
   </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 1</strong> of <strong>1</strong> in the series "CakeAdvent 2014".</p>
+    <ol>
+      <li>CakePHP Advent Calendar 2014</li>
+    </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
         <ul>
@@ -134,9 +164,9 @@
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/';
-        var disqus_url        = 'http://josediazgonzalez.com/2010/09/13/why-cakephp-documentation-sucks-and-what-i-m-doing-about-it/';
-        var disqus_title      = "Why CakePHP documentation sucks and what I'm doing about it";
+        var disqus_identifier = '/2014/12/01/cakephp-advent-calendar-2014/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/';
+        var disqus_title      = "CakeAdvent-2014: CakePHP Advent Calendar 2014";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
