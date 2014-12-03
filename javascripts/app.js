@@ -5,8 +5,9 @@
     var $el = $(el);
     if (!$el.hasClass('rainbow-code')) {
       var $code = $($el.find('code'));
-      var match = $code.attr('class').match(pattern);
-      if (match) {
+      var klass = $code.attr('class');
+      if (klass && klass.match(pattern)) {
+        var match = $code.attr('class').match(pattern);
         $code.removeClass('language-' + match[1]);
         $code.removeClass('lang-' + match[1]);
         $el.addClass("rainbow-code");
