@@ -5,9 +5,194 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 02 Dec 2014 02:29:09 +0000</pubDate>
-    <lastBuildDate>Tue, 02 Dec 2014 02:29:09 +0000</lastBuildDate>
+    <pubDate>Wed, 03 Dec 2014 01:46:27 +0000</pubDate>
+    <lastBuildDate>Wed, 03 Dec 2014 01:46:27 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
+    
+      <item>
+        <title>Designing an anonymous issue tracker in CakePHP</title>
+        <description>&lt;p&gt;This CakeAdvent 2014 tutorial will walk you through the creation of a simple anonymous issue tracking application using CakePHP 3. To start with, we’ll be setting up our development environment, installing our app template, creating our database, and using the tools CakePHP provides to get our application up fast.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Lets start by cloning the &lt;a href=&quot;https://github.com/friendsofcake/vagrant-chef&quot;&gt;FriendsOfCake/vagrant-chef&lt;/a&gt; repository. This repository will provide a full-featured cakephp working environment within a virtual linux server, allowing us to use each and every feature our app will need without worrying about how to install software on our machines.&lt;/p&gt;
+
+&lt;p&gt;Assuming you already installed Git, Vagrant and Virtualbox, you can simply clone the &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; repo and start the virtual machine. This should take around 5 minutes on a decent DSL connection, and need only be done once.:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;git clone git@github.com:FriendsOfCake/vagrant-chef.git anonymous-issues
+cd anonymous-issues
+
+# bring up the working vm
+vagrant up
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that the virtualmachine is running, you can ssh onto it. Windows users will need to use &lt;a href=&quot;http://www.chiark.greenend.org.uk/~sgtatham/putty/&quot;&gt;Putty&lt;/a&gt; or similar, but please refer to the vagrant docs on how to connect.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;# ssh onto the vm
+vagrant ssh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that you are connected to your development environment, you should be able to create an application. &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; currently expects the application to be available in it’s &lt;code&gt;app&lt;/code&gt; directory, so we’ll keep that in mind.&lt;/p&gt;
+
+&lt;p&gt;As of CakePHP 3, we create new applications using the &lt;a href=&quot;https://getcomposer.org/&quot;&gt;Composer&lt;/a&gt; &lt;code&gt;create-project&lt;/code&gt; command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;composer create-project --prefer-dist -s dev cakephp/app app
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running the above will have output similar to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Installing cakephp/app (dev-master 28008873514274db441338eff5e2d07e75274f48)
+  - Installing cakephp/app (dev-master master)
+    Downloading: 100%
+
+Created project in app
+Loading composer repositories with package information
+Installing dependencies (including require-dev)
+  - Installing cakephp/plugin-installer (0.0.1)
+    Downloading: 100%
+
+  - Installing aura/installer-default (1.0.0)
+    Downloading: 100%
+
+  - Installing nesbot/carbon (1.13.0)
+    Downloading: 100%
+
+  - Installing psr/log (1.0.0)
+    Downloading: 100%
+
+  - Installing aura/intl (1.1.1)
+    Downloading: 100%
+
+  - Installing ircmaxell/password-compat (v1.0.4)
+    Downloading: 100%
+
+  - Installing cakephp/cakephp (3.0.x-dev 360c04e)
+    Downloading: 100%
+
+  - Installing cakephp/debug_kit (3.0.x-dev 8a6f3da)
+    Downloading: 100%
+
+  - Installing mobiledetect/mobiledetectlib (2.8.11)
+    Downloading: 100%
+
+  - Installing d11wtq/boris (v1.0.8)
+    Downloading: 100%
+
+Writing lock file
+Generating autoload files
+Created `config/app.php` file
+Permissions set on /vagrant/app/tmp/cache
+Permissions set on /vagrant/app/tmp/cache/models
+Permissions set on /vagrant/app/tmp/cache/persistent
+Permissions set on /vagrant/app/tmp/cache/views
+Permissions set on /vagrant/app/tmp/sessions
+Permissions set on /vagrant/app/tmp/tests
+Permissions set on /vagrant/app/tmp
+Permissions set on /vagrant/app/logs
+Updated Security.salt value in config/app.php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In previous versions of cake, you would need to configure your security salt and change permissions, though we now take care of this for you automatically. You’ll still need to change your database permissions in your &lt;code&gt;app/config/app.php&lt;/code&gt; file. &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; comes preinstalled with many datastores, so we’ll use MySQL for this sample application. The following are the credentials you will need to change in your &lt;code&gt;app/config/app.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;username: &lt;code&gt;root&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;password: &lt;code&gt;bananas&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;database: &lt;code&gt;database_name&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now that we’ve setup our database, we can import an initial schema into our app. There is currently no automated way to create a schema - though it’s coming quite soon - so we’ll connect to MySQL:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;mysql -uroot -pbananas
+# run the following command within the mysql connection
+use database_name;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And import the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-sql&quot;&gt;CREATE TABLE `comments` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `comment_id` int(11) DEFAULT NULL,
+  `email_address` varchar(255) DEFAULT NULL,
+  `comment` text,
+  `created` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `issues` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT NULL,
+  `text` text,
+  `created` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Disconnecting from the mysql terminal will drop us back into our linux virtualmachine, where we can now generate some general application scaffolding using the Bake utility. &lt;code&gt;Bake&lt;/code&gt; is a CakePHP command-line utility that allows us to template out various types of files. We could, for instance, template out custom migration files if we installed the Migrations plugin. In our case, we’re going to use it to generate Controllers, Table classes, Entities, and Template files for our &lt;code&gt;issues&lt;/code&gt; table. This allows us to skip a lot of the boring work of creating various files that won’t vary much from application to application.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd /vagrant/app
+bin/cake bake all issues
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you browse to http://192.168.13.37/issues, you’ll see your baked app in action. If you browse to http://192.168.13.37/, you’ll see that we have the generic CakePHP 3 landing page. Rather than show this to our users, lets show them the issues page by default.&lt;/p&gt;
+
+&lt;p&gt;CakePHP 3’s routing layer - which is specified in the &lt;code&gt;app/config/routes.php&lt;/code&gt; file - uses scoped routes. This means that you can do stuff like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+Router::scope('/blog', ['plugin' =&amp;gt; 'Blog'], function ($routes) {
+    $routes-&amp;gt;connect('/', ['controller' =&amp;gt; 'Articles']);
+});
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In our case, we’re going to use the default scope and change the routes.php file to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Core\Plugin;
+use Cake\Routing\Router;
+
+Router::scope('/', function ($routes) {
+  $routes-&amp;gt;connect('/', ['controller' =&amp;gt; 'Issues', 'action' =&amp;gt; 'index']);
+
+  $routes-&amp;gt;fallbacks();
+});
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We removed the &lt;code&gt;/pages/*&lt;/code&gt; catch-all route. This isn’t necessary unless you have static pages, which our app will not.&lt;/li&gt;
+  &lt;li&gt;We also removed plugin routing. This decreases the time it takes for the router class to process all the routes, though will break routing for any plugins. We can always add it back in the future.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now if you browse to http://192.168.13.37/, you’ll see our default &lt;code&gt;issues&lt;/code&gt; index page!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The above went by really quickly, and while it’s still early, our application looks pretty good already. We have a working development environment with any datastore we need, a scaffolded app via the excellent Composer package, been introduced to the Bake Shell, and learned a little about customizing our routes. What’s next?&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Customizing our bake templates to make baking faster in the future&lt;/li&gt;
+  &lt;li&gt;Generating Schema migrations from the command-line&lt;/li&gt;
+  &lt;li&gt;Attaching comments to issues and associating them automatically&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll cover those in the next installment of CakeAdvent 2014. Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 02 Dec 2014 16:22:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/</guid>
+        
+        <category>CakeAdvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>CakePHP Advent Calendar 2014</title>
@@ -44,6 +229,7 @@
 &lt;ul&gt;
   &lt;li&gt;A &lt;a href=&quot;https://github.com/&quot;&gt;Github account&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;A &lt;a href=&quot;https://www.heroku.com/&quot;&gt;Heroku account&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Install &lt;a href=&quot;http://git-scm.com/&quot;&gt;Git&lt;/a&gt; if you are not on a Mac&lt;/li&gt;
   &lt;li&gt;Install &lt;a href=&quot;https://www.vagrantup.com/&quot;&gt;Vagrant&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;Install &lt;a href=&quot;https://www.virtualbox.org/&quot;&gt;Virtualbox&lt;/a&gt; or &lt;a href=&quot;http://www.vmware.com/products/fusion&quot;&gt;Vmware Fusion&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -1475,400 +1661,6 @@ CakeLog::config('error', array(
         <category>cakephp</category>
         
         <category>heroku</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Building a Behavior with CakePHP</title>
-        <description>&lt;p&gt;I’ve been meaning to create a &lt;code&gt;deleted_at&lt;/code&gt; behavior, and today we’ll go over that.&lt;/p&gt;
-
-&lt;h2 id=&quot;creating-plugin-scaffolding&quot;&gt;Creating Plugin Scaffolding&lt;/h2&gt;
-
-&lt;p&gt;I normally place non-application code in a plugin. Most extensions to your core logic - behaviors, components, helpers - fall into this category. You can normally tell if it is pluginizable if you can imagine reusing the logic within the context of a CMS and an Issue Tracker :)&lt;/p&gt;
-
-&lt;p&gt;Lets create the followin directory structure:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd path/to/app
-mkdir -p app/Plugin/DeletedAt/Model/Behavior
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll initialize our plugin as a git repository. We’re doing this with the aim of having the plugin within hosted Packagist:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd app/Plugin/DeletedAt
-touch Model/Behavior/empty
-git init
-git add Model/Behavior/empty
-git commit -m &quot;Initial commit&quot;
-git push origin master
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The above assumes you created a repository on github to push your code to. Github is where &lt;em&gt;most&lt;/em&gt; CakePHP code exists, and it would be beneficial to the community to continue to use a single type of version control+code repository. Obviously, you can and should change this according to your needs.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;And now we’ll make this a &lt;a href=&quot;http://friendsofcake.com/&quot;&gt;FriendsOfCake-approved&lt;/a&gt; plugin using the steps from the &lt;a href=&quot;/2013/12/01/testing-your-cakephp-plugins-with-travis/&quot;&gt;first CakeAdvent post&lt;/a&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd path/to/app
-git clone git@github.com:FriendsOfCake/travis.git vendor/travis
-export COPYRIGHT_YEAR=2013
-export GITHUB_USERNAME=&quot;josegonzalez&quot;
-export PLUGIN_PATH=&quot;Plugin/DeletedAt&quot;
-export PLUGIN_NAME=&quot;DeletedAt&quot;
-export REPO_NAME=&quot;cakephp-deleted-at&quot;
-export YOUR_NAME=&quot;Jose Diaz-Gonzalez&quot;
-./vendor/travis/setup.sh
-rm -rf vendor/travis
-cd Plugin/DeletedAt
-git add .
-git commit -m &quot;FriendsOfCake support&quot;
-git push origin master
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;At this point, you should be able to enable support for the plugin within TravisCI, Packagist, and Coveralls.&lt;/p&gt;
-
-&lt;h2 id=&quot;creating-a-simple-behavior&quot;&gt;Creating a simple Behavior&lt;/h2&gt;
-
-&lt;p&gt;We’ll first need to create the proper files. We will have both a &lt;code&gt;DeletedAtBehavior.php&lt;/code&gt; and a &lt;code&gt;DeletedAtBehaviorTest.php&lt;/code&gt;. Lets do that:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd app/Plugin/DeletedAt
-mkdir -p Test/Case/Model/Behavior
-touch Model/Behavior/DeletedAtBehavior.php
-touch Test/Case/Model/Behavior/DeletedAtBehaviorTest.php
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The initial contents of each are pretty simple:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('ModelBehavior', 'Model');
-class DeletedAtBehavior extends ModelBehavior {
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('Model', 'Model');
-App::uses('AppModel', 'Model');
-require_once CAKE . 'Test' . DS . 'CASE' . DS . 'Model' . DS . 'models.php';
-class DeletedAtBehaviorTest extends CakeTestCase {
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, lets enable our plugin so that we can run tests. Add the following to your &lt;code&gt;bootstrap.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-CakePlugin::load('DeletedAt');
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now lets run tests!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd path/to/app
-Console/cake test DeletedAt AllDeletedAt --stderr
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You should see exactly 1 failure. We have no tests! But this is good. We now have a barebones behavior, tests that properly fail, and a goal in mind: fully passing tests for our new &lt;code&gt;DeletedAt&lt;/code&gt; behavior.&lt;/p&gt;
-
-&lt;p&gt;Commit your changes and read the next section.&lt;/p&gt;
-
-&lt;h2 id=&quot;writing-tests&quot;&gt;Writing tests&lt;/h2&gt;
-
-&lt;p&gt;For our behavior, we want to be able to:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Mark records as &lt;code&gt;deleted_at&lt;/code&gt; with a timestamp&lt;/li&gt;
-  &lt;li&gt;Un-delete records&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We’ll store this state within a &lt;code&gt;deleted_at&lt;/code&gt; field on the record. It will be of type &lt;code&gt;datetime&lt;/code&gt;, and if it is null, then the record is not deleted, otherwise we know when it was soft-deleted.&lt;/p&gt;
-
-&lt;p&gt;We’ll need a fixture to represent our test model. We should create it using the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd app/Plugin/DeletedAt
-mkdir -p Test/Fixture
-touch Test/Fixture/DeletedUserFixture.php
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Fixture classes are used to mock out test schemas in the database. They are useful for testing both real-world cases - using the database schema of your production tables - as well as for test-scenarios - as we will use for our plugin.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Fixture classes require two class attributes: &lt;code&gt;$fields&lt;/code&gt; and &lt;code&gt;$records&lt;/code&gt;. The &lt;code&gt;$fields&lt;/code&gt; attribute is used to define the schema for the mocked out table. The &lt;code&gt;$records&lt;/code&gt; attribute is an array of records to insert into your database. The &lt;code&gt;$records&lt;/code&gt; attribute should have values specified for each field in &lt;code&gt;$fields&lt;/code&gt;, otherwise the behavior would be unknown. We’ll use the following for our fixture:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('CakeTestFixture', 'TestSuite/Fixture');
-class DeletedUserFixture extends CakeTestFixture {
-
-  public $fields = array(
-    'id' =&amp;gt; array('type' =&amp;gt; 'integer', 'key' =&amp;gt; 'primary'),
-    'user' =&amp;gt; array('type' =&amp;gt; 'string', 'null' =&amp;gt; true),
-    'password' =&amp;gt; array('type' =&amp;gt; 'string', 'null' =&amp;gt; true),
-    'created' =&amp;gt; 'datetime',
-    'updated' =&amp;gt; 'datetime',
-    'deleted' =&amp;gt; array('type' =&amp;gt; 'datetime', 'null' =&amp;gt; true),
-  );
-
-  public $records = array(
-    array('user' =&amp;gt; 'mariano', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:16:23', 'updated' =&amp;gt; '2007-03-17 01:18:31', 'deleted' =&amp;gt; '2007-03-18 10:45:31'),
-    array('user' =&amp;gt; 'nate', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:18:23', 'updated' =&amp;gt; '2007-03-17 01:20:31', 'deleted' =&amp;gt; null),
-    array('user' =&amp;gt; 'larry', 'password' =&amp;gt; '5f4dcc3b5aa765d61d8327deb882cf99', 'created' =&amp;gt; '2007-03-17 01:20:23', 'updated' =&amp;gt; '2007-03-17 01:22:31', 'deleted' =&amp;gt; null),
-  );
-
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now lets write a test just for our sanity. We need to prepare our test class with the following:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A &lt;code&gt;$fixtures&lt;/code&gt; property to notify PHPUnit as to what fixtures to load for our tests&lt;/li&gt;
-  &lt;li&gt;A &lt;code&gt;setUp()&lt;/code&gt; method to execute before each test. We’ll setup our model here.&lt;/li&gt;
-  &lt;li&gt;A &lt;code&gt;tearDown()&lt;/code&gt; method to execute after each test. We’ll destroy our model here to ensure the next test case has a clean environment.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I’ve taken the liberty of writing these for you, and you can copy the following into your &lt;code&gt;DeletedAtBehavior&lt;/code&gt; test file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  public $fixtures = array(
-    'plugin.deleted_at.deleted_user'
-  );
-
-  public function setUp() {
-    parent::setUp();
-    $this-&amp;gt;DeletedUser = ClassRegistry::init('User');
-    $this-&amp;gt;DeletedUser-&amp;gt;useTable = 'deleted_users';
-    $this-&amp;gt;DeletedUser-&amp;gt;Behaviors-&amp;gt;load('DeletedAt.DeletedAt');
-  }
-
-  public function tearDown() {
-    unset($this-&amp;gt;DeletedUser);
-    parent::tearDown();
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now lets add a test. We’ll find all &lt;code&gt;deleted&lt;/code&gt; and &lt;code&gt;non-deleted&lt;/code&gt; records:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  public function testFindDeleted() {
-    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('all', array(
-      'conditions' =&amp;gt; array('deleted &amp;lt;&amp;gt;' =&amp;gt; null)
-    ));
-    $this-&amp;gt;assertEqual(1, count($records));
-  }
-
-  public function testFindNonDeleted() {
-    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('all', array(
-      'conditions' =&amp;gt; array('deleted' =&amp;gt; null)
-    ));
-    $this-&amp;gt;assertEqual(2, count($records));
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running &lt;code&gt;Console/cake test DeletedAt AllDeletedAt --stderr&lt;/code&gt; should give you a single passing test! Yay! Now lets write some real model code.&lt;/p&gt;
-
-&lt;h2 id=&quot;custom-finds&quot;&gt;Custom Finds&lt;/h2&gt;
-
-&lt;p&gt;To simplify our logic, we will not be overriding the build-in &lt;code&gt;Model::delete()&lt;/code&gt; method. Instead, we’ll do the following:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Add a custom finder to find deleted and non-deleted records&lt;/li&gt;
-  &lt;li&gt;Add a custom method to softdelete and un-softdelete records&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Here is some code to handle custom finds in a behavior. It comes from my earlier post on &lt;a href=&quot;/2010/12/01/embedding-custom-finds-in-behaviors/&quot;&gt;embedding custom finds within behaviors&lt;/a&gt;, with relevant updates for 2.x.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  public $mapMethods = array(
-    '/findDeleted/' =&amp;gt; 'findDeleted',
-    '/findNon_deleted/' =&amp;gt; 'findNonDeleted',
-  );
-
-  public function setup(Model $model, $config = array()) {
-      $model-&amp;gt;_findMethods['deleted'] = true;
-      $model-&amp;gt;_findMethods['non_deleted'] = true;
-  }
-
-  public function findDeleted(&amp;amp;$model, $functionCall, $state, $query, $results = array()) {
-      if ($state == 'before') {
-        if (empty($query['conditions'])) {
-          $query['conditions'] = array();
-        }
-        $query['conditions'][&quot;{$model-&amp;gt;alias}.deleted &amp;lt;&amp;gt;&quot;] = null;
-        return $query;
-      }
-      return $results;
-  }
-
-  public function findNonDeleted(&amp;amp;$model, $functionCall, $state, $query, $results = array()) {
-      if ($state == 'before') {
-        if (empty($query['conditions'])) {
-          $query['conditions'] = array();
-        }
-        $query['conditions'][&quot;{$model-&amp;gt;alias}.deleted&quot;] = null;
-        return $query;
-      }
-      return $results;
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that we have our custom finds in place, let’s modify our tests to use them:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  public function testFindDeleted() {
-    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $this-&amp;gt;assertEqual(1, count($records));
-  }
-
-  public function testFindNonDeleted() {
-    $records = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
-    $this-&amp;gt;assertEqual(2, count($records));
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running &lt;code&gt;Console/cake test DeletedAt AllDeletedAt --stderr&lt;/code&gt; should give us two passing tests!&lt;/p&gt;
-
-&lt;h2 id=&quot;deleting-records&quot;&gt;Deleting records&lt;/h2&gt;
-
-&lt;p&gt;Now we’ll add two custom methods. Create the following tests:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  public function testSoftdelete() {
-    $this-&amp;gt;DeletedUser-&amp;gt;softdelete(1);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
-    $this-&amp;gt;assertEqual(1, count($deleted));
-    $this-&amp;gt;assertEqual(2, count($nonDeleted));
-
-    $this-&amp;gt;DeletedUser-&amp;gt;softdelete(2);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
-    $this-&amp;gt;assertEqual(2, count($deleted));
-    $this-&amp;gt;assertEqual(1, count($nonDeleted));
-
-    $this-&amp;gt;DeletedUser-&amp;gt;softdelete(3);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
-    $this-&amp;gt;assertEqual(3, count($deleted));
-    $this-&amp;gt;assertEqual(0, count($nonDeleted));
-  }
-
-  public function testUnDelete() {
-    $this-&amp;gt;DeletedUser-&amp;gt;undelete(3);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
-    $this-&amp;gt;assertEqual(1, count($deleted));
-    $this-&amp;gt;assertEqual(2, count($nonDeleted));
-
-    $this-&amp;gt;DeletedUser-&amp;gt;undelete(2);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
-    $this-&amp;gt;assertEqual(1, count($deleted));
-    $this-&amp;gt;assertEqual(2, count($nonDeleted));
-
-    $this-&amp;gt;DeletedUser-&amp;gt;undelete(1);
-    $deleted = $this-&amp;gt;DeletedUser-&amp;gt;find('deleted');
-    $nonDeleted = $this-&amp;gt;DeletedUser-&amp;gt;find('non_deleted');
-    $this-&amp;gt;assertEqual(0, count($deleted));
-    $this-&amp;gt;assertEqual(3, count($nonDeleted));
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running tests now should give you two successes - our previous tests - and two failures - the new tests. The new tests fail because CakePHP will map &lt;code&gt;undelete&lt;/code&gt; and &lt;code&gt;softdelete&lt;/code&gt; to database methods if they don’t exist - which is useful in some cases, but in our case, we’ll implement the methods.&lt;/p&gt;
-
-&lt;p&gt;The logic for these methods is below. Feel free to extend them to your hearts content:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-  public function softdelete(Model $model, $id = null) {
-    if ($id) {
-      $model-&amp;gt;id = $id;
-    }
-
-    if (!$model-&amp;gt;id) {
-      return false;
-    }
-
-    $deleteCol = 'deleted';
-    if (!$model-&amp;gt;hasField($deleteCol)) {
-      return false;
-    }
-
-    $db = $model-&amp;gt;getDataSource();
-    $now = time();
-
-    $default = array('formatter' =&amp;gt; 'date');
-    $colType = array_merge($default, $db-&amp;gt;columns[$model-&amp;gt;getColumnType($deleteCol)]);
-
-    $time = $now;
-    if (array_key_exists('format', $colType)) {
-      $time = call_user_func($colType['formatter'], $colType['format']);
-    }
-
-    if (!empty($model-&amp;gt;whitelist)) {
-      $model-&amp;gt;whitelist[] = $deleteCol;
-    }
-    $model-&amp;gt;set($deleteCol, $time);
-    return $model-&amp;gt;saveField($deleteCol, $time);
-  }
-
-  public function undelete(Model $model, $id = null) {
-    if ($id) {
-      $model-&amp;gt;id = $id;
-    }
-
-    if (!$model-&amp;gt;id) {
-      return false;
-    }
-
-    $deleteCol = 'deleted';
-    if (!$model-&amp;gt;hasField($deleteCol)) {
-      return false;
-    }
-
-    $model-&amp;gt;set($deleteCol, null);
-    return $model-&amp;gt;saveField($deleteCol, null);
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now lets run tests using &lt;code&gt;Console/cake test DeletedAt AllDeletedAt --stderr&lt;/code&gt;. You should get the following output:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://cl.ly/image/1T010S2J390f/Screen%20Shot%202013-12-21%20at%205.03.38%20PM.png&quot; alt=&quot;http://cl.ly/image/1T010S2J390f&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Commit your changes and push to github. We’re done!&lt;/p&gt;
-
-&lt;h2 id=&quot;going-further&quot;&gt;Going Further&lt;/h2&gt;
-
-&lt;p&gt;Any of the following things would be cool to see:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Moving the softdeletion code to &lt;code&gt;Model::delete()&lt;/code&gt; and having two consecutive &lt;code&gt;delete()&lt;/code&gt; calls actually delete the record&lt;/li&gt;
-  &lt;li&gt;Configuration for the &lt;code&gt;deleted&lt;/code&gt; column.&lt;/li&gt;
-  &lt;li&gt;Tracking deletion state over time within a different table.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Of course, you are free to continue with this plugin as you wish! Hopefully the above post clarified some things regarding writing testable CakePHP code, creating plugins, and using/abusing Behaviors within CakePHP.&lt;/p&gt;
-</description>
-        <pubDate>Sat, 21 Dec 2013 14:52:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/21/building-a-behavior-with-cakephp/</guid>
-        
-        <category>CakeAdvent-2013</category>
-        
-        <category>cakephp</category>
-        
-        <category>behaviors</category>
-        
-        <category>plugins</category>
-        
-        <category>testing</category>
         
         
         <category>cakephp</category>

@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Designing an anonymous issue tracker in CakePHP",
+    "url": "/2014/12/02/designing-a-store-application-in-cakephp/",
+    "description": "Part 1 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["anonymous","cakephp","designed","designing","effectively","issue","part","posts","series","teach","tracker","use"]
+  },
+  {
+    "type": "post",
     "title": "CakePHP Advent Calendar 2014",
     "url": "/2014/12/01/cakephp-advent-calendar-2014/",
     "description": "Introducing a slightly different CakePHP Advent Calendar.",
