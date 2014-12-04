@@ -5,9 +5,123 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 04 Dec 2014 02:54:41 +0000</pubDate>
-    <lastBuildDate>Thu, 04 Dec 2014 02:54:41 +0000</lastBuildDate>
+    <pubDate>Thu, 04 Dec 2014 23:15:35 +0000</pubDate>
+    <lastBuildDate>Thu, 04 Dec 2014 23:15:35 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
+    
+      <item>
+        <title>Schema Migrations with CakePHP 3</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;I corrected a few issues with the previous post regarding the redirect and &lt;code&gt;requirePost&lt;/code&gt; event. They’ve been corrected.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In our previous post, I gave you all some homework:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Make the form actions optional - and turn them off for embedded forms.&lt;/li&gt;
+  &lt;li&gt;Create a nicer comment list than the current version.&lt;/li&gt;
+  &lt;li&gt;Hide the &lt;code&gt;issue_id&lt;/code&gt; field on the form without removing it completely&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For the first task, you can extract the form actions into a separate element and make the inclusion of that element conditional - default true - on a variable you specify from the event.&lt;/p&gt;
+
+&lt;p&gt;For the second task, using a custom element for related entities is the way to go.&lt;/p&gt;
+
+&lt;p&gt;For the third task, you will want to populate a new variable - lets call it &lt;code&gt;$inputOptions&lt;/code&gt; - and have it be an array of &lt;code&gt;field&lt;/code&gt; =&amp;gt; &lt;code&gt;options&lt;/code&gt; for the field. Each field being output should be in this array with a default empty array as it’s options. You can use the &lt;code&gt;BakeHelper::stringifyList&lt;/code&gt; to turn those options into a nicely formatted string array.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;One thing that is a pain is managing database schema changes. While we had &lt;a href=&quot;https://github.com/cakedc/migrations&quot;&gt;CakeDC/migrations&lt;/a&gt; in the 2.x world, CakePHP 3 is about embracing existing solutions to problems. In CakePHP 3, we’ve delegated the task to the excellent &lt;a href=&quot;https://phinx.org/&quot;&gt;Phinx&lt;/a&gt; library. Phinx is a database migration tool that CakePHP provides a wrapper for with the &lt;a href=&quot;https://github.com/cakephp/migrations&quot;&gt;CakePHP/migrations&lt;/a&gt; plugin. You can use Phinx outside of CakePHP as well, so switching back and forth between CakePHP and other PHP frameworks should be a breeze.&lt;/p&gt;
+
+&lt;p&gt;To install the migrations plugin, we’ll use composer:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
+vagrant ssh
+
+cd /vagrant/app
+composer require cakephp/migrations:dev-master
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At this point both phinx and the plugin will be installed. Plugins in CakePHP must be enabled before they can be used, and the CakePHP/migrations plugin is no different. Since it’s only useful on the command-line, we’ll enable it with the following code on our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Core\Plugin;
+
+Plugin::load('Migrations');
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that it’s enabled, we can generate our initial migration from the existing database:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
+bin/cake bake migration Initial
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The output should be similar to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Welcome to CakePHP v3.0.0-beta3 Console
+---------------------------------------------------------------
+App : src
+Path: /vagrant/app/src/
+---------------------------------------------------------------
+
+Baking migration class for Connection default
+
+Creating file /vagrant/app/config/Migrations/20141204225440_initial.php
+Wrote `/vagrant/app/config/Migrations/20141204225440_initial.php`
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If we look at that file, we’ll see a phinx-style migration that contains all the information about our current database schema. This can be useful for bootstrapping a new database (though our database works just fine for now). It’s pretty similar to the old migrations plugin - you get an &lt;code&gt;up&lt;/code&gt;, &lt;code&gt;down&lt;/code&gt;, and &lt;code&gt;change&lt;/code&gt; method - but uses an object-oriented approach to changing the database.&lt;/p&gt;
+
+&lt;p&gt;You can rollback any migration with the &lt;code&gt;down()&lt;/code&gt; callback by running the following command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations rollback
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And if you have created new migrations, you can migrate up to them:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One note, there is currently an issue where the Phinx library auto-includes an auto-increment &lt;code&gt;id&lt;/code&gt; field for every database. This might not be desired for certain tables, in which case you’ll want to manually disable the field:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$table = $this-&amp;gt;table('statuses', [
+    'id' =&amp;gt; false,
+    'primary_key' =&amp;gt; ['id']
+]);
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For more docs, see the &lt;a href=&quot;http://docs.phinx.org/en/latest/migrations.html#creating-a-new-migration&quot;&gt;phinx documentation here&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h2&gt;
+
+&lt;p&gt;This was a relatively short introduction to database migrations, but I felt it important enough to cover as we’ll be using them extensively over the next few tutorials. Your homework is actually pretty simple. We need to keep track of a &lt;code&gt;webhook_url&lt;/code&gt; string field with a length of 256 characters in our &lt;code&gt;comments&lt;/code&gt; table. Create a new migration and add the field to the table. The command to create an empty migration is as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations create WebhookUrl
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note, there is a bug in Phinx’s - not Cake’s! - templates where the end-docblock for the &lt;code&gt;change()&lt;/code&gt; method is in the wrong place. We’ll get that fixed up before CakePHP 3 goes stable :)&lt;/p&gt;
+</description>
+        <pubDate>Thu, 04 Dec 2014 14:22:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/</guid>
+        
+        <category>CakeAdvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        <category>migrations</category>
+        
+        <category>phinx</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Customizing Bake in CakePHP 3</title>
@@ -60,9 +174,9 @@ use Cake\View\Helper;
 use Cake\View\View;
 
 /**
- * Cell helper
+ * Post helper
  */
-class CellHelper extends Helper {
+class PostHelper extends Helper {
 
 /**
  * Default configuration.
@@ -124,8 +238,8 @@ bin/cake bake controller issues --force
 
 &lt;p&gt;One thing we’ll want to do is exclude &lt;code&gt;GET&lt;/code&gt; requests to the &lt;code&gt;/comments/add&lt;/code&gt; endpoint. Users should only post to it from the form that will be embedded on the &lt;code&gt;/issues/view&lt;/code&gt; page, and it should also redirect back to the issue. After the line setting actions for the &lt;code&gt;Comments&lt;/code&gt; controller, add the following:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$event-&amp;gt;view-&amp;gt;set('redirect', '[&quot;controller&quot; =&amp;gt; &quot;Issues&quot;, &quot;action&quot; =&amp;gt; &quot;view&quot;, $comment-&amp;gt;issue_id]');
-$event-&amp;gt;view-&amp;gt;set('requirePost', true);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$view-&amp;gt;set('redirect', '[&quot;controller&quot; =&amp;gt; &quot;Issues&quot;, &quot;action&quot; =&amp;gt; &quot;view&quot;, $comment-&amp;gt;issue_id]');
+$view-&amp;gt;set('requirePost', true);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The above two variables will be used in our custom &lt;code&gt;src/Template/Bake/Element/Controller/add.ctp&lt;/code&gt;. Controllers use elements to bake each action - meaning we can create custom actions as elements in the aforementioned directory - and the add action is no different. While you can copy the core one to that location, I’ll just show you the updated version we’ll be using:&lt;/p&gt;
@@ -216,7 +330,7 @@ if (!empty($relatedForm)) {
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%= $this-&amp;gt;element('form', $relatedForm) %&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Now that the initial setup is done, we need to populate this new &lt;code&gt;$addRelatedEntity&lt;/code&gt; variable in our &lt;code&gt;Bake.beforeRender&lt;/code&gt; event. The following event will do just that:&lt;/p&gt;
+&lt;p&gt;Now that the initial setup is done, we need to populate this new &lt;code&gt;$relatedForm&lt;/code&gt; variable in our &lt;code&gt;Bake.beforeRender&lt;/code&gt; event. The following event will do just that:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\ORM\TableRegistry;
 
@@ -307,10 +421,13 @@ bin/cake bake view issues --force
 
 &lt;h2 id=&quot;homework-time&quot;&gt;Homework Time&lt;/h2&gt;
 
-&lt;p&gt;I won’t write &lt;em&gt;all&lt;/em&gt; the code, but hopefully the above gives you a good idea as to how to modify bake templates. Your homework is:&lt;br /&gt;
-- Make the form actions optional - and turn them off for embedded forms.&lt;br /&gt;
-- Create a nicer comment list than the current version.&lt;br /&gt;
-- Hide the &lt;code&gt;issue_id&lt;/code&gt; field on the form without removing it completely&lt;/p&gt;
+&lt;p&gt;I won’t write &lt;em&gt;all&lt;/em&gt; the code, but hopefully the above gives you a good idea as to how to modify bake templates. Your homework is:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Make the form actions optional - and turn them off for embedded forms.&lt;/li&gt;
+  &lt;li&gt;Create a nicer comment list than the current version.&lt;/li&gt;
+  &lt;li&gt;Hide the &lt;code&gt;issue_id&lt;/code&gt; field on the form without removing it completely&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;Tomorrow’s CakeAdvent entry will contain a solution, but this should be a good way for you to start creating your own custom bake templates :) Until then!&lt;/p&gt;
 </description>
@@ -322,7 +439,7 @@ bin/cake bake view issues --force
         
         <category>cakephp</category>
         
-        <category>composer</category>
+        <category>bake</category>
         
         
         <category>cakephp</category>
@@ -1657,127 +1774,6 @@ public function add($restaurant_id = null) {
         <category>cakephp</category>
         
         <category>controllers</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Application-wide event management</title>
-        <description>&lt;p&gt;Today’s post is a simple, application-wide event manager. Listening and firing events usually requires some thought as to where the event should be attached. Do we want it on a model? What if I make a custom class? What if I don’t have access to something because I am in a plugin?&lt;/p&gt;
-
-&lt;p&gt;One thing I do is make a generic event dispatcher that can be used everywhere. Here’s how you can do the same.&lt;/p&gt;
-
-&lt;h2 id=&quot;appeventdispatcher&quot;&gt;AppEventDispatcher&lt;/h2&gt;
-
-&lt;p&gt;We discussed an &lt;code&gt;AppEventDispatcher&lt;/code&gt; in a &lt;a href=&quot;/2013/12/16/simpler-cakephp-events/&quot;&gt;previous post&lt;/a&gt;. If you are using that, you can continue doing so. Everything from here will be additive.&lt;/p&gt;
-
-&lt;p&gt;First, the &lt;code&gt;CakeEventManager&lt;/code&gt; has a method &lt;code&gt;instance()&lt;/code&gt; which returns a globale &lt;code&gt;CakeEventManager&lt;/code&gt;. This is useful for a global hooks system. We’ll use this in our own methods.&lt;/p&gt;
-
-&lt;p&gt;To handle the entire cycle, we will use both a &lt;code&gt;listen&lt;/code&gt; and &lt;code&gt;fire&lt;/code&gt; method.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;listen&lt;/code&gt;: Handles the attachment of a listener to the specified event. If the listener is an instance of &lt;code&gt;EventListener&lt;/code&gt;, event names can be omitted.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;fire&lt;/code&gt;: Handles the dispatching of a given event. Keep in mind that &lt;code&gt;$subject&lt;/code&gt; and &lt;code&gt;$data&lt;/code&gt; are optional arguments to this method.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Here is our &lt;code&gt;Lib/Event/AppEventDispatcher.php&lt;/code&gt; class with the above methods:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('CakeEvent', 'Event');
-App::uses('CakeEventManager', 'Event');
-
-class AppEventDispatcher {
-  public static function listen($callable, $eventKey = null, $options = array()) {
-    $manager = CakeEventManager::instance();
-    $manager-&amp;gt;attach($callable, $eventKey, $options);
-  }
-
-  public static function fire($name, $subject = null, $data = null) {
-    $manager = CakeEventManager::instance();
-    $event = new CakeEvent($name, $subject, $data);
-    $manager-&amp;gt;dispatch($event);
-    return $event;
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that we have our AppEventDispatcher in place, we can start using it.&lt;/p&gt;
-
-&lt;h2 id=&quot;global-startup-events&quot;&gt;Global Startup Events&lt;/h2&gt;
-
-&lt;p&gt;You may wish to create global events before most of the app has started. We’ll create a new file, &lt;code&gt;app/Config/events.php&lt;/code&gt;, which will contain our events. Include this file in your &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-include dirname(__FILE__) . DS . 'events.php';
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, create the file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;touch app/Config/events.php
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And we’ll add the following as content:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('AppEventDispatcher', 'Lib/Event');
-App::uses('CakeEvent', 'Event');
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we’re ready to test our global event system&lt;/p&gt;
-
-&lt;h2 id=&quot;test-the-whole-thing&quot;&gt;Test the whole thing&lt;/h2&gt;
-
-&lt;p&gt;Lets add the following to &lt;code&gt;app/Config/events.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-AppEventDispatcher::listen(function(CakeEvent $event) {
-  debug($event-&amp;gt;name());
-  debug($event-&amp;gt;subject());
-  debug($event-&amp;gt;data);
-  die;
-}, 'foo');
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is the initial setup for a dummy event &lt;code&gt;foo&lt;/code&gt; that triggers a callback which prints out the event and then exits the app. Not too fantastic, but for the purposes of our demo, it will do.&lt;/p&gt;
-
-&lt;p&gt;Now we need to fire the event. While not super exciting, I am placing the following at the bottom of my &lt;code&gt;app/Config/routes.php&lt;/code&gt; file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-AppEventDispatcher::fire('foo', null, array('baz'));
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And if we start our app, here is the output:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://cl.ly/image/1Q1O252X323d/Screen%20Shot%202013-12-23%20at%202.30.04%20PM.png&quot; alt=&quot;http://cl.ly/image/1Q1O252X323d&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;going-further&quot;&gt;Going further&lt;/h2&gt;
-
-&lt;p&gt;The following things are not available in our current implementation:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Queued events. These events would wait for a &lt;code&gt;AppEventDispatcher::flush()&lt;/code&gt; before firing.&lt;/li&gt;
-  &lt;li&gt;Subscriber classes that can be subscribed to any specified event&lt;/li&gt;
-  &lt;li&gt;Wildcard event names.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Some of the above may be tricky, but all are doable, and if you find them useful, feel free to extend my implementation to include your use cases :)&lt;/p&gt;
-</description>
-        <pubDate>Mon, 23 Dec 2013 14:15:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2013/12/23/application-wide-event-management/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/23/application-wide-event-management/</guid>
-        
-        <category>CakeAdvent-2013</category>
-        
-        <category>cakephp</category>
-        
-        <category>events</category>
         
         
         <category>cakephp</category>

@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-12-04T02:54:41+00:00</updated>
+ <updated>2014-12-04T23:15:35+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Schema Migrations with CakePHP 3]]></title>
+   <link href="http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/"/>
+   <updated>2014-12-04T14:22:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/</id>
+   <content type="html"><![CDATA[Part 3 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Customizing Bake in CakePHP 3]]></title>

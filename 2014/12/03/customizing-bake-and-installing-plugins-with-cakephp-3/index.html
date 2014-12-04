@@ -22,7 +22,7 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Part 2 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
-    <meta name="keywords" content="cakeadvent-2014, cakephp, composer" />
+    <meta name="keywords" content="cakeadvent-2014, cakephp, bake" />
     <meta property="fb:app_id" content="775202682501320" />
     <meta property="og:title" content="CakeAdvent-2014: Customizing Bake in CakePHP 3" />
     <meta property="og:type" content="website" />
@@ -107,9 +107,9 @@ namespace App\View\Helper;
 use Cake\View\Helper;
 use Cake\View\View;
 /**
- * Cell helper
+ * Post helper
  */
-class CellHelper extends Helper {
+class PostHelper extends Helper {
 /**
  * Default configuration.
  *
@@ -157,8 +157,8 @@ bin/cake bake controller issues --force
 </code></pre>
 <p>Bake will force-overwrite (using the <code>--force</code> argument) your existing Controller and it’s test. If you open them in your editor, you’ll see we only have our desired three actions! The overide for our Comments controller is also in effect :)</p>
 <p>One thing we’ll want to do is exclude <code>GET</code> requests to the <code>/comments/add</code> endpoint. Users should only post to it from the form that will be embedded on the <code>/issues/view</code> page, and it should also redirect back to the issue. After the line setting actions for the <code>Comments</code> controller, add the following:</p>
-<pre><code class="language-php">$event-&gt;view-&gt;set('redirect', '["controller" =&gt; "Issues", "action" =&gt; "view", $comment-&gt;issue_id]');
-$event-&gt;view-&gt;set('requirePost', true);
+<pre><code class="language-php">$view-&gt;set('redirect', '["controller" =&gt; "Issues", "action" =&gt; "view", $comment-&gt;issue_id]');
+$view-&gt;set('requirePost', true);
 </code></pre>
 <p>The above two variables will be used in our custom <code>src/Template/Bake/Element/Controller/add.ctp</code>. Controllers use elements to bake each action - meaning we can create custom actions as elements in the aforementioned directory - and the add action is no different. While you can copy the core one to that location, I’ll just show you the updated version we’ll be using:</p>
 <pre><code class="language-php">&lt;%
@@ -233,7 +233,7 @@ if (!empty($relatedForm)) {
 <p>Next, set the following contents in your <code>add_related.ctp</code> file:</p>
 <pre><code class="language-php">&lt;%= $this-&gt;element('form', $relatedForm) %&gt;
 </code></pre>
-<p>Now that the initial setup is done, we need to populate this new <code>$addRelatedEntity</code> variable in our <code>Bake.beforeRender</code> event. The following event will do just that:</p>
+<p>Now that the initial setup is done, we need to populate this new <code>$relatedForm</code> variable in our <code>Bake.beforeRender</code> event. The following event will do just that:</p>
 <pre><code class="language-php">use Cake\ORM\TableRegistry;
 EventManager::instance()-&gt;attach(function (Event $event) {
     $view = $event-&gt;subject;
@@ -307,10 +307,12 @@ bin/cake bake view issues --force
 </code></pre>
 <p>And we’ll have a working form on our view page!</p>
 <h2 id="homework-time">Homework Time</h2>
-<p>I won’t write <em>all</em> the code, but hopefully the above gives you a good idea as to how to modify bake templates. Your homework is:<br />
-- Make the form actions optional - and turn them off for embedded forms.<br />
-- Create a nicer comment list than the current version.<br />
-- Hide the <code>issue_id</code> field on the form without removing it completely</p>
+<p>I won’t write <em>all</em> the code, but hopefully the above gives you a good idea as to how to modify bake templates. Your homework is:</p>
+<ul>
+  <li>Make the form actions optional - and turn them off for embedded forms.</li>
+  <li>Create a nicer comment list than the current version.</li>
+  <li>Hide the <code>issue_id</code> field on the form without removing it completely</li>
+</ul>
 <p>Tomorrow’s CakeAdvent entry will contain a solution, but this should be a good way for you to start creating your own custom bake templates :) Until then!</p>
   </div>
     <footer class="entry-meta">
@@ -335,11 +337,12 @@ bin/cake bake view issues --force
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 3</strong> of <strong>3</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 3</strong> of <strong>4</strong> in the series "CakeAdvent 2014".</p>
     <ol>
       <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li><a href="/2014/12/02/designing-a-store-application-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
       <li>Customizing Bake in CakePHP 3</li>
+      <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
