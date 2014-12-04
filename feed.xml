@@ -269,8 +269,7 @@ EventManager::instance()-&amp;gt;attach(function (Event $event) {
         $this-&amp;gt;set('&amp;lt;%= $pluralName %&amp;gt;', [
           $&amp;lt;%= $singularName %&amp;gt;-&amp;gt;&amp;lt;%= $modelObj-&amp;gt;primaryKey() %&amp;gt; =&amp;gt; $&amp;lt;%= $singularName %&amp;gt;-&amp;gt;&amp;lt;%= $modelObj-&amp;gt;displayField() %&amp;gt;,
         ]);
-&amp;lt;%
-endif %&amp;gt;
+&amp;lt;% endif %&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This will:&lt;/p&gt;

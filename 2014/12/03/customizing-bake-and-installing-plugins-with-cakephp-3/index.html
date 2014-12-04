@@ -279,8 +279,7 @@ EventManager::instance()-&gt;attach(function (Event $event) {
         $this-&gt;set('&lt;%= $pluralName %&gt;', [
           $&lt;%= $singularName %&gt;-&gt;&lt;%= $modelObj-&gt;primaryKey() %&gt; =&gt; $&lt;%= $singularName %&gt;-&gt;&lt;%= $modelObj-&gt;displayField() %&gt;,
         ]);
-&lt;%
-endif %&gt;
+&lt;% endif %&gt;
 </code></pre>
 <p>This will:</p>
 <ul>
