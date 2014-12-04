@@ -175,7 +175,7 @@ exit(0);
 <p>Simply add the above to your <code>.git/hooks/pre-commit</code> and you’ll be off to the races!</p>
 <h2 id="find-failing-commits">Find failing commits</h2>
 <p>Do you have a test that fails and you don’t know when the regression was introduced? Use <code>git-bisect</code> to find it.</p>
-<pre><code class="language-bash"># start a bisect
+<pre><code class="language-shell"># start a bisect
 git bisect state
 # mark a commit as passing
 git bisect good b0ac325

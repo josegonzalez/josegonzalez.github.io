@@ -76,13 +76,13 @@
     <p>As you head towards service-oriented architecture, continuous deployment, immutable servers and an ever-growing infrastructure, you inevitably come up against resource provisioning issues.</p>
 <p>On a PaaS, you might have <code>100</code> nodes running <code>6</code> different services, each having dependencies upon datastores and other services. How do you route between each service to the correct external source?</p>
 <p>One way to do it is by using environment variables:</p>
-<pre><code class="language-bash">export DATABASE_URL=mysql://user:password@host:port/database
+<pre><code class="language-shell">export DATABASE_URL=mysql://user:password@host:port/database
 export API_URL=http://internal-domain/mount
 export ENV=production
 ./path/to/command --opts
 </code></pre>
 <p>This gets a bit messy because there may be several different environment variables, so eventually you may have something like:</p>
-<pre><code class="language-bash">cat &gt; /etc/services.d/app.conf &lt;&lt;EOF
+<pre><code class="language-shell">cat &gt; /etc/services.d/app.conf &lt;&lt;EOF
 export DATABASE_URL=mysql://user:password@host:port/database
 export API_URL=http://internal-domain/mount
 export ENV=production

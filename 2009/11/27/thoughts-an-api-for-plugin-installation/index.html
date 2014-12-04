@@ -114,13 +114,13 @@
   <li>Configure settings for project/plugin installer</li>
 </ul>
 <p>Ideally, one would be able to specify a server from which to grab a plugin. The following is a sample cake shell call:</p>
-<pre><code class="language-bash">cake plugin install -server "http://thechaw.com/plugins" -name trackable-behavior -branch 1.3 -scm git -basepath app/plugins/trackable
+<pre><code class="language-shell">cake plugin install -server "http://thechaw.com/plugins" -name trackable-behavior -branch 1.3 -scm git -basepath app/plugins/trackable
 </code></pre>
 <p>The above would query <a href="http://thechaw.com/plugins">http://thechaw.com/plugins</a> for a plugin matching the slug <em>trackable-behavior</em> and, using git, install the <em>1.3</em> branch in <em>app/plugins/trackable</em>. Updating <em>only</em> the trackable behavior plugin would be a breeze (assuming we cached the installed plugins somewhere, like in a database or something):</p>
-<pre><code class="language-bash">cake plugin update -server "http://thechaw.com/plugins" -name trackable-behavior
+<pre><code class="language-shell">cake plugin update -server "http://thechaw.com/plugins" -name trackable-behavior
 </code></pre>
 <p>If you don’t like typing out the server, scm, branch, or base install path, one might do the following</p>
-<pre><code class="language-bash">cake plugin configure -server "http://thechaw.com/plugins" -branch 1.3 -scm git -path app/plugins/
+<pre><code class="language-shell">cake plugin configure -server "http://thechaw.com/plugins" -branch 1.3 -scm git -path app/plugins/
 </code></pre>
 <p>New plugins would be installed using the 1.3 branch where possible (master in all other cases) from thechaw.com into app/plugins (we would be able to specify a directory name using something like -relpath later).</p>
 <p>Of course, the cake shell would request a new list of all plugins at least once a week, or could be configured to refresh it’s cache. Would be cool to store all of this in either a cache file, a raw json dump, or even Sqlite (CakePHP <em>does</em> have a datasource for that). I’m still evaluating this, and I should be able to make some incremental progress on at least the server portion soon.</p>

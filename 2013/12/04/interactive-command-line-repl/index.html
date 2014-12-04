@@ -83,7 +83,7 @@
   <li>doesn’t have pretty output by default :(</li>
 </ul>
 <p>All I want to do is the following:</p>
-<pre><code class="language-bash">Console/shell
+<pre><code class="language-shell">Console/shell
 cakephp&gt; App::uses('ClassRegistry', 'Utility');
 cakephp&gt; App::uses('Post', 'Model');
 cakephp&gt; $posts = ClassRegistry::init('Post');
@@ -112,11 +112,11 @@ cakephp&gt; $posts-&gt;find('first');
 </ul>
 <h1 id="boris">Boris</h1>
 <p>Boris is a relative newcomer to PHP repl land. It’s a pure-php REPL with some interesting code behind the implementation. We’ll first need to install it:</p>
-<pre><code class="language-bash">cd path/to/app/Vendor
+<pre><code class="language-shell">cd path/to/app/Vendor
 git clone git@github.com:d11wtq/boris.git
 </code></pre>
 <p>Next we’ll need something to bootstrap the CakePHP codebase. We will create a file called <code>app/Console/boris</code>. You’ll need to set proper permissions on it:</p>
-<pre><code class="language-bash">chmod +x app/Console/boris
+<pre><code class="language-shell">chmod +x app/Console/boris
 </code></pre>
 <p>Next, we need to bootstrap some constants. The CakePHP <code>ShellDispatcher</code> class does this, though we’ll need to make a few exceptions to it. Lets ensure we can include it (the code snippets here will all be in the same file!):</p>
 <pre><code class="language-php">#!/usr/bin/php -q
@@ -178,7 +178,7 @@ $boris-&gt;start();
 </ul>
 <h2 id="interactive-shell-for-cakephp">Interactive shell for CakePHP</h2>
 <p>This is something from <a href="https://github.com/nodesagency">@nodesagency</a>. It is a CakePHP shell, similar to the <code>Console</code> shell, but in plugin format. We’ll need to install it first:</p>
-<pre><code class="language-bash">git clone git://github.com/nodesagency/cake-interactive-shell.git app/Plugin/Interactive
+<pre><code class="language-shell">git clone git://github.com/nodesagency/cake-interactive-shell.git app/Plugin/Interactive
 </code></pre>
 <p>We’ll also need to enable it:</p>
 <pre><code class="language-php">&lt;?php
@@ -187,7 +187,7 @@ CakePlugin::load('Interactive');
 ?&gt;
 </code></pre>
 <p>And now install it:</p>
-<pre><code class="language-bash">Console/cake Interactive.Install
+<pre><code class="language-shell">Console/cake Interactive.Install
 </code></pre>
 <p>Lets try our commands:</p>
 <p><img src="http://cl.ly/image/0F21373g0v2d/Screen%20Shot%202013-12-04%20at%204.45.51%20AM.png" alt="http://cl.ly/image/0F21373g0v2d" /></p>

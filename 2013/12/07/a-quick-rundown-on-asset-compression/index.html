@@ -100,7 +100,7 @@ cachePath = WEBROOT/cache_js/
 cachePath = WEBROOT/cache_css/
 </code></pre>
 <p>The paths are used to cache the files on disk. Those paths <em>must</em> exist, so create them:</p>
-<pre><code class="language-bash">mkdir -p path/to/webroot/cache_js path/to/webroot/cache_css
+<pre><code class="language-shell">mkdir -p path/to/webroot/cache_js path/to/webroot/cache_css
 </code></pre>
 <p>Now we’ll need to add a <code>js</code> section to our <code>asset_compress.ini</code>. This will be used to specify a list of libraries to handle as one build:</p>
 <pre><code class="language-ini">[externals.js]
@@ -134,7 +134,7 @@ ART
 </code></pre>
 <p>Now when you reference it, it will contain the ascii art!</p>
 <p>For production use, I recommend running the associated shell to generate css/js assets on deploy. For instance, you might do:</p>
-<pre><code class="language-bash">### clear existing assets
+<pre><code class="language-shell">### clear existing assets
 cake AssetCompress.AssetCompress clear
 # build assets
 cake AssetCompress.AssetCompress build

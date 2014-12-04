@@ -162,19 +162,19 @@
 </ul>
 <h2 id="command-line-utility">Command line utility</h2>
 <p>We will have a simple command (name tbd):</p>
-<pre><code class="language-bash">package
+<pre><code class="language-shell">package
 </code></pre>
 <p>That can take a <code>namespace:action</code>:</p>
-<pre><code class="language-bash">package &lt;namespace&gt;:&lt;action&gt;
+<pre><code class="language-shell">package &lt;namespace&gt;:&lt;action&gt;
 </code></pre>
 <p>And then optional group name filtering:</p>
-<pre><code class="language-bash">package &lt;namespace&gt;:&lt;action&gt; (group)
+<pre><code class="language-shell">package &lt;namespace&gt;:&lt;action&gt; (group)
 </code></pre>
 <p>Of course, there would be other command line arguments:</p>
-<pre><code class="language-bash">package &lt;namespace&gt;:&lt;action&gt; (group) --arg value
+<pre><code class="language-shell">package &lt;namespace&gt;:&lt;action&gt; (group) --arg value
 </code></pre>
 <h3 id="available-actions">Available actions</h3>
-<pre><code class="language-bash">package packer:create (group)
+<pre><code class="language-shell">package packer:create (group)
 package packer:run (group)
 package packer:clean (group) -n 10
 package packer:delete (group)
@@ -187,7 +187,7 @@ package instance:deploy (group) -n 10
 </code></pre>
 <h3 id="generating-chef-roles">Generating chef roles</h3>
 <p>Each node group should be able to generate a role:</p>
-<pre><code class="language-bash">package role:create 12_04-bee
+<pre><code class="language-shell">package role:create 12_04-bee
 </code></pre>
 <p>For our above example, this would provide the following:</p>
 <pre><code class="language-javascript">{
@@ -221,12 +221,12 @@ package instance:deploy (group) -n 10
 </ul>
 <h4 id="updating-a-role">Updating a role</h4>
 <p>If you ever touch <code>nodes.json</code> to add extra capabilities, you’ll want to update your existing roles:</p>
-<pre><code class="language-bash">package roles:update 12_04-bee
+<pre><code class="language-shell">package roles:update 12_04-bee
 </code></pre>
 <p>Of course, this won’t update nodes, which you’ll have to do separately.</p>
 <h3 id="generating-packer-images">Generating Packer images</h3>
 <p>Running the following command:</p>
-<pre><code class="language-bash">package packer:create 12_04-bee
+<pre><code class="language-shell">package packer:create 12_04-bee
 </code></pre>
 <p>Will generate the following packer json:</p>
 <pre><code class="language-javascript">{
@@ -246,19 +246,19 @@ package instance:deploy (group) -n 10
 <p>The above would be based on some sort of templating language.</p>
 <h4 id="running">Running</h4>
 <p>Actually creating the ami on AWS for later use would be nice:</p>
-<pre><code class="language-bash">package packer:run 12_04-bee
+<pre><code class="language-shell">package packer:run 12_04-bee
 </code></pre>
 <p>We will likely want to clean up older versions of the ami to save money:</p>
-<pre><code class="language-bash">package packer:clean 12_04-bee -n 10 # keep the last 10 amis
+<pre><code class="language-shell">package packer:clean 12_04-bee -n 10 # keep the last 10 amis
 </code></pre>
 <p>If a node group will never be used again, we can simply delete all amis from aws and the related packer.json:</p>
-<pre><code class="language-bash"># this will not delete any other local files or any ASGs
+<pre><code class="language-shell"># this will not delete any other local files or any ASGs
 package packer:delete 12_04-bee
 </code></pre>
 <h3 id="autoscale-group-integration">Autoscale Group Integration</h3>
 <h4 id="creating-an-asg">Creating an ASG</h4>
 <p>If we want to create an autoscale group, you could run the following command:</p>
-<pre><code class="language-bash">package autoscale:create 12_04-bee
+<pre><code class="language-shell">package autoscale:create 12_04-bee
 </code></pre>
 <p>This would create the following asg <code>dna</code> file in <code>dna/asg/12_04-bee.json</code>:</p>
 <pre><code class="language-javascript">{
@@ -270,7 +270,7 @@ package packer:delete 12_04-bee
 </code></pre>
 <p>It would also run <code>package role:create 12_04-bee</code> for the role dependency. Your tooling could then do as it likes regarding the running of this dna file.</p>
 <p>Next you’ll want to actually start any ASGs:</p>
-<pre><code class="language-bash">package autoscale:run 12_04-bee
+<pre><code class="language-shell">package autoscale:run 12_04-bee
 </code></pre>
 <p>This will create the required ASG - or error if one exists! - with the tag <code>group:12_04-bee</code>. Integrating chef runs wih bootstrapped data is outside of the scope of this document.</p>
 <blockquote>
@@ -281,7 +281,7 @@ package packer:delete 12_04-bee
   <p>This is slightly messy, and due to the notification system (see next section), it may not be entirely necessary.</p>
 </blockquote>
 <p>If a node significantly changes - such as the size of the instance, or even base ami - we will likely want to reprovision the autoscale group:</p>
-<pre><code class="language-bash">package autoscale:update 12_04-bee
+<pre><code class="language-shell">package autoscale:update 12_04-bee
 </code></pre>
 <p>This would:</p>
 <ul>
@@ -291,7 +291,7 @@ package packer:delete 12_04-bee
 </ul>
 <h3 id="procuring-an-instance">Procuring an instance</h3>
 <p>There will be cases where an ASG makes no sense, or we’d like to run a node in a one-off fashion:</p>
-<pre><code class="language-bash">package instance:create &lt;group&gt; --key path/to/key.pem --name INSTANCE-NAME  (--zone name-of-zone)
+<pre><code class="language-shell">package instance:create &lt;group&gt; --key path/to/key.pem --name INSTANCE-NAME  (--zone name-of-zone)
 </code></pre>
 <p>This will:</p>
 <ul>
@@ -303,10 +303,10 @@ package packer:delete 12_04-bee
 </blockquote>
 <h3 id="deploying-instances">Deploying instances</h3>
 <p>It would be nice to be able to kick off a deployment of all nodes:</p>
-<pre><code class="language-bash">package instance:deploy
+<pre><code class="language-shell">package instance:deploy
 </code></pre>
 <p>Or a specific subset of nodes:</p>
-<pre><code class="language-bash">package instance:deploy 12_04-bee
+<pre><code class="language-shell">package instance:deploy 12_04-bee
 </code></pre>
 <p>This could be helpful in the following circumstances:</p>
 <ul>
@@ -387,14 +387,14 @@ for item, available in node['seatgeek-services']['available']:
 <p>Having not tried it, I cannot endorse it. It <em>seems</em> legit.</p>
 <h3 id="completely-new-standalone-services">Completely new, standalone services</h3>
 <p>An operations engineer should be able to go about his day, working on a feature:</p>
-<pre><code class="language-bash">git add data_bags
+<pre><code class="language-shell">git add data_bags
 git add vftp
 git add seatgeek-service/recipes/ftp-listener.rb
 git add seatgeek-service/recipes/ftp-processor.rb
 git commit -m "added service to process ftp uploads"
 </code></pre>
 <p>And then setup instances for this:</p>
-<pre><code class="language-bash"># edit nodes.json to add ftp-processor and ftp-listener roles
+<pre><code class="language-shell"># edit nodes.json to add ftp-processor and ftp-listener roles
 package role:create ftp-listener
 package role:create ftp-processor
 git add nodes.json
@@ -406,14 +406,14 @@ package packer:create ftp-processor
 package packer:run ftp-processor
 </code></pre>
 <p>And finally bring them up in an autoscale group:</p>
-<pre><code class="language-bash">package autoscale:create ftp-processor
+<pre><code class="language-shell">package autoscale:create ftp-processor
 package autoscale:run ftp-processor
 package autoscale:create ftp-processor
 package autoscale:run ftp-processor
 </code></pre>
 <h3 id="existing-services">Existing services</h3>
 <p>What if we had catch-all background workers, and were just deploying some new background worker that processes user analytics?</p>
-<pre><code class="language-bash"># work on seatgeek-service::process-users which requires access to temporary storage
+<pre><code class="language-shell"># work on seatgeek-service::process-users which requires access to temporary storage
 # meaning we want to ensure the temporary storage is there, in addition to the service itself running.
 git add data_bags
 git add seatgeek-service/recipes/process-users.rb
@@ -424,7 +424,7 @@ git add nodes.json roles/12_04-bee.json
 git commit -m "added user processing to 12_04-bee machines"
 </code></pre>
 <p>We should be able to notify nodes to redeploy in some fashion.</p>
-<pre><code class="language-bash">package instance:deploy 12_04-bee
+<pre><code class="language-shell">package instance:deploy 12_04-bee
 </code></pre>
 <h2 id="final-thoughts">Final Thoughts</h2>
 <p>This is likely step 1 towards a PaaS. Managing services here is still difficult, though relatively less so due to the tooling built around it. And the tooling does not exist yet.</p>

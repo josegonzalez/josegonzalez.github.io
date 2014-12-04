@@ -76,7 +76,7 @@
     <p>This is a post about simple CakePHP application deployment. We’ll use the <code>bash</code> language to deploy our application.</p>
 <h2 id="some-setup">Some setup</h2>
 <p>Let’s start by defining a new bash file in the base of our repository called <code>deploy</code>:</p>
-<pre><code class="language-bash">#!/bin/sh
+<pre><code class="language-shell">#!/bin/sh
 #
 # Deploy Script
 #
@@ -85,7 +85,7 @@
 #
 </code></pre>
 <p>You should execute the command <code>chmod +x deploy</code> in order to give it executable permissions. Next, lets add a few configuration variables:</p>
-<pre><code class="language-bash"># Colors
+<pre><code class="language-shell"># Colors
 COLOR_OFF="\033[0m"   # unsets color to term fg color
 RED="\033[0;31m"      # red
 GREEN="\033[0;32m"    # green
@@ -112,7 +112,7 @@ PRODUCTION_SSH_PORT=22
 <p>We’ve defined a few colors for use within our deploy process, as well as configuration for both staging and production. You can modify the paths and configuration as you see fit.</p>
 <h2 id="meat-and-latvian-potatos">Meat and Latvian Potatos</h2>
 <p>Now lets add some meat to our deploy script. The following bit will control how the script reacts to different arguments:</p>
-<pre><code class="language-bash">case $1 in
+<pre><code class="language-shell">case $1 in
   staging)
     echo "\n${GREEN}DEPLOYING APP TO STAGING${COLOR_OFF}\n"
     # Updates origin/staging to specified branch (default origin/master)
@@ -165,7 +165,7 @@ esac
 </ul>
 <p>We still don’t have many of the functions referenced, so lets define them. Please place them <em>before</em> the case/switch statement.</p>
 <h3 id="restartproductionworkers"><code>restart_production_workers</code></h3>
-<pre><code class="language-bash">restart_production_workers() {
+<pre><code class="language-shell">restart_production_workers() {
   ssh -p $PRODUCTION_SSH_PORT $DEPLOY_USER@$PRODUCTION_SERVER "cd $PRODUCTION_DIR/current &amp;&amp;\
     echo -e \"${YELLOW}---&gt;${COLOR_OFF} Stopping workers \" &amp;&amp;\
     CAKE_ENV=production app/Console/cake CakeResque.cake_resque stop --all&gt;/dev/null &amp;&amp;\
@@ -175,7 +175,7 @@ esac
 </code></pre>
 <p>This command is custom to my own setup. It will stop my CakeResque workers and restart them. Nothing too weird here. I have to define my <code>CAKE_ENV</code> as configuration for this app is controlled via an environment (which we’ll discuss in a later post).</p>
 <h3 id="deployproduction"><code>deploy_production</code></h3>
-<pre><code class="language-bash">deploy_production() {
+<pre><code class="language-shell">deploy_production() {
   ssh -p $PRODUCTION_SSH_PORT $DEPLOY_USER@$PRODUCTION_SERVER "cd $PRODUCTION_DIR/current &amp;&amp;\
     echo -e \"${YELLOW}---&gt;${COLOR_OFF} Fetching changes\" &amp;&amp;\
     git fetch -q &amp;&amp;\
@@ -202,7 +202,7 @@ esac
   <li>Removes the <code>test.php</code> file, which doesn’t belong in production</li>
 </ul>
 <h3 id="deploystaging"><code>deploy_staging</code></h3>
-<pre><code class="language-bash">deploy_staging() {
+<pre><code class="language-shell">deploy_staging() {
   ssh -p $STAGING_SSH_PORT $DEPLOY_USER@$STAGING_SERVER "cd $STAGING_DIR/current &amp;&amp;\
     echo -e \"${YELLOW}---&gt;${COLOR_OFF} Fetching changes\" &amp;&amp;\
     git fetch -q &amp;&amp;\
@@ -228,7 +228,7 @@ esac
 </ul>
 <p>Notably, we don’t care about any downtime in staging, so all directory changes are done in-place as opposed to within a symlink.</p>
 <h3 id="tagnonproduction"><code>tag_nonproduction</code></h3>
-<pre><code class="language-bash">tag_nonproduction() {
+<pre><code class="language-shell">tag_nonproduction() {
   verify_working_directory_clean
   local branch=$2
   if [ -e $2 ]; then
@@ -252,7 +252,7 @@ esac
   <li>Delete the local staging branch, as we don’t need it.</li>
 </ul>
 <h3 id="production"><code>production</code></h3>
-<pre><code class="language-bash">tag_production() {
+<pre><code class="language-shell">tag_production() {
   verify_working_directory_clean
   echo "${YELLOW}---&gt;${COLOR_OFF} Pushing current master"
   git push -q origin master
@@ -275,7 +275,7 @@ esac
   <li>Delete the local production branch, as we don’t need it.</li>
 </ul>
 <h3 id="verifyworkingdirectoryclean"><code>verify_working_directory_clean</code></h3>
-<pre><code class="language-bash">verify_working_directory_clean() {
+<pre><code class="language-shell">verify_working_directory_clean() {
   git status | grep "working directory clean" &amp;&gt; /dev/null
   if [ ! $? -eq 0 ]; then # working directory is NOT clean
     echo "${RED}WARNING: You have uncomitted changes, you may have forgotten something${COLOR_OFF}\n"

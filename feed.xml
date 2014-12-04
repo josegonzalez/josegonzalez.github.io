@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 04 Dec 2014 02:48:47 +0000</pubDate>
-    <lastBuildDate>Thu, 04 Dec 2014 02:48:47 +0000</lastBuildDate>
+    <pubDate>Thu, 04 Dec 2014 02:54:41 +0000</pubDate>
+    <lastBuildDate>Thu, 04 Dec 2014 02:54:41 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
     
       <item>
@@ -113,7 +113,7 @@ EventManager::instance()-&amp;gt;attach(function (Event $event) {
 
 &lt;p&gt;To test this, lets run bake:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;# ssh onto the vm
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
 vagrant ssh
 
 cd /vagrant/app
@@ -181,7 +181,7 @@ if (empty($redirect)) {
 
 &lt;p&gt;We’ll now modify the &lt;code&gt;view.ctp&lt;/code&gt;  template to include a post form on the issues controller. You can copy the existing one to something we can modify with the following commands:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;TEMPLATE_DIR=&quot;src/Template/Bake/&quot;
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;TEMPLATE_DIR=&quot;src/Template/Bake/&quot;
 BAKE_TEMPLATE_DIR=&quot;vendor/cakephp/cakephp/src/Template/Bake/&quot;
 cd /vagrant/app
 mkdir -p $TEMPLATE_DIR
@@ -298,7 +298,7 @@ endif %&amp;gt;
 
 &lt;p&gt;Now lets run bake:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;cd /vagrant/app
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
 
 bin/cake bake controller issues --force
 bin/cake bake view issues --force
@@ -340,7 +340,7 @@ bin/cake bake view issues --force
 
 &lt;p&gt;Assuming you already installed Git, Vagrant and Virtualbox, you can simply clone the &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; repo and start the virtual machine. This should take around 5 minutes on a decent DSL connection, and need only be done once.:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;git clone git@github.com:FriendsOfCake/vagrant-chef.git anonymous-issues
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git clone git@github.com:FriendsOfCake/vagrant-chef.git anonymous-issues
 cd anonymous-issues
 
 # bring up the working vm
@@ -349,7 +349,7 @@ vagrant up
 
 &lt;p&gt;Now that the virtualmachine is running, you can ssh onto it. Windows users will need to use &lt;a href=&quot;http://www.chiark.greenend.org.uk/~sgtatham/putty/&quot;&gt;Putty&lt;/a&gt; or similar, but please refer to the vagrant docs on how to connect.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;# ssh onto the vm
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
 vagrant ssh
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -357,7 +357,7 @@ vagrant ssh
 
 &lt;p&gt;As of CakePHP 3, we create new applications using the &lt;a href=&quot;https://getcomposer.org/&quot;&gt;Composer&lt;/a&gt; &lt;code&gt;create-project&lt;/code&gt; command:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;composer create-project --prefer-dist -s dev cakephp/app app
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --prefer-dist -s dev cakephp/app app
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Running the above will have output similar to the following:&lt;/p&gt;
@@ -423,7 +423,7 @@ Updated Security.salt value in config/app.php
 
 &lt;p&gt;Now that we’ve setup our database, we can import an initial schema into our app. There is currently no automated way to create a schema - though it’s coming quite soon - so we’ll connect to MySQL:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;mysql -uroot -pbananas
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;mysql -uroot -pbananas
 # run the following command within the mysql connection
 use database_name;
 &lt;/code&gt;&lt;/pre&gt;
@@ -450,7 +450,7 @@ CREATE TABLE `issues` (
 
 &lt;p&gt;Disconnecting from the mysql terminal will drop us back into our linux virtualmachine, where we can now generate some general application scaffolding using the Bake utility. &lt;code&gt;Bake&lt;/code&gt; is a CakePHP command-line utility that allows us to template out various types of files. We could, for instance, template out custom migration files if we installed the Migrations plugin. In our case, we’re going to use it to generate Controllers, Table classes, Entities, and Template files for our &lt;code&gt;issues&lt;/code&gt; table. This allows us to skip a lot of the boring work of creating various files that won’t vary much from application to application.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cd /vagrant/app
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
 bin/cake bake all issues
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1718,7 +1718,7 @@ include dirname(__FILE__) . DS . 'events.php';
 
 &lt;p&gt;Next, create the file:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;touch app/Config/events.php
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;touch app/Config/events.php
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And we’ll add the following as content:&lt;/p&gt;

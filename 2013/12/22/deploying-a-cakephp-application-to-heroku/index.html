@@ -76,7 +76,7 @@
     <p>These are some notes from my deploy of an application I am developing to Heroku. There are some specialized things you need to do to make everything work, so hopefully I catch everything.</p>
 <h2 id="use-friendsofcakeapp-template">Use FriendsOfCake/app-template</h2>
 <p>The biggest bit here is to ensure that we are properly using composer for everything but our application logic. Most people tend to bundle the CakePHP core with their app in version control, but we can safely rely on Composer to be run before the application is deployed. Having CakePHP installed via composer allows us to safely and quickly test upgrades from one release to another.</p>
-<pre><code class="language-bash">composer -sdev create-project friendsofcake/app-template your_app
+<pre><code class="language-shell">composer -sdev create-project friendsofcake/app-template your_app
 </code></pre>
 <h3 id="add-a-root-indexphp">Add a root <code>index.php</code></h3>
 <p>We’ll need it to make the CakePHP app compatible with the buildpack we’ll be using:</p>
@@ -121,7 +121,7 @@ class DATABASE_CONFIG {
 <p>This does mean you’ll need to do extra work to get the app running locally, but it shouldn’t be too difficult.</p>
 <h2 id="use-chhheroku-buildpack-phphttpsgithubcomchhheroku-buildpack-php">Use <a href="https://github.com/CHH/heroku-buildpack-php">CHH/heroku-buildpack-php</a></h2>
 <p>This buildpack does a lot of the gruntwork to get a PHP app running to current community standards. Built-in support for Composer, PHP 5.5, PHP-FPM and Nginx. I approve.</p>
-<pre><code class="language-bash">heroku config:set BUILDPACK_URL=https://github.com/CHH/heroku-buildpack-php
+<pre><code class="language-shell">heroku config:set BUILDPACK_URL=https://github.com/CHH/heroku-buildpack-php
 </code></pre>
 <h3 id="configure-a-cakephp-app-in-your-composerjson">Configure a CakePHP app in your <code>composer.json</code></h3>
 <p>The <code>CHH/heroku-buildpack-php</code> uses our <code>composer.json</code> to figure out how to serve the application. I add an <code>extra</code> key to ensure my app is properly routed.</p>
@@ -199,7 +199,7 @@ CakeLog::config('error', array(
 ?&gt;
 </code></pre>
 <p>And the configuration:</p>
-<pre><code class="language-bash">heroku config:set LOG_PATH=/app/vendor/php/var/log/
+<pre><code class="language-shell">heroku config:set LOG_PATH=/app/vendor/php/var/log/
 </code></pre>
 <h2 id="use-utc-date-time">Use UTC Date Time</h2>
 <p>If you’re building a new application, do it correctly. In your <code>core.php</code>, uncomment the datetime call:</p>

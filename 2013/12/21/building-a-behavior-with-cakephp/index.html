@@ -77,11 +77,11 @@
 <h2 id="creating-plugin-scaffolding">Creating Plugin Scaffolding</h2>
 <p>I normally place non-application code in a plugin. Most extensions to your core logic - behaviors, components, helpers - fall into this category. You can normally tell if it is pluginizable if you can imagine reusing the logic within the context of a CMS and an Issue Tracker :)</p>
 <p>Lets create the followin directory structure:</p>
-<pre><code class="language-bash">cd path/to/app
+<pre><code class="language-shell">cd path/to/app
 mkdir -p app/Plugin/DeletedAt/Model/Behavior
 </code></pre>
 <p>Next, we’ll initialize our plugin as a git repository. We’re doing this with the aim of having the plugin within hosted Packagist:</p>
-<pre><code class="language-bash">cd app/Plugin/DeletedAt
+<pre><code class="language-shell">cd app/Plugin/DeletedAt
 touch Model/Behavior/empty
 git init
 git add Model/Behavior/empty
@@ -92,7 +92,7 @@ git push origin master
   <p>The above assumes you created a repository on github to push your code to. Github is where <em>most</em> CakePHP code exists, and it would be beneficial to the community to continue to use a single type of version control+code repository. Obviously, you can and should change this according to your needs.</p>
 </blockquote>
 <p>And now we’ll make this a <a href="http://friendsofcake.com/">FriendsOfCake-approved</a> plugin using the steps from the <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">first CakeAdvent post</a>:</p>
-<pre><code class="language-bash">cd path/to/app
+<pre><code class="language-shell">cd path/to/app
 git clone git@github.com:FriendsOfCake/travis.git vendor/travis
 export COPYRIGHT_YEAR=2013
 export GITHUB_USERNAME="josegonzalez"
@@ -110,7 +110,7 @@ git push origin master
 <p>At this point, you should be able to enable support for the plugin within TravisCI, Packagist, and Coveralls.</p>
 <h2 id="creating-a-simple-behavior">Creating a simple Behavior</h2>
 <p>We’ll first need to create the proper files. We will have both a <code>DeletedAtBehavior.php</code> and a <code>DeletedAtBehaviorTest.php</code>. Lets do that:</p>
-<pre><code class="language-bash">cd app/Plugin/DeletedAt
+<pre><code class="language-shell">cd app/Plugin/DeletedAt
 mkdir -p Test/Case/Model/Behavior
 touch Model/Behavior/DeletedAtBehavior.php
 touch Test/Case/Model/Behavior/DeletedAtBehaviorTest.php
@@ -136,7 +136,7 @@ CakePlugin::load('DeletedAt');
 ?&gt;
 </code></pre>
 <p>Now lets run tests!</p>
-<pre><code class="language-bash">cd path/to/app
+<pre><code class="language-shell">cd path/to/app
 Console/cake test DeletedAt AllDeletedAt --stderr
 </code></pre>
 <p>You should see exactly 1 failure. We have no tests! But this is good. We now have a barebones behavior, tests that properly fail, and a goal in mind: fully passing tests for our new <code>DeletedAt</code> behavior.</p>
@@ -149,7 +149,7 @@ Console/cake test DeletedAt AllDeletedAt --stderr
 </ul>
 <p>We’ll store this state within a <code>deleted_at</code> field on the record. It will be of type <code>datetime</code>, and if it is null, then the record is not deleted, otherwise we know when it was soft-deleted.</p>
 <p>We’ll need a fixture to represent our test model. We should create it using the following:</p>
-<pre><code class="language-bash">cd app/Plugin/DeletedAt
+<pre><code class="language-shell">cd app/Plugin/DeletedAt
 mkdir -p Test/Fixture
 touch Test/Fixture/DeletedUserFixture.php
 </code></pre>

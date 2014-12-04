@@ -149,7 +149,7 @@ EventManager::instance()-&gt;attach(function (Event $event) {
   <li>We also only allow <code>add</code> for the <code>Comments</code> controller</li>
 </ul>
 <p>To test this, lets run bake:</p>
-<pre><code class="language-bash"># ssh onto the vm
+<pre><code class="language-shell"># ssh onto the vm
 vagrant ssh
 cd /vagrant/app
 bin/cake bake controller comments --force
@@ -208,7 +208,7 @@ if (empty($redirect)) {
 </code></pre>
 <p>There are two small changes here. One is that we default the redirect to a string containing the “index” action. This is a custom variable we added - and are overriding just for the <code>Comments</code> controller. The <code>$requirePost</code> variable is also a custom one, and we inserted a bit of logic to require that the request is a post, otherwise we redirect to the referring page :)</p>
 <p>We’ll now modify the <code>view.ctp</code>  template to include a post form on the issues controller. You can copy the existing one to something we can modify with the following commands:</p>
-<pre><code>TEMPLATE_DIR="src/Template/Bake/"
+<pre><code class="language-shell">TEMPLATE_DIR="src/Template/Bake/"
 BAKE_TEMPLATE_DIR="vendor/cakephp/cakephp/src/Template/Bake/"
 cd /vagrant/app
 mkdir -p $TEMPLATE_DIR
@@ -302,7 +302,7 @@ endif %&gt;
 }, 'Bake.beforeRender');
 </code></pre>
 <p>Now lets run bake:</p>
-<pre><code class="language-php">cd /vagrant/app
+<pre><code class="language-shell">cd /vagrant/app
 bin/cake bake controller issues --force
 bin/cake bake view issues --force
 </code></pre>

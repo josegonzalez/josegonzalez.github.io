@@ -111,7 +111,7 @@ class User extends AppModel {
   <p>This section requires Traits, which are only available in 5.4</p>
 </blockquote>
 <p>I absolutely <em>hate</em> defining a new method in my listeners to return implemented events. Instead, I’ll use annotations. Let’s install an annotations library using <code>composer</code>:</p>
-<pre><code class="language-bash">composer require minime/annotations:~1.1
+<pre><code class="language-shell">composer require minime/annotations:~1.1
 </code></pre>
 <p>And now we’ll define an <code>AppEventListener</code> that all our classes will inherit from:</p>
 <pre><code class="language-php">&lt;?php

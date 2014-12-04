@@ -188,7 +188,7 @@ class JsonFilter extends DispatcherFilter {
 <h2 id="adding-a-bit-of-flavour">Adding a bit of <em>flavour</em></h2>
 <p>What if we wanted to support something other than json? Lets support <a href="http://msgpack.org/">Message Pack</a>!</p>
 <p>First, install the pecl extension:</p>
-<pre><code class="language-bash">pecl install msgpack
+<pre><code class="language-shell">pecl install msgpack
 </code></pre>
 <p>And now we can add a new filter:</p>
 <pre><code class="language-php">&lt;?php
@@ -224,7 +224,7 @@ class MessagePackFilter extends DispatcherFilter {
 <h2 id="adding-a-bit-of-authentication-spice">Adding a bit of authentication spice</h2>
 <p>Lets say we want some dead simple authentication in front of this. We just want to ensure users without the magic key do not get access to our super-webscale json/msgpack api.</p>
 <p>They’ll need to set the following header on their requests:</p>
-<pre><code class="language-bash">curl -h 'Crappy-Auth: herp:derp' http://example.com/posts/index.json
+<pre><code class="language-shell">curl -h 'Crappy-Auth: herp:derp' http://example.com/posts/index.json
 </code></pre>
 <p>Doing the above would be <em>trivial</em>. Lets setup a new filter. It needs to run after our <code>ModelFilter</code>, since we only want to trigger it in the case where the <code>ModelFilter</code> runs:</p>
 <pre><code class="language-php">&lt;?php

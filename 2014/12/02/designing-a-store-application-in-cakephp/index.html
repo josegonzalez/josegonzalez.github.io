@@ -77,18 +77,18 @@
 <hr />
 <p>Lets start by cloning the <a href="https://github.com/friendsofcake/vagrant-chef">FriendsOfCake/vagrant-chef</a> repository. This repository will provide a full-featured cakephp working environment within a virtual linux server, allowing us to use each and every feature our app will need without worrying about how to install software on our machines.</p>
 <p>Assuming you already installed Git, Vagrant and Virtualbox, you can simply clone the <code>FriendsOfCake/vagrant-chef</code> repo and start the virtual machine. This should take around 5 minutes on a decent DSL connection, and need only be done once.:</p>
-<pre><code class="language-bash">git clone git@github.com:FriendsOfCake/vagrant-chef.git anonymous-issues
+<pre><code class="language-shell">git clone git@github.com:FriendsOfCake/vagrant-chef.git anonymous-issues
 cd anonymous-issues
 # bring up the working vm
 vagrant up
 </code></pre>
 <p>Now that the virtualmachine is running, you can ssh onto it. Windows users will need to use <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">Putty</a> or similar, but please refer to the vagrant docs on how to connect.</p>
-<pre><code class="language-bash"># ssh onto the vm
+<pre><code class="language-shell"># ssh onto the vm
 vagrant ssh
 </code></pre>
 <p>Now that you are connected to your development environment, you should be able to create an application. <code>FriendsOfCake/vagrant-chef</code> currently expects the application to be available in it’s <code>app</code> directory, so we’ll keep that in mind.</p>
 <p>As of CakePHP 3, we create new applications using the <a href="https://getcomposer.org/">Composer</a> <code>create-project</code> command:</p>
-<pre><code class="language-bash">composer create-project --prefer-dist -s dev cakephp/app app
+<pre><code class="language-shell">composer create-project --prefer-dist -s dev cakephp/app app
 </code></pre>
 <p>Running the above will have output similar to the following:</p>
 <pre><code>Installing cakephp/app (dev-master 28008873514274db441338eff5e2d07e75274f48)
@@ -137,7 +137,7 @@ Updated Security.salt value in config/app.php
   <li>database: <code>database_name</code></li>
 </ul>
 <p>Now that we’ve setup our database, we can import an initial schema into our app. There is currently no automated way to create a schema - though it’s coming quite soon - so we’ll connect to MySQL:</p>
-<pre><code class="language-bash">mysql -uroot -pbananas
+<pre><code class="language-shell">mysql -uroot -pbananas
 # run the following command within the mysql connection
 use database_name;
 </code></pre>
@@ -159,7 +159,7 @@ CREATE TABLE `issues` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 </code></pre>
 <p>Disconnecting from the mysql terminal will drop us back into our linux virtualmachine, where we can now generate some general application scaffolding using the Bake utility. <code>Bake</code> is a CakePHP command-line utility that allows us to template out various types of files. We could, for instance, template out custom migration files if we installed the Migrations plugin. In our case, we’re going to use it to generate Controllers, Table classes, Entities, and Template files for our <code>issues</code> table. This allows us to skip a lot of the boring work of creating various files that won’t vary much from application to application.</p>
-<pre><code class="language-bash">cd /vagrant/app
+<pre><code class="language-shell">cd /vagrant/app
 bin/cake bake all issues
 </code></pre>
 <p>If you browse to http://192.168.13.37/issues, you’ll see your baked app in action. If you browse to http://192.168.13.37/, you’ll see that we have the generic CakePHP 3 landing page. Rather than show this to our users, lets show them the issues page by default.</p>

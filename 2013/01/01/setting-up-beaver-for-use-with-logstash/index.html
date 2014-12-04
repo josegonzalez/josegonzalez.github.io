@@ -84,14 +84,14 @@
 <p>I actually built it for all of the above reasons. I wanted to process all application logs, but my webapp instances were <code>c1.medium</code> instances on AWS, and I needed both the memory and cpu for PHP. My service boxes were already overloaded, and I wanted to ensure any instances running varnish were not impacted by stupidities in just shipping logs.</p>
 <p>I did, however, still want those log lines, so I set about writing a small daemon to send log lines to Redis. Redis is my preferred broker, because insertion is very fast and it is easy to inspect.</p>
 <p>To start, we need to install Beaver:</p>
-<pre><code class="language-bash">pip install --update Beaver
+<pre><code class="language-shell">pip install --update Beaver
 </code></pre>
 <p>This will retrieve the latest version of Beaver - version 18 as of this writing - via pip. It’s possible to install via <code>easy_install</code>, but pip will ensure requirements are set.</p>
 <blockquote>
 Please note that while I specify `Python 2.7`, you *may* actually be able to get away with `Python 2.6`. Every so often a build will break compatibility because I don't test against 2.6, but it currently does work just fine.
 </blockquote>
 <p>Running beaver is relatively straightforward:</p>
-<pre><code class="language-bash">beaver -c /etc/beaver/beaver.conf
+<pre><code class="language-shell">beaver -c /etc/beaver/beaver.conf
 </code></pre>
 <p>In the above example, I tell beaver to run using a configuration file located at <code>/etc/beaver/beaver.conf</code>. Beaver takes configuration via arguments as well as via a configuration file, though I’ve found using a configuration file is much more flexible. Certain options can only be set via configuration file, so the above is how I recommend running beaver.</p>
 <p>Once running, it will read your configuration from that file. An example for an api running under varnish is as follows:</p>

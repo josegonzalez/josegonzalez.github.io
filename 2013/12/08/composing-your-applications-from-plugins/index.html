@@ -81,24 +81,24 @@
 <p>For the rest of this post, you’ll need the composer tool installed. The following are instructions across various systems to do so:</p>
 <h3 id="mac-os-x">Mac OS X</h3>
 <p>Users of the homebrew package manager can use the <code>homebrew-php</code> tap to install composer globally, which is the easiest way of interacting with the tool:</p>
-<pre><code class="language-bash">brew tap josegonzalez/php
+<pre><code class="language-shell">brew tap josegonzalez/php
 brew install composer
 </code></pre>
 <h3 id="manual-install">Manual Install</h3>
 <p>The following will manually install the <code>composer.phar</code> in your current directory. Note that you’ll need to execute a PHP script from the internet, so be mindful of not running as root or verifying the script contents:</p>
-<pre><code class="language-bash">curl -sS https://getcomposer.org/installer | php
+<pre><code class="language-shell">curl -sS https://getcomposer.org/installer | php
 </code></pre>
 <p>If you wish to make it globally available, please install it to your <code>/usr/local/bin</code> directory:</p>
-<pre><code class="language-bash">curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin
+<pre><code class="language-shell">curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin
 </code></pre>
 <p>I normally rename the <code>composer.phar</code> file to remove the extension:</p>
-<pre><code class="language-bash">mv composer.phar composer
+<pre><code class="language-shell">mv composer.phar composer
 </code></pre>
 <p>Other manual instructions are available on the <a href="http://getcomposer.org/download/">composer website</a></p>
 <h2 id="application-skeletons">Application Skeletons</h2>
 <p>The first thing most people get stuck on is how to manage your application distinctly from the CakePHP core. This is a bit weird, because in the 1.x and 2.x line, the CakePHP framework is distributed with an <code>app</code> folder. Instead, your app folder should be the base of the repository. Let’s start from scratch and see what this might look like.</p>
 <p>Composer has the ability to create projects from project templates registered on the official composer repository, <a href="https://packagist.org/">Packagist.org</a>. In our case, the <a href="http://friendsofcake.com/">FriendsOfCake</a> organization provides a composer template for CakePHP application development. We’ll use it to create a new app called <code>lollipop</code>:</p>
-<pre><code class="language-bash">composer -sdev create-project friendsofcake/app-template lollipop
+<pre><code class="language-shell">composer -sdev create-project friendsofcake/app-template lollipop
 </code></pre>
 <p><img src="http://cl.ly/image/2c0E353d0V0k/Screen%20Shot%202013-12-08%20at%2010.14.30%20AM.png" alt="http://cl.ly/image/2c0E353d0V0k" /></p>
 <blockquote>
@@ -124,7 +124,7 @@ brew install composer
 <pre><code class="language-javascript">"josegonzalez/cakephp-entity": "1.0.0"
 </code></pre>
 <p>And then install the plugin:</p>
-<pre><code class="language-bash">composer update
+<pre><code class="language-shell">composer update
 </code></pre>
 <p>We should now have the directory <code>./Plugin/Entity</code> available to us!</p>
 <h3 id="php-packages">PHP Packages</h3>

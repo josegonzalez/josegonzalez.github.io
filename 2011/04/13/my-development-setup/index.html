@@ -75,7 +75,7 @@
   <div class="entry-content">
     <p>For the purposes of archiving how I like to develop, I’ll chronicle a few things here.</p>
 <p>First things first. You’ll want to ensure that your login/non-login terminal sessions have the same environment. On OS X, non-login sessions use the <code>~/.bashrc</code>, while login sessions use <code>~/.bash_profile</code>. Most terminal emulators follow this rule, but lets ensure this is always the case by modifying our non-existent <code>~/.bash_profile</code> as follows:</p>
-<pre><code class="language-bash">if [ -f ~/.bashrc ]; then
+<pre><code class="language-shell">if [ -f ~/.bashrc ]; then
   source ~/.bashrc
 fi
 </code></pre>
@@ -83,25 +83,25 @@ fi
 <p>Install XCode. For Lion/Mountain Lion, it is important that you also install the <code>Command Line Tools</code>, as the version of <code>gcc</code> that is included with XCode 4.3 is incompatible with certain build tools.</p>
 <p>XCode 4.2 users - that means anyone on Snow Leopard - should install the <a href="https://github.com/kennethreitz/osx-gcc-installer">osx gcc installer</a>, as installing a proper gcc is pretty much impossible otherwise.</p>
 <p>Once that is complete, install homebrew - the proper way, to <code>/usr/local/</code>, with no sudo enabled:</p>
-<pre><code class="language-bash">/usr/bin/ruby -e "$(/usr/bin/curl -fksSL https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb)"
+<pre><code class="language-shell">/usr/bin/ruby -e "$(/usr/bin/curl -fksSL https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb)"
 brew update
 brew install bash-completion
 </code></pre>
 <p>Then you’ll want to have RVM installed:</p>
-<pre><code class="language-bash">bash -s stable &lt; &lt;(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
+<pre><code class="language-shell">bash -s stable &lt; &lt;(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
 </code></pre>
 <p>The following will ensure <code>rvm</code> is always loaded. And add the following to the bottom of your <code>.bashrc</code>:</p>
-<pre><code class="language-bash">[[ -s "$HOME/.rvm/scripts/rvm" ]] &amp;&amp; . "$HOME/.rvm/scripts/rvm"  # This loads RVM
+<pre><code class="language-shell">[[ -s "$HOME/.rvm/scripts/rvm" ]] &amp;&amp; . "$HOME/.rvm/scripts/rvm"  # This loads RVM
 </code></pre>
 <p>Then source your <code>~/.bash_profile</code></p>
-<pre><code class="language-bash">source ~/.bash_profile
+<pre><code class="language-shell">source ~/.bash_profile
 </code></pre>
 <p>Be sure to run the following and follow any instructions:</p>
-<pre><code class="language-bash">rvm requirements
+<pre><code class="language-shell">rvm requirements
 </code></pre>
 <p>If you are running a version of <code>rvm</code> less than <code>1.12</code> on Lion/Mountain Lion, you will need to install the <a href="https://github.com/kennethreitz/osx-gcc-installer">osx gcc installer</a> due to a bug in <code>rvm</code> itself. It should be fixed in <code>1.12</code>.</p>
 <p>Then install the desired rubies. I leave <code>1.9.2</code> as default, which is usually safe now:</p>
-<pre><code class="language-bash">rvm install 1.8.7
+<pre><code class="language-shell">rvm install 1.8.7
 rvm install 1.9.2
 rvm install 1.9.3
 rvm install ree
@@ -109,28 +109,28 @@ rvm use --default 1.9.2
 </code></pre>
 <p>You can now install any gems you typically use. I would recommend leaving this to <code>bundler</code>, and using a proper <code>Gemfile</code> in all your projects, however small they may be. You can use rvm to manage gemsets if necessary. Please read <a href="https://rvm.beginrescueend.com/gemsets/">the documentation on that</a>.</p>
 <p>I usually install the following brews - follow all their individual installation instructions! - at this point:</p>
-<pre><code class="language-bash">brew install bash-completion git subversion bazaar mercurial mysql mongodb redis elasticsearch ack python nodejs imagemagick
+<pre><code class="language-shell">brew install bash-completion git subversion bazaar mercurial mysql mongodb redis elasticsearch ack python nodejs imagemagick
 </code></pre>
 <p>Sometimes <code>subversion</code> installation freezes - haven’t investigated this yet - so you can either install it separately, skip it, or just rerun the command. I generally kill it if it’s been running for what seems to be 45 minutes.</p>
 <p>I personally install <code>gsl</code>, so I can use <code>LSI</code> to generate related posts within <a href="https://github.com/mojombo/jekyll">Jekyll</a> in conjunction with <a href="http://rb-gsl.rubyforge.org/">Ruby-GSL</a>. Homebrew comes in handy.</p>
-<pre><code class="language-bash">brew install gsl
+<pre><code class="language-shell">brew install gsl
 </code></pre>
 <p>If you get issues doing <code>gem install rb-gsl</code>, you probably want to install an older version of <code>gsl</code>, version 1.14:</p>
-<pre><code class="language-bash">brew remove gsl
+<pre><code class="language-shell">brew remove gsl
 brew install https://raw.github.com/mxcl/homebrew/83ed49411f076e30ced04c2cbebb054b2645a431/Library/Formula/gsl.rb
 </code></pre>
 <p>If you are using nodejs, you’ll also want to install <code>npm</code>:</p>
-<pre><code class="language-bash">curl http://npmjs.org/install.sh | sh
+<pre><code class="language-shell">curl http://npmjs.org/install.sh | sh
 </code></pre>
 <p>If you’ve installed <code>python</code> using homebrew, I suggest doing the following so that installing python packages uses the right python:</p>
-<pre><code class="language-bash"># install pip
+<pre><code class="language-shell"># install pip
 /usr/local/share/python/easy_install pip
 # modify PATH in ~/.bashrc to have the following
 export PATH="$(brew --prefix python)/bin:$PATH"
 export PATH="/usr/local/share/python:$PATH"
 </code></pre>
 <p>Next comes the customization of PHP. I use PHP for most of my development - well, anything that has nothing to do with systems administration at least - so it’s very useful to have an up to date version with a few different extensions. I’ve recently begun managing <a href="https://github.com/josegonzalez/homebrew-php/">Homebrew-PHP</a>, so I have the process down pat - again, follow any instructions for each brew, like enabling the homebrew <code>php</code> in Apache:</p>
-<pre><code class="language-bash">brew tap josegonzalez/homebrew-php
+<pre><code class="language-shell">brew tap josegonzalez/homebrew-php
 brew install php --with-mysql
 brew install apc-php
 brew install mongo-php
@@ -141,7 +141,7 @@ brew install xdebug-php
 <p>Now I need to ensure I have all my ducks in a row, and I sync in my home directory scripts. My <a href="https://gist.github.com/565837">gitconfig</a>, my ssh keys, all sorts of yummy stuff.</p>
 <p>For the record, my <code>~/.bashrc</code> ends up looking <a href="https://gist.github.com/2223297">a bit like this</a>. Feel free to modify that at will. Note that it currently does not show branches/tags/bookmarks for <code>bazaar</code> or <code>mercurial</code>. Patches welcome :)</p>
 <p>I no longer use <a href="http://macromates.com/">Textmate</a> religiously. I recommend using <a href="http://www.sublimetext.com/2">Sublime Text 2</a> with whatever your favorite setup is. Someday I shall post mine. I did run the following command to make it easier to call <code>Sublime Text</code> from the terminal:</p>
-<pre><code class="language-bash">ln -s "/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl" $(brew --prefix)/bin/subl
+<pre><code class="language-shell">ln -s "/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl" $(brew --prefix)/bin/subl
 </code></pre>
 <p>For those still using Textmate, I recommend installing the <a href="https://github.com/jcf/git-tmbundle">Git-Bundle</a>, and customizing the hotkeys. The <a href="https://github.com/cakephp/cakephp-tmbundle">CakePHP bundle</a> is up next, as is the <a href="https://github.com/drnic/github-tmbundle">GitHub bundle</a>. I use <a href="http://peepcode.com/products/peepopen">PeepOpen</a> to find files in my projects - supports regular expression lookups - which is developed by the awesome guys at PeepCode.</p>
 <p>I’ll then make sure all my projects are installed in their proper directories (under ~/Sites). Once that is through, I’ll install <a href="http://clickontyler.com/virtualhostx/">VirtualHostX</a>, which I use to configure Apache VirtualHosts. At this point, once the default Apache setup is enabled in the <code>Sharing</code> panel of <code>System Preferences</code>, I have all my sites ready and rearing to go (assuming I’ve imported a backup of my virtualhosts).</p>

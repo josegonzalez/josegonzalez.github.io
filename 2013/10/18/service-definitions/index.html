@@ -153,11 +153,11 @@ while (true) {
   </ul>
 </blockquote>
 <p>If we ran a process in the background - using <a href="http://www.cyberciti.biz/tips/nohup-execute-commands-after-you-exit-from-a-shell-prompt.html">nohup</a> for instance - you would potentially get the following output:</p>
-<pre><code class="language-bash">$ nohup ./worker.php &amp;
+<pre><code class="language-shell">$ nohup ./worker.php &amp;
 =&gt; [1] 1337
 </code></pre>
 <p>The output on the second line above contains a process ID, which can be used to inspect the process. A trivial use of this id would be to kill it:</p>
-<pre><code class="language-bash"># HUP: hang up
+<pre><code class="language-shell"># HUP: hang up
 kill -1 1337
 # KILL: non-catchable, non-ignorable kill
 kill -9 1337

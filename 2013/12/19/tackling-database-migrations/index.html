@@ -76,14 +76,14 @@
     <p>Database schema migrations are a tricky topic. Luckily, CakePHP has the excellent <a href="https://github.com/CakeDC/migrations">Migrations plugin by CakeDC</a>, but creating a new migration file is often obtuse. Rather than diffing the schema, or trying to manually create it, lets automate some of the process with a custom Cakeshell</p>
 <h2 id="setup">Setup</h2>
 <p>First up, we’ll install the <a href="https://github.com/CakeDC/migrations">Migrations plugin</a>. Run the following command in your shell to install it via composer:</p>
-<pre><code class="language-bash">composer require cakedc/migrations 2.2.*
+<pre><code class="language-shell">composer require cakedc/migrations 2.2.*
 </code></pre>
 <p>Next, lets enable it in our <code>app/Config/bootstrap.php</code>:</p>
-<pre><code class="language-bash">echo -e "\nApp::import('Vendor', array('file' =&gt; 'autoload'));" &gt;&gt; app/Config/bootstrap.php;
+<pre><code class="language-shell">echo -e "\nApp::import('Vendor', array('file' =&gt; 'autoload'));" &gt;&gt; app/Config/bootstrap.php;
 echo -e "\nCakePlugin::loadAll();" &gt;&gt; app/Config/bootstrap.php;
 </code></pre>
 <p>Now that it is enabled, we will setup the initial database migrations needed for the plugin itself:</p>
-<pre><code class="language-bash">app/Console/cake Migrations.migration run all -p Migrations
+<pre><code class="language-shell">app/Console/cake Migrations.migration run all -p Migrations
 </code></pre>
 <h2 id="cli-migration-creation">CLI Migration creation</h2>
 <blockquote>
@@ -97,7 +97,7 @@ class MigrationGeneratorShell extends AppShell {
 ?&gt;
 </code></pre>
 <p>There isn’t much here. We’ll want the following interface to the shell:</p>
-<pre><code class="language-bash"># creates a migration that adds a user_id to the testers table
+<pre><code class="language-shell"># creates a migration that adds a user_id to the testers table
 app/Console/cake migration_generator create add_user_id_to_tester user_id:integer:index
 </code></pre>
 <p>So we need to add a few methods:</p>
@@ -292,10 +292,10 @@ app/Console/cake migration_generator create add_user_id_to_tester user_id:intege
 ?&gt;
 </code></pre>
 <h2 id="create-a-schema-file">Create a schema file</h2>
-<pre><code class="language-bash">app/Console/cake migration_generator create create_users id:primary_key name:string created:datetime modified:datetime
+<pre><code class="language-shell">app/Console/cake migration_generator create create_users id:primary_key name:string created:datetime modified:datetime
 </code></pre>
 <p>Success! You should have a new file in <code>app/Config/Migration</code> with your migrations in it. Now you can run them:</p>
-<pre><code class="language-bash">app/Console/cake Migrations.migration run all
+<pre><code class="language-shell">app/Console/cake Migrations.migration run all
 </code></pre>
 <h2 id="more-notes">More notes</h2>
 <p>The <a href="https://github.com/CakeDC/migrations">CakeDC Migrations readme</a> is pretty comprehensive in terms of what it supports. I personally like using <code>app/Console/cake Migrations.migration status</code> to check on the status of my migrations in production.</p>

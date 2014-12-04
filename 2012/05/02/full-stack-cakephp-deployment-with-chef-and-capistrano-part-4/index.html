@@ -210,7 +210,7 @@ end
 </code></pre>
 <p>I normally specify a <code>box_name</code> which sets the hostname for the instance in a separate recipe. Please note that this is usually done with <code>chef-solo</code>, and running a <code>chef</code> server will use another way to identify instances, so please consult that documentation to figure out the server setup.</p>
 <p>Running this dna file on the server - chef doesn’t run on your machine! - would be done as follows:</p>
-<pre><code class="language-bash">chef-solo -c path/to/chef/solo/config.rb -j path/to/dna/www-ec2-01.json
+<pre><code class="language-shell">chef-solo -c path/to/chef/solo/config.rb -j path/to/dna/www-ec2-01.json
 </code></pre>
 <p>You can specify a config file to give it more options as to where to find recipes etc. Chef runs and gives some output, depending upon it’s configured level of verbosity and your recipes.</p>
 <h2 id="recap">Recap</h2>
