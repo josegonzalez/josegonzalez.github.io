@@ -5,9 +5,330 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 03 Dec 2014 01:46:27 +0000</pubDate>
-    <lastBuildDate>Wed, 03 Dec 2014 01:46:27 +0000</lastBuildDate>
+    <pubDate>Thu, 04 Dec 2014 02:48:47 +0000</pubDate>
+    <lastBuildDate>Thu, 04 Dec 2014 02:48:47 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
+    
+      <item>
+        <title>Customizing Bake in CakePHP 3</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;Note: There was an error in the sql schema for the comments table from yesterday’s post. If you have the old version, please change it with the following statement in mysql:&lt;/p&gt;
+
+  &lt;p&gt;&lt;code&gt;ALTER TABLE database_name.comments CHANGE comment_id issue_id INT&lt;/code&gt;&lt;/p&gt;
+
+  &lt;p&gt;You will also need to regenerate your model classes and clear out the cache:&lt;/p&gt;
+
+  &lt;p&gt;bin/cake bake model comments –force&lt;br /&gt;
+  bin/cake bake model issues –force&lt;br /&gt;
+  bin/cake orm_cache clear&lt;/p&gt;
+
+  &lt;p&gt;I’ve already corrected yesterdays post, so this change may not be necessary for some users.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;CakePHP has always had the Bake shell command - you saw it in action &lt;a href=&quot;http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/&quot;&gt;yesterday&lt;/a&gt; - but it’s always been a bit difficult to work with. You would need to escape your actual php code, making it difficult to actually think about the contents of the template. Thanks to some excellent work by &lt;a href=&quot;http://ad7six.com/&quot;&gt;Andy Dawson&lt;/a&gt;, we now have quite a bit of flexibility in writing bake templates.&lt;/p&gt;
+
+&lt;p&gt;In CakePHP, we can use Helpers and elements in our bake templates. As well, CakePHP uses ASP-style tags - &lt;code&gt;&amp;lt;%&lt;/code&gt;, &lt;code&gt;&amp;lt;%=&lt;/code&gt;, and &lt;code&gt;%&amp;gt;&lt;/code&gt; - to execute php code. This sounds weird, but here is an example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace &amp;lt;%= $namespace %&amp;gt;\View\Helper;
+
+use Cake\View\Helper;
+use Cake\View\View;
+
+/**
+ * &amp;lt;%= $name %&amp;gt; helper
+ */
+class &amp;lt;%= $name %&amp;gt;Helper extends Helper {
+
+/**
+ * Default configuration.
+ *
+ * @var array
+ */
+  protected $_defaultConfig = [];
+
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Any code in enclosed in &lt;code&gt;&amp;lt;%&lt;/code&gt; and &lt;code&gt;%&amp;gt;&lt;/code&gt; is executed by CakePHP - &lt;code&gt;&amp;lt;%=&lt;/code&gt; can be used to auto-echo variables - while everything else is just normal php. The above template - when baking a &lt;code&gt;PostHelper&lt;/code&gt;, for instance - turns into the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\View\Helper;
+
+use Cake\View\Helper;
+use Cake\View\View;
+
+/**
+ * Cell helper
+ */
+class CellHelper extends Helper {
+
+/**
+ * Default configuration.
+ *
+ * @var array
+ */
+  protected $_defaultConfig = [];
+
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As well, the intermediate template is output to your &lt;code&gt;tmp&lt;/code&gt; directory, meaning you can use the intermediate files to figure out what PHP code will be executed when we &lt;em&gt;actually&lt;/em&gt; generate your files. One last thing is that the new View-based bake allows us to hook events into the actual bake process, which means we can add/edit/remove any data going into the view. Pretty cool.&lt;/p&gt;
+
+&lt;p&gt;Now lets actually customize our bake templates. We’re going to customize the controller template to only bake the &lt;code&gt;index&lt;/code&gt;, &lt;code&gt;view&lt;/code&gt; and &lt;code&gt;add&lt;/code&gt; for the issues controller, and modify the views such that the &lt;code&gt;view&lt;/code&gt; will contain a form that people can use to submit comments. To do so, lets attach an event to Bake. Add the following to your &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+use Cake\Utility\Hash;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event) {
+    $view = $event-&amp;gt;subject;
+    $name = Hash::get($view-&amp;gt;viewVars, 'name');
+    $isController = strpos($event-&amp;gt;data[0], 'Bake/Controller/controller.ctp') !== false;
+    if ($isController !== false &amp;amp;&amp;amp; $name == 'Issues') {
+        $view-&amp;gt;viewVars['actions'] = ['index', 'view', 'add'];
+    }
+    if ($isController &amp;amp;&amp;amp; $name == 'Comments') {
+        $view-&amp;gt;viewVars['actions'] = ['add'];
+    }
+}, 'Bake.beforeRender');
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;In CakePHP 3, shells all include the new &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;, as well as the &lt;code&gt;app/config/bootstrap.php&lt;/code&gt;, which makes cli-only changes like the above a breeze.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This event will:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Attach to the event &lt;code&gt;Bake.beforeRender&lt;/code&gt;, which allows us to modify any data going into the template.&lt;/li&gt;
+  &lt;li&gt;Retrieve the &lt;code&gt;name&lt;/code&gt; of the template (baked tests do not currently populate this variable).&lt;/li&gt;
+  &lt;li&gt;If the &lt;code&gt;filename&lt;/code&gt; ends with &lt;code&gt;Bake/Controller/controller.ctp&lt;/code&gt; - the template used for controllers - and we are baking “issues”, it will force the actions to be just &lt;code&gt;['index', 'view', 'add']&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;We also only allow &lt;code&gt;add&lt;/code&gt; for the &lt;code&gt;Comments&lt;/code&gt; controller&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To test this, lets run bake:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;# ssh onto the vm
+vagrant ssh
+
+cd /vagrant/app
+bin/cake bake controller comments --force
+bin/cake bake controller issues --force
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Bake will force-overwrite (using the &lt;code&gt;--force&lt;/code&gt; argument) your existing Controller and it’s test. If you open them in your editor, you’ll see we only have our desired three actions! The overide for our Comments controller is also in effect :)&lt;/p&gt;
+
+&lt;p&gt;One thing we’ll want to do is exclude &lt;code&gt;GET&lt;/code&gt; requests to the &lt;code&gt;/comments/add&lt;/code&gt; endpoint. Users should only post to it from the form that will be embedded on the &lt;code&gt;/issues/view&lt;/code&gt; page, and it should also redirect back to the issue. After the line setting actions for the &lt;code&gt;Comments&lt;/code&gt; controller, add the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$event-&amp;gt;view-&amp;gt;set('redirect', '[&quot;controller&quot; =&amp;gt; &quot;Issues&quot;, &quot;action&quot; =&amp;gt; &quot;view&quot;, $comment-&amp;gt;issue_id]');
+$event-&amp;gt;view-&amp;gt;set('requirePost', true);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above two variables will be used in our custom &lt;code&gt;src/Template/Bake/Element/Controller/add.ctp&lt;/code&gt;. Controllers use elements to bake each action - meaning we can create custom actions as elements in the aforementioned directory - and the add action is no different. While you can copy the core one to that location, I’ll just show you the updated version we’ll be using:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%
+$compact = [&quot;'&quot; . $singularName . &quot;'&quot;];
+if (empty($redirect)) {
+    $redirect = &quot;['action' =&amp;gt; 'index']&quot;;
+}
+%&amp;gt;
+
+/**
+ * Add method
+ *
+ * @return void
+ */
+    public function add() {
+&amp;lt;% if (!empty($requirePost)) : %&amp;gt;
+        if (!$this-&amp;gt;request-&amp;gt;is('post')) {
+            $this-&amp;gt;Flash-&amp;gt;error('This action requires a post request');
+            $this-&amp;gt;redirect($this-&amp;gt;request-&amp;gt;referer());
+        }
+&amp;lt;% endif; %&amp;gt;
+        $&amp;lt;%= $singularName %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity($this-&amp;gt;request-&amp;gt;data);
+        if ($this-&amp;gt;request-&amp;gt;is('post')) {
+            if ($this-&amp;gt;&amp;lt;%= $currentModelName; %&amp;gt;-&amp;gt;save($&amp;lt;%= $singularName %&amp;gt;)) {
+                $this-&amp;gt;Flash-&amp;gt;success('The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; has been saved.');
+                return $this-&amp;gt;redirect(&amp;lt;%= $redirect %&amp;gt;);
+            } else {
+                $this-&amp;gt;Flash-&amp;gt;error('The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; could not be saved. Please, try again.');
+            }
+        }
+&amp;lt;%
+        $associations = array_merge(
+            $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, 'BelongsTo'),
+            $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, 'BelongsToMany')
+        );
+        foreach ($associations as $assoc):
+            $association = $modelObj-&amp;gt;association($assoc);
+            $otherName = $association-&amp;gt;target()-&amp;gt;alias();
+            $otherPlural = $this-&amp;gt;_variableName($otherName);
+%&amp;gt;
+        $&amp;lt;%= $otherPlural %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;&amp;lt;%= $otherName %&amp;gt;-&amp;gt;find('list');
+&amp;lt;%
+            $compact[] = &quot;'$otherPlural'&quot;;
+        endforeach;
+%&amp;gt;
+        $this-&amp;gt;set(compact(&amp;lt;%= join(', ', $compact) %&amp;gt;));
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There are two small changes here. One is that we default the redirect to a string containing the “index” action. This is a custom variable we added - and are overriding just for the &lt;code&gt;Comments&lt;/code&gt; controller. The &lt;code&gt;$requirePost&lt;/code&gt; variable is also a custom one, and we inserted a bit of logic to require that the request is a post, otherwise we redirect to the referring page :)&lt;/p&gt;
+
+&lt;p&gt;We’ll now modify the &lt;code&gt;view.ctp&lt;/code&gt;  template to include a post form on the issues controller. You can copy the existing one to something we can modify with the following commands:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;TEMPLATE_DIR=&quot;src/Template/Bake/&quot;
+BAKE_TEMPLATE_DIR=&quot;vendor/cakephp/cakephp/src/Template/Bake/&quot;
+cd /vagrant/app
+mkdir -p $TEMPLATE_DIR
+cp $BAKE_TEMPLATE_DIR/Template/view.ctp $TEMPLATE_DIR/Template/view.ctp
+
+## Copy over the form.ctp element file so we can do some light editing
+cp $BAKE_TEMPLATE_DIR/Element/form.ctp $TEMPLATE_DIR/Element/form.ctp
+
+## Also copy over the controller's view.ctp action file
+cp $BAKE_TEMPLATE_DIR/Element/Controller/view.ctp $TEMPLATE_DIR/Element/Controller/view.ctp
+
+## Create a stub element for later use:
+touch $TEMPLATE_DIR/Element/add_related.ctp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We need to modify the &lt;code&gt;form.ctp&lt;/code&gt; to allow us to set a custom action for the &lt;code&gt;POST&lt;/code&gt; request. The following bit of code should replace the line containing &lt;code&gt;$this-&amp;gt;Form-&amp;gt;create&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create($&amp;lt;%= $singularVar %&amp;gt;, &amp;lt;% if (empty($formOptions)) : %&amp;gt;[]&amp;lt;% else : %&amp;gt;&amp;lt;%= var_export($formOptions) %&amp;gt;&amp;lt;% endif;%&amp;gt;); ?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It’s rather long and complicated, but we’ll simply add the following line to the end:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%
+if (!empty($relatedForm)) {
+  $this-&amp;gt;element('add_related', $relatedForm);
+}
+%&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, set the following contents in your &lt;code&gt;add_related.ctp&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%= $this-&amp;gt;element('form', $relatedForm) %&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that the initial setup is done, we need to populate this new &lt;code&gt;$addRelatedEntity&lt;/code&gt; variable in our &lt;code&gt;Bake.beforeRender&lt;/code&gt; event. The following event will do just that:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\ORM\TableRegistry;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event) {
+    $view = $event-&amp;gt;subject;
+    $name = Hash::get($view-&amp;gt;viewVars, 'pluralHumanName');
+    $isAddView = strpos($event-&amp;gt;data[0], 'Bake/Template/view.ctp') !== false;
+    if ($isAddView &amp;amp;&amp;amp; $name == 'Issues') {
+        $modelObj = TableRegistry::get('Comments');
+        $view-&amp;gt;set('relatedForm', [
+            'action' =&amp;gt; 'Add',
+            'schema' =&amp;gt; $modelObj-&amp;gt;schema(),
+            'primaryKey' =&amp;gt; (array)$modelObj-&amp;gt;primaryKey(),
+            'displayField' =&amp;gt; $modelObj-&amp;gt;displayField(),
+            'singularVar' =&amp;gt; 'comment',
+            'pluralVar' =&amp;gt; 'comments',
+            'singularHumanName' =&amp;gt; 'Comment',
+            'pluralHumanName' =&amp;gt; 'Comments',
+            'fields' =&amp;gt; $modelObj-&amp;gt;schema()-&amp;gt;columns(),
+            'associations' =&amp;gt; [],
+            'keyFields' =&amp;gt; [],
+            'formOptions' =&amp;gt; [
+                'url' =&amp;gt; [
+                    'controller' =&amp;gt; 'Comments',
+                    'action' =&amp;gt; 'add',
+                ],
+            ],
+        ]);
+    }
+}, 'Bake.beforeRender');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You can always bind more than one listener to the event, so this is fine. If you want, you can also combine the two events, but this is easier to keep track of for me.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;If the above seems like a lot, that’s because it is. Those variables are necessary for the &lt;code&gt;form.ctp&lt;/code&gt; element to do it’s magic. Unfortunately, there isn’t a good way to generically call this for a template from the core, but a solution may come soon. In any case, a couple notes if you bake now:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;There will be another &lt;code&gt;actions&lt;/code&gt; list right above the form. This is currently not optional in the core &lt;code&gt;form.ctp&lt;/code&gt; we copied, though you are welcome to make it optional in your own :)&lt;/li&gt;
+  &lt;li&gt;The &lt;code&gt;issue_id&lt;/code&gt; field isn’t hidden. We cannot arbitrarily pass in options for fields in the core &lt;code&gt;form.ctp&lt;/code&gt; we copied. Again, you can implement this feature in your own custom element, but we’ll try and make this easier before a final release :)&lt;/li&gt;
+  &lt;li&gt;The form will break because we are missing a &lt;code&gt;$comment&lt;/code&gt; entity.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To add the &lt;code&gt;$comment&lt;/code&gt; entity, lets modify the &lt;code&gt;src/Template/Bake/Element/Controller/view.ctp&lt;/code&gt; we previously copied over. Add the following before the last brace:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;% if (!empty($addRelatedEntity)) : %&amp;gt;
+        $&amp;lt;%= $addRelatedEntity['entityName'] %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;&amp;lt;%= $addRelatedEntity['modelName'] %&amp;gt;-&amp;gt;newEntity();
+        $this-&amp;gt;set('&amp;lt;%= $addRelatedEntity['entityName'] %&amp;gt;', $&amp;lt;%= $addRelatedEntity['entityName'] %&amp;gt;);
+        $this-&amp;gt;set('&amp;lt;%= $pluralName %&amp;gt;', [
+          $&amp;lt;%= $singularName %&amp;gt;-&amp;gt;&amp;lt;%= $modelObj-&amp;gt;primaryKey() %&amp;gt; =&amp;gt; $&amp;lt;%= $singularName %&amp;gt;-&amp;gt;&amp;lt;%= $modelObj-&amp;gt;displayField() %&amp;gt;,
+        ]);
+&amp;lt;%
+endif %&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Create a new entity for the related model&lt;/li&gt;
+  &lt;li&gt;Set that empty entity for the view&lt;/li&gt;
+  &lt;li&gt;Set a dummy list for the form containing just the current issue.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To populate the &lt;code&gt;view.ctp&lt;/code&gt; Controller template properly, we’ll need to add one more event to our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
+    $view = $event-&amp;gt;subject;
+    $name = Hash::get($view-&amp;gt;viewVars, 'name');
+    $isController = strpos($event-&amp;gt;data[0], 'Bake/Controller/controller.ctp') !== false;
+    if ($isController !== false &amp;amp;&amp;amp; $name == 'Issues') {
+        $view-&amp;gt;viewVars['addRelatedEntity'] = [
+            'modelName' =&amp;gt; 'Comments',
+            'entityName' =&amp;gt; 'comment',
+        ];
+    }
+}, 'Bake.beforeRender');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now lets run bake:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;cd /vagrant/app
+
+bin/cake bake controller issues --force
+bin/cake bake view issues --force
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we’ll have a working form on our view page!&lt;/p&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time&lt;/h2&gt;
+
+&lt;p&gt;I won’t write &lt;em&gt;all&lt;/em&gt; the code, but hopefully the above gives you a good idea as to how to modify bake templates. Your homework is:&lt;br /&gt;
+- Make the form actions optional - and turn them off for embedded forms.&lt;br /&gt;
+- Create a nicer comment list than the current version.&lt;br /&gt;
+- Hide the &lt;code&gt;issue_id&lt;/code&gt; field on the form without removing it completely&lt;/p&gt;
+
+&lt;p&gt;Tomorrow’s CakeAdvent entry will contain a solution, but this should be a good way for you to start creating your own custom bake templates :) Until then!&lt;/p&gt;
+</description>
+        <pubDate>Wed, 03 Dec 2014 16:22:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/</guid>
+        
+        <category>CakeAdvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Designing an anonymous issue tracker in CakePHP</title>
@@ -111,7 +432,7 @@ use database_name;
 
 &lt;pre&gt;&lt;code class=&quot;language-sql&quot;&gt;CREATE TABLE `comments` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `comment_id` int(11) DEFAULT NULL,
+  `issue_id` int(11) DEFAULT NULL,
   `email_address` varchar(255) DEFAULT NULL,
   `comment` text,
   `created` datetime DEFAULT NULL,
@@ -1458,209 +1779,6 @@ AppEventDispatcher::fire('foo', null, array('baz'));
         <category>cakephp</category>
         
         <category>events</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Deploying a CakePHP application to Heroku</title>
-        <description>&lt;p&gt;These are some notes from my deploy of an application I am developing to Heroku. There are some specialized things you need to do to make everything work, so hopefully I catch everything.&lt;/p&gt;
-
-&lt;h2 id=&quot;use-friendsofcakeapp-template&quot;&gt;Use FriendsOfCake/app-template&lt;/h2&gt;
-
-&lt;p&gt;The biggest bit here is to ensure that we are properly using composer for everything but our application logic. Most people tend to bundle the CakePHP core with their app in version control, but we can safely rely on Composer to be run before the application is deployed. Having CakePHP installed via composer allows us to safely and quickly test upgrades from one release to another.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;composer -sdev create-project friendsofcake/app-template your_app
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;add-a-root-indexphp&quot;&gt;Add a root &lt;code&gt;index.php&lt;/code&gt;&lt;/h3&gt;
-
-&lt;p&gt;We’ll need it to make the CakePHP app compatible with the buildpack we’ll be using:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-define('APP_DIR', 'app');
-define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', dirname(__FILE__));
-define('WEBROOT_DIR', 'webroot');
-define('WWW_ROOT', ROOT . DS . APP_DIR . DS . WEBROOT_DIR . DS);
-
-require APP_DIR . DS . WEBROOT_DIR . DS . 'index.php';
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;use-environment-variables-for-configuration&quot;&gt;Use environment variables for Configuration&lt;/h2&gt;
-
-&lt;p&gt;We’ll be using Postgres in production - a big change for many CakePHP developers - because it’s what much of the heroku tooling works around. However, we still need to connect to the database, so here is what I have in my application’s &lt;code&gt;database.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class DATABASE_CONFIG {
-
-  public $default;
-
-  public $test = array(
-    'persistent' =&amp;gt; false,
-    'host' =&amp;gt; '',
-    'login' =&amp;gt; '',
-    'password' =&amp;gt; '',
-    'database' =&amp;gt; 'cakephp_test',
-    'prefix' =&amp;gt; ''
-  );
-
-  public function __construct() {
-    $DATABASE_URL = parse_url(getenv('DATABASE_URL'));
-    $this-&amp;gt;default = array(
-      'datasource' =&amp;gt; 'Database/Postgres',
-      'persistent' =&amp;gt; false,
-      'host'       =&amp;gt; $DATABASE_URL['host'],
-      'login'      =&amp;gt; $DATABASE_URL['user'],
-      'password'   =&amp;gt; $DATABASE_URL['pass'],
-      'database'   =&amp;gt; substr($DATABASE_URL['path'], 1),
-      'prefix'     =&amp;gt; '',
-      'encoding'   =&amp;gt; 'utf8',
-    );
-  }
-
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This does mean you’ll need to do extra work to get the app running locally, but it shouldn’t be too difficult.&lt;/p&gt;
-
-&lt;h2 id=&quot;use-chhheroku-buildpack-phphttpsgithubcomchhheroku-buildpack-php&quot;&gt;Use &lt;a href=&quot;https://github.com/CHH/heroku-buildpack-php&quot;&gt;CHH/heroku-buildpack-php&lt;/a&gt;&lt;/h2&gt;
-
-&lt;p&gt;This buildpack does a lot of the gruntwork to get a PHP app running to current community standards. Built-in support for Composer, PHP 5.5, PHP-FPM and Nginx. I approve.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;heroku config:set BUILDPACK_URL=https://github.com/CHH/heroku-buildpack-php
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;configure-a-cakephp-app-in-your-composerjson&quot;&gt;Configure a CakePHP app in your &lt;code&gt;composer.json&lt;/code&gt;&lt;/h3&gt;
-
-&lt;p&gt;The &lt;code&gt;CHH/heroku-buildpack-php&lt;/code&gt; uses our &lt;code&gt;composer.json&lt;/code&gt; to figure out how to serve the application. I add an &lt;code&gt;extra&lt;/code&gt; key to ensure my app is properly routed.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;&quot;extra&quot;: {
-  &quot;heroku&quot;: {
-    &quot;document-root&quot;: &quot;app/webroot&quot;,
-    &quot;index-document&quot;: &quot;index.php&quot;
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;use-redis-or-memcached-for-caching&quot;&gt;Use Redis or Memcached for Caching&lt;/h2&gt;
-
-&lt;p&gt;Both of these are available in the buildpack we use. Distributed caching is &lt;em&gt;much&lt;/em&gt; nicer, especially if your dyno can go to sleep. Here is what I use to parse the DSN:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$login = null;
-$password = null;
-$server = null;
-$servers = null;
-
-if (extension_loaded('apc') &amp;amp;&amp;amp; function_exists('apc_dec') &amp;amp;&amp;amp; (php_sapi_name() !== 'cli')) {
-  $engine = 'Apc';
-}
-
-if (getenv('MEMCACHED_URL')) {
-  // Custom Memcached implementation
-  include ROOT . DS . APP_DIR . DS . 'Lib' . DS . 'Memcached.php';
-  $engine = 'Memcached';
-  $MEMCACHED_URL = parse_url(getenv('MEMCACHED_URL'));
-  $servers = Hash::get($MEMCACHED_URL, 'host');
-  $port = Hash::get($MEMCACHED_URL, 'port');
-  $login = Hash::get($MEMCACHED_URL, 'user');
-  $password = Hash::get($MEMCACHED_URL, 'pass');
-} elseif (getenv('REDIS_URL')) {
-  // Custom Redis implementation
-  include ROOT . DS . APP_DIR . DS . 'Lib' . DS . 'Redis.php';
-  $engine = 'Redis';
-  $REDIS_URL = parse_url(getenv('REDIS_URL'));
-  $server = Hash::get($REDIS_URL, 'host');
-  $port = Hash::get($REDIS_URL, 'port');
-  $login = Hash::get($REDIS_URL, 'user');
-  $password = Hash::get($REDIS_URL, 'pass');
-}
-
-$prefix = 'app_';
-
-// In development mode, caches should expire quickly.
-$duration = '+999 days';
-if (Configure::read('debug') &amp;gt; 0) {
-  $duration = '+10 seconds';
-}
-
-// Setup a 'default' cache configuration for use in the application.
-Cache::config('default', array(
-  'engine' =&amp;gt; $engine,
-  'prefix' =&amp;gt; $prefix . 'default_',
-  'path' =&amp;gt; CACHE . 'persistent' . DS,
-  'serialize' =&amp;gt; ($engine === 'File'),
-  'duration' =&amp;gt; $duration,
-  'login' =&amp;gt; $login,
-  'password' =&amp;gt; $password,
-  'server' =&amp;gt; $server,
-  'servers' =&amp;gt; $servers,
-));
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;log-to-a-custom-path&quot;&gt;Log to a custom path&lt;/h2&gt;
-
-&lt;p&gt;Your application will not be able to stream logs to you unless you use a custom logging path. Here is how I configured it in my &lt;code&gt;bootstrap.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-CakeLog::config('default', array(
-    'engine' =&amp;gt; 'FileLog',
-    'file' =&amp;gt; 'stdout.log',
-    'path' =&amp;gt;  getenv('LOG_PATH'),
-    'types' =&amp;gt; array('notice', 'info', 'debug'),
-));
-
-CakeLog::config('error', array(
-    'engine' =&amp;gt; 'FileLog',
-    'file' =&amp;gt; 'error.log',
-    'path' =&amp;gt;  getenv('LOG_PATH'),
-    'types' =&amp;gt; array('emergency', 'alert', 'critical', 'error', 'warning'),
-));
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And the configuration:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;heroku config:set LOG_PATH=/app/vendor/php/var/log/
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;use-utc-date-time&quot;&gt;Use UTC Date Time&lt;/h2&gt;
-
-&lt;p&gt;If you’re building a new application, do it correctly. In your &lt;code&gt;core.php&lt;/code&gt;, uncomment the datetime call:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;date_default_timezone_set('UTC');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;copy-plugin-assets-into-the-webroot&quot;&gt;Copy plugin assets into the webroot&lt;/h2&gt;
-
-&lt;p&gt;Because of our virtualhost configuration, plugins will not have their assets served up properly. Here is what I have in my composer.json (under the &lt;code&gt;extra&lt;/code&gt; key):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;&quot;extra&quot;: {
-  &quot;heroku&quot;: {
-    &quot;document-root&quot;: &quot;app/webroot&quot;,
-    &quot;index-document&quot;: &quot;index.php&quot;,
-    &quot;compile&quot;: [
-      &quot;echo 'Copying DebugKit webroot directory' &amp;amp;&amp;amp; cp -rfp $BUILD_DIR/Plugin/DebugKit/webroot $BUILD_DIR/app/webroot/debug_kit&quot;
-    ]
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-        <pubDate>Sun, 22 Dec 2013 15:18:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2013/12/22/deploying-a-cakephp-application-to-heroku/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/22/deploying-a-cakephp-application-to-heroku/</guid>
-        
-        <category>CakeAdvent-2013</category>
-        
-        <category>cakephp</category>
-        
-        <category>heroku</category>
         
         
         <category>cakephp</category>

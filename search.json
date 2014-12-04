@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Customizing Bake in CakePHP 3",
+    "url": "/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/",
+    "description": "Part 2 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["bake","cakephp","customizing","designed","effectively","part","posts","series","teach","use"]
+  },
+  {
+    "type": "post",
     "title": "Designing an anonymous issue tracker in CakePHP",
     "url": "/2014/12/02/designing-a-store-application-in-cakephp/",
     "description": "Part 1 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",

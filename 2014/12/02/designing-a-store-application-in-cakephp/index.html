@@ -144,7 +144,7 @@ use database_name;
 <p>And import the following:</p>
 <pre><code class="language-sql">CREATE TABLE `comments` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `comment_id` int(11) DEFAULT NULL,
+  `issue_id` int(11) DEFAULT NULL,
   `email_address` varchar(255) DEFAULT NULL,
   `comment` text,
   `created` datetime DEFAULT NULL,
@@ -217,10 +217,11 @@ Router::scope('/', function ($routes) {
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 2</strong> of <strong>2</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 2</strong> of <strong>3</strong> in the series "CakeAdvent 2014".</p>
     <ol>
       <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li>Designing an anonymous issue tracker in CakePHP</li>
+      <li><a href="/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">Customizing Bake in CakePHP 3</a></li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>

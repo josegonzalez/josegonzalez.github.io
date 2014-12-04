@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2014: Customizing Bake in CakePHP 3</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 2 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="keywords" content="cakeadvent-2014, cakephp, composer" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2014: Customizing Bake in CakePHP 3" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/" />
+    <meta property="og:description" content="Part 2 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2014: Customizing Bake in CakePHP 3" />
+    <meta name="twitter:description" content="Part 2 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <link rel="alternate" type="application/rss+xml" title="Customizing Bake in CakePHP 3 » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Customizing Bake in CakePHP 3
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Customizing Bake in CakePHP 3!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <blockquote>
+  <p>Note: There was an error in the sql schema for the comments table from yesterday’s post. If you have the old version, please change it with the following statement in mysql:</p>
+  <p><code>ALTER TABLE database_name.comments CHANGE comment_id issue_id INT</code></p>
+  <p>You will also need to regenerate your model classes and clear out the cache:</p>
+  <p>bin/cake bake model comments –force<br />
+  bin/cake bake model issues –force<br />
+  bin/cake orm_cache clear</p>
+  <p>I’ve already corrected yesterdays post, so this change may not be necessary for some users.</p>
+</blockquote>
+<p>CakePHP has always had the Bake shell command - you saw it in action <a href="http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/">yesterday</a> - but it’s always been a bit difficult to work with. You would need to escape your actual php code, making it difficult to actually think about the contents of the template. Thanks to some excellent work by <a href="http://ad7six.com/">Andy Dawson</a>, we now have quite a bit of flexibility in writing bake templates.</p>
+<p>In CakePHP, we can use Helpers and elements in our bake templates. As well, CakePHP uses ASP-style tags - <code>&lt;%</code>, <code>&lt;%=</code>, and <code>%&gt;</code> - to execute php code. This sounds weird, but here is an example:</p>
+<pre><code class="language-php">&lt;?php
+namespace &lt;%= $namespace %&gt;\View\Helper;
+use Cake\View\Helper;
+use Cake\View\View;
+/**
+ * &lt;%= $name %&gt; helper
+ */
+class &lt;%= $name %&gt;Helper extends Helper {
+/**
+ * Default configuration.
+ *
+ * @var array
+ */
+  protected $_defaultConfig = [];
+}
+?&gt;
+</code></pre>
+<p>Any code in enclosed in <code>&lt;%</code> and <code>%&gt;</code> is executed by CakePHP - <code>&lt;%=</code> can be used to auto-echo variables - while everything else is just normal php. The above template - when baking a <code>PostHelper</code>, for instance - turns into the following:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\View\Helper;
+use Cake\View\Helper;
+use Cake\View\View;
+/**
+ * Cell helper
+ */
+class CellHelper extends Helper {
+/**
+ * Default configuration.
+ *
+ * @var array
+ */
+  protected $_defaultConfig = [];
+}
+?&gt;
+</code></pre>
+<p>As well, the intermediate template is output to your <code>tmp</code> directory, meaning you can use the intermediate files to figure out what PHP code will be executed when we <em>actually</em> generate your files. One last thing is that the new View-based bake allows us to hook events into the actual bake process, which means we can add/edit/remove any data going into the view. Pretty cool.</p>
+<p>Now lets actually customize our bake templates. We’re going to customize the controller template to only bake the <code>index</code>, <code>view</code> and <code>add</code> for the issues controller, and modify the views such that the <code>view</code> will contain a form that people can use to submit comments. To do so, lets attach an event to Bake. Add the following to your <code>app/config/bootstrap_cli.php</code>:</p>
+<pre><code class="language-php">&lt;?php
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+use Cake\Utility\Hash;
+EventManager::instance()-&gt;attach(function (Event $event) {
+    $view = $event-&gt;subject;
+    $name = Hash::get($view-&gt;viewVars, 'name');
+    $isController = strpos($event-&gt;data[0], 'Bake/Controller/controller.ctp') !== false;
+    if ($isController !== false &amp;&amp; $name == 'Issues') {
+        $view-&gt;viewVars['actions'] = ['index', 'view', 'add'];
+    }
+    if ($isController &amp;&amp; $name == 'Comments') {
+        $view-&gt;viewVars['actions'] = ['add'];
+    }
+}, 'Bake.beforeRender');
+?&gt;
+</code></pre>
+<blockquote>
+  <p>In CakePHP 3, shells all include the new <code>app/config/bootstrap_cli.php</code>, as well as the <code>app/config/bootstrap.php</code>, which makes cli-only changes like the above a breeze.</p>
+</blockquote>
+<p>This event will:</p>
+<ul>
+  <li>Attach to the event <code>Bake.beforeRender</code>, which allows us to modify any data going into the template.</li>
+  <li>Retrieve the <code>name</code> of the template (baked tests do not currently populate this variable).</li>
+  <li>If the <code>filename</code> ends with <code>Bake/Controller/controller.ctp</code> - the template used for controllers - and we are baking “issues”, it will force the actions to be just <code>['index', 'view', 'add']</code>.</li>
+  <li>We also only allow <code>add</code> for the <code>Comments</code> controller</li>
+</ul>
+<p>To test this, lets run bake:</p>
+<pre><code class="language-bash"># ssh onto the vm
+vagrant ssh
+cd /vagrant/app
+bin/cake bake controller comments --force
+bin/cake bake controller issues --force
+</code></pre>
+<p>Bake will force-overwrite (using the <code>--force</code> argument) your existing Controller and it’s test. If you open them in your editor, you’ll see we only have our desired three actions! The overide for our Comments controller is also in effect :)</p>
+<p>One thing we’ll want to do is exclude <code>GET</code> requests to the <code>/comments/add</code> endpoint. Users should only post to it from the form that will be embedded on the <code>/issues/view</code> page, and it should also redirect back to the issue. After the line setting actions for the <code>Comments</code> controller, add the following:</p>
+<pre><code class="language-php">$event-&gt;view-&gt;set('redirect', '["controller" =&gt; "Issues", "action" =&gt; "view", $comment-&gt;issue_id]');
+$event-&gt;view-&gt;set('requirePost', true);
+</code></pre>
+<p>The above two variables will be used in our custom <code>src/Template/Bake/Element/Controller/add.ctp</code>. Controllers use elements to bake each action - meaning we can create custom actions as elements in the aforementioned directory - and the add action is no different. While you can copy the core one to that location, I’ll just show you the updated version we’ll be using:</p>
+<pre><code class="language-php">&lt;%
+$compact = ["'" . $singularName . "'"];
+if (empty($redirect)) {
+    $redirect = "['action' =&gt; 'index']";
+}
+%&gt;
+/**
+ * Add method
+ *
+ * @return void
+ */
+    public function add() {
+&lt;% if (!empty($requirePost)) : %&gt;
+        if (!$this-&gt;request-&gt;is('post')) {
+            $this-&gt;Flash-&gt;error('This action requires a post request');
+            $this-&gt;redirect($this-&gt;request-&gt;referer());
+        }
+&lt;% endif; %&gt;
+        $&lt;%= $singularName %&gt; = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;newEntity($this-&gt;request-&gt;data);
+        if ($this-&gt;request-&gt;is('post')) {
+            if ($this-&gt;&lt;%= $currentModelName; %&gt;-&gt;save($&lt;%= $singularName %&gt;)) {
+                $this-&gt;Flash-&gt;success('The &lt;%= strtolower($singularHumanName) %&gt; has been saved.');
+                return $this-&gt;redirect(&lt;%= $redirect %&gt;);
+            } else {
+                $this-&gt;Flash-&gt;error('The &lt;%= strtolower($singularHumanName) %&gt; could not be saved. Please, try again.');
+            }
+        }
+&lt;%
+        $associations = array_merge(
+            $this-&gt;Bake-&gt;aliasExtractor($modelObj, 'BelongsTo'),
+            $this-&gt;Bake-&gt;aliasExtractor($modelObj, 'BelongsToMany')
+        );
+        foreach ($associations as $assoc):
+            $association = $modelObj-&gt;association($assoc);
+            $otherName = $association-&gt;target()-&gt;alias();
+            $otherPlural = $this-&gt;_variableName($otherName);
+%&gt;
+        $&lt;%= $otherPlural %&gt; = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;&lt;%= $otherName %&gt;-&gt;find('list');
+&lt;%
+            $compact[] = "'$otherPlural'";
+        endforeach;
+%&gt;
+        $this-&gt;set(compact(&lt;%= join(', ', $compact) %&gt;));
+    }
+</code></pre>
+<p>There are two small changes here. One is that we default the redirect to a string containing the “index” action. This is a custom variable we added - and are overriding just for the <code>Comments</code> controller. The <code>$requirePost</code> variable is also a custom one, and we inserted a bit of logic to require that the request is a post, otherwise we redirect to the referring page :)</p>
+<p>We’ll now modify the <code>view.ctp</code>  template to include a post form on the issues controller. You can copy the existing one to something we can modify with the following commands:</p>
+<pre><code>TEMPLATE_DIR="src/Template/Bake/"
+BAKE_TEMPLATE_DIR="vendor/cakephp/cakephp/src/Template/Bake/"
+cd /vagrant/app
+mkdir -p $TEMPLATE_DIR
+cp $BAKE_TEMPLATE_DIR/Template/view.ctp $TEMPLATE_DIR/Template/view.ctp
+## Copy over the form.ctp element file so we can do some light editing
+cp $BAKE_TEMPLATE_DIR/Element/form.ctp $TEMPLATE_DIR/Element/form.ctp
+## Also copy over the controller's view.ctp action file
+cp $BAKE_TEMPLATE_DIR/Element/Controller/view.ctp $TEMPLATE_DIR/Element/Controller/view.ctp
+## Create a stub element for later use:
+touch $TEMPLATE_DIR/Element/add_related.ctp
+</code></pre>
+<p>We need to modify the <code>form.ctp</code> to allow us to set a custom action for the <code>POST</code> request. The following bit of code should replace the line containing <code>$this-&gt;Form-&gt;create</code>:</p>
+<pre><code class="language-php">&lt;?= $this-&gt;Form-&gt;create($&lt;%= $singularVar %&gt;, &lt;% if (empty($formOptions)) : %&gt;[]&lt;% else : %&gt;&lt;%= var_export($formOptions) %&gt;&lt;% endif;%&gt;); ?&gt;
+</code></pre>
+<p>It’s rather long and complicated, but we’ll simply add the following line to the end:</p>
+<pre><code class="language-php">&lt;%
+if (!empty($relatedForm)) {
+  $this-&gt;element('add_related', $relatedForm);
+}
+%&gt;
+</code></pre>
+<p>Next, set the following contents in your <code>add_related.ctp</code> file:</p>
+<pre><code class="language-php">&lt;%= $this-&gt;element('form', $relatedForm) %&gt;
+</code></pre>
+<p>Now that the initial setup is done, we need to populate this new <code>$addRelatedEntity</code> variable in our <code>Bake.beforeRender</code> event. The following event will do just that:</p>
+<pre><code class="language-php">use Cake\ORM\TableRegistry;
+EventManager::instance()-&gt;attach(function (Event $event) {
+    $view = $event-&gt;subject;
+    $name = Hash::get($view-&gt;viewVars, 'pluralHumanName');
+    $isAddView = strpos($event-&gt;data[0], 'Bake/Template/view.ctp') !== false;
+    if ($isAddView &amp;&amp; $name == 'Issues') {
+        $modelObj = TableRegistry::get('Comments');
+        $view-&gt;set('relatedForm', [
+            'action' =&gt; 'Add',
+            'schema' =&gt; $modelObj-&gt;schema(),
+            'primaryKey' =&gt; (array)$modelObj-&gt;primaryKey(),
+            'displayField' =&gt; $modelObj-&gt;displayField(),
+            'singularVar' =&gt; 'comment',
+            'pluralVar' =&gt; 'comments',
+            'singularHumanName' =&gt; 'Comment',
+            'pluralHumanName' =&gt; 'Comments',
+            'fields' =&gt; $modelObj-&gt;schema()-&gt;columns(),
+            'associations' =&gt; [],
+            'keyFields' =&gt; [],
+            'formOptions' =&gt; [
+                'url' =&gt; [
+                    'controller' =&gt; 'Comments',
+                    'action' =&gt; 'add',
+                ],
+            ],
+        ]);
+    }
+}, 'Bake.beforeRender');
+</code></pre>
+<blockquote>
+  <p>You can always bind more than one listener to the event, so this is fine. If you want, you can also combine the two events, but this is easier to keep track of for me.</p>
+</blockquote>
+<p>If the above seems like a lot, that’s because it is. Those variables are necessary for the <code>form.ctp</code> element to do it’s magic. Unfortunately, there isn’t a good way to generically call this for a template from the core, but a solution may come soon. In any case, a couple notes if you bake now:</p>
+<ul>
+  <li>There will be another <code>actions</code> list right above the form. This is currently not optional in the core <code>form.ctp</code> we copied, though you are welcome to make it optional in your own :)</li>
+  <li>The <code>issue_id</code> field isn’t hidden. We cannot arbitrarily pass in options for fields in the core <code>form.ctp</code> we copied. Again, you can implement this feature in your own custom element, but we’ll try and make this easier before a final release :)</li>
+  <li>The form will break because we are missing a <code>$comment</code> entity.</li>
+</ul>
+<p>To add the <code>$comment</code> entity, lets modify the <code>src/Template/Bake/Element/Controller/view.ctp</code> we previously copied over. Add the following before the last brace:</p>
+<pre><code class="language-php">&lt;% if (!empty($addRelatedEntity)) : %&gt;
+        $&lt;%= $addRelatedEntity['entityName'] %&gt; = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;&lt;%= $addRelatedEntity['modelName'] %&gt;-&gt;newEntity();
+        $this-&gt;set('&lt;%= $addRelatedEntity['entityName'] %&gt;', $&lt;%= $addRelatedEntity['entityName'] %&gt;);
+        $this-&gt;set('&lt;%= $pluralName %&gt;', [
+          $&lt;%= $singularName %&gt;-&gt;&lt;%= $modelObj-&gt;primaryKey() %&gt; =&gt; $&lt;%= $singularName %&gt;-&gt;&lt;%= $modelObj-&gt;displayField() %&gt;,
+        ]);
+&lt;%
+endif %&gt;
+</code></pre>
+<p>This will:</p>
+<ul>
+  <li>Create a new entity for the related model</li>
+  <li>Set that empty entity for the view</li>
+  <li>Set a dummy list for the form containing just the current issue.</li>
+</ul>
+<p>To populate the <code>view.ctp</code> Controller template properly, we’ll need to add one more event to our <code>app/config/bootstrap_cli.php</code>:</p>
+<pre><code class="language-php">EventManager::instance()-&gt;attach(function (Event $event) {
+    $view = $event-&gt;subject;
+    $name = Hash::get($view-&gt;viewVars, 'name');
+    $isController = strpos($event-&gt;data[0], 'Bake/Controller/controller.ctp') !== false;
+    if ($isController !== false &amp;&amp; $name == 'Issues') {
+        $view-&gt;viewVars['addRelatedEntity'] = [
+            'modelName' =&gt; 'Comments',
+            'entityName' =&gt; 'comment',
+        ];
+    }
+}, 'Bake.beforeRender');
+</code></pre>
+<p>Now lets run bake:</p>
+<pre><code class="language-php">cd /vagrant/app
+bin/cake bake controller issues --force
+bin/cake bake view issues --force
+</code></pre>
+<p>And we’ll have a working form on our view page!</p>
+<h2 id="homework-time">Homework Time</h2>
+<p>I won’t write <em>all</em> the code, but hopefully the above gives you a good idea as to how to modify bake templates. Your homework is:<br />
+- Make the form actions optional - and turn them off for embedded forms.<br />
+- Create a nicer comment list than the current version.<br />
+- Hide the <code>issue_id</code> field on the form without removing it completely</p>
+<p>Tomorrow’s CakeAdvent entry will contain a solution, but this should be a good way for you to start creating your own custom bake templates :) Until then!</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-03 16:22:00 +0000">03 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 3</strong> of <strong>3</strong> in the series "CakeAdvent 2014".</p>
+    <ol>
+      <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
+      <li><a href="/2014/12/02/designing-a-store-application-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
+      <li>Customizing Bake in CakePHP 3</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/';
+        var disqus_title      = "CakeAdvent-2014: Customizing Bake in CakePHP 3";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>
