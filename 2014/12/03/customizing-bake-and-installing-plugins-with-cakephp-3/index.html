@@ -223,7 +223,7 @@ touch $TEMPLATE_DIR/Element/add_related.ctp
 <p>We need to modify the <code>form.ctp</code> to allow us to set a custom action for the <code>POST</code> request. The following bit of code should replace the line containing <code>$this-&gt;Form-&gt;create</code>:</p>
 <pre><code class="language-php">&lt;?= $this-&gt;Form-&gt;create($&lt;%= $singularVar %&gt;, &lt;% if (empty($formOptions)) : %&gt;[]&lt;% else : %&gt;&lt;%= var_export($formOptions) %&gt;&lt;% endif;%&gt;); ?&gt;
 </code></pre>
-<p>It’s rather long and complicated, but we’ll simply add the following line to the end:</p>
+<p>I order to show the related form, we’ll need to modify the <code>Bake/Template/view.ctp</code> we copied over. It’s rather long and complicated, but we’ll simply add the following line to the end:</p>
 <pre><code class="language-php">&lt;%
 if (!empty($relatedForm)) {
   $this-&gt;element('add_related', $relatedForm);

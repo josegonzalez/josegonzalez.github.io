@@ -316,7 +316,7 @@ touch $TEMPLATE_DIR/Element/add_related.ctp
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create($&amp;lt;%= $singularVar %&amp;gt;, &amp;lt;% if (empty($formOptions)) : %&amp;gt;[]&amp;lt;% else : %&amp;gt;&amp;lt;%= var_export($formOptions) %&amp;gt;&amp;lt;% endif;%&amp;gt;); ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;It’s rather long and complicated, but we’ll simply add the following line to the end:&lt;/p&gt;
+&lt;p&gt;I order to show the related form, we’ll need to modify the &lt;code&gt;Bake/Template/view.ctp&lt;/code&gt; we copied over. It’s rather long and complicated, but we’ll simply add the following line to the end:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%
 if (!empty($relatedForm)) {
