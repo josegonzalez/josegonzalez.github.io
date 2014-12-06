@@ -5,9 +5,164 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 04 Dec 2014 23:15:35 +0000</pubDate>
-    <lastBuildDate>Thu, 04 Dec 2014 23:15:35 +0000</lastBuildDate>
+    <pubDate>Sat, 06 Dec 2014 01:35:21 +0000</pubDate>
+    <lastBuildDate>Sat, 06 Dec 2014 01:35:21 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
+    
+      <item>
+        <title>Creating Table Callback Events</title>
+        <description>&lt;p&gt;For yesterday’s homework, you should have generated the following migration:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Phinx\Migration\AbstractMigration;
+
+class WebookUrl extends AbstractMigration {
+  public function change() {
+
+    $table = $this-&amp;gt;table('comments');
+    $table
+      -&amp;gt;addColumn('webhook_url', 'string', [
+        'limit' =&amp;gt; '255',
+        'null' =&amp;gt; '1',
+        'default' =&amp;gt; '',
+      ])
+      -&amp;gt;save();
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A couple other notes (while CakePHP 3 is still in beta):&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Using the field &lt;code&gt;unsigned&lt;/code&gt; is currently invalid. You can either remove those designations from your initial migration, or make them the inverse and use &lt;code&gt;signed&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;In order to properly disable the automatic &lt;code&gt;id&lt;/code&gt; field that phinx does, you’ll need to remove the following from the initial schema &lt;code&gt;$table&lt;/code&gt; instantiations:&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt;-&amp;gt;addColumn('id', 'integer', [
+  'limit' =&amp;gt; '11',
+  'null' =&amp;gt; '',
+  'default' =&amp;gt; '',
+])
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To actually start using migrations from now on, you should drop your existing tables (which is okay since we’re starting fresh): and run the following command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
+bin/cake orm_cache clear
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You will also need to make the &lt;code&gt;webhook_url&lt;/code&gt; to the &lt;code&gt;$_accessible&lt;/code&gt; property in your &lt;code&gt;src/Model/Entity/Issue.php&lt;/code&gt; file. You can do this manually (if you have customizations) or with the bake shell:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake model comments --force --no-table
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In future tutorials, we’ll avoid these issues, but just keep this in mind for now.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Webhooks are actually pretty easy to setup. Whenever a comment is created, we’ll want to notify all other comment webhooks that the issue was updated. To do so, we can hook into the &lt;code&gt;Issues::afterSave()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;A &lt;code&gt;Table::afterSave()&lt;/code&gt; call takes the following arguments:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;Event $event&lt;/code&gt;: The actual event that is occurring&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;Entity $entity&lt;/code&gt;: The entity that was just saved&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;ArrayObject $options&lt;/code&gt;: An array of options that was passed into the &lt;code&gt;Table::save()&lt;/code&gt; call.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you don’t create a concrete &lt;code&gt;afterSave()&lt;/code&gt; method, the event isn’t fired on the Table class, so unfortunately we can’t bind to the global event easily. Instead, we’ll fire a custom &lt;code&gt;IssuesTable.afterSave&lt;/code&gt; event from our own custom &lt;code&gt;afterSave()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function afterSave(Event $event, Entity $entity, ArrayObject $options) {
+  $this-&amp;gt;dispatchEvent('IssuesTable.afterSave', compact('entity', 'options'));
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You also will want to include the following classes at the top of your table class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use ArrayObject;
+use Cake\Event\Event;
+use Cake\Orm\Entity;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;In the future, it may be possible to use custom bake events to insert elements into Table and Entity classes. Stay tuned for bake updates!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Now that we’ve fired our custom event, we can add a new event for it! What I like doing is centralizing my global events in an &lt;code&gt;app/config/events.php&lt;/code&gt; file, so lets add the following line to the &lt;code&gt;app/config/bootstrap.php&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;require __DIR__ . '/events.php';
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll add the following event to our &lt;code&gt;app/config/events.php&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+use Cake\Network\Http\Client;
+use Cake\ORM\Entity;
+use Cake\ORM\TableRegistry;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
+    $issueId = $entity-&amp;gt;issue_id;
+    $table = TableRegistry::get('Comments');
+    $comments = $table-&amp;gt;find('all')-&amp;gt;where([
+        'Comments.id !=' =&amp;gt; $entity-&amp;gt;id,
+        'Comments.issue_id' =&amp;gt; $issueId,
+        'Comments.webhook_url IS NOT' =&amp;gt; null,
+    ]);
+    foreach ($comments as $comment) {
+        $data = $comment-&amp;gt;toArray();
+        unset($data['email_address']);
+
+        $http = new Client();
+        $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($data), [
+          'type' =&amp;gt; 'json'
+        ]);
+    }
+}, 'IssuesTable.afterSave');
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A lot of new code. Lets disect this a bit:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;When you want an arbitrary Table class, you can use &lt;code&gt;TableRegistry::get()&lt;/code&gt; to retrieve it.&lt;/li&gt;
+  &lt;li&gt;The new ORM uses method chaining in order to change the query being used. Note that it is a lazy query, so you need to iterate over the result &lt;em&gt;or&lt;/em&gt; call the methods &lt;code&gt;count()&lt;/code&gt;, &lt;code&gt;all()&lt;/code&gt;, &lt;code&gt;first()&lt;/code&gt;, or &lt;code&gt;firstOrFail()&lt;/code&gt; in order to execute the query. Consult the &lt;a href=&quot;http://book.cakephp.org/3.0/en/orm/query-builder.html&quot;&gt;query builder docs&lt;/a&gt; for more details.&lt;/li&gt;
+  &lt;li&gt;Every entity has a &lt;code&gt;toArray()&lt;/code&gt; method, which uses the &lt;code&gt;Entity::visibleProperties()&lt;/code&gt; method to decide what to expose. You can limit this by adding fields to the &lt;code&gt;$_hidden&lt;/code&gt; Entity property. Out of laziness, we didn’t use any entity features to remove the &lt;code&gt;email_address&lt;/code&gt; field from the array output. See &lt;a href=&quot;http://book.cakephp.org/3.0/en/orm/entities.html#converting-to-arrays-json&quot;&gt;array/json conversion docs&lt;/a&gt; if you’d like to do so.&lt;/li&gt;
+  &lt;li&gt;Every entity is json serializable by default. The EntityTrait class - included in the Entity class - has a &lt;code&gt;jsonSerialize&lt;/code&gt; method which calls &lt;code&gt;toArray()&lt;/code&gt;. Pretty nifty.&lt;/li&gt;
+  &lt;li&gt;CakePHP includes a &lt;a href=&quot;http://book.cakephp.org/3.0/en/core-libraries/httpclient.html&quot;&gt;simple HttpClient&lt;/a&gt; that you can use to interact with external webservices. It’s &lt;em&gt;quite&lt;/em&gt; useful. In our case, we’re specifying that we should post json to the api.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;At this point, you’ll want to regenerate your &lt;code&gt;src/Template/Issues/view.ctp&lt;/code&gt; file in order to add the &lt;code&gt;webhook_url&lt;/code&gt; field to test. You can do so via the following command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;bin/cake bake view issues --force
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now all you need to do is test your integration. You can do so by creating a new issue and adding comments to that issue. If you want to generate a test url, I recommend using the excellent &lt;a href=&quot;http://requestb.in/&quot;&gt;http://requestb.in/&lt;/a&gt; to make a url that captures your response.&lt;/p&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h2&gt;
+
+&lt;p&gt;There is no homework, it’s the weekend :) . Go forth and use your new knowledge to extend your app however you please.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 05 Dec 2014 17:34:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/05/creating-table-callback-events/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/05/creating-table-callback-events/</guid>
+        
+        <category>CakeAdvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>models</category>
+        
+        <category>events</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Schema Migrations with CakePHP 3</title>
@@ -1440,340 +1595,6 @@ class PostsController extends Controller
         <category>development</category>
         
         <category>vagrant</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Writing Slimmer Controllers</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;Note: I am using the CakeEntity plugin &lt;a href=&quot;/2013/12/05/objectifying-cakephp-2-0-applications/&quot;&gt;from a previous post&lt;/a&gt; in this example. Feel free to ignore that code if it helps simplify what is going on.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I want to take a little time and go over ways in which we can slim down model code. Below is some early code from an application I developed - it handles lunch scheduling for small companies and teams.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-public function add($restaurant_id = null) {
-  if (empty($restaurant_id)) {
-    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
-  }
-
-  $lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('first', array(
-    'entity' =&amp;gt; true,
-    'conditions' =&amp;gt; array('Lunch.date' =&amp;gt; date('Y-m-d')),
-    'contain' =&amp;gt; array('Restaurant'),
-  ));
-
-  if (!empty($lunchDate)) {
-    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'update', $restaurant_id));
-  }
-
-  $this-&amp;gt;_breadcrumbs[] = array(
-    'name', =&amp;gt; 'Create Lunch Date',
-    'url' =&amp;gt; array(),
-  );
-
-  $this-&amp;gt;set(compact('restaurant_id'));
-
-  if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
-    $this-&amp;gt;Session-&amp;gt;info('Lunch canceled');
-    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
-  }
-
-  if (!$this-&amp;gt;request-&amp;gt;is('post')) {
-    $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
-    return $this-&amp;gt;set($data);
-  }
-
-  try {
-    $entity = $this-&amp;gt;Lunch-&amp;gt;addEntity($this-&amp;gt;request-&amp;gt;data);
-    $this-&amp;gt;Session-&amp;gt;success(__('The Lunch has been saved.'));
-    return $this-&amp;gt;redirect($entity-&amp;gt;route());
-  } catch (Exception $e) {
-    $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
-    if ($entity) {
-      $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray();
-    }
-
-    $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
-    return $this-&amp;gt;set($data);
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above is about 50 lines of code that essentially handles:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Finding an associated lunchdate&lt;/li&gt;
-  &lt;li&gt;Form cancelation&lt;/li&gt;
-  &lt;li&gt;Breadcrumbs for the view&lt;/li&gt;
-  &lt;li&gt;Creating a lunchdate&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This could and should be way smaller, and more reusable. Lets take a look at this in chunks.&lt;/p&gt;
-
-&lt;h2 id=&quot;requiring-action-arguments&quot;&gt;Requiring action arguments&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-if (empty($restaurant_id)) {
-  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Some people will have issues with how I do this, but because I use &lt;a href=&quot;/2013/12/12/abusing-exceptions-to-provide-model-layer-redirection/&quot;&gt;exceptions to handle redirection&lt;/a&gt;, this method works out well for me. I normally have a helper method in my AppController, &lt;code&gt;AppController::redirectUnless()&lt;/code&gt;, with the following contents:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-public function redirectUnless($variable, $redirectTo = null) {
-  if (!empty($variable)) {
-    return;
-  }
-
-  if (empty($redirectTo)) {
-    $redirectTo = array('action' =&amp;gt; 'index');
-  }
-
-  return $this-&amp;gt;redirect($redirectTo);
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Then my code sample becomes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$this-&amp;gt;redirectUnless($restaurant_id);
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;If your tests excepted a return, this won’t work because PHP does not have conditional returns without guard statements.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;custom-finds&quot;&gt;Custom finds:&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('first', array(
-  'entity' =&amp;gt; true,
-  'conditions' =&amp;gt; array('Lunch.date' =&amp;gt; date('Y-m-d')),
-  'contain' =&amp;gt; array('Restaurant'),
-));
-
-if (!empty($lunchDate)) {
-  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'update', $restaurant_id));
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I absolutely hate writing finds in my view. Instead, I use custom finds:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('EntityModel', 'Entity.Model');
-App::uses('LunchEntity', 'Model/Entity');
-class Lunch extends EntityModel {
-  public $findMethods = array(
-    'lunchDate' =&amp;gt; true,
-  );
-
-  public function _findLunchDate($state, $query, $results = array()) {
-    if ($state == 'before') {
-      $query['entity'] = true;
-      $query['conditions'] = array('Lunch.date' =&amp;gt; date('Y-m-d'));
-      $query['contain'] = array('Restaurant');
-      $query['limit'] = 1;
-      return $query;
-    }
-
-    if (empty($results[0])) {
-      return false;
-    }
-
-    return $results[0];
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It’s quite easy to setup a custom find - they have &lt;code&gt;before&lt;/code&gt; and &lt;code&gt;after&lt;/code&gt; states, and can have logic that applies to both. Please &lt;a href=&quot;http://book.cakephp.org/2.0/en/models/retrieving-your-data.html#creating-custom-find-types&quot;&gt;read the docs for more information&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Our code sample would finally become:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('lunchDate');
-$this-&amp;gt;redirectUnless($lunchDate, array('action' =&amp;gt; 'update', $restaurant_id));
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;handling-common-view-data&quot;&gt;Handling common view data&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$this-&amp;gt;_breadcrumbs[] = array(
-  'name', =&amp;gt; 'Create Lunch Date',
-  'url' =&amp;gt; array(),
-);
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I usually have some common view data, such as meta tags, breadcrumbs, etc. that are set from each controller. Rather than have the underlying datastructure be exposed to each controller - the &lt;code&gt;_breadcrumbs&lt;/code&gt; array - I use a helper method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-protected function _addBreadcrumb($name, $url = array()) {
-  $this-&amp;gt;_breadcrumbs[] = compact('name', 'url');
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Then my controller code becomes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$this-&amp;gt;_addBreadcrumb('Create Lunch Date');
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;handling-form-cancellation&quot;&gt;Handling Form Cancellation&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
-  $this-&amp;gt;Session-&amp;gt;info(__('Lunch canceled'));
-  return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;My forms commonly have some sort of &lt;em&gt;cancel&lt;/em&gt; button on them. If pressed, the user will be brought back to the index action.&lt;/p&gt;
-
-&lt;p&gt;Instead, I use some generic code in my &lt;code&gt;AppController::beforeFilter()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-public function beforeFilter() {
-  if (!empty($this-&amp;gt;request-&amp;gt;data['cancel'])) {
-    $this-&amp;gt;Session-&amp;gt;info(__('%s canceled', $this-&amp;gt;modelClass));
-    return $this-&amp;gt;redirect(array('action' =&amp;gt; 'index'));
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now I do not need to worry about having this logic in any of my actions.&lt;/p&gt;
-
-&lt;h2 id=&quot;generic-form-handling&quot;&gt;Generic Form Handling&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-if (!$this-&amp;gt;request-&amp;gt;is('post')) {
-  $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
-  return $this-&amp;gt;set($data);
-}
-
-try {
-  $entity = $this-&amp;gt;Lunch-&amp;gt;addEntity($this-&amp;gt;request-&amp;gt;data);
-  $this-&amp;gt;Session-&amp;gt;success(__('The Lunch has been saved.'));
-  return $this-&amp;gt;redirect($entity-&amp;gt;route());
-} catch (Exception $e) {
-  $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
-  if ($entity) {
-    $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray();
-  }
-
-  $data = $this-&amp;gt;Lunch-&amp;gt;getData('add');
-  return $this-&amp;gt;set($data);
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The trick to generic form handling is doing it in such a way to allow developers to override the functionality. Note that this means &lt;em&gt;all&lt;/em&gt; your forms &lt;em&gt;should&lt;/em&gt; be handled similarly. If not, there is no gain from creating a generic form handling method. The following is what I used in this application:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-protected function _form($entity = null, $modelClass = null) {
-  if (empty($modelClass)) {
-    $modelClass = $this-&amp;gt;modelClass;
-  }
-
-  $_action = $this-&amp;gt;request-&amp;gt;params['action'];
-  if ($entity &amp;amp;&amp;amp; empty($this-&amp;gt;request-&amp;gt;data)) {
-    $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray($_action);
-  }
-
-  if (!$this-&amp;gt;request-&amp;gt;is($entity ? 'put' : 'post')) {
-    $data = $this-&amp;gt;{$modelClass}-&amp;gt;getData($_action);
-    return $this-&amp;gt;set($data);
-  }
-
-  try {
-    $method = $entity ? 'updateEntity' : 'addEntity';
-    $entity = $this-&amp;gt;{$modelClass}-&amp;gt;$method($this-&amp;gt;request-&amp;gt;data, $entity);
-    $this-&amp;gt;Session-&amp;gt;success(__('The %s has been saved.', Inflector::humanize($modelClass)));
-    return $this-&amp;gt;redirect($entity-&amp;gt;route());
-  } catch (Exception $e) {
-    $this-&amp;gt;Session-&amp;gt;danger($e-&amp;gt;getMessage());
-    if ($entity) {
-      $this-&amp;gt;request-&amp;gt;data = $entity-&amp;gt;toArray();
-    }
-
-    $data = $this-&amp;gt;{$modelClass}-&amp;gt;getData($_action);
-    return $this-&amp;gt;set($data);
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above bit of code handles:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Existing records being passed in&lt;/li&gt;
-  &lt;li&gt;Models that are not the default model associated to the controller&lt;/li&gt;
-  &lt;li&gt;Both creation and updating records&lt;/li&gt;
-  &lt;li&gt;Session flash messages&lt;/li&gt;
-  &lt;li&gt;Updating post data on failure&lt;/li&gt;
-  &lt;li&gt;Retrieving data for the view&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Using the above helper method would simplify our action code to:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-return $this-&amp;gt;_form();
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;all-together&quot;&gt;All Together&lt;/h2&gt;
-
-&lt;p&gt;Our previous codeblock of 49 lines is now the following, beautiful 10 line method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-public function add($restaurant_id = null) {
-  $this-&amp;gt;redirectUnless($restaurant_id);
-
-  $lunchDate = $this-&amp;gt;Lunch-&amp;gt;find('lunchDate');
-  $this-&amp;gt;redirectUnless($lunchDate, array('action' =&amp;gt; 'update', $restaurant_id));
-
-  $this-&amp;gt;_addBreadcrumb('Create Lunch Date');
-  $this-&amp;gt;set(compact('restaurant_id'));
-  return $this-&amp;gt;_form();
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;What we gain from the new code:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Simpler design&lt;/li&gt;
-  &lt;li&gt;Easier to understand for new developers&lt;/li&gt;
-  &lt;li&gt;Unit tests for the parts can be created as opposed for the whole&lt;/li&gt;
-  &lt;li&gt;Reusable methods have been created for other places across the codebase&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Refactoring code is easy to get carried away with - as we did above - but also serves to freshen up a codebase and allow you to get more stuff done in less time.&lt;/p&gt;
-</description>
-        <pubDate>Tue, 24 Dec 2013 13:27:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2013/12/24/writing-slimmer-controllers/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/24/writing-slimmer-controllers/</guid>
-        
-        <category>CakeAdvent-2013</category>
-        
-        <category>cakephp</category>
-        
-        <category>controllers</category>
         
         
         <category>cakephp</category>

@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Creating Table Callback Events",
+    "url": "/2014/12/05/creating-table-callback-events/",
+    "description": "Part 4 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["cakephp","callback","creating","designed","effectively","events","part","posts","series","table","teach","use"]
+  },
+  {
+    "type": "post",
     "title": "Schema Migrations with CakePHP 3",
     "url": "/2014/12/04/schema-migrations-with-cakephp-3/",
     "description": "Part 3 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
@@ -1146,6 +1153,12 @@
     "title": "phinx",
     "url": "/tags/phinx/",
     "tokens": ["phinx"]
+  },
+  {
+    "type": "tag",
+    "title": "models",
+    "url": "/tags/models/",
+    "tokens": ["models"]
   },
   false
 ]
