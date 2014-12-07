@@ -180,7 +180,7 @@ EventManager::instance()-&gt;attach(function (Event $event, Entity $entity, Arra
 <p><em>Much</em> nicer.</p>
 <h3 id="sending-email">Sending email</h3>
 <p>To send email, you’ll need to <a href="http://book.cakephp.org/3.0/en/core-libraries/email.html#configuring-transports">configure an email transport</a>. I’m going assume you did that (gmail via smtp should work fine) so we’ll skip ahead to the actual email sending. Our new event will <em>also</em> be in the <code>app/config/event.php</code> file, so we only need to call <code>use</code> on one more class:</p>
-<pre><code>use Cake\Network\Email\Email;
+<pre><code class="language-php">use Cake\Network\Email\Email;
 EventManager::instance()-&gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
     $comments = TableRegistry::get('Comments')-&gt;find('notifiable', [
         'comment' =&gt; $entity,
