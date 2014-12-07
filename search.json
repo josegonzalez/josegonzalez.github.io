@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Emailing users when a new comment is posted",
+    "url": "/2014/12/06/email-users-when-a-new-comment-is-posted/",
+    "description": "Part 5 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["cakephp","comment","designed","effectively","emailing","new","part","posted","posts","series","teach","use","users"]
+  },
+  {
+    "type": "post",
     "title": "Creating Table Callback Events",
     "url": "/2014/12/05/creating-table-callback-events/",
     "description": "Part 4 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
@@ -1159,6 +1166,24 @@
     "title": "models",
     "url": "/tags/models/",
     "tokens": ["models"]
+  },
+  {
+    "type": "tag",
+    "title": "custom find",
+    "url": "/tags/custom-find/",
+    "tokens": ["custom","find"]
+  },
+  {
+    "type": "tag",
+    "title": "email",
+    "url": "/tags/email/",
+    "tokens": ["email"]
+  },
+  {
+    "type": "tag",
+    "title": "entities",
+    "url": "/tags/entities/",
+    "tokens": ["entities"]
   },
   false
 ]

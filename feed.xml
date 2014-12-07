@@ -5,9 +5,197 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 06 Dec 2014 01:35:21 +0000</pubDate>
-    <lastBuildDate>Sat, 06 Dec 2014 01:35:21 +0000</lastBuildDate>
+    <pubDate>Sun, 07 Dec 2014 00:36:03 +0000</pubDate>
+    <lastBuildDate>Sun, 07 Dec 2014 00:36:03 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
+    
+      <item>
+        <title>Emailing users when a new comment is posted</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;The previous post had &lt;code&gt;IssuesTable.afterSave&lt;/code&gt; as the event in use. We’ve changed this to &lt;code&gt;CommentsTable.afterSave&lt;/code&gt; to better reflect what is occurring.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Similar to yesterday, we’ll want to &lt;em&gt;also&lt;/em&gt; notify users via email. If a user has specified their email address, we’ll want to notify them at their email address. Lets start by adding a new event to our &lt;code&gt;app/config/events.php&lt;/code&gt; file. It will follow the same basic pattern as the previous event. Here the previous event is for your recollection:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Event\Event;
+use Cake\Event\EventManager;
+use Cake\Network\Http\Client;
+use Cake\ORM\Entity;
+use Cake\ORM\TableRegistry;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
+    $table = TableRegistry::get('Comments');
+    $comments = $table-&amp;gt;find('all')-&amp;gt;where([
+        'Comments.id !=' =&amp;gt; $entity-&amp;gt;id,
+        'Comments.issue_id' =&amp;gt; $entity-&amp;gt;issue_id,
+        'Comments.webhook_url IS NOT' =&amp;gt; null,
+    ]);
+    foreach ($comments as $comment) {
+        $data = $comment-&amp;gt;toArray();
+        unset($data['email_address']);
+        unset($data['webhook_url']);
+
+        $http = new Client();
+        $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($data), [
+          'type' =&amp;gt; 'json'
+        ]);
+    }
+}, 'IssuesTable.afterSave');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The only part we’re going to change is &lt;em&gt;how&lt;/em&gt; we send the data - rather than via a POST, it will send an email. A couple notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The find is being duplicated each time&lt;/li&gt;
+  &lt;li&gt;We’re going to unset the &lt;code&gt;email_address&lt;/code&gt; and &lt;code&gt;webhook_url&lt;/code&gt; fields from the data array both times&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Boo. Code duplication that will probably happen again if we implement more callback-types. To reduce this, we’re going to add a custom finder to simplify our find call, and then a custom method to our Comment Entity class to output the public data.&lt;/p&gt;
+
+&lt;h3 id=&quot;custom-finders&quot;&gt;Custom finders&lt;/h3&gt;
+
+&lt;p&gt;In CakePHP 3, custom finders are simply methods that return custom query objects. As a result, hey are a bit simpler to manipulate than in CakePHP 2. Since our find call above was simply a query object manipulator, it will be quite simple to transform that into a custom find in our &lt;code&gt;app/src/Model/Table/CommentsTable.php&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// You can move the `\App\Model\Entity\Comment` to a `use` call at the top
+// of the class and then reference it with `Comment` in the `instanceof` check
+public function findNotifiable(Query $query, array $options) {
+    if (empty($options['comment']) || !($options['comment'] instanceof \App\Model\Entity\Comment)) {
+        throw new \InvalidArgumentException('Missing comment entity argument');
+    }
+    if (empty($options['notifierField']) {
+        throw new \InvalidArgumentException('Missing notifierField argument');
+    }
+
+    return $query-&amp;gt;where([
+        'Comments.id !=' =&amp;gt; $options['comment']-&amp;gt;id,
+        'Comments.issue_id' =&amp;gt; $options['comment']-&amp;gt;issue_id,
+        &quot;Comments.{$options['notifierField']} IS NOT&quot; =&amp;gt; null,
+    ]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you place the above in your &lt;code&gt;CommentsTable&lt;/code&gt; class, you can now call the custom find in the following way:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$table = TableRegistry::get('Comments');
+$comments = $table-&amp;gt;find('notifiable', [
+    'comment' =&amp;gt; $comment
+    'notifierField' =&amp;gt; 'webhook_url'
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;While this allows you easily replace the &lt;code&gt;Model::beforeFind()&lt;/code&gt; in 2.x, you will need to use &lt;a href=&quot;http://book.cakephp.org/3.0/en/orm/query-builder.html#map-reduce&quot;&gt;map/reduce&lt;/a&gt; functions to simulate &lt;code&gt;Model::afterFind()&lt;/code&gt;. Note that you can place these within the custom finder as well, just that their syntax is a little different. We’ll explore them in a future post.&lt;/p&gt;
+
+&lt;h3 id=&quot;custom-entity-methods&quot;&gt;Custom entity methods&lt;/h3&gt;
+
+&lt;p&gt;Entities are simply objects returned by the ORM. Pretty straightforward. They replace the former array structure returned by a &lt;code&gt;Model::find()&lt;/code&gt;, allowing developers to add custom methods to the base objects, making dealing with data representation a bit easier. In our case, we’re going to wrap the &lt;code&gt;Comment::toArray()&lt;/code&gt; method with our own logic for setting property data:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function toPublicArray() {
+  $data = $this-&amp;gt;toArray();
+  unset($data['email_address']);
+  unset($data['webhook_url']);
+  return $data;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Adding the above to our &lt;code&gt;app/src/Model/Entity/Comment.php&lt;/code&gt; file will allow us to use the method in our code like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$comment = $table-&amp;gt;find('all')-&amp;gt;first();
+$publicData = $comment-&amp;gt;toPublicArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;An &lt;em&gt;alternative&lt;/em&gt; is to modify the &lt;code&gt;$_hidden&lt;/code&gt; property of the Entity. This property will hide a field from the output of &lt;code&gt;$entity-&amp;gt;toArray()&lt;/code&gt; and &lt;code&gt;json_encode($entity)&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Entity;
+
+use Cake\ORM\Entity;
+class Comment extends Entity {
+  protected $_hidden = ['email_address', 'webhook_url'];
+
+  // other code here
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;With the above, we can continue using the &lt;code&gt;$entity-&amp;gt;toArray()&lt;/code&gt; method of data retrieval without worrying about whether the data being output contains sensitive information.&lt;/p&gt;
+
+&lt;p&gt;Going forward, we’ll assume you used the &lt;code&gt;$_hidden&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;h3 id=&quot;a-reimagined-event&quot;&gt;A reimagined event:&lt;/h3&gt;
+
+&lt;p&gt;Now that we have the basics in place, our original webhook event looks like the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Event\Event;
+use Cake\Event\EventManager;
+use Cake\Network\Http\Client;
+use Cake\ORM\Entity;
+use Cake\ORM\TableRegistry;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
+    $comments = TableRegistry::get('Comments')-&amp;gt;find('notifiable', [
+        'comment' =&amp;gt; $entity,
+        'notifierField' =&amp;gt; 'webhook_url'
+    ]);
+    foreach ($comments as $comment) {
+        $http = new Client();
+        $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($comment), [
+          'type' =&amp;gt; 'json'
+        ]);
+    }
+}, 'IssuesTable.afterSave');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;Much&lt;/em&gt; nicer.&lt;/p&gt;
+
+&lt;h3 id=&quot;sending-email&quot;&gt;Sending email&lt;/h3&gt;
+
+&lt;p&gt;To send email, you’ll need to &lt;a href=&quot;http://book.cakephp.org/3.0/en/core-libraries/email.html#configuring-transports&quot;&gt;configure an email transport&lt;/a&gt;. I’m going assume you did that (gmail via smtp should work fine) so we’ll skip ahead to the actual email sending. Our new event will &lt;em&gt;also&lt;/em&gt; be in the &lt;code&gt;app/config/event.php&lt;/code&gt; file, so we only need to call &lt;code&gt;use&lt;/code&gt; on one more class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;use Cake\Network\Email\Email;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
+    $comments = TableRegistry::get('Comments')-&amp;gt;find('notifiable', [
+        'comment' =&amp;gt; $entity,
+        'notifierField' =&amp;gt; 'email_address'
+    ]);
+    foreach ($comments as $comment) {
+        $email = new Email();
+        $email-&amp;gt;from(['me@example.com' =&amp;gt; 'Anonymous Issues'])
+            -&amp;gt;to($comment-&amp;gt;email_address)
+            -&amp;gt;subject(sprintf(&quot;New comment on issue #%d&quot;, $comment-&amp;gt;issue_id))
+            -&amp;gt;send($comment-&amp;gt;comment);
+    }
+}, 'IssuesTable.afterSave');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above is a contrived example of email sending. You could subclass the email class into a &lt;code&gt;NotificationEmail&lt;/code&gt; class and have it take a &lt;code&gt;Comment&lt;/code&gt; entity directly - as well as add custom logic around the message body or other configuration - but we’ll leave that as an exercise for larger applications.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;While this and the previous tutorial show how to make http requests and notifications in a web request, it may be prudent to move these into background tasks to keep the application responsive. We’ll look into doing just that in a separate post, but keep in mind that performing longer tasks in a web request is ill-advised.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h3&gt;
+
+&lt;p&gt;Lazy sunday tomorrow, so go do something for yourself. &lt;a href=&quot;http://littleanimalgifs.tumblr.com/random&quot;&gt;Here is a link&lt;/a&gt; to random animal gifs. Until next time!&lt;/p&gt;
+</description>
+        <pubDate>Sat, 06 Dec 2014 13:45:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/06/email-users-when-a-new-comment-is-posted/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/06/email-users-when-a-new-comment-is-posted/</guid>
+        
+        <category>CakeAdvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>custom find</category>
+        
+        <category>email</category>
+        
+        <category>entities</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Creating Table Callback Events</title>
@@ -63,7 +251,7 @@ bin/cake orm_cache clear
 
 &lt;hr /&gt;
 
-&lt;p&gt;Webhooks are actually pretty easy to setup. Whenever a comment is created, we’ll want to notify all other comment webhooks that the issue was updated. To do so, we can hook into the &lt;code&gt;Issues::afterSave()&lt;/code&gt; method.&lt;/p&gt;
+&lt;p&gt;Webhooks are actually pretty easy to setup. Whenever a comment is created, we’ll want to notify all other comment webhooks that the issue was updated. To do so, we can hook into the &lt;code&gt;CommentsTable::afterSave()&lt;/code&gt; method.&lt;/p&gt;
 
 &lt;p&gt;A &lt;code&gt;Table::afterSave()&lt;/code&gt; call takes the following arguments:&lt;/p&gt;
 
@@ -73,10 +261,10 @@ bin/cake orm_cache clear
   &lt;li&gt;&lt;code&gt;ArrayObject $options&lt;/code&gt;: An array of options that was passed into the &lt;code&gt;Table::save()&lt;/code&gt; call.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;If you don’t create a concrete &lt;code&gt;afterSave()&lt;/code&gt; method, the event isn’t fired on the Table class, so unfortunately we can’t bind to the global event easily. Instead, we’ll fire a custom &lt;code&gt;IssuesTable.afterSave&lt;/code&gt; event from our own custom &lt;code&gt;afterSave()&lt;/code&gt; method:&lt;/p&gt;
+&lt;p&gt;If you don’t create a concrete &lt;code&gt;afterSave()&lt;/code&gt; method, the event isn’t fired on the Table class, so unfortunately we can’t bind to the global event easily. Instead, we’ll fire a custom &lt;code&gt;CommentsTable.afterSave&lt;/code&gt; event from our own custom &lt;code&gt;afterSave()&lt;/code&gt; method:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function afterSave(Event $event, Entity $entity, ArrayObject $options) {
-  $this-&amp;gt;dispatchEvent('IssuesTable.afterSave', compact('entity', 'options'));
+  $this-&amp;gt;dispatchEvent('CommentsTable.afterSave', compact('entity', 'options'));
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -106,23 +294,23 @@ use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 
 EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $issueId = $entity-&amp;gt;issue_id;
     $table = TableRegistry::get('Comments');
     $comments = $table-&amp;gt;find('all')-&amp;gt;where([
         'Comments.id !=' =&amp;gt; $entity-&amp;gt;id,
-        'Comments.issue_id' =&amp;gt; $issueId,
+        'Comments.issue_id' =&amp;gt; $entity-&amp;gt;issue_id,
         'Comments.webhook_url IS NOT' =&amp;gt; null,
     ]);
     foreach ($comments as $comment) {
         $data = $comment-&amp;gt;toArray();
         unset($data['email_address']);
+        unset($data['webhook_url']);
 
         $http = new Client();
         $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($data), [
           'type' =&amp;gt; 'json'
         ]);
     }
-}, 'IssuesTable.afterSave');
+}, 'CommentsTable.afterSave');
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1545,56 +1733,6 @@ class PostsController extends Controller
         <category>views</category>
         
         <category>service</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Local Development Environment using Vagrant and Virtualbox</title>
-        <description>&lt;p&gt;One thing developers have issues with is setting up their local development environment. You install a piece of software, it breaks something, and then rolling back is annoying. Or perhaps you have a new laptop, and now you need to reinstall the entire kitchen sink.&lt;/p&gt;
-
-&lt;p&gt;I’ve been using &lt;a href=&quot;http://www.vagrantup.com/&quot;&gt;Vagrant&lt;/a&gt; for the past few months to great success. Vagrant allows you to automate the creation and lifecycle of a virtual machine. You can &lt;em&gt;provision&lt;/em&gt; a new machine, automatically run code, and have a fully working environment in a few miinutes. The hard part is figuring out the exact steps needed to get your development environment up to speed.&lt;/p&gt;
-
-&lt;p&gt;My Christmas gift to CakePHP developers is the &lt;em&gt;&lt;a href=&quot;https://github.com/FriendsOfCake/vagrant-chef&quot;&gt;FriendsOfCake/vagrant-chef&lt;/a&gt;&lt;/em&gt; repository, a vagrant installation custom-built for CakePHP applications. It will automatically setup the following within a virtual machine:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Ubuntu 12.04 Precise Pangolin&lt;/li&gt;
-  &lt;li&gt;Ningx 1.1&lt;/li&gt;
-  &lt;li&gt;PHP 5.5&lt;/li&gt;
-  &lt;li&gt;Percona MySQL 5.5&lt;/li&gt;
-  &lt;li&gt;Redis 2.8&lt;/li&gt;
-  &lt;li&gt;Memcached 1.4&lt;/li&gt;
-  &lt;li&gt;Git 1.7&lt;/li&gt;
-  &lt;li&gt;Composer&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;How do we do it?&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Install &lt;a href=&quot;http://www.vagrantup.com/downloads.html&quot;&gt;Vagrant&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Install &lt;a href=&quot;https://www.virtualbox.org/wiki/Downloads&quot;&gt;Virtualbox&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;git clone https://github.com/FriendsOfCake/vagrant-chef.git&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;cd vagrant-chef&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;vagrant up&lt;/code&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Once it’s up, you can simply replace your &lt;code&gt;app&lt;/code&gt; directory with your application and visit &lt;code&gt;192.168.13.37&lt;/code&gt;. Your application should be ready and raring to go!&lt;/p&gt;
-
-&lt;p&gt;For more information, please visit the  &lt;em&gt;&lt;a href=&quot;https://github.com/FriendsOfCake/vagrant-chef&quot;&gt;FriendsOfCake/vagrant-chef&lt;/a&gt;&lt;/em&gt; repository! Happy Holidays!&lt;/p&gt;
-</description>
-        <pubDate>Wed, 25 Dec 2013 16:29:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2013/12/25/local-development-environment-using-vagrant-and-virtualbox/</guid>
-        
-        <category>CakeAdvent-2013</category>
-        
-        <category>cakephp</category>
-        
-        <category>development</category>
-        
-        <category>vagrant</category>
         
         
         <category>cakephp</category>

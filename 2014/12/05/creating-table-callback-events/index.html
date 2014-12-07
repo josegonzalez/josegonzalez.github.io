@@ -112,16 +112,16 @@ bin/cake orm_cache clear
 </code></pre>
 <p>In future tutorials, we’ll avoid these issues, but just keep this in mind for now.</p>
 <hr />
-<p>Webhooks are actually pretty easy to setup. Whenever a comment is created, we’ll want to notify all other comment webhooks that the issue was updated. To do so, we can hook into the <code>Issues::afterSave()</code> method.</p>
+<p>Webhooks are actually pretty easy to setup. Whenever a comment is created, we’ll want to notify all other comment webhooks that the issue was updated. To do so, we can hook into the <code>CommentsTable::afterSave()</code> method.</p>
 <p>A <code>Table::afterSave()</code> call takes the following arguments:</p>
 <ul>
   <li><code>Event $event</code>: The actual event that is occurring</li>
   <li><code>Entity $entity</code>: The entity that was just saved</li>
   <li><code>ArrayObject $options</code>: An array of options that was passed into the <code>Table::save()</code> call.</li>
 </ul>
-<p>If you don’t create a concrete <code>afterSave()</code> method, the event isn’t fired on the Table class, so unfortunately we can’t bind to the global event easily. Instead, we’ll fire a custom <code>IssuesTable.afterSave</code> event from our own custom <code>afterSave()</code> method:</p>
+<p>If you don’t create a concrete <code>afterSave()</code> method, the event isn’t fired on the Table class, so unfortunately we can’t bind to the global event easily. Instead, we’ll fire a custom <code>CommentsTable.afterSave</code> event from our own custom <code>afterSave()</code> method:</p>
 <pre><code class="language-php">public function afterSave(Event $event, Entity $entity, ArrayObject $options) {
-  $this-&gt;dispatchEvent('IssuesTable.afterSave', compact('entity', 'options'));
+  $this-&gt;dispatchEvent('CommentsTable.afterSave', compact('entity', 'options'));
 }
 </code></pre>
 <p>You also will want to include the following classes at the top of your table class:</p>
@@ -143,22 +143,22 @@ use Cake\Network\Http\Client;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 EventManager::instance()-&gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $issueId = $entity-&gt;issue_id;
     $table = TableRegistry::get('Comments');
     $comments = $table-&gt;find('all')-&gt;where([
         'Comments.id !=' =&gt; $entity-&gt;id,
-        'Comments.issue_id' =&gt; $issueId,
+        'Comments.issue_id' =&gt; $entity-&gt;issue_id,
         'Comments.webhook_url IS NOT' =&gt; null,
     ]);
     foreach ($comments as $comment) {
         $data = $comment-&gt;toArray();
         unset($data['email_address']);
+        unset($data['webhook_url']);
         $http = new Client();
         $http-&gt;post($comment-&gt;webhook_url, json_encode($data), [
           'type' =&gt; 'json'
         ]);
     }
-}, 'IssuesTable.afterSave');
+}, 'CommentsTable.afterSave');
 ?&gt;
 </code></pre>
 <p>A lot of new code. Lets disect this a bit:</p>
@@ -198,13 +198,14 @@ EventManager::instance()-&gt;attach(function (Event $event, Entity $entity, Arra
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 5</strong> of <strong>5</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 5</strong> of <strong>6</strong> in the series "CakeAdvent 2014".</p>
     <ol>
       <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li><a href="/2014/12/02/designing-a-store-application-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
       <li><a href="/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">Customizing Bake in CakePHP 3</a></li>
       <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
       <li>Creating Table Callback Events</li>
+      <li><a href="/2014/12/06/email-users-when-a-new-comment-is-posted/">Emailing users when a new comment is posted</a></li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
