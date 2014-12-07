@@ -109,6 +109,7 @@ touch app/src/View/Helper/MarkdownHelper.php
 <pre><code class="language-php">&lt;?php
 namespace App\View\Helper;
 use Cake\View\Helper;
+use Cake\View\View;
 use ColinODell\CommonMark\CommonMarkConverter;
 class MarkdownHelper extends Helper {
     public function __construct(View $view, $config = []) {
