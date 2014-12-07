@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2014: CakePHP Advent Calendar 2014</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/">
+    <title>CakeAdvent-2014: Parsing markdown comments</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -21,19 +21,19 @@
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
-    <meta name="description" content="Introducing a slightly different CakePHP Advent Calendar." />
-    <meta name="keywords" content="cakeadvent-2014, cakephp" />
+    <meta name="description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="keywords" content="cakeadvent-2014, cakephp, composer, helpers" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2014: CakePHP Advent Calendar 2014" />
+    <meta property="og:title" content="CakeAdvent-2014: Parsing markdown comments" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/" />
-    <meta property="og:description" content="Introducing a slightly different CakePHP Advent Calendar." />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/" />
+    <meta property="og:description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2014: CakePHP Advent Calendar 2014" />
-    <meta name="twitter:description" content="Introducing a slightly different CakePHP Advent Calendar." />
-    <link rel="alternate" type="application/rss+xml" title="CakePHP Advent Calendar 2014 » Feed" href="/atom.xml">
+    <meta name="twitter:title" content="CakeAdvent-2014: Parsing markdown comments" />
+    <meta name="twitter:description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <link rel="alternate" type="application/rss+xml" title="Parsing markdown comments » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,46 +64,75 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        CakePHP Advent Calendar 2014
+        Parsing markdown comments
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on CakePHP Advent Calendar 2014!">
+        <a href="#comments" title="Comment on Parsing markdown comments!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>Last year for the Advent Calendar, I brought to you <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">25 delicious posts</a> surrounding writing better CakePHP applications. Those posts catered to both the beginner and advanced CakePHP developer, and hopefully can still be of some use to you.</p>
-<p>This year, however, we’re going to kick it up a notch and actually use our skills to design 3 custom <a href="http://cakephp.org/">CakePHP</a> applications:</p>
+    <p>In CakePHP 3, some things change significantly, and others stay pretty much the same. CakePHP 3 provides a new <code>AppView</code> class in <code>app/src/View/AppView.php</code>. You can do any of the following here:</p>
 <ul>
-  <li>An anonymous markdown-based issue tracker capable of sending email notifications and exposing webhooks</li>
-  <li>A simple cart system with user authentication and payment processing</li>
-  <li>A simple tumblr clone with support for post type extensions</li>
+  <li>Load helpers for every template</li>
+  <li>Override <code>View</code> methods</li>
+  <li>Add custom methods that may not necessarily require a new helper</li>
 </ul>
-<h2 id="a-bit-of-background">A bit of background</h2>
-<p>As some of you may be aware, <a href="http://bakery.cakephp.org/articles/markstory/2014/11/17/cakephp_3_0_0-beta3_released">CakePHP 3</a> is right around the corner. With just two RCs left, it’s almost ready for prime-time with lots of great changes. Unfortunately, this also means that some of the old knowledge we had is no longer applicable, and so rather than try to introduce CakePHP 3 features in one-off tutorials, we will showcase the power of the new framework to build working applications.</p>
-<h2 id="why-3-tutorials">Why 3 tutorials?</h2>
-<p>CakePHP 3 is coming out, so we should match it with the same number. It also helps that an Advent Calendar is 25 days, so we’ll have an interlude between each tutorial series.</p>
-<h2 id="who-are-these-tutorials-aimed-at">Who are these tutorials aimed at?</h2>
-<p>You should have some knowledge of the PHP language, and knowledge of any MVC framework will help. That said, new CakePHP developers will hopefully grow more comfortable as we progress with the tutorials.  We’ll be laying the foundation for effective application development - via working local development environments and production code deployment.</p>
-<p>For experienced CakePHP developers, these series of tutorials will be designed to point out changes from the 2.x series. Note that we’ll be a bit light on tests - this is a purposeful change to make following the tutorials a bit easier, but don’t be afraid to practice TDD.</p>
-<p>For CakePHP haters, these tutorials are meant to show development practices in another framework. We will be using community libraries where possible, and thus most of the applications we are building will be possible to build in other frameworks. As CakePHP 3 is quite modular, you are welcome to incorporate both developed application code as well as CakePHP 3 libraries in your non-CakePHP projects.</p>
-<h2 id="what-do-i-need">What do I need?</h2>
-<p>These tutorials are completely free, and there will be no cost for any of the tools we use (other than your computer!). You’ll want to setup the following before reading these tutorials:</p>
-<ul>
-  <li>A <a href="https://github.com/">Github account</a></li>
-  <li>A <a href="https://www.heroku.com/">Heroku account</a></li>
-  <li>Install <a href="http://git-scm.com/">Git</a> if you are not on a Mac</li>
-  <li>Install <a href="https://www.vagrantup.com/">Vagrant</a></li>
-  <li>Install <a href="https://www.virtualbox.org/">Virtualbox</a> or <a href="http://www.vmware.com/products/fusion">Vmware Fusion</a></li>
-</ul>
-<p>Please ensure you have all of the above setup, as otherwise certain portions of the tutorials will not make sense.</p>
-<p>Note that not every tutorial will use the above tools, and you are free to use alternatives if you so desire.</p>
-<h2 id="how-do-i-get-started">How do I get started?</h2>
-<p>I’ll be posting new posts in the series each day of the Advent Calendar, and tweeting about it as <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 1st of December!) for more delicious content.</p>
+<p>In our case, we’ll be making a new <code>MarkdownHelper</code> available everywhere. As such, our <code>AppView</code> will look similar to the following:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\View;
+use Cake\View\View;
+class AppView extends View {
+    public function initialize() {
+        $this-&gt;loadHelper('Markdown');
+    }
+}
+?&gt;
+</code></pre>
+<h3 id="creating-a-new-helper">Creating a new helper</h3>
+<p>In our helper, we’re going to depend upon the <code>colinodell/commonmark-php</code> package to render markdown that follows the <a href="http://commonmark.org/">CommonMark</a> specification. First, you’ll want to install that package using <code>composer</code>:</p>
+<pre><code class="language-shell"># ssh onto the vm
+vagrant ssh
+cd /vagrant/app
+composer require colinodell/commonmark-php:0.3.0
+</code></pre>
+<blockquote>
+  <p>The <code>colinodell/commonmark-php</code> package will be named <code>league/markdown</code> shortly, but for now, these instructions should work fine.</p>
+</blockquote>
+<p>Now we can create a very simple helper class. Helper classes allow us to format output for templates in a more user friendly format. We could, for instance, use a helper to generate the correct gravatar url for a given email address. Helpers allow you to consolidate your template logic into classes that can be easily tested and reused not just in a single application, but across multiple applications that need the same functionality.</p>
+<p>You should first create the file containing your new helper:</p>
+<pre><code class="language-shell">cd /vagrant/app
+touch app/src/View/Helper/MarkdownHelper.php
+</code></pre>
+<p>The contents of our helper will then be the following:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\View\Helper;
+use Cake\View\Helper;
+use ColinODell\CommonMark\CommonMarkConverter;
+class MarkdownHelper extends Helper {
+    public function __construct(View $view, $config = []) {
+        parent::__construct($view, $config);
+        $this-&gt;Converter = new CommonMarkConverter;
+    }
+    public function out($input) {
+      return $this-&gt;Converter-&gt;convertToHtml($input);
+    }
+}
+?&gt;
+</code></pre>
+<p>To use our helper, anytime we output <code>Comment</code> or <code>Issue</code> contents, we would wrap them in a call to our helper:</p>
+<pre><code class="language-php">// For issues
+$this-&gt;Markdown-&gt;out($issue-&gt;text);
+// For comments
+$this-&gt;Markdown-&gt;out($comment-&gt;comment);
+</code></pre>
+<p>Helpers can be a pretty simple way of consolidating logic in your template files. While in this case there wasn’t much work to be done, you might want to consider using helpers for outputting stuff like navigation bars, custom form elements, and automatically parsing urls into embeddable images and videos.</p>
+<h3 id="homework-time">Homework Time!</h3>
+<p>Since it’s still sunday, we’re going to skip homework. I’m going to personally listen to the guy playing jazz two apartment buildings down and go to Fifthsgiving in an hour. Let me know in the comments if you have any feedback, and see you all tomorrow!</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-01 17:24:00 +0000">01 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-07 13:45:00 +0000">07 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -124,15 +153,15 @@
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 1</strong> of <strong>7</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 7</strong> of <strong>7</strong> in the series "CakeAdvent 2014".</p>
     <ol>
-      <li>CakePHP Advent Calendar 2014</li>
+      <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li><a href="/2014/12/02/designing-a-store-application-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
       <li><a href="/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">Customizing Bake in CakePHP 3</a></li>
       <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
       <li><a href="/2014/12/05/creating-table-callback-events/">Creating Table Callback Events</a></li>
       <li><a href="/2014/12/06/email-users-when-a-new-comment-is-posted/">Emailing users when a new comment is posted</a></li>
-      <li><a href="/2014/12/07/parsing-markdown-comments/">Parsing markdown comments</a></li>
+      <li>Parsing markdown comments</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -171,9 +200,9 @@
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2014/12/01/cakephp-advent-calendar-2014/';
-        var disqus_url        = 'http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/';
-        var disqus_title      = "CakeAdvent-2014: CakePHP Advent Calendar 2014";
+        var disqus_identifier = '/2014/12/07/parsing-markdown-comments/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/';
+        var disqus_title      = "CakeAdvent-2014: Parsing markdown comments";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

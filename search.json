@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Parsing markdown comments",
+    "url": "/2014/12/07/parsing-markdown-comments/",
+    "description": "Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["cakephp","comments","designed","effectively","markdown","parsing","part","posts","series","teach","use"]
+  },
+  {
+    "type": "post",
     "title": "Emailing users when a new comment is posted",
     "url": "/2014/12/06/email-users-when-a-new-comment-is-posted/",
     "description": "Part 5 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
@@ -1184,6 +1191,12 @@
     "title": "entities",
     "url": "/tags/entities/",
     "tokens": ["entities"]
+  },
+  {
+    "type": "tag",
+    "title": "helpers",
+    "url": "/tags/helpers/",
+    "tokens": ["helpers"]
   },
   false
 ]

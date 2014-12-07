@@ -5,9 +5,110 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 07 Dec 2014 00:38:40 +0000</pubDate>
-    <lastBuildDate>Sun, 07 Dec 2014 00:38:40 +0000</lastBuildDate>
+    <pubDate>Sun, 07 Dec 2014 18:15:07 +0000</pubDate>
+    <lastBuildDate>Sun, 07 Dec 2014 18:15:07 +0000</lastBuildDate>
     <generator>Jekyll v2.3.0</generator>
+    
+      <item>
+        <title>Parsing markdown comments</title>
+        <description>&lt;p&gt;In CakePHP 3, some things change significantly, and others stay pretty much the same. CakePHP 3 provides a new &lt;code&gt;AppView&lt;/code&gt; class in &lt;code&gt;app/src/View/AppView.php&lt;/code&gt;. You can do any of the following here:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Load helpers for every template&lt;/li&gt;
+  &lt;li&gt;Override &lt;code&gt;View&lt;/code&gt; methods&lt;/li&gt;
+  &lt;li&gt;Add custom methods that may not necessarily require a new helper&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In our case, we’ll be making a new &lt;code&gt;MarkdownHelper&lt;/code&gt; available everywhere. As such, our &lt;code&gt;AppView&lt;/code&gt; will look similar to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\View;
+
+use Cake\View\View;
+
+class AppView extends View {
+    public function initialize() {
+        $this-&amp;gt;loadHelper('Markdown');
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;creating-a-new-helper&quot;&gt;Creating a new helper&lt;/h3&gt;
+
+&lt;p&gt;In our helper, we’re going to depend upon the &lt;code&gt;colinodell/commonmark-php&lt;/code&gt; package to render markdown that follows the &lt;a href=&quot;http://commonmark.org/&quot;&gt;CommonMark&lt;/a&gt; specification. First, you’ll want to install that package using &lt;code&gt;composer&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
+vagrant ssh
+
+cd /vagrant/app
+composer require colinodell/commonmark-php:0.3.0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The &lt;code&gt;colinodell/commonmark-php&lt;/code&gt; package will be named &lt;code&gt;league/markdown&lt;/code&gt; shortly, but for now, these instructions should work fine.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Now we can create a very simple helper class. Helper classes allow us to format output for templates in a more user friendly format. We could, for instance, use a helper to generate the correct gravatar url for a given email address. Helpers allow you to consolidate your template logic into classes that can be easily tested and reused not just in a single application, but across multiple applications that need the same functionality.&lt;/p&gt;
+
+&lt;p&gt;You should first create the file containing your new helper:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
+touch app/src/View/Helper/MarkdownHelper.php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The contents of our helper will then be the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\View\Helper;
+
+use Cake\View\Helper;
+use ColinODell\CommonMark\CommonMarkConverter;
+
+class MarkdownHelper extends Helper {
+    public function __construct(View $view, $config = []) {
+        parent::__construct($view, $config);
+        $this-&amp;gt;Converter = new CommonMarkConverter;
+    }
+
+    public function out($input) {
+      return $this-&amp;gt;Converter-&amp;gt;convertToHtml($input);
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To use our helper, anytime we output &lt;code&gt;Comment&lt;/code&gt; or &lt;code&gt;Issue&lt;/code&gt; contents, we would wrap them in a call to our helper:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// For issues
+$this-&amp;gt;Markdown-&amp;gt;out($issue-&amp;gt;text);
+
+// For comments
+$this-&amp;gt;Markdown-&amp;gt;out($comment-&amp;gt;comment);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Helpers can be a pretty simple way of consolidating logic in your template files. While in this case there wasn’t much work to be done, you might want to consider using helpers for outputting stuff like navigation bars, custom form elements, and automatically parsing urls into embeddable images and videos.&lt;/p&gt;
+
+&lt;h3 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h3&gt;
+
+&lt;p&gt;Since it’s still sunday, we’re going to skip homework. I’m going to personally listen to the guy playing jazz two apartment buildings down and go to Fifthsgiving in an hour. Let me know in the comments if you have any feedback, and see you all tomorrow!&lt;/p&gt;
+</description>
+        <pubDate>Sun, 07 Dec 2014 13:45:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/</guid>
+        
+        <category>CakeAdvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        <category>helpers</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Emailing users when a new comment is posted</title>
@@ -1484,255 +1585,6 @@ CakeLog::config('error', [
         <category>logging</category>
         
         <category>logstash</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Using View Cells in your CakePHP applications</title>
-        <description>&lt;p&gt;There is an &lt;a href=&quot;https://github.com/cakephp/cakephp/issues/3052&quot;&gt;interesting ticket&lt;/a&gt; in 3.x describing View Cells. Lets dive right in and figure out what they mean for CakePHP applications.&lt;/p&gt;
-
-&lt;h2 id=&quot;what-is-a-view-cell&quot;&gt;What is a view cell?&lt;/h2&gt;
-
-&lt;p&gt;View cells are like mini templates that are assigned to variables. A good use case for them would be to decorate entities of data. For example, consider the following example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class PostCell extends ViewCell {
-    public $view = 'single_post';
-
-    // I am renaming the method `render` to `run` for a specific reason...
-    public function run(array $options = [])
-    {
-        $this-&amp;gt;loadModel('Posts');
-        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
-        $this-&amp;gt;set(compact('post'));
-        return $this; // So I can chain the `run` method
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above class would retrieve the data necessary to render a &lt;code&gt;PostCell&lt;/code&gt; using the &lt;code&gt;single_post&lt;/code&gt; template file. Our template file could be as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h1&amp;gt;&amp;lt;?= $post-&amp;gt;get('title') ?&amp;gt;&amp;lt;/h1&amp;gt;
-&amp;lt;div class=&quot;post-content&quot;&amp;gt;
-    &amp;lt;?= $post-&amp;gt;get('content') ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In order to use this view cell, we might do the following in our &lt;code&gt;view.ctp&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;cell('PostCell', array('id' =&amp;gt; 10)) ?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;reusing-cells-with-existing-data&quot;&gt;Reusing cells with existing data&lt;/h2&gt;
-
-&lt;p&gt;What if we already have the data, and just want to re-use our cell? This is similar to using an element, though it would be possible with some hackery:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class PostCell extends ViewCell {
-    public $view = 'single_post';
-
-    public function run(array $options = [])
-    {
-        // Short-circuit the cell and return any passed data
-        if (!empty($options['post'])) {
-            $this-&amp;gt;set('post', $options['post']);
-            return $this; // So I can chain the `run` method
-        }
-
-        $this-&amp;gt;loadModel('Posts');
-        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
-        $this-&amp;gt;set(compact('post'));
-        return $this; // So I can chain the `run` method
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Our use case would be to show this on an &lt;code&gt;index.ctp&lt;/code&gt; like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;? foreach ($posts as $post) : ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;cell('PostCell', compact('post')) ?&amp;gt;
-&amp;lt;? endforeach; ?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;returning-cells-directly-from-the-controller&quot;&gt;Returning cells directly from the controller&lt;/h2&gt;
-
-&lt;p&gt;We might also want to include the cell directly from the controller. We could do this by constructing the cell directly within the controller:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class PostsController extends Controller
-{
-    use CellTrait;
-
-    public function view($id)
-    {
-        $post = $this-&amp;gt;Post-&amp;gt;findById($id);
-        if (!$post) {
-            throw new NotFoundException('Post not found');
-        }
-
-        $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $post));
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And our &lt;code&gt;view.ctp&lt;/code&gt; would be as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $post ?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;retrieving-cell-data-from-a-controller&quot;&gt;Retrieving Cell data from a controller&lt;/h2&gt;
-
-&lt;p&gt;You might want to reuse &lt;em&gt;just&lt;/em&gt; the cell data, and not the representation, within a controller. The following could be what the api for this looks like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class PostsController extends Controller
-{
-    use CellTrait;
-
-    public function view($id)
-    {
-        $data = (new PostCell())-&amp;gt;run(compact('id'))-&amp;gt;data();
-        if (empty($data['post'])) {
-            throw new NotFoundException('Post not found');
-        }
-
-        // do things to $data['post']
-
-        $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $data['post']));
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If the above looks familiar, it is because a PostCell can be pretty analagous to a service class, which I &lt;a href=&quot;/2013/12/06/building-service-classes/&quot;&gt;previously blogged about&lt;/a&gt; during CakeAdvent.&lt;/p&gt;
-
-&lt;h3 id=&quot;containing-state-within-your-service-class&quot;&gt;Containing state within your service class&lt;/h3&gt;
-
-&lt;p&gt;In the vein of reusing cells for service classes, what if we want to contain the success and failure state of the cell? We might extend our base &lt;code&gt;ViewCell&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class AppViewCell extends ViewCell
-{
-    public static function perform(array $options = [])
-    {
-        $klass = get_called_class();
-        $cell = new $klass;
-        $klass-&amp;gt;run($options);
-        return $klass;
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you change the parent class of &lt;code&gt;PostCell&lt;/code&gt; to &lt;code&gt;AppViewCell&lt;/code&gt;, we can now do:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$cell = PostCell::perform(array('id' =&amp;gt; 10));
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lets make this a bit more interesting by adding &lt;code&gt;successful&lt;/code&gt; and &lt;code&gt;failed&lt;/code&gt; methods:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class AppViewCell extends ViewCell
-{
-    protected $success = null;
-
-    public static function perform(array $options = [])
-    {
-        $klass = get_called_class();
-        $cell = new $klass;
-        $klass-&amp;gt;run($options);
-        return $klass;
-    }
-
-    public function successful()
-    {
-        return $successful === true;
-    }
-
-    public function failed()
-    {
-        return $successful === false;
-    }
-
-    public function performed()
-    {
-        return $successful === null;
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can now modify our &lt;code&gt;PostCell&lt;/code&gt; class to be as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class PostCell extends ViewCell {
-    public $view = 'single_post';
-
-    public function run(array $options = [])
-    {
-        // Short-circuit the cell and return any passed data
-        if (!empty($options['post'])) {
-            $this-&amp;gt;set('post', $options['post']);
-            return $this; // So I can chain the `run` method
-        }
-
-        $this-&amp;gt;loadModel('Posts');
-        $post = $this-&amp;gt;Posts-&amp;gt;findById($options['id']
-        $this-&amp;gt;success = !!$post;
-
-        if ($this-&amp;gt;success) {
-            $this-&amp;gt;set(compact('post'));
-        }
-
-        return $this; // So I can chain the `run` method
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now our controller action could become the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class PostsController extends Controller
-{
-    use CellTrait;
-
-    public function view($id)
-    {
-        $cell = PostCell::perform(compact('id'));
-        if ($cell-&amp;gt;successful()) {
-            $this-&amp;gt;set('post', $this-&amp;gt;decorate('PostCell', $cell-&amp;gt;data()));
-        }
-
-        throw new NotFoundException('Post not found');
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;why-use-a-cell&quot;&gt;Why use a cell?&lt;/h2&gt;
-
-&lt;p&gt;One of the most ill-used features of CakePHP is &lt;code&gt;View::requestAction()&lt;/code&gt;. Developers frequently use this all over their applications, causing convoluted cases where you need to figure out if you are within a web request or an internal action request, cluttering controllers. You also need to invoke a new CakePHP request, which can add some unneeded overhead.&lt;/p&gt;
-
-&lt;p&gt;You could think of View cells as lightweight request containers. Rather than constructing a new request to get at some request data, you could simply reuse cells to get at useful data without having all of the overhead involved in invoking a controller. And as I showed above, they would make excellent containers for service classes.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 20 Mar 2014 16:54:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/03/20/view-cells/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/03/20/view-cells/</guid>
-        
-        <category>cakephp</category>
-        
-        <category>views</category>
-        
-        <category>service</category>
         
         
         <category>cakephp</category>

@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-12-07T00:38:40+00:00</updated>
+ <updated>2014-12-07T18:15:07+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Parsing markdown comments]]></title>
+   <link href="http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/"/>
+   <updated>2014-12-07T13:45:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/</id>
+   <content type="html"><![CDATA[Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Emailing users when a new comment is posted]]></title>
