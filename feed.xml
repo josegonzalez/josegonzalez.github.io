@@ -5,9 +5,9 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 07 Dec 2014 18:15:07 +0000</pubDate>
-    <lastBuildDate>Sun, 07 Dec 2014 18:15:07 +0000</lastBuildDate>
-    <generator>Jekyll v2.3.0</generator>
+    <pubDate>Sun, 07 Dec 2014 18:21:42 +0000</pubDate>
+    <lastBuildDate>Sun, 07 Dec 2014 18:21:42 +0000</lastBuildDate>
+    <generator>Jekyll v2.5.2</generator>
     
       <item>
         <title>Parsing markdown comments</title>
@@ -97,7 +97,7 @@ $this-&amp;gt;Markdown-&amp;gt;out($comment-&amp;gt;comment);
         <link>http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/</guid>
         
-        <category>CakeAdvent-2014</category>
+        <category>cakeadvent-2014</category>
         
         <category>cakephp</category>
         
@@ -283,7 +283,7 @@ EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, 
         <link>http://josediazgonzalez.com/2014/12/06/email-users-when-a-new-comment-is-posted/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/06/email-users-when-a-new-comment-is-posted/</guid>
         
-        <category>CakeAdvent-2014</category>
+        <category>cakeadvent-2014</category>
         
         <category>cakephp</category>
         
@@ -440,7 +440,7 @@ EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, 
         <link>http://josediazgonzalez.com/2014/12/05/creating-table-callback-events/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/05/creating-table-callback-events/</guid>
         
-        <category>CakeAdvent-2014</category>
+        <category>cakeadvent-2014</category>
         
         <category>cakephp</category>
         
@@ -552,7 +552,7 @@ $table = $this-&amp;gt;table('statuses', [
         <link>http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/</guid>
         
-        <category>CakeAdvent-2014</category>
+        <category>cakeadvent-2014</category>
         
         <category>cakephp</category>
         
@@ -879,7 +879,7 @@ bin/cake bake view issues --force
         <link>http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/</guid>
         
-        <category>CakeAdvent-2014</category>
+        <category>cakeadvent-2014</category>
         
         <category>cakephp</category>
         
@@ -1064,7 +1064,7 @@ Router::scope('/', function ($routes) {
         <link>http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/</guid>
         
-        <category>CakeAdvent-2014</category>
+        <category>cakeadvent-2014</category>
         
         <category>cakephp</category>
         
@@ -1127,7 +1127,7 @@ Router::scope('/', function ($routes) {
         <link>http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/</guid>
         
-        <category>CakeAdvent-2014</category>
+        <category>cakeadvent-2014</category>
         
         <category>cakephp</category>
         
