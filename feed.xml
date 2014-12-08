@@ -5,9 +5,93 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 07 Dec 2014 19:02:50 +0000</pubDate>
-    <lastBuildDate>Sun, 07 Dec 2014 19:02:50 +0000</lastBuildDate>
+    <pubDate>Mon, 08 Dec 2014 22:52:51 +0000</pubDate>
+    <lastBuildDate>Mon, 08 Dec 2014 22:52:51 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
+    
+      <item>
+        <title>Closing Issues in our Anonymous Issue Tracker using Events</title>
+        <description>&lt;p&gt;One thing that you’ll want to eventually handle is closing issues. We’ll do this using a simple Event. We need to first add the following migration to handle whether an issue is closed or not:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Phinx\Migration\AbstractMigration;
+
+class ClosingIssues extends AbstractMigration {
+  public function change() {
+
+    $table = $this-&amp;gt;table('issues');
+    $table
+      -&amp;gt;addColumn('is_closed', 'boolean', [
+        'default' =&amp;gt; false,
+      ])
+      -&amp;gt;save();
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You’ll want to run the migration and clear your orm cache:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
+bin/cake orm_cache clear
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, you should add this field to the &lt;code&gt;IssueEntity::$_accessible&lt;/code&gt; array.&lt;/p&gt;
+
+&lt;p&gt;Whenever an issue has it’s &lt;code&gt;is_closed&lt;/code&gt; field set to true in the database (1 in mysql), then we should disable commenting on said entity. We can do this by hooking into the &lt;code&gt;Model.beforeValidate&lt;/code&gt; event in our &lt;code&gt;app/config/events.php&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use App\Model\Entity\Comment;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
+    if (!($entity instanceof Comment)) {
+        return true;
+    }
+
+    $table = TableRegistry::get('Issues');
+    $open_issue = $table-&amp;gt;find('all')-&amp;gt;where([
+        'Issues.id' =&amp;gt; $entity-&amp;gt;issue_id,
+        'Issues.is_closed' =&amp;gt; false,
+    ])-&amp;gt;first();
+
+    return !empty($open_issue);
+}, 'Model.beforeValidate');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A bit of explanation:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We’re only going to trigger this event for &lt;code&gt;Comment&lt;/code&gt; entities, hence the &lt;code&gt;instanceof&lt;/code&gt; check&lt;/li&gt;
+  &lt;li&gt;Since we only want to allow commenting on open issues, we need to find the entity matching our comment’s issue only if &lt;code&gt;is_closed&lt;/code&gt; is false.&lt;/li&gt;
+  &lt;li&gt;If an event returns false, then &lt;code&gt;Event-&amp;gt;stopPropagation&lt;/code&gt; is automatically called. For the &lt;code&gt;Model.beforeValidate&lt;/code&gt; event, if the event is stopped, then the validation fails, so therefore if the &lt;code&gt;open_issue&lt;/code&gt; is empty, then we fail validation.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Quite simple! We can refactor this into a validation rule, but we will avoid doing so for now as validation is currently being refactored in 3.x.&lt;/p&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework time!&lt;/h2&gt;
+
+&lt;p&gt;A few more things you’ll want to do:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Provide some interface to actually close an issue. You can perhaps place this functionality behind basic auth, build a cake shell to handle closing issues, or simply allow anyone to close issues. It’s up to you.&lt;/li&gt;
+  &lt;li&gt;You need to hide the form if the issue is closed. You can do this by modifying your bake templates to handle this case and rebaking.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;With the above change, our anonymous issue tracker is “feature-complete”. We’ve covered quite a bit of CakePHP in building this application, but are definitely many more features to cover. Stay tuned for the next tutorial series, where we’ll cover creating an ecommerce store from scratch, including use authentication, payment processing and more!&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 08 Dec 2014 17:31:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/08/closing-issues/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/08/closing-issues/</guid>
+        
+        <category>cakeadvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Parsing markdown comments</title>
@@ -1377,215 +1461,6 @@ Configure::write('Dispatcher.filters', [
         <category>dispatcher</category>
         
         <category>microframeworks</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Shipping CakePHP App Logs to Logstash via Syslog</title>
-        <description>&lt;p&gt;Writing a logger for CakePHP isn’t very difficult. The work lies in implementing the &lt;code&gt;CakeLogInterface&lt;/code&gt;, which requires that you implement a &lt;code&gt;write&lt;/code&gt; method as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('BaseLog', 'Log/Engine');
-class LogstashLog extends BaseLog
-{
-    public function write($type, $message)
-    {
-        // write to some output.
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above class can go into &lt;code&gt;app/Lib/Log/Engine/LogstashLog.php&lt;/code&gt;. Once you’ve implemented the interface - and I recommend you do so by extending BaseLog - you may want to actually write the logs to some location. In our case, we want to ship these logs to &lt;code&gt;Logstash&lt;/code&gt;, a log processing tool that can take logs and decompose them into useful information.&lt;/p&gt;
-
-&lt;p&gt;At the very base, log messages should have some context about the logs - specifically a timestamp. Rather than invent our own format, we’ll use &lt;a href=&quot;http://en.wikipedia.org/wiki/ISO_8601&quot;&gt;ISO-8601&lt;/a&gt;, which Logstash can handle natively. We can represent this using the following bit of code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$format = 'Y-m-d\TH:i:s.uP';
-echo date($format); // ISO-8601 compliant datetime
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Logstash also represents message as &lt;code&gt;json&lt;/code&gt; in a specific format. Pre-formatting our log messages would allow Logstash to skip any regular expression parsing of our log messages. The following is the current format:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;{
-    &quot;@timestamp&quot;: &quot;2012-12-18T01:01:46.092538Z&quot;,
-    &quot;@version&quot;: 1,
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;All other fields are optional, and therefore our &lt;code&gt;LogstashLog&lt;/code&gt; would look as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('BaseLog', 'Log/Engine');
-class LogstashLog extends BaseLog
-{
-    protected $format = 'Y-m-d\TH:i:s.uP';
-    public function write($type, $message)
-    {
-        $data = [
-            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
-            '@version' =&amp;gt; 1,
-            'message' =&amp;gt; $message,
-            'tags' =&amp;gt; [$type],
-        ];
-        // write to some output.
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can use &lt;code&gt;syslog&lt;/code&gt; to ship our logs. PHP defines the following three methods to interface with &lt;code&gt;syslog&lt;/code&gt;, and I recommend reading up on them:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;openlog&lt;/code&gt;: opens a connection to the system logger for a program&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;syslog&lt;/code&gt;: generates a log message that will be distributed by the system logger&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;closelog&lt;/code&gt;: closes the descriptor being used to write to the system logger&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Adding in &lt;code&gt;syslog&lt;/code&gt; support will change our logger as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('BaseLog', 'Log/Engine');
-class LogstashLog extends BaseLog
-{
-    protected $format = 'Y-m-d\TH:i:s.uP';
-
-    protected $logLevels = [
-        'emergency' =&amp;gt; LOG_EMERG,
-        'alert' =&amp;gt; LOG_ALERT,
-        'critical' =&amp;gt; LOG_CRIT,
-        'error' =&amp;gt; LOG_ERR,
-        'warning' =&amp;gt; LOG_WARNING,
-        'notice' =&amp;gt; LOG_NOTICE,
-        'info' =&amp;gt; LOG_INFO,
-        'debug' =&amp;gt; LOG_DEBUG,
-    ];
-
-    public function write($type, $message)
-    {
-        $data = [
-            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
-            '@version' =&amp;gt; 1,
-            'message' =&amp;gt; $message,
-            'tags' =&amp;gt; [$type],
-        ];
-
-        if (!openlog('app', LOG_PID, LOG_USER)) {
-            // Handle your logging error...
-            return;
-        }
-
-        syslog($this-&amp;gt;logLevels[$type], json_encode($data));
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;What if we wanted to include extra metadata? Well, we can modify our &lt;code&gt;write&lt;/code&gt; method to allow &lt;code&gt;$message&lt;/code&gt; to be an array as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function write($type, $message)
-{
-    $message = is_array($message) ? $message : compact('message');
-    $data = array_merge(array(
-        '@timestamp' =&amp;gt; date($this-&amp;gt;format),
-        '@version' =&amp;gt; 1,
-    ), $message);
-
-    if (isset($data['tags'])) {
-        $data['tags'][] = $type;
-    } else {
-        $data['tags'] = [$type];
-    }
-
-    if (!openlog('app', LOG_PID, LOG_USER)) {
-        // Handle your logging error...
-        return;
-    }
-
-    syslog($this-&amp;gt;logLevels[$type], json_encode($data));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We never want to drop logs, so we’ll fallback to using &lt;code&gt;FileLog&lt;/code&gt; as our parent class. When &lt;code&gt;openlog&lt;/code&gt; returns false, we’ll simply call &lt;code&gt;return parent::write($type, json_ecode($message));&lt;/code&gt;. We can then later go back with a different log shipper and reprocess anything that couldn’t be shipped to Logstash.&lt;/p&gt;
-
-&lt;p&gt;Here is what our log engine will look like at the end of the day:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('FileLog', 'Log');
-class LogstashLog extends FileLog
-{
-    protected $format = 'Y-m-d\TH:i:s.uP';
-
-    protected $logLevels = [
-        'emergency' =&amp;gt; LOG_EMERG,
-        'alert' =&amp;gt; LOG_ALERT,
-        'critical' =&amp;gt; LOG_CRIT,
-        'error' =&amp;gt; LOG_ERR,
-        'warning' =&amp;gt; LOG_WARNING,
-        'notice' =&amp;gt; LOG_NOTICE,
-        'info' =&amp;gt; LOG_INFO,
-        'debug' =&amp;gt; LOG_DEBUG,
-    ];
-
-    public function write($type, $message)
-    {
-        $message = is_array($message) ? $message : compact('message');
-        $data = array_merge(array(
-            '@timestamp' =&amp;gt; date($this-&amp;gt;format),
-            '@version' =&amp;gt; 1,
-        ), $message);
-
-        if (isset($data['tags'])) {
-            $data['tags'][] = $type;
-        } else {
-            $data['tags'] = [$type];
-        }
-
-        if (!openlog('app', LOG_PID, LOG_USER)) {
-            return parent::write($type, json_ecode($data));
-        }
-
-        return syslog($this-&amp;gt;logLevels[$type], json_encode($data));
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can now configure our custom logging engine the same way we would any other logging engine:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-// in our app/Config/bootstrap.php
-App::uses('CakeLog', 'Log');
-CakeLog::config('debug', [
-    'engine' =&amp;gt; 'Logstash',
-    'types' =&amp;gt; ['notice', 'info', 'debug'],
-    'file' =&amp;gt; 'debug',
-]);
-CakeLog::config('error', [
-    'engine' =&amp;gt; 'Logstash',
-    'types' =&amp;gt; ['warning', 'error', 'critical', 'alert', 'emergency'],
-    'file' =&amp;gt; 'error',
-]);
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You’ll notice that we included some extra configuration information. This is primarily used for routing messages - we could in theory create a &lt;code&gt;Null&lt;/code&gt; engine and use that for &lt;code&gt;debug&lt;/code&gt; messages - though we also specify a &lt;code&gt;file&lt;/code&gt; so that the parent &lt;code&gt;FileLog&lt;/code&gt; class is properly configured.&lt;/p&gt;
-
-&lt;p&gt;Creating custom logging engines is quite simple with CakePHP, and it would be easy to extend this system to have log handlers and formatters.&lt;/p&gt;
-</description>
-        <pubDate>Sat, 22 Mar 2014 06:28:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/03/22/shipping-cakephp-application-logs-to-logstash/</guid>
-        
-        <category>cakephp</category>
-        
-        <category>logging</category>
-        
-        <category>logstash</category>
         
         
         <category>cakephp</category>

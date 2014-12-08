@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2014: Parsing markdown comments</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/">
+    <title>CakeAdvent-2014: Closing Issues in our Anonymous Issue Tracker using Events</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/08/closing-issues/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -21,19 +21,19 @@
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
-    <meta name="description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
-    <meta name="keywords" content="cakeadvent-2014, cakephp, composer, helpers" />
+    <meta name="description" content="Part 7 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="keywords" content="cakeadvent-2014, cakephp" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2014: Parsing markdown comments" />
+    <meta property="og:title" content="CakeAdvent-2014: Closing Issues in our Anonymous Issue Tracker using Events" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/" />
-    <meta property="og:description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/08/closing-issues/" />
+    <meta property="og:description" content="Part 7 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2014: Parsing markdown comments" />
-    <meta name="twitter:description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
-    <link rel="alternate" type="application/rss+xml" title="Parsing markdown comments » Feed" href="/atom.xml">
+    <meta name="twitter:title" content="CakeAdvent-2014: Closing Issues in our Anonymous Issue Tracker using Events" />
+    <meta name="twitter:description" content="Part 7 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <link rel="alternate" type="application/rss+xml" title="Closing Issues in our Anonymous Issue Tracker using Events » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,76 +64,67 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Parsing markdown comments
+        Closing Issues in our Anonymous Issue Tracker using Events
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Parsing markdown comments!">
+        <a href="#comments" title="Comment on Closing Issues in our Anonymous Issue Tracker using Events!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>In CakePHP 3, some things change significantly, and others stay pretty much the same. CakePHP 3 provides a new <code>AppView</code> class in <code>app/src/View/AppView.php</code>. You can do any of the following here:</p>
+    <p>One thing that you’ll want to eventually handle is closing issues. We’ll do this using a simple Event. We need to first add the following migration to handle whether an issue is closed or not:</p>
+<pre><code class="language-php">&lt;?php
+use Phinx\Migration\AbstractMigration;
+class ClosingIssues extends AbstractMigration {
+  public function change() {
+    $table = $this-&gt;table('issues');
+    $table
+      -&gt;addColumn('is_closed', 'boolean', [
+        'default' =&gt; false,
+      ])
+      -&gt;save();
+  }
+}
+?&gt;
+</code></pre>
+<p>You’ll want to run the migration and clear your orm cache:</p>
+<pre><code class="language-shell">bin/cake migrations migrate
+bin/cake orm_cache clear
+</code></pre>
+<p>Finally, you should add this field to the <code>IssueEntity::$_accessible</code> array.</p>
+<p>Whenever an issue has it’s <code>is_closed</code> field set to true in the database (1 in mysql), then we should disable commenting on said entity. We can do this by hooking into the <code>Model.beforeValidate</code> event in our <code>app/config/events.php</code> file:</p>
+<pre><code class="language-php">use App\Model\Entity\Comment;
+EventManager::instance()-&gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
+    if (!($entity instanceof Comment)) {
+        return true;
+    }
+    $table = TableRegistry::get('Issues');
+    $open_issue = $table-&gt;find('all')-&gt;where([
+        'Issues.id' =&gt; $entity-&gt;issue_id,
+        'Issues.is_closed' =&gt; false,
+    ])-&gt;first();
+    return !empty($open_issue);
+}, 'Model.beforeValidate');
+</code></pre>
+<p>A bit of explanation:</p>
 <ul>
-  <li>Load helpers for every template</li>
-  <li>Override <code>View</code> methods</li>
-  <li>Add custom methods that may not necessarily require a new helper</li>
+  <li>We’re only going to trigger this event for <code>Comment</code> entities, hence the <code>instanceof</code> check</li>
+  <li>Since we only want to allow commenting on open issues, we need to find the entity matching our comment’s issue only if <code>is_closed</code> is false.</li>
+  <li>If an event returns false, then <code>Event-&gt;stopPropagation</code> is automatically called. For the <code>Model.beforeValidate</code> event, if the event is stopped, then the validation fails, so therefore if the <code>open_issue</code> is empty, then we fail validation.</li>
 </ul>
-<p>In our case, we’ll be making a new <code>MarkdownHelper</code> available everywhere. As such, our <code>AppView</code> will look similar to the following:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\View;
-use Cake\View\View;
-class AppView extends View {
-    public function initialize() {
-        $this-&gt;loadHelper('Markdown');
-    }
-}
-?&gt;
-</code></pre>
-<h3 id="creating-a-new-helper">Creating a new helper</h3>
-<p>In our helper, we’re going to depend upon the <code>colinodell/commonmark-php</code> package to render markdown that follows the <a href="http://commonmark.org/">CommonMark</a> specification. First, you’ll want to install that package using <code>composer</code>:</p>
-<pre><code class="language-shell"># ssh onto the vm
-vagrant ssh
-cd /vagrant/app
-composer require colinodell/commonmark-php:0.3.0
-</code></pre>
-<blockquote>
-  <p>The <code>colinodell/commonmark-php</code> package will be named <code>league/markdown</code> shortly, but for now, these instructions should work fine.</p>
-</blockquote>
-<p>Now we can create a very simple helper class. Helper classes allow us to format output for templates in a more user friendly format. We could, for instance, use a helper to generate the correct gravatar url for a given email address. Helpers allow you to consolidate your template logic into classes that can be easily tested and reused not just in a single application, but across multiple applications that need the same functionality.</p>
-<p>You should first create the file containing your new helper:</p>
-<pre><code class="language-shell">cd /vagrant/app
-touch app/src/View/Helper/MarkdownHelper.php
-</code></pre>
-<p>The contents of our helper will then be the following:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\View\Helper;
-use Cake\View\Helper;
-use Cake\View\View;
-use ColinODell\CommonMark\CommonMarkConverter;
-class MarkdownHelper extends Helper {
-    public function __construct(View $view, $config = []) {
-        parent::__construct($view, $config);
-        $this-&gt;Converter = new CommonMarkConverter;
-    }
-    public function out($input) {
-      return $this-&gt;Converter-&gt;convertToHtml($input);
-    }
-}
-?&gt;
-</code></pre>
-<p>To use our helper, anytime we output <code>Comment</code> or <code>Issue</code> contents, we would wrap them in a call to our helper:</p>
-<pre><code class="language-php">// For issues
-$this-&gt;Markdown-&gt;out($issue-&gt;text);
-// For comments
-$this-&gt;Markdown-&gt;out($comment-&gt;comment);
-</code></pre>
-<p>Helpers can be a pretty simple way of consolidating logic in your template files. While in this case there wasn’t much work to be done, you might want to consider using helpers for outputting stuff like navigation bars, custom form elements, and automatically parsing urls into embeddable images and videos.</p>
-<h3 id="homework-time">Homework Time!</h3>
-<p>Since it’s still sunday, we’re going to skip homework. I’m going to personally listen to the guy playing jazz two apartment buildings down and go to Fifthsgiving in an hour. Let me know in the comments if you have any feedback, and see you all tomorrow!</p>
+<p>Quite simple! We can refactor this into a validation rule, but we will avoid doing so for now as validation is currently being refactored in 3.x.</p>
+<h2 id="homework-time">Homework time!</h2>
+<p>A few more things you’ll want to do:</p>
+<ul>
+  <li>Provide some interface to actually close an issue. You can perhaps place this functionality behind basic auth, build a cake shell to handle closing issues, or simply allow anyone to close issues. It’s up to you.</li>
+  <li>You need to hide the form if the issue is closed. You can do this by modifying your bake templates to handle this case and rebaking.</li>
+</ul>
+<p>With the above change, our anonymous issue tracker is “feature-complete”. We’ve covered quite a bit of CakePHP in building this application, but are definitely many more features to cover. Stay tuned for the next tutorial series, where we’ll cover creating an ecommerce store from scratch, including use authentication, payment processing and more!</p>
+<p>Be sure to follow along as via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-07 13:45:00 +0000">07 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/08/closing-issues/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-08 17:31:00 +0000">08 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -154,7 +145,7 @@ $this-&gt;Markdown-&gt;out($comment-&gt;comment);
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 7</strong> of <strong>8</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 8</strong> of <strong>8</strong> in the series "CakeAdvent 2014".</p>
     <ol>
       <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li><a href="/2014/12/02/designing-a-store-application-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
@@ -162,8 +153,8 @@ $this-&gt;Markdown-&gt;out($comment-&gt;comment);
       <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
       <li><a href="/2014/12/05/creating-table-callback-events/">Creating Table Callback Events</a></li>
       <li><a href="/2014/12/06/email-users-when-a-new-comment-is-posted/">Emailing users when a new comment is posted</a></li>
-      <li>Parsing markdown comments</li>
-      <li><a href="/2014/12/08/closing-issues/">Closing Issues in our Anonymous Issue Tracker using Events</a></li>
+      <li><a href="/2014/12/07/parsing-markdown-comments/">Parsing markdown comments</a></li>
+      <li>Closing Issues in our Anonymous Issue Tracker using Events</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -202,9 +193,9 @@ $this-&gt;Markdown-&gt;out($comment-&gt;comment);
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2014/12/07/parsing-markdown-comments/';
-        var disqus_url        = 'http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/';
-        var disqus_title      = "CakeAdvent-2014: Parsing markdown comments";
+        var disqus_identifier = '/2014/12/08/closing-issues/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/08/closing-issues/';
+        var disqus_title      = "CakeAdvent-2014: Closing Issues in our Anonymous Issue Tracker using Events";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

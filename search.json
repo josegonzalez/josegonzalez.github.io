@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Closing Issues in our Anonymous Issue Tracker using Events",
+    "url": "/2014/12/08/closing-issues/",
+    "description": "Part 7 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["anonymous","cakephp","closing","designed","effectively","events","issue","issues","part","posts","series","teach","tracker","use","using"]
+  },
+  {
+    "type": "post",
     "title": "Parsing markdown comments",
     "url": "/2014/12/07/parsing-markdown-comments/",
     "description": "Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
