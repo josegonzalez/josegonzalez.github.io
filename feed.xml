@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 10 Dec 2014 00:02:39 +0000</pubDate>
-    <lastBuildDate>Wed, 10 Dec 2014 00:02:39 +0000</lastBuildDate>
+    <pubDate>Wed, 10 Dec 2014 16:31:15 +0000</pubDate>
+    <lastBuildDate>Wed, 10 Dec 2014 16:31:15 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
     
       <item>
@@ -1185,8 +1185,8 @@ Router::scope('/', function ($routes) {
 &lt;p&gt;We’ll cover those in the next installment of CakeAdvent 2014. Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.&lt;/p&gt;
 </description>
         <pubDate>Tue, 02 Dec 2014 16:22:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/</guid>
+        <link>http://josediazgonzalez.com/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/</guid>
         
         <category>cakeadvent-2014</category>
         
