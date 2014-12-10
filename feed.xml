@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 10 Dec 2014 00:01:24 +0000</pubDate>
-    <lastBuildDate>Wed, 10 Dec 2014 00:01:24 +0000</lastBuildDate>
+    <pubDate>Wed, 10 Dec 2014 00:02:39 +0000</pubDate>
+    <lastBuildDate>Wed, 10 Dec 2014 00:02:39 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
     
       <item>
@@ -18,10 +18,12 @@
   &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5319&quot;&gt;Bake Improvements&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5251&quot;&gt;Table-less FormModel classes&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5251&quot;&gt;&lt;em&gt;Maybe&lt;/em&gt; supporting users without ext-intl&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;
-    &lt;h2 id=&quot;migrations-project-needs-some-workhttpsgithubcomcakephpmigrationspull34&quot;&gt;&lt;a href=&quot;https://github.com/cakephp/migrations/pull/34&quot;&gt;Migrations project needs some work&lt;/a&gt;&lt;/h2&gt;
-    &lt;p&gt;Some repos that need some love:&lt;/p&gt;
-  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/migrations/pull/34&quot;&gt;Migrations project needs some work&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Some repos that need some love:&lt;/p&gt;
+
+&lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/datasources&quot;&gt;Datasources needs an update&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://github.com/croogo/croogo&quot;&gt;Croogo CMS doesn’t yet boot&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/upgrade&quot;&gt;Break the Upgrade plugin!&lt;/a&gt;&lt;/li&gt;
