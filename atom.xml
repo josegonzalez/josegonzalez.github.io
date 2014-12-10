@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-12-08T22:52:51+00:00</updated>
+ <updated>2014-12-10T00:01:24+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -13,10 +13,18 @@
 
 
  <entry>
+   <title type="html"><![CDATA[Contributing to CakePHP]]></title>
+   <link href="http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/"/>
+   <updated>2014-12-09T17:31:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/</id>
+   <content type="html"><![CDATA[Find out various ways to contribute back to the CakePHP project]]></content>
+ </entry>
+
+ <entry>
    <title type="html"><![CDATA[Closing Issues in our Anonymous Issue Tracker using Events]]></title>
-   <link href="http://josediazgonzalez.com/2014/12/08/closing-issues/"/>
+   <link href="http://josediazgonzalez.com/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/"/>
    <updated>2014-12-08T17:31:00+00:00</updated>
-   <id>http://josediazgonzalez.com/2014/12/08/closing-issues/</id>
+   <id>http://josediazgonzalez.com/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/</id>
    <content type="html"><![CDATA[Part 7 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively]]></content>
  </entry>
 

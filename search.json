@@ -1,8 +1,15 @@
 [
   {
     "type": "post",
+    "title": "Contributing to CakePHP",
+    "url": "/2014/12/09/contributing-to-cakephp/",
+    "description": "Find out various ways to contribute back to the CakePHP project",
+    "tokens": ["back","cakephp","contribute","contributing","find","project","various","ways"]
+  },
+  {
+    "type": "post",
     "title": "Closing Issues in our Anonymous Issue Tracker using Events",
-    "url": "/2014/12/08/closing-issues/",
+    "url": "/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/",
     "description": "Part 7 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
     "tokens": ["anonymous","cakephp","closing","designed","effectively","events","issue","issues","part","posts","series","teach","tracker","use","using"]
   },

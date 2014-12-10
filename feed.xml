@@ -5,9 +5,46 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 08 Dec 2014 22:52:51 +0000</pubDate>
-    <lastBuildDate>Mon, 08 Dec 2014 22:52:51 +0000</lastBuildDate>
+    <pubDate>Wed, 10 Dec 2014 00:01:24 +0000</pubDate>
+    <lastBuildDate>Wed, 10 Dec 2014 00:01:24 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
+    
+      <item>
+        <title>Contributing to CakePHP</title>
+        <description>&lt;p&gt;This is an extremely short post where I’ll ask that you all give back (not just monetarily) but with your time. Here are some projects that will need feedback before 3.0 goes general availability:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/pull/5296&quot;&gt;Retooling Validation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5319&quot;&gt;Bake Improvements&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5251&quot;&gt;Table-less FormModel classes&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5251&quot;&gt;&lt;em&gt;Maybe&lt;/em&gt; supporting users without ext-intl&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;
+    &lt;h2 id=&quot;migrations-project-needs-some-workhttpsgithubcomcakephpmigrationspull34&quot;&gt;&lt;a href=&quot;https://github.com/cakephp/migrations/pull/34&quot;&gt;Migrations project needs some work&lt;/a&gt;&lt;/h2&gt;
+    &lt;p&gt;Some repos that need some love:&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/datasources&quot;&gt;Datasources needs an update&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/croogo/croogo&quot;&gt;Croogo CMS doesn’t yet boot&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/upgrade&quot;&gt;Break the Upgrade plugin!&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/docs/tree/3.0&quot;&gt;Doc work for 3.x&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakepackages&quot;&gt;Filtering 3.x packages on the plugins site&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;CakePHP is a community project. If any of the above aren’t things you’re interested - but you’d love to give back - feel free to give feedback on existing features, write blog posts, and release updates of existing open source projects.&lt;/p&gt;
+
+&lt;p&gt;Until tomorrow!&lt;/p&gt;
+</description>
+        <pubDate>Tue, 09 Dec 2014 17:31:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/</guid>
+        
+        <category>cakeadvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Closing Issues in our Anonymous Issue Tracker using Events</title>
@@ -81,8 +118,8 @@ EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, 
 &lt;p&gt;Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar.&lt;/p&gt;
 </description>
         <pubDate>Mon, 08 Dec 2014 17:31:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/08/closing-issues/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/08/closing-issues/</guid>
+        <link>http://josediazgonzalez.com/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/</guid>
         
         <category>cakeadvent-2014</category>
         
@@ -1353,117 +1390,6 @@ Router::scope('/', function ($routes) {
         
         
         <category>dev log</category>
-        
-      </item>
-    
-      <item>
-        <title>CakePHP as a Microframework</title>
-        <description>&lt;p&gt;One of the features that most frameworks toute is the ability to respond to a request from the route file immediately. For instance, here is how SlimPHP applications are structured (at least initially):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$app = new \Slim\Slim();
-$app-&amp;gt;get('/hello/:name', function ($name) {
-    echo &quot;Hello, $name&quot;;
-});
-$app-&amp;gt;run();
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;People familiar with this type of application are likely familiar with the &lt;code&gt;Sinatra&lt;/code&gt; microframework.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;CakePHP has typically been in the opposite camp. Lots of classes to wire up to get a response on the page. Kind of lame, and then you &lt;em&gt;have&lt;/em&gt; to integrate with CakePHP’s conventions, which can be frustrating if you simply want to use the framework as a library. It’s quite straightforward to turn CakePHP into a microframework using dispatch filters.&lt;/p&gt;
-
-&lt;p&gt;Lets define a simple api. We’ll want to be able to connect arbitrary routes to a &lt;code&gt;callable&lt;/code&gt; or a class that has a &lt;code&gt;respond&lt;/code&gt; method. This can look like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class ResponseInterface {
-    public abstract function respond($request, $response);
-}
-
-class HelloWorld implements ResponseInterface {
-    public function respond($request, $response) {
-        $response-&amp;gt;body('Hello World');
-    }
-}
-
-Router::connect('/hello/*', ['callable' =&amp;gt; function($request, $response) {
-    $response-&amp;gt;body('Hello World');
-}]);
-
-Router::connect('/world/*', ['callable' =&amp;gt; 'HelloWorld']);
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Controller classes have plumbing to auto-generate responses based on &lt;em&gt;just&lt;/em&gt; the &lt;code&gt;CakeRequest&lt;/code&gt; and &lt;code&gt;CakeResponse&lt;/code&gt; objects, hence why they are necessary. We also implement the &lt;code&gt;ResponseInterface&lt;/code&gt; class to make the PHPJava people happy :)&lt;/p&gt;
-
-&lt;p&gt;To route these properly, we’ll hook into CakePHP’s dispatch cycle using a custom dispatch filter as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-App::uses('DispatcherFilter', 'Routing');
-class CallableFilter extends DispatcherFilter {
-    public function beforeDispatch(CakeEvent $event) {
-        $callable = null;
-        if (isset($event-&amp;gt;data['request']-&amp;gt;params['callable'])) {
-            $callable = $event-&amp;gt;data['request']-&amp;gt;params['callable'];
-        }
-
-        if (is_string($callable) &amp;amp;&amp;amp; class_exists($callable)) {
-            $callable = new $callable;
-            $callable-&amp;gt;respond($event-&amp;gt;data['request'], $event-&amp;gt;data['response']);
-        } elseif (is_callable($callable)) {
-            $callable($event-&amp;gt;data['request'], $event-&amp;gt;data['response']);
-        } else {
-            return null;
-        }
-
-        $event-&amp;gt;stopPropagation();
-        return $event-&amp;gt;data['response'];
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In our CallableFilter, we check for the existence of a &lt;code&gt;callable&lt;/code&gt;. For practicality, we’re a bit flexible in this definition and also allow class names to be “callables”. All &lt;code&gt;callable&lt;/code&gt; executions are given &lt;code&gt;CakeRequest&lt;/code&gt; and a &lt;code&gt;CakeResponse&lt;/code&gt; objects, and we automatically call &lt;code&gt;$event-&amp;gt;stopPropagation()&lt;/code&gt; should the callable be invoked.&lt;/p&gt;
-
-&lt;p&gt;To configure our filter, simply attach it to your DispatcherFilter configuration in &lt;code&gt;app/Config/bootstrap.php&lt;/code&gt; like so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-Configure::write('Dispatcher.filters', [
-    'AssetDispatcher',
-    'CacheDispatcher',
-    'CallableFilter'
-]);
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And voila! You have a CakePHP microframework.&lt;/p&gt;
-
-&lt;p&gt;Some things you can now do with this setup:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Configure before and after request filters&lt;/li&gt;
-  &lt;li&gt;Setup a templating system (with helper loading)&lt;/li&gt;
-  &lt;li&gt;Automatically load model classes based on class name and configuration&lt;/li&gt;
-  &lt;li&gt;Figure out how to do reverse routing&lt;/li&gt;
-  &lt;li&gt;Reimplement all of the CakePHP dispatching because you refuse to use a full framework ;)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Microframeworks have their place, and while I don’t recommend you implement &lt;em&gt;all&lt;/em&gt; of your CakePHP applications using the above setup, it can be a powerful tool in your arsenal.&lt;/p&gt;
-</description>
-        <pubDate>Sun, 23 Mar 2014 20:37:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/03/23/cakephp-a-microframework/</guid>
-        
-        <category>cakephp</category>
-        
-        <category>dispatcher</category>
-        
-        <category>microframeworks</category>
-        
-        
-        <category>cakephp</category>
         
       </item>
     

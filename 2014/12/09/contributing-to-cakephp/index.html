@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2014: CakePHP Advent Calendar 2014</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/">
+    <title>CakeAdvent-2014: Contributing to CakePHP</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -21,19 +21,19 @@
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
-    <meta name="description" content="Introducing a slightly different CakePHP Advent Calendar." />
+    <meta name="description" content="Find out various ways to contribute back to the CakePHP project" />
     <meta name="keywords" content="cakeadvent-2014, cakephp" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2014: CakePHP Advent Calendar 2014" />
+    <meta property="og:title" content="CakeAdvent-2014: Contributing to CakePHP" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/" />
-    <meta property="og:description" content="Introducing a slightly different CakePHP Advent Calendar." />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/" />
+    <meta property="og:description" content="Find out various ways to contribute back to the CakePHP project" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2014: CakePHP Advent Calendar 2014" />
-    <meta name="twitter:description" content="Introducing a slightly different CakePHP Advent Calendar." />
-    <link rel="alternate" type="application/rss+xml" title="CakePHP Advent Calendar 2014 » Feed" href="/atom.xml">
+    <meta name="twitter:title" content="CakeAdvent-2014: Contributing to CakePHP" />
+    <meta name="twitter:description" content="Find out various ways to contribute back to the CakePHP project" />
+    <link rel="alternate" type="application/rss+xml" title="Contributing to CakePHP » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,46 +64,36 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        CakePHP Advent Calendar 2014
+        Contributing to CakePHP
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on CakePHP Advent Calendar 2014!">
+        <a href="#comments" title="Comment on Contributing to CakePHP!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>Last year for the Advent Calendar, I brought to you <a href="/2013/12/01/testing-your-cakephp-plugins-with-travis/">25 delicious posts</a> surrounding writing better CakePHP applications. Those posts catered to both the beginner and advanced CakePHP developer, and hopefully can still be of some use to you.</p>
-<p>This year, however, we’re going to kick it up a notch and actually use our skills to design 3 custom <a href="http://cakephp.org/">CakePHP</a> applications:</p>
+    <p>This is an extremely short post where I’ll ask that you all give back (not just monetarily) but with your time. Here are some projects that will need feedback before 3.0 goes general availability:</p>
 <ul>
-  <li>An anonymous markdown-based issue tracker capable of sending email notifications and exposing webhooks</li>
-  <li>A simple cart system with user authentication and payment processing</li>
-  <li>A simple tumblr clone with support for post type extensions</li>
+  <li><a href="https://github.com/cakephp/cakephp/pull/5296">Retooling Validation</a></li>
+  <li><a href="https://github.com/cakephp/cakephp/issues/5319">Bake Improvements</a></li>
+  <li><a href="https://github.com/cakephp/cakephp/issues/5251">Table-less FormModel classes</a></li>
+  <li><a href="https://github.com/cakephp/cakephp/issues/5251"><em>Maybe</em> supporting users without ext-intl</a></li>
+  <li>
+    <h2 id="migrations-project-needs-some-workhttpsgithubcomcakephpmigrationspull34"><a href="https://github.com/cakephp/migrations/pull/34">Migrations project needs some work</a></h2>
+    <p>Some repos that need some love:</p>
+  </li>
+  <li><a href="https://github.com/cakephp/datasources">Datasources needs an update</a></li>
+  <li><a href="https://github.com/croogo/croogo">Croogo CMS doesn’t yet boot</a></li>
+  <li><a href="https://github.com/cakephp/upgrade">Break the Upgrade plugin!</a></li>
+  <li><a href="https://github.com/cakephp/docs/tree/3.0">Doc work for 3.x</a></li>
+  <li><a href="https://github.com/cakephp/cakepackages">Filtering 3.x packages on the plugins site</a></li>
 </ul>
-<h2 id="a-bit-of-background">A bit of background</h2>
-<p>As some of you may be aware, <a href="http://bakery.cakephp.org/articles/markstory/2014/11/17/cakephp_3_0_0-beta3_released">CakePHP 3</a> is right around the corner. With just two RCs left, it’s almost ready for prime-time with lots of great changes. Unfortunately, this also means that some of the old knowledge we had is no longer applicable, and so rather than try to introduce CakePHP 3 features in one-off tutorials, we will showcase the power of the new framework to build working applications.</p>
-<h2 id="why-3-tutorials">Why 3 tutorials?</h2>
-<p>CakePHP 3 is coming out, so we should match it with the same number. It also helps that an Advent Calendar is 25 days, so we’ll have an interlude between each tutorial series.</p>
-<h2 id="who-are-these-tutorials-aimed-at">Who are these tutorials aimed at?</h2>
-<p>You should have some knowledge of the PHP language, and knowledge of any MVC framework will help. That said, new CakePHP developers will hopefully grow more comfortable as we progress with the tutorials.  We’ll be laying the foundation for effective application development - via working local development environments and production code deployment.</p>
-<p>For experienced CakePHP developers, these series of tutorials will be designed to point out changes from the 2.x series. Note that we’ll be a bit light on tests - this is a purposeful change to make following the tutorials a bit easier, but don’t be afraid to practice TDD.</p>
-<p>For CakePHP haters, these tutorials are meant to show development practices in another framework. We will be using community libraries where possible, and thus most of the applications we are building will be possible to build in other frameworks. As CakePHP 3 is quite modular, you are welcome to incorporate both developed application code as well as CakePHP 3 libraries in your non-CakePHP projects.</p>
-<h2 id="what-do-i-need">What do I need?</h2>
-<p>These tutorials are completely free, and there will be no cost for any of the tools we use (other than your computer!). You’ll want to setup the following before reading these tutorials:</p>
-<ul>
-  <li>A <a href="https://github.com/">Github account</a></li>
-  <li>A <a href="https://www.heroku.com/">Heroku account</a></li>
-  <li>Install <a href="http://git-scm.com/">Git</a> if you are not on a Mac</li>
-  <li>Install <a href="https://www.vagrantup.com/">Vagrant</a></li>
-  <li>Install <a href="https://www.virtualbox.org/">Virtualbox</a> or <a href="http://www.vmware.com/products/fusion">Vmware Fusion</a></li>
-</ul>
-<p>Please ensure you have all of the above setup, as otherwise certain portions of the tutorials will not make sense.</p>
-<p>Note that not every tutorial will use the above tools, and you are free to use alternatives if you so desire.</p>
-<h2 id="how-do-i-get-started">How do I get started?</h2>
-<p>I’ll be posting new posts in the series each day of the Advent Calendar, and tweeting about it as <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 1st of December!) for more delicious content.</p>
+<p>CakePHP is a community project. If any of the above aren’t things you’re interested - but you’d love to give back - feel free to give feedback on existing features, write blog posts, and release updates of existing open source projects.</p>
+<p>Until tomorrow!</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-01 17:24:00 +0000">01 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-09 17:31:00 +0000">09 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -124,9 +114,9 @@
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 1</strong> of <strong>9</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 9</strong> of <strong>9</strong> in the series "CakeAdvent 2014".</p>
     <ol>
-      <li>CakePHP Advent Calendar 2014</li>
+      <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li><a href="/2014/12/02/designing-a-store-application-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
       <li><a href="/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">Customizing Bake in CakePHP 3</a></li>
       <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
@@ -134,7 +124,7 @@
       <li><a href="/2014/12/06/email-users-when-a-new-comment-is-posted/">Emailing users when a new comment is posted</a></li>
       <li><a href="/2014/12/07/parsing-markdown-comments/">Parsing markdown comments</a></li>
       <li><a href="/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/">Closing Issues in our Anonymous Issue Tracker using Events</a></li>
-      <li><a href="/2014/12/09/contributing-to-cakephp/">Contributing to CakePHP</a></li>
+      <li>Contributing to CakePHP</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -173,9 +163,9 @@
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2014/12/01/cakephp-advent-calendar-2014/';
-        var disqus_url        = 'http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/';
-        var disqus_title      = "CakeAdvent-2014: CakePHP Advent Calendar 2014";
+        var disqus_identifier = '/2014/12/09/contributing-to-cakephp/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/';
+        var disqus_title      = "CakeAdvent-2014: Contributing to CakePHP";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
