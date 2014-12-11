@@ -171,7 +171,7 @@ bin/cake bake migration create_products name:string stock:integer price:float ca
   <p>When creating new tables, Phinx will automatically add the <code>id</code> field, so we don’t need to specify it. As well, the migrations plugin is smart enough to auto-assign types to certain fields.</p>
 </blockquote>
 <p>Now you can run your migrations</p>
-<pre><code>cd /vagrant/app
+<pre><code class="language-shell">cd /vagrant/app
 bin/cake migrations migrate
 </code></pre>
 <p>Finally, we can bake all the initial files necessary for our application:</p>
