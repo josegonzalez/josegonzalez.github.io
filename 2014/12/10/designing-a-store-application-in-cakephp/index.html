@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2014: Designing an anonymous issue tracker in CakePHP</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/">
+    <title>CakeAdvent-2014: Designing a Store application in CakePHP</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -24,16 +24,16 @@
     <meta name="description" content="Part 1 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
     <meta name="keywords" content="cakeadvent-2014, cakephp, composer" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2014: Designing an anonymous issue tracker in CakePHP" />
+    <meta property="og:title" content="CakeAdvent-2014: Designing a Store application in CakePHP" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/" />
     <meta property="og:description" content="Part 1 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2014: Designing an anonymous issue tracker in CakePHP" />
+    <meta name="twitter:title" content="CakeAdvent-2014: Designing a Store application in CakePHP" />
     <meta name="twitter:description" content="Part 1 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
-    <link rel="alternate" type="application/rss+xml" title="Designing an anonymous issue tracker in CakePHP » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Designing a Store application in CakePHP » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,21 +64,21 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Designing an anonymous issue tracker in CakePHP
+        Designing a Store application in CakePHP
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Designing an anonymous issue tracker in CakePHP!">
+        <a href="#comments" title="Comment on Designing a Store application in CakePHP!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>This CakeAdvent 2014 tutorial will walk you through the creation of a simple anonymous issue tracking application using CakePHP 3. To start with, we’ll be setting up our development environment, installing our app template, creating our database, and using the tools CakePHP provides to get our application up fast.</p>
+    <p>This CakeAdvent 2014 tutorial will walk you through the creation of a simple ecommerce store application using CakePHP 3. To start with, we’ll be setting up our development environment, installing our app template, creating our database, and using the tools CakePHP provides to get our application up fast.</p>
 <hr />
 <p>Lets start by cloning the <a href="https://github.com/friendsofcake/vagrant-chef">FriendsOfCake/vagrant-chef</a> repository. This repository will provide a full-featured cakephp working environment within a virtual linux server, allowing us to use each and every feature our app will need without worrying about how to install software on our machines.</p>
 <p>Assuming you already installed Git, Vagrant and Virtualbox, you can simply clone the <code>FriendsOfCake/vagrant-chef</code> repo and start the virtual machine. This should take around 5 minutes on a decent DSL connection, and need only be done once.:</p>
-<pre><code class="language-shell">git clone git@github.com:FriendsOfCake/vagrant-chef.git anonymous-issues
-cd anonymous-issues
+<pre><code class="language-shell">git clone git@github.com:FriendsOfCake/vagrant-chef.git store
+cd store
 # bring up the working vm
 vagrant up
 </code></pre>
@@ -141,62 +141,71 @@ Updated Security.salt value in config/app.php
 # run the following command within the mysql connection
 use database_name;
 </code></pre>
-<p>And import the following:</p>
-<pre><code class="language-sql">CREATE TABLE `comments` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `issue_id` int(11) DEFAULT NULL,
-  `email_address` varchar(255) DEFAULT NULL,
-  `comment` text,
-  `created` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-CREATE TABLE `issues` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) DEFAULT NULL,
-  `text` text,
-  `created` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-</code></pre>
-<p>Disconnecting from the mysql terminal will drop us back into our linux virtualmachine, where we can now generate some general application scaffolding using the Bake utility. <code>Bake</code> is a CakePHP command-line utility that allows us to template out various types of files. We could, for instance, template out custom migration files if we installed the Migrations plugin. In our case, we’re going to use it to generate Controllers, Table classes, Entities, and Template files for our <code>issues</code> table. This allows us to skip a lot of the boring work of creating various files that won’t vary much from application to application.</p>
+<p>In our last app, we generated migrations by hand and did some mangling of the db. We’ll skip that and use an alpha version of the migrations plugin. Install it using the following command:</p>
 <pre><code class="language-shell">cd /vagrant/app
-bin/cake bake all issues
+composer require cakephp/migrations:dev-migration-generation
 </code></pre>
-<p>If you browse to http://192.168.13.37/issues, you’ll see your baked app in action. If you browse to http://192.168.13.37/, you’ll see that we have the generic CakePHP 3 landing page. Rather than show this to our users, lets show them the issues page by default.</p>
-<p>CakePHP 3’s routing layer - which is specified in the <code>app/config/routes.php</code> file - uses scoped routes. This means that you can do stuff like:</p>
+<blockquote>
+  <p>We’ll eventually need to use at least dev-master. For now, the functionality we need is in a pull request.</p>
+</blockquote>
+<p>At this point both phinx and the plugin will be installed. Plugins in CakePHP must be enabled before they can be used, and the CakePHP/migrations plugin is no different. Since it’s only useful on the command-line, we’ll enable it with the following code on our <code>app/config/bootstrap_cli.php</code>:</p>
 <pre><code class="language-php">&lt;?php
-Router::scope('/blog', ['plugin' =&gt; 'Blog'], function ($routes) {
-    $routes-&gt;connect('/', ['controller' =&gt; 'Articles']);
-});
+use Cake\Core\Plugin;
+Plugin::load('Migrations');
 ?&gt;
 </code></pre>
-<p>In our case, we’re going to use the default scope and change the routes.php file to the following:</p>
+<p>Now we need to create our store’s tables:</p>
+<pre><code class="language-shell">cd /vagrant/app
+# when creating new tables, you should follow the following format for creating a migration
+# - bin/cake bake migration [create_TABLE_NAME] &lt;fields&gt; &lt;go&gt; &lt;here&gt;
+#
+# reference fields with the following format:
+# - field:fieldType:indexType:indexName
+bin/cake bake migration create_users email:string:index password:string created modified
+bin/cake bake migration create_categories name:string:index created modified
+bin/cake bake migration create_order_items order_id:integer product_id:integer quantity:integer price:float created modified
+bin/cake bake migration create_orders user_id:integer created modified
+bin/cake bake migration create_products name:string stock:integer price:float category_id:integer created modified
+</code></pre>
+<blockquote>
+  <p>When creating new tables, Phinx will automatically add the <code>id</code> field, so we don’t need to specify it. As well, the migrations plugin is smart enough to auto-assign types to certain fields.</p>
+</blockquote>
+<p>Now you can run your migrations</p>
+<pre><code>cd /vagrant/app
+bin/cake migrations migrate
+</code></pre>
+<p>Finally, we can bake all the initial files necessary for our application:</p>
+<pre><code class="language-shell">cd /vagrant/app
+bin/cake bake all users
+bin/cake bake all categories
+bin/cake bake all order_items
+bin/cake bake all orders
+bin/cake bake all products
+</code></pre>
+<p>Finally, lets show the <code>/products</code> view by default when browsing our site. Modify your <code>app/config/routes.php</code> to have the following contents:</p>
 <pre><code class="language-php">&lt;?php
 use Cake\Core\Plugin;
 use Cake\Routing\Router;
 Router::scope('/', function ($routes) {
-  $routes-&gt;connect('/', ['controller' =&gt; 'Issues', 'action' =&gt; 'index']);
+  $routes-&gt;connect('/', ['controller' =&gt; 'Products', 'action' =&gt; 'index']);
   $routes-&gt;fallbacks();
 });
 ?&gt;
 </code></pre>
-<p>A few notes:</p>
-<ul>
-  <li>We removed the <code>/pages/*</code> catch-all route. This isn’t necessary unless you have static pages, which our app will not.</li>
-  <li>We also removed plugin routing. This decreases the time it takes for the router class to process all the routes, though will break routing for any plugins. We can always add it back in the future.</li>
-</ul>
-<p>Now if you browse to http://192.168.13.37/, you’ll see our default <code>issues</code> index page!</p>
+<p>Now if you browse to http://192.168.13.37/, you’ll see our default <code>products</code> index page!</p>
 <hr />
-<p>The above went by really quickly, and while it’s still early, our application looks pretty good already. We have a working development environment with any datastore we need, a scaffolded app via the excellent Composer package, been introduced to the Bake Shell, and learned a little about customizing our routes. What’s next?</p>
+<p>The above went by really quickly, and while it’s still early, our application looks pretty good already. We have a working development environment with any datastore we need, a scaffolded app via the excellent Composer package, run database migrations all from the command-line been introduced to the Bake Shell, and learned a little about customizing our routes. What’s next?</p>
 <ul>
-  <li>Customizing our bake templates to make baking faster in the future</li>
-  <li>Generating Schema migrations from the command-line</li>
-  <li>Attaching comments to issues and associating them automatically</li>
+  <li>Setting up authentication</li>
+  <li>Seeding our store with reasonable information</li>
+  <li>Managing our order for specific users</li>
+  <li>Add payment processing</li>
+  <li>Much moar</li>
 </ul>
-<p>We’ll cover those in the next installment of CakeAdvent 2014. Be sure to follow along as via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.</p>
+<p>We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along as via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-02 16:22:00 +0000">02 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-10 17:24:00 +0000">10 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -217,10 +226,10 @@ Router::scope('/', function ($routes) {
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 2</strong> of <strong>10</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 10</strong> of <strong>10</strong> in the series "CakeAdvent 2014".</p>
     <ol>
       <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
-      <li>Designing an anonymous issue tracker in CakePHP</li>
+      <li><a href="/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
       <li><a href="/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">Customizing Bake in CakePHP 3</a></li>
       <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
       <li><a href="/2014/12/05/creating-table-callback-events/">Creating Table Callback Events</a></li>
@@ -228,7 +237,7 @@ Router::scope('/', function ($routes) {
       <li><a href="/2014/12/07/parsing-markdown-comments/">Parsing markdown comments</a></li>
       <li><a href="/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/">Closing Issues in our Anonymous Issue Tracker using Events</a></li>
       <li><a href="/2014/12/09/contributing-to-cakephp/">Contributing to CakePHP</a></li>
-      <li><a href="/2014/12/10/designing-a-store-application-in-cakephp/">Designing a Store application in CakePHP</a></li>
+      <li>Designing a Store application in CakePHP</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -267,9 +276,9 @@ Router::scope('/', function ($routes) {
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/';
-        var disqus_url        = 'http://josediazgonzalez.com/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/';
-        var disqus_title      = "CakeAdvent-2014: Designing an anonymous issue tracker in CakePHP";
+        var disqus_identifier = '/2014/12/10/designing-a-store-application-in-cakephp/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/';
+        var disqus_title      = "CakeAdvent-2014: Designing a Store application in CakePHP";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

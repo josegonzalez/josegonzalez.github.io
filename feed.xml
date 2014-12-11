@@ -5,9 +5,210 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 10 Dec 2014 16:31:15 +0000</pubDate>
-    <lastBuildDate>Wed, 10 Dec 2014 16:31:15 +0000</lastBuildDate>
+    <pubDate>Thu, 11 Dec 2014 00:33:07 +0000</pubDate>
+    <lastBuildDate>Thu, 11 Dec 2014 00:33:07 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
+    
+      <item>
+        <title>Designing a Store application in CakePHP</title>
+        <description>&lt;p&gt;This CakeAdvent 2014 tutorial will walk you through the creation of a simple ecommerce store application using CakePHP 3. To start with, we’ll be setting up our development environment, installing our app template, creating our database, and using the tools CakePHP provides to get our application up fast.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Lets start by cloning the &lt;a href=&quot;https://github.com/friendsofcake/vagrant-chef&quot;&gt;FriendsOfCake/vagrant-chef&lt;/a&gt; repository. This repository will provide a full-featured cakephp working environment within a virtual linux server, allowing us to use each and every feature our app will need without worrying about how to install software on our machines.&lt;/p&gt;
+
+&lt;p&gt;Assuming you already installed Git, Vagrant and Virtualbox, you can simply clone the &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; repo and start the virtual machine. This should take around 5 minutes on a decent DSL connection, and need only be done once.:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git clone git@github.com:FriendsOfCake/vagrant-chef.git store
+cd store
+
+# bring up the working vm
+vagrant up
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that the virtualmachine is running, you can ssh onto it. Windows users will need to use &lt;a href=&quot;http://www.chiark.greenend.org.uk/~sgtatham/putty/&quot;&gt;Putty&lt;/a&gt; or similar, but please refer to the vagrant docs on how to connect.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
+vagrant ssh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that you are connected to your development environment, you should be able to create an application. &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; currently expects the application to be available in it’s &lt;code&gt;app&lt;/code&gt; directory, so we’ll keep that in mind.&lt;/p&gt;
+
+&lt;p&gt;As of CakePHP 3, we create new applications using the &lt;a href=&quot;https://getcomposer.org/&quot;&gt;Composer&lt;/a&gt; &lt;code&gt;create-project&lt;/code&gt; command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --prefer-dist -s dev cakephp/app app
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running the above will have output similar to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Installing cakephp/app (dev-master 28008873514274db441338eff5e2d07e75274f48)
+  - Installing cakephp/app (dev-master master)
+    Downloading: 100%
+
+Created project in app
+Loading composer repositories with package information
+Installing dependencies (including require-dev)
+  - Installing cakephp/plugin-installer (0.0.1)
+    Downloading: 100%
+
+  - Installing aura/installer-default (1.0.0)
+    Downloading: 100%
+
+  - Installing nesbot/carbon (1.13.0)
+    Downloading: 100%
+
+  - Installing psr/log (1.0.0)
+    Downloading: 100%
+
+  - Installing aura/intl (1.1.1)
+    Downloading: 100%
+
+  - Installing ircmaxell/password-compat (v1.0.4)
+    Downloading: 100%
+
+  - Installing cakephp/cakephp (3.0.x-dev 360c04e)
+    Downloading: 100%
+
+  - Installing cakephp/debug_kit (3.0.x-dev 8a6f3da)
+    Downloading: 100%
+
+  - Installing mobiledetect/mobiledetectlib (2.8.11)
+    Downloading: 100%
+
+  - Installing d11wtq/boris (v1.0.8)
+    Downloading: 100%
+
+Writing lock file
+Generating autoload files
+Created `config/app.php` file
+Permissions set on /vagrant/app/tmp/cache
+Permissions set on /vagrant/app/tmp/cache/models
+Permissions set on /vagrant/app/tmp/cache/persistent
+Permissions set on /vagrant/app/tmp/cache/views
+Permissions set on /vagrant/app/tmp/sessions
+Permissions set on /vagrant/app/tmp/tests
+Permissions set on /vagrant/app/tmp
+Permissions set on /vagrant/app/logs
+Updated Security.salt value in config/app.php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In previous versions of cake, you would need to configure your security salt and change permissions, though we now take care of this for you automatically. You’ll still need to change your database permissions in your &lt;code&gt;app/config/app.php&lt;/code&gt; file. &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; comes preinstalled with many datastores, so we’ll use MySQL for this sample application. The following are the credentials you will need to change in your &lt;code&gt;app/config/app.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;username: &lt;code&gt;root&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;password: &lt;code&gt;bananas&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;database: &lt;code&gt;database_name&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now that we’ve setup our database, we can import an initial schema into our app. There is currently no automated way to create a schema - though it’s coming quite soon - so we’ll connect to MySQL:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;mysql -uroot -pbananas
+# run the following command within the mysql connection
+use database_name;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In our last app, we generated migrations by hand and did some mangling of the db. We’ll skip that and use an alpha version of the migrations plugin. Install it using the following command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
+
+composer require cakephp/migrations:dev-migration-generation
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;We’ll eventually need to use at least dev-master. For now, the functionality we need is in a pull request.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;At this point both phinx and the plugin will be installed. Plugins in CakePHP must be enabled before they can be used, and the CakePHP/migrations plugin is no different. Since it’s only useful on the command-line, we’ll enable it with the following code on our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Core\Plugin;
+
+Plugin::load('Migrations');
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we need to create our store’s tables:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
+
+# when creating new tables, you should follow the following format for creating a migration
+# - bin/cake bake migration [create_TABLE_NAME] &amp;lt;fields&amp;gt; &amp;lt;go&amp;gt; &amp;lt;here&amp;gt;
+#
+# reference fields with the following format:
+# - field:fieldType:indexType:indexName
+bin/cake bake migration create_users email:string:index password:string created modified
+bin/cake bake migration create_categories name:string:index created modified
+bin/cake bake migration create_order_items order_id:integer product_id:integer quantity:integer price:float created modified
+bin/cake bake migration create_orders user_id:integer created modified
+bin/cake bake migration create_products name:string stock:integer price:float category_id:integer created modified
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;When creating new tables, Phinx will automatically add the &lt;code&gt;id&lt;/code&gt; field, so we don’t need to specify it. As well, the migrations plugin is smart enough to auto-assign types to certain fields.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Now you can run your migrations&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cd /vagrant/app
+
+bin/cake migrations migrate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, we can bake all the initial files necessary for our application:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
+
+bin/cake bake all users
+bin/cake bake all categories
+bin/cake bake all order_items
+bin/cake bake all orders
+bin/cake bake all products
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, lets show the &lt;code&gt;/products&lt;/code&gt; view by default when browsing our site. Modify your &lt;code&gt;app/config/routes.php&lt;/code&gt; to have the following contents:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Core\Plugin;
+use Cake\Routing\Router;
+
+Router::scope('/', function ($routes) {
+  $routes-&amp;gt;connect('/', ['controller' =&amp;gt; 'Products', 'action' =&amp;gt; 'index']);
+
+  $routes-&amp;gt;fallbacks();
+});
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now if you browse to http://192.168.13.37/, you’ll see our default &lt;code&gt;products&lt;/code&gt; index page!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The above went by really quickly, and while it’s still early, our application looks pretty good already. We have a working development environment with any datastore we need, a scaffolded app via the excellent Composer package, run database migrations all from the command-line been introduced to the Bake Shell, and learned a little about customizing our routes. What’s next?&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Setting up authentication&lt;/li&gt;
+  &lt;li&gt;Seeding our store with reasonable information&lt;/li&gt;
+  &lt;li&gt;Managing our order for specific users&lt;/li&gt;
+  &lt;li&gt;Add payment processing&lt;/li&gt;
+  &lt;li&gt;Much moar&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 10 Dec 2014 17:24:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/</guid>
+        
+        <category>cakeadvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Contributing to CakePHP</title>
@@ -1257,141 +1458,6 @@ Router::scope('/', function ($routes) {
         
         
         <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Work Items</title>
-        <description>&lt;p&gt;Areas of active interest over the next few months. This is a brain dump, and a much better way of tracking wtf I want to do than the current todo-list method I’ve been using. I doubt I’ll get half this crap done.&lt;/p&gt;
-
-&lt;h2 id=&quot;software-as-a-service&quot;&gt;Software as a Service&lt;/h2&gt;
-
-&lt;p&gt;Some day I would like to have tens of dollars come into my bank account every month. Here are two pieces of software I am writing in the hopes that people will want to pay me:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Writing a SaaS Wiki platform.
-    &lt;ul&gt;
-      &lt;li&gt;Needs some sort of inline wiki editor. Haven’t looked too hard, and I figure I could write one if need be.&lt;/li&gt;
-      &lt;li&gt;Need to extend the markdown parser (cebe/markdown) to support lots of extensions useful wiki extensions. Yes, it’s markdown based, and yes, I realize you can use a Github repo/wiki or something instead. Or an existing wiki solution.&lt;/li&gt;
-      &lt;li&gt;Should probably hire people to audit cebe/markdown for security issues&lt;/li&gt;
-      &lt;li&gt;I need a better styling than the bullshit I came up with when drunk. Not that it’s bad, but I was drunk.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Writing a SaaS Book Editing tool.
-    &lt;ul&gt;
-      &lt;li&gt;I originally wrote one to make it easy for me to allow people to edit my own book, and I figure it might be useful to other people.&lt;/li&gt;
-      &lt;li&gt;Needs to support context for comments&lt;/li&gt;
-      &lt;li&gt;Missing comment notifications&lt;/li&gt;
-      &lt;li&gt;No way to currently mark a comment as “resolved”, which makes it a pita to have to review old comments.&lt;/li&gt;
-      &lt;li&gt;Need to support giving users access to books as well as limiting them to certain chapters. Currently I need to insert a database record, and that won’t work in production.&lt;/li&gt;
-      &lt;li&gt;Need to support multiple “owners” of a book. Maybe like book organizations or something. Might need to rework the permission system.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;fun-side-projects&quot;&gt;Fun side projects&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A yes/no domain hosting platform. You point a domain at the yes/no generator, pay $10 a year, and get stats/an api to switch the yes/no to something else.&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://humanslol.org/&quot;&gt;humanslol.org&lt;/a&gt; needs to be a thing.&lt;/li&gt;
-  &lt;li&gt;Making &lt;a href=&quot;https://twitter.com/savant/status/520684357946994688&quot;&gt;more 8-bit paintings&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;blogging&quot;&gt;Blogging&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;CakeAdvent 2014 is going to be a thing - &lt;a href=&quot;/tags/CakeAdvent-2013/&quot;&gt;last year&lt;/a&gt; was tres excellent - and I’m currently gathering material&lt;/li&gt;
-  &lt;li&gt;Bringing back my &lt;a href=&quot;/tags/daily-dev-log/&quot;&gt;daily dev log&lt;/a&gt; in some fashion. It helped me formulate my plans - most work ended up being spread out over a series of a few days.&lt;/li&gt;
-  &lt;li&gt;A few tutorial posts I started but never completed, plus things people ask about in my issue tracker.&lt;/li&gt;
-  &lt;li&gt;Writing more tutorials on operations-type things, which will give me an excuse to learn how to use said tools.&lt;/li&gt;
-  &lt;li&gt;Updates to my blog to make discovering content a bit easier, as well as styling and blah blah fucking blah.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;books&quot;&gt;Books&lt;/h2&gt;
-
-&lt;p&gt;I’m writing/rewriting a few books, mostly on CakePHP.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A book on using &lt;a href=&quot;http://www.fabfile.org/&quot;&gt;Python Fabric&lt;/a&gt; for various things.
-    &lt;ul&gt;
-      &lt;li&gt;Based on some of the things I’ve done at work/to support work.&lt;/li&gt;
-      &lt;li&gt;Using it as an api, writing custom decorators, integrating with AWS, fixing logging, writing Web UIs, etc. Should be a small but fun one.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Updating my &lt;a href=&quot;/cakephp-book/&quot;&gt;current CakePHP book&lt;/a&gt; to 3.x.
-    &lt;ul&gt;
-      &lt;li&gt;I’m about half-way done, but need to redo certain chapters as the CakePHP apis change a bit in certain cases.&lt;/li&gt;
-      &lt;li&gt;Want to also add two new chapters:
-        &lt;ul&gt;
-          &lt;li&gt;Versioning Pastes&lt;/li&gt;
-          &lt;li&gt;Adding a simple api with oauth integration&lt;/li&gt;
-        &lt;/ul&gt;
-      &lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Converting a tutorial series to CakePHP 3.x.
-    &lt;ul&gt;
-      &lt;li&gt;The original writer has given me permission, just need to actually write the content.&lt;/li&gt;
-      &lt;li&gt;Aimed towards intro CakePHP users, so different target from my first one.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;open-source&quot;&gt;Open Source&lt;/h2&gt;
-
-&lt;p&gt;As always, I’m heavily involved in both my own and community projects. Poop.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://beaver.readthedocs.org/&quot;&gt;Beaver&lt;/a&gt; needs a whole lot of love :( . I wish I had time to work on it/improve it, as I learned a lot during the process and I know there are things I can improve.&lt;/li&gt;
-  &lt;li&gt;I started helping maintain &lt;a href=&quot;https://github.com/progrium/dokku&quot;&gt;Dokku&lt;/a&gt; - a single-server heroku alternative.
-    &lt;ul&gt;
-      &lt;li&gt;The original maintainer was burned out I guess. NBD, shit happens. I think he’s starting to pickup some steam, so hopefully we can continue on with this.&lt;/li&gt;
-      &lt;li&gt;Lots of pull requests and issues to triage. I closed ~60 issues and merged ~19 pull requests over the past week. My goal is zero bugs by the time we hit our 0.4.0 release, so stabilizing the external api is pretty important.&lt;/li&gt;
-      &lt;li&gt;I personally made 22 commits over the past few days. It’s been a good way to exercise my bash-fu.&lt;/li&gt;
-      &lt;li&gt;Tests still fail, and I don’t have access to the webserver that runs them or even the script that handles test-running :( . We’ll get that sorted out though, I’m sure.&lt;/li&gt;
-      &lt;li&gt;I’d like to write a simple web ui for it and integrate it with AWS services - RDS, ElastiCache, backups - and potentially sell that web ui as a product. Not that anyone would/should buy it. I’ve always wanted to write web tools to automate servers…&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Lots of &lt;a href=&quot;/open-source/&quot;&gt;CakePHP open source&lt;/a&gt;…
-    &lt;ul&gt;
-      &lt;li&gt;Move &lt;a href=&quot;https://github.com/friendsofcake/vagrant-chef&quot;&gt;friendsofcake/vagrant-chef&lt;/a&gt; to support more of a heroku-style deploy for any PHP framework. Would be extremely nice if users of the project could just have their framework auto-detected and be able to work.&lt;/li&gt;
-      &lt;li&gt;Work on &lt;a href=&quot;https://github.com/friendsofcake/crud-view&quot;&gt;friendsofcake/crud-view&lt;/a&gt;. I started a while back, but it needs a lot of love and a dedicated developer. It’s basically scaffolding on steroids.&lt;/li&gt;
-      &lt;li&gt;Updating a bunch of plugins to CakePHP 3.x.&lt;/li&gt;
-      &lt;li&gt;Marking a bunch of plugins as deprecated and pointing users to alternatives&lt;/li&gt;
-      &lt;li&gt;Adding support to filter out 3.x from 2.x plugins on the CakePHP plugins site&lt;/li&gt;
-      &lt;li&gt;Making a new version of the &lt;a href=&quot;https://github.com/friendsofcake/app-template/&quot;&gt;friendsofcake/app-template&lt;/a&gt; project for 3.x. Much simpler now that CakePHP 3 has built-in support for using DSNs for connection strings, but still has to be done at some point. Will be necessary for my book.&lt;/li&gt;
-      &lt;li&gt;Contributing cli-based migration generation for &lt;a href=&quot;https://phinx.org/&quot;&gt;phinx&lt;/a&gt;. We have r&lt;a href=&quot;https://github.com/CakeDC/migrations/blob/master/Docs/Documentation/Generate-Migrations-Without-DB-Interaction.md&quot;&gt;ails-like migration generation&lt;/a&gt; in CakePHP 2.x, but now that we’re adopting a community library, we need to port that feature. Won’t be hard as the basic structure is already there.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Generic PHP queuing library.
-    &lt;ul&gt;
-      &lt;li&gt;I already have a version I stopped working on last year called &lt;a href=&quot;https://github.com/josegonzalez/php-queuesadilla&quot;&gt;php-queuesadilla&lt;/a&gt;, though it needs some love and care before it can be considered general use. It also needs to use proper queuing systems (rabbit and zero are missing).&lt;/li&gt;
-      &lt;li&gt;All the existing ones suck or pull in quite a few requirements.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;work-related-stuff&quot;&gt;Work-related stuff&lt;/h2&gt;
-
-&lt;p&gt;There’s other, more important crap, but one does not simply post all the things. The stuff here will likely be open source if it already isn’t.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;An integration between ruby’s ERB templates and consul. Should let me re-use chef templates rather than needing to maintain them in two places.&lt;/li&gt;
-  &lt;li&gt;Make it easier to interact with &lt;a href=&quot;https://github.com/seatgeek/cronq&quot;&gt;cronq&lt;/a&gt;, a distributed cron-like system. Also have a few logging improvements to make, and the codebase isn’t the greatest thing…&lt;/li&gt;
-  &lt;li&gt;Making &lt;a href=&quot;https://github.com/seatgeek/graphite-pager&quot;&gt;graphite-pager&lt;/a&gt; scale slightly better, perhaps by rewriting it to be a statsd clone so that it can introspect on data rather than retreiving it during a check.&lt;/li&gt;
-  &lt;li&gt;Clean up a php-aqmp job system we have (unrelated to my own open source work). You know, to be good open-source citizens.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;tldr-im-hella-busy&quot;&gt;tl;dr I’m hella busy&lt;/h4&gt;
-</description>
-        <pubDate>Sun, 16 Nov 2014 19:47:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/11/16/work-items/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/11/16/work-items/</guid>
-        
-        <category>development</category>
-        
-        
-        <category>dev log</category>
         
       </item>
     

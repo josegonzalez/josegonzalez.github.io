@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Designing a Store application in CakePHP",
+    "url": "/2014/12/10/designing-a-store-application-in-cakephp/",
+    "description": "Part 1 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["application","cakephp","designed","designing","effectively","part","posts","series","store","teach","use"]
+  },
+  {
+    "type": "post",
     "title": "Contributing to CakePHP",
     "url": "/2014/12/09/contributing-to-cakephp/",
     "description": "Find out various ways to contribute back to the CakePHP project",
