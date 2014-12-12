@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 12 Dec 2014 00:09:16 +0000</pubDate>
-    <lastBuildDate>Fri, 12 Dec 2014 00:09:16 +0000</lastBuildDate>
+    <pubDate>Fri, 12 Dec 2014 00:10:30 +0000</pubDate>
+    <lastBuildDate>Fri, 12 Dec 2014 00:10:30 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
     
       <item>
@@ -150,10 +150,12 @@ public function validationDefault(Validator $validator) {
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize() {
     $this-&amp;gt;loadComponent('Flash');
     $this-&amp;gt;loadComponent('Auth', [
+        // Where to redirect after a successful login
         'loginRedirect' =&amp;gt; [
             'controller' =&amp;gt; 'Products',
             'action' =&amp;gt; 'index'
         ],
+        // Where to redirect after a user logs out
         'logoutRedirect' =&amp;gt; [
             'controller' =&amp;gt; 'Products',
             'action' =&amp;gt; 'index',

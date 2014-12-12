@@ -188,10 +188,12 @@ public function validationDefault(Validator $validator) {
 <pre><code class="language-php">public function initialize() {
     $this-&gt;loadComponent('Flash');
     $this-&gt;loadComponent('Auth', [
+        // Where to redirect after a successful login
         'loginRedirect' =&gt; [
             'controller' =&gt; 'Products',
             'action' =&gt; 'index'
         ],
+        // Where to redirect after a user logs out
         'logoutRedirect' =&gt; [
             'controller' =&gt; 'Products',
             'action' =&gt; 'index',
