@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-12-11T00:34:26+00:00</updated>
+ <updated>2014-12-12T00:09:16+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Adding an Authentication layer to our CakePHP Store]]></title>
+   <link href="http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/"/>
+   <updated>2014-12-11T18:26:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/</id>
+   <content type="html"><![CDATA[Part 2 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Designing a Store application in CakePHP]]></title>

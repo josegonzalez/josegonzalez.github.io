@@ -5,9 +5,210 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 11 Dec 2014 00:34:26 +0000</pubDate>
-    <lastBuildDate>Thu, 11 Dec 2014 00:34:26 +0000</lastBuildDate>
+    <pubDate>Fri, 12 Dec 2014 00:09:16 +0000</pubDate>
+    <lastBuildDate>Fri, 12 Dec 2014 00:09:16 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
+    
+      <item>
+        <title>Adding an Authentication layer to our CakePHP Store</title>
+        <description>&lt;p&gt;We already have basic scaffolding for our application, so lets get authentication working. First, we’ll add the login/logout methods by modifying our bake skeleton. Add the following to your &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Event\Event;
+use Cake\Event\EventManager;
+use Cake\Utility\Hash;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event) {
+    $view = $event-&amp;gt;subject;
+    $name = Hash::get($view-&amp;gt;viewVars, 'name');
+    $isController = strpos($event-&amp;gt;data[0], 'Bake/Controller/controller.ctp') !== false;
+    if ($isController &amp;amp;&amp;amp; $name == 'Users') {
+        $view-&amp;gt;viewVars['actions'] = ['login', 'logout', 'index', 'view', 'register', 'edit', 'delete'];
+    }
+}, 'Bake.beforeRender');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that this is set, we’ll need action templates for our &lt;code&gt;login&lt;/code&gt;, &lt;code&gt;logout&lt;/code&gt;, and &lt;code&gt;register&lt;/code&gt; methods. These do not come with CakePHP as they can be pretty specific, so we’ll include some pretty basic ones.&lt;/p&gt;
+
+&lt;p&gt;Here is &lt;code&gt;app/src/Template/Bake/Element/Controller/login.ctp&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Login method
+ *
+ * @return void
+ */
+public function login() {
+    if ($this-&amp;gt;request-&amp;gt;is('post')) {
+        $user = $this-&amp;gt;Auth-&amp;gt;identify();
+        if ($user) {
+            $this-&amp;gt;Auth-&amp;gt;setUser($user);
+            return $this-&amp;gt;redirect($this-&amp;gt;Auth-&amp;gt;redirectUrl());
+        }
+        $this-&amp;gt;Flash-&amp;gt;error(__('Invalid username or password, try again'));
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is &lt;code&gt;app/src/Template/Bake/Element/Controller/logout.ctp&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Logout method
+ *
+ * @return void
+ */
+public function logout() {
+    return $this-&amp;gt;redirect($this-&amp;gt;Auth-&amp;gt;logout());
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And finally &lt;code&gt;app/src/Template/Bake/Element/Controller/register.ctp&lt;/code&gt; (which is simply &lt;code&gt;add.ctp&lt;/code&gt; but with the action name changed):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;% $compact = [&quot;'&quot; . $singularName . &quot;'&quot;]; %&amp;gt;
+
+/**
+ * Register method
+ *
+ * @return void
+ */
+  public function register() {
+    $&amp;lt;%= $singularName %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity($this-&amp;gt;request-&amp;gt;data);
+    if ($this-&amp;gt;request-&amp;gt;is('post')) {
+      if ($this-&amp;gt;&amp;lt;%= $currentModelName; %&amp;gt;-&amp;gt;save($&amp;lt;%= $singularName %&amp;gt;)) {
+        $this-&amp;gt;Flash-&amp;gt;success('The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; has been saved.');
+        return $this-&amp;gt;redirect(['action' =&amp;gt; 'index']);
+      } else {
+        $this-&amp;gt;Flash-&amp;gt;error('The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; could not be saved. Please, try again.');
+      }
+    }
+&amp;lt;%
+    $associations = array_merge(
+      $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, 'BelongsTo'),
+      $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, 'BelongsToMany')
+    );
+    foreach ($associations as $assoc):
+      $association = $modelObj-&amp;gt;association($assoc);
+      $otherName = $association-&amp;gt;target()-&amp;gt;alias();
+      $otherPlural = $this-&amp;gt;_variableName($otherName);
+%&amp;gt;
+    $&amp;lt;%= $otherPlural %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;&amp;lt;%= $otherName %&amp;gt;-&amp;gt;find('list');
+&amp;lt;%
+      $compact[] = &quot;'$otherPlural'&quot;;
+    endforeach;
+%&amp;gt;
+    $this-&amp;gt;set(compact(&amp;lt;%= join(', ', $compact) %&amp;gt;));
+  }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can rebake your UsersController now:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
+
+bin/cake bake controller users -f
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We also need a login view template at &lt;code&gt;app/src/Template/Bake/Template/login.ctp&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;&amp;lt;%= $pluralVar %&amp;gt; form&quot;&amp;gt;
+&amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render('auth') ?&amp;gt;
+&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
+    &amp;lt;fieldset&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __('Please enter your username and password') ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('username') ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('password') ?&amp;gt;
+    &amp;lt;/fieldset&amp;gt;
+&amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__('Login')); ?&amp;gt;
+&amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we need our &lt;code&gt;app/src/Template/Bake/Template/register.ctp&lt;/code&gt;, which will just call out to the &lt;code&gt;form.ctp&lt;/code&gt; element:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%
+echo $this-&amp;gt;element('form');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To create these new views, we can simply use bake. Note that if a bake template does not exist for a given action, a corresponding view template is not created. This means we won’t have an empty &lt;code&gt;app/src/Template/Users/logout.ctp&lt;/code&gt; generated, which is nice.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake view users -f
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When users register themselves, we want to ensure they have correct data in the database. CakePHP exposes Validators for this exact purpose, and we’ll add a custom validator to our &lt;code&gt;UsersTable&lt;/code&gt; to handle this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Validation\Validator;` at the top of your class
+public function validationDefault(Validator $validator) {
+    return $validator
+        -&amp;gt;notEmpty('username', 'A username is required')
+        -&amp;gt;notEmpty('password', 'A password is required');
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;We’ll go into Validators in more detail in a future post. For now, just be aware that they exist and can be used on any type of data.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;While we’ve templated out a bunch of stuff, we still need to actually handle login/logout. You can load the AuthComponent in your AppController::initialize() like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize() {
+    $this-&amp;gt;loadComponent('Flash');
+    $this-&amp;gt;loadComponent('Auth', [
+        'loginRedirect' =&amp;gt; [
+            'controller' =&amp;gt; 'Products',
+            'action' =&amp;gt; 'index'
+        ],
+        'logoutRedirect' =&amp;gt; [
+            'controller' =&amp;gt; 'Products',
+            'action' =&amp;gt; 'index',
+            'home'
+        ]
+    ]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In previous CakePHP versions, you would use the beforeFilter, but in the current version, we load behaviors/components/helpers inside of the &lt;code&gt;initialize()&lt;/code&gt; method of a class.&lt;/p&gt;
+
+&lt;p&gt;We also need to allow access to our logout action - as well as let users actually register. In all other actions, we’ll currently allow &lt;em&gt;everything&lt;/em&gt; to happen - and lock this down as we build out the application! We can do so by adding access to those methods from within our &lt;code&gt;AppController::beforeFilter()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Event\Event;` at the top of your class
+public function beforeFilter(Event $event) {
+    parent::beforeFilter($event);
+    if ($this-&amp;gt;request-&amp;gt;controller == 'Users') {
+        $this-&amp;gt;Auth-&amp;gt;allow(['add', 'logout']);
+    } else {
+        $this-&amp;gt;Auth-&amp;gt;allow();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One last thing is that we need to take care of password hashing. Since CakePHP 2, the framework does not automatically hash password fields. This is due to developers getting weird errors with non-user password fields being hashed (or not hashed!) with certain configurations. In CakePHP 3, we can handle this easily by adding a new setter method for the &lt;code&gt;password&lt;/code&gt; field to our &lt;code&gt;app/src/Model/Entity/User.php&lt;/code&gt; entity. Note that setter methods are prefixed by &lt;code&gt;_set&lt;/code&gt; and the field is &lt;code&gt;UpperCamelCase&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Auth\DefaultPasswordHasher;` at the top of your class
+protected function _setPassword($password) {
+    return (new DefaultPasswordHasher)-&amp;gt;hash($password);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we now have a functioning authentication layer on top of our store application. A couple notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We can no longer re-bake our user Entity or Table classes. Boo. A wise developer would crack open new bake templates and add in the appropriate hooks to include traits instead of adding methods, or even switch those methods to bake elements.&lt;/li&gt;
+  &lt;li&gt;It would be useful to create a shell to pre-seed users from random data or custom data. You may guess what the next blog post will concern :)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 11 Dec 2014 18:26:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/</guid>
+        
+        <category>cakeadvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Designing a Store application in CakePHP</title>
@@ -1394,67 +1595,6 @@ Router::scope('/', function ($routes) {
         <category>cakephp</category>
         
         <category>composer</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>CakePHP Advent Calendar 2014</title>
-        <description>&lt;p&gt;Last year for the Advent Calendar, I brought to you &lt;a href=&quot;/2013/12/01/testing-your-cakephp-plugins-with-travis/&quot;&gt;25 delicious posts&lt;/a&gt; surrounding writing better CakePHP applications. Those posts catered to both the beginner and advanced CakePHP developer, and hopefully can still be of some use to you.&lt;/p&gt;
-
-&lt;p&gt;This year, however, we’re going to kick it up a notch and actually use our skills to design 3 custom &lt;a href=&quot;http://cakephp.org/&quot;&gt;CakePHP&lt;/a&gt; applications:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;An anonymous markdown-based issue tracker capable of sending email notifications and exposing webhooks&lt;/li&gt;
-  &lt;li&gt;A simple cart system with user authentication and payment processing&lt;/li&gt;
-  &lt;li&gt;A simple tumblr clone with support for post type extensions&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;a-bit-of-background&quot;&gt;A bit of background&lt;/h2&gt;
-
-&lt;p&gt;As some of you may be aware, &lt;a href=&quot;http://bakery.cakephp.org/articles/markstory/2014/11/17/cakephp_3_0_0-beta3_released&quot;&gt;CakePHP 3&lt;/a&gt; is right around the corner. With just two RCs left, it’s almost ready for prime-time with lots of great changes. Unfortunately, this also means that some of the old knowledge we had is no longer applicable, and so rather than try to introduce CakePHP 3 features in one-off tutorials, we will showcase the power of the new framework to build working applications.&lt;/p&gt;
-
-&lt;h2 id=&quot;why-3-tutorials&quot;&gt;Why 3 tutorials?&lt;/h2&gt;
-
-&lt;p&gt;CakePHP 3 is coming out, so we should match it with the same number. It also helps that an Advent Calendar is 25 days, so we’ll have an interlude between each tutorial series.&lt;/p&gt;
-
-&lt;h2 id=&quot;who-are-these-tutorials-aimed-at&quot;&gt;Who are these tutorials aimed at?&lt;/h2&gt;
-
-&lt;p&gt;You should have some knowledge of the PHP language, and knowledge of any MVC framework will help. That said, new CakePHP developers will hopefully grow more comfortable as we progress with the tutorials.  We’ll be laying the foundation for effective application development - via working local development environments and production code deployment.&lt;/p&gt;
-
-&lt;p&gt;For experienced CakePHP developers, these series of tutorials will be designed to point out changes from the 2.x series. Note that we’ll be a bit light on tests - this is a purposeful change to make following the tutorials a bit easier, but don’t be afraid to practice TDD.&lt;/p&gt;
-
-&lt;p&gt;For CakePHP haters, these tutorials are meant to show development practices in another framework. We will be using community libraries where possible, and thus most of the applications we are building will be possible to build in other frameworks. As CakePHP 3 is quite modular, you are welcome to incorporate both developed application code as well as CakePHP 3 libraries in your non-CakePHP projects.&lt;/p&gt;
-
-&lt;h2 id=&quot;what-do-i-need&quot;&gt;What do I need?&lt;/h2&gt;
-
-&lt;p&gt;These tutorials are completely free, and there will be no cost for any of the tools we use (other than your computer!). You’ll want to setup the following before reading these tutorials:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A &lt;a href=&quot;https://github.com/&quot;&gt;Github account&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;A &lt;a href=&quot;https://www.heroku.com/&quot;&gt;Heroku account&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Install &lt;a href=&quot;http://git-scm.com/&quot;&gt;Git&lt;/a&gt; if you are not on a Mac&lt;/li&gt;
-  &lt;li&gt;Install &lt;a href=&quot;https://www.vagrantup.com/&quot;&gt;Vagrant&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Install &lt;a href=&quot;https://www.virtualbox.org/&quot;&gt;Virtualbox&lt;/a&gt; or &lt;a href=&quot;http://www.vmware.com/products/fusion&quot;&gt;Vmware Fusion&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Please ensure you have all of the above setup, as otherwise certain portions of the tutorials will not make sense.&lt;/p&gt;
-
-&lt;p&gt;Note that not every tutorial will use the above tools, and you are free to use alternatives if you so desire.&lt;/p&gt;
-
-&lt;h2 id=&quot;how-do-i-get-started&quot;&gt;How do I get started?&lt;/h2&gt;
-
-&lt;p&gt;I’ll be posting new posts in the series each day of the Advent Calendar, and tweeting about it as &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 1st of December!) for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Mon, 01 Dec 2014 17:24:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/01/cakephp-advent-calendar-2014/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
         
         
         <category>cakephp</category>
