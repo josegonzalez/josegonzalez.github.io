@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2014: Schema Migrations with CakePHP 3</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/">
+    <title>CakeAdvent-2014: Adding dummy data via a custom faker shell to our store</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/12/adding-dummy-data-to-our-store/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Part 3 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
-    <meta name="keywords" content="cakeadvent-2014, cakephp, composer, migrations, phinx" />
+    <meta name="keywords" content="cakeadvent-2014, cakephp, composer" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2014: Schema Migrations with CakePHP 3" />
+    <meta property="og:title" content="CakeAdvent-2014: Adding dummy data via a custom faker shell to our store" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/12/adding-dummy-data-to-our-store/" />
     <meta property="og:description" content="Part 3 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2014: Schema Migrations with CakePHP 3" />
+    <meta name="twitter:title" content="CakeAdvent-2014: Adding dummy data via a custom faker shell to our store" />
     <meta name="twitter:description" content="Part 3 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
-    <link rel="alternate" type="application/rss+xml" title="Schema Migrations with CakePHP 3 » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Adding dummy data via a custom faker shell to our store » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,79 +64,85 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Schema Migrations with CakePHP 3
+        Adding dummy data via a custom faker shell to our store
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Schema Migrations with CakePHP 3!">
+        <a href="#comments" title="Comment on Adding dummy data via a custom faker shell to our store!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <blockquote>
-  <p>I corrected a few issues with the previous post regarding the redirect and <code>requirePost</code> event. They’ve been corrected.</p>
-</blockquote>
-<p>In our previous post, I gave you all some homework:</p>
-<ul>
-  <li>Make the form actions optional - and turn them off for embedded forms.</li>
-  <li>Create a nicer comment list than the current version.</li>
-  <li>Hide the <code>issue_id</code> field on the form without removing it completely</li>
-</ul>
-<p>For the first task, you can extract the form actions into a separate element and make the inclusion of that element conditional - default true - on a variable you specify from the event.</p>
-<p>For the second task, using a custom element for related entities is the way to go.</p>
-<p>For the third task, you will want to populate a new variable - lets call it <code>$inputOptions</code> - and have it be an array of <code>field</code> =&gt; <code>options</code> for the field. Each field being output should be in this array with a default empty array as it’s options. You can use the <code>BakeHelper::stringifyList</code> to turn those options into a nicely formatted string array.</p>
-<hr />
-<p>One thing that is a pain is managing database schema changes. While we had <a href="https://github.com/cakedc/migrations">CakeDC/migrations</a> in the 2.x world, CakePHP 3 is about embracing existing solutions to problems. In CakePHP 3, we’ve delegated the task to the excellent <a href="https://phinx.org/">Phinx</a> library. Phinx is a database migration tool that CakePHP provides a wrapper for with the <a href="https://github.com/cakephp/migrations">CakePHP/migrations</a> plugin. You can use Phinx outside of CakePHP as well, so switching back and forth between CakePHP and other PHP frameworks should be a breeze.</p>
-<p>To install the migrations plugin, we’ll use composer:</p>
-<pre><code class="language-shell"># ssh onto the vm
-vagrant ssh
-cd /vagrant/app
-composer require cakephp/migrations:dev-master
+    <p>The excellent <a href="http://jadb.io">Jad Bittar</a> added support for Faker to the Cake3 ORM as a plugin, so we can use this to generate dummy data for our application. This will allow us to easily test stuff going forward. Let’s start by installing the plugin:</p>
+<pre><code class="language-shell">composer require gourmet/faker
 </code></pre>
-<p>At this point both phinx and the plugin will be installed. Plugins in CakePHP must be enabled before they can be used, and the CakePHP/migrations plugin is no different. Since it’s only useful on the command-line, we’ll enable it with the following code on our <code>app/config/bootstrap_cli.php</code>:</p>
-<pre><code class="language-php">&lt;?php
-use Cake\Core\Plugin;
-Plugin::load('Migrations');
-?&gt;
-</code></pre>
-<p>Now that it’s enabled, we can generate our initial migration from the existing database:</p>
+<p>This will pull in both the CakePHP plugin as well as the Faker library. Next, lets generate a shell to generate dummy data:</p>
 <pre><code class="language-shell">cd /vagrant/app
-bin/cake bake migration Initial
+# generate a dummy data shell
+bin/cake bake shell DummyData
 </code></pre>
-<p>The output should be similar to the following:</p>
-<pre><code>Welcome to CakePHP v3.0.0-beta3 Console
+<p>The new shell will be created in <code>app/src/Shell/DummyDataShell.php</code>. It has a <code>main</code> method which you can modify, and if you run the following command now:</p>
+<pre><code class="language-shell">bin/cake dummy_data
+</code></pre>
+<p>You’ll have the following - pretty plain - output:</p>
+<pre><code>vagrant@precise32:/vagrant/app$ bin/cake dummy_data
+Welcome to CakePHP v3.0.0-beta3 Console
 ---------------------------------------------------------------
 App : src
 Path: /vagrant/app/src/
 ---------------------------------------------------------------
-Baking migration class for Connection default
-Creating file /vagrant/app/config/Migrations/20141204225440_initial.php
-Wrote `/vagrant/app/config/Migrations/20141204225440_initial.php`
 </code></pre>
-<p>If we look at that file, we’ll see a phinx-style migration that contains all the information about our current database schema. This can be useful for bootstrapping a new database (though our database works just fine for now). It’s pretty similar to the old migrations plugin - you get an <code>up</code>, <code>down</code>, and <code>change</code> method - but uses an object-oriented approach to changing the database.</p>
-<p>You can rollback any migration with the <code>down()</code> callback by running the following command:</p>
-<pre><code class="language-shell">bin/cake migrations rollback
+<p>Lets actually do something with this new shell. In our <code>DummyDataShell::main()</code> method, we’ll need to create a <code>faker</code> object</p>
+<pre><code class="language-php">$faker = \Faker\Factory::create();
 </code></pre>
-<p>And if you have created new migrations, you can migrate up to them:</p>
-<pre><code class="language-shell">bin/cake migrations migrate
+<p>Faker uses providers to give custom data types to fields. We’ll first populate the <code>users</code> table, and to do so, we’ll need to provide fake email addresses. To do so, we’ll need to add the <code>Internet</code> provider:</p>
+<pre><code class="language-php">$faker-&gt;addProvider(new \Faker\Provider\Internet($faker));
 </code></pre>
-<p>One note, there is currently an issue where the Phinx library auto-includes an auto-increment <code>id</code> field for every database. This might not be desired for certain tables, in which case you’ll want to manually disable the field:</p>
-<pre><code class="language-php">&lt;?php
-$table = $this-&gt;table('statuses', [
-    'id' =&gt; false,
-    'primary_key' =&gt; ['id']
+<p>To populate a specific type of entity, we need to create an EntityPopulator object. The Faker library provides a custom populator for the CakePHP framework, which we’ll leverage in our case. You simply need to provide the name of the table class:</p>
+<pre><code class="language-php">$entityPopulator = new \Faker\ORM\CakePHP\EntityPopulator('Users');
+</code></pre>
+<p>Finally, we need to create a populator object that will actually insert data into the database. We need to pass in our EntityPopulator object, a number of records to insert, as well as custom formatters. The formatters come from providers - we added the <code>Internet</code> provider above - or your own text. Faker tries to autodetect data types, but will default to stuff like <code>plaintext</code> for <code>email</code> fields, so we need to override this:</p>
+<pre><code class="language-php">$populator = new \Faker\ORM\CakePHP\Populator($faker);
+$populator-&gt;addEntity($entityPopulator, 20, [
+  'email' =&gt; function () use ($faker) { return $faker-&gt;email(); },
+  'password' =&gt; 'password',
 ]);
-?&gt;
 </code></pre>
-<p>For more docs, see the <a href="http://docs.phinx.org/en/latest/migrations.html#creating-a-new-migration">phinx documentation here</a></p>
-<h2 id="homework-time">Homework Time!</h2>
-<p>This was a relatively short introduction to database migrations, but I felt it important enough to cover as we’ll be using them extensively over the next few tutorials. Your homework is actually pretty simple. We need to keep track of a <code>webhook_url</code> string field with a length of 256 characters in our <code>comments</code> table. Create a new migration and add the field to the table. The command to create an empty migration is as follows:</p>
-<pre><code class="language-shell">bin/cake migrations create WebhookUrl
+<p>The last thing is to actually populate our table!</p>
+<pre><code class="language-php">$populator-&gt;execute(['validate' =&gt; false]);
 </code></pre>
-<p>Note, there is a bug in Phinx’s - not Cake’s! - templates where the end-docblock for the <code>change()</code> method is in the wrong place. We’ll get that fixed up before CakePHP 3 goes stable :)</p>
+<p>The full code sample will look like the following:</p>
+<pre><code class="language-php">$this-&gt;out("Creating user populator");
+$faker = \Faker\Factory::create();
+$faker-&gt;addProvider(new \Faker\Provider\Internet($faker));
+$entityPopulator = new \Faker\ORM\CakePHP\EntityPopulator('Users');
+$populator = new \Faker\ORM\CakePHP\Populator($faker);
+$populator-&gt;addEntity($entityPopulator, 20, [
+  'email' =&gt; function () use ($faker) { return $faker-&gt;email(); },
+  'password' =&gt; 'password',
+]);
+$this-&gt;out("Inserting");
+$populator-&gt;execute(['validate' =&gt; false]);
+</code></pre>
+<blockquote>
+  <p>I’ve added some calls to <code>$this-&gt;out()</code> to provide feedback in my shell. You can omit these or add more as you like. This is a special helper method available in shells</p>
+</blockquote>
+<p>If you run this, you’ll recieve the following output:</p>
+<pre><code>vagrant@precise32:/vagrant/app$ bin/cake dummy_data
+Welcome to CakePHP v3.0.0-beta3 Console
+---------------------------------------------------------------
+App : src
+Path: /vagrant/app/src/
+---------------------------------------------------------------
+Creating user populator
+Inserting
+</code></pre>
+<p>But more importantly, you’ll have 20 beautiful user records with passwords. You should be able to login as any of these users.</p>
+<h2 id="homework-time">Homework time!</h2>
+<p>If you thought you’d get off this week, you thought incorrectly. Your homework is to create dummy data for every model we have in our app - a store without products is kind of useless. You can ignore the <code>Orders</code> and <code>OrderItems</code> models.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-04 14:22:00 +0000">04 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/12/adding-dummy-data-to-our-store/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-12 18:26:00 +0000">12 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -157,12 +163,12 @@ $table = $this-&gt;table('statuses', [
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 4</strong> of <strong>12</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 12</strong> of <strong>12</strong> in the series "CakeAdvent 2014".</p>
     <ol>
       <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li><a href="/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
       <li><a href="/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">Customizing Bake in CakePHP 3</a></li>
-      <li>Schema Migrations with CakePHP 3</li>
+      <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
       <li><a href="/2014/12/05/creating-table-callback-events/">Creating Table Callback Events</a></li>
       <li><a href="/2014/12/06/email-users-when-a-new-comment-is-posted/">Emailing users when a new comment is posted</a></li>
       <li><a href="/2014/12/07/parsing-markdown-comments/">Parsing markdown comments</a></li>
@@ -170,7 +176,7 @@ $table = $this-&gt;table('statuses', [
       <li><a href="/2014/12/09/contributing-to-cakephp/">Contributing to CakePHP</a></li>
       <li><a href="/2014/12/10/designing-a-store-application-in-cakephp/">Designing a Store application in CakePHP</a></li>
       <li><a href="/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/">Adding an Authentication layer to our CakePHP Store</a></li>
-      <li><a href="/2014/12/12/adding-dummy-data-to-our-store/">Adding dummy data via a custom faker shell to our store</a></li>
+      <li>Adding dummy data via a custom faker shell to our store</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -209,9 +215,9 @@ $table = $this-&gt;table('statuses', [
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2014/12/04/schema-migrations-with-cakephp-3/';
-        var disqus_url        = 'http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/';
-        var disqus_title      = "CakeAdvent-2014: Schema Migrations with CakePHP 3";
+        var disqus_identifier = '/2014/12/12/adding-dummy-data-to-our-store/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/12/adding-dummy-data-to-our-store/';
+        var disqus_title      = "CakeAdvent-2014: Adding dummy data via a custom faker shell to our store";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

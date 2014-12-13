@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Adding dummy data via a custom faker shell to our store",
+    "url": "/2014/12/12/adding-dummy-data-to-our-store/",
+    "description": "Part 3 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["adding","cakephp","custom","data","designed","dummy","effectively","faker","part","posts","series","store","teach","use","via"]
+  },
+  {
+    "type": "post",
     "title": "Adding an Authentication layer to our CakePHP Store",
     "url": "/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/",
     "description": "Part 2 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
