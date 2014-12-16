@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 16 Dec 2014 15:11:40 +0000</pubDate>
-    <lastBuildDate>Tue, 16 Dec 2014 15:11:40 +0000</lastBuildDate>
+    <pubDate>Tue, 16 Dec 2014 15:21:23 +0000</pubDate>
+    <lastBuildDate>Tue, 16 Dec 2014 15:21:23 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
     
       <item>
@@ -125,7 +125,7 @@ EventManager::instance()-&amp;gt;attach(function (Event $event) {
       </item>
     
       <item>
-        <title>Adding dummy data via a custom faker shell to our store</title>
+        <title>Processing Payments with CakePHP 3 and Omnipay</title>
         <description>&lt;p&gt;Today we’ll actually process a charge from our user - because making money is nice.&lt;/p&gt;
 
 &lt;p&gt;As good PHP citizens, the CakePHP community does not re-implement existing libraries in the 3.x release - CakeTime with Carbon and the Migrations plugin with Phinx are good examples.&lt;/p&gt;
