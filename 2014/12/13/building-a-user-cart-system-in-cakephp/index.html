@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2014: Building a user cart system in CakePHP</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 4 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="keywords" content="cakeadvent-2014, cakephp, composer, cart-management" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2014: Building a user cart system in CakePHP" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/" />
+    <meta property="og:description" content="Part 4 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2014: Building a user cart system in CakePHP" />
+    <meta name="twitter:description" content="Part 4 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <link rel="alternate" type="application/rss+xml" title="Building a user cart system in CakePHP » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Building a user cart system in CakePHP
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Building a user cart system in CakePHP!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>Today’s post will be fairly straightforward. We should now have dummy data in our application, can browse products, and authenticate as users to actually start using our store. So lets allow people to add items to their carts.</p>
+<p>First thing we’ll need is to customize the methods available to the Products controller. We already have a bake event in our <code>app/config/bootstrap_cli.php</code>, so we’ll add the following bit of code to limit the actions (as well as add two new ones);</p>
+<pre><code class="language-php">if ($isController &amp;&amp; $name == 'Products') {
+    $view-&gt;viewVars['actions'] = ['index', 'view', 'add', 'addToCart', 'removeFromCart'];
+}
+</code></pre>
+<p>Next, we’ll create two new bake controller elements in our <code>src/Template/Bake/Element/Controller</code> directory. One will be our <code>addToCart.ctp</code> file, and the other will be <code>removeFromCart.ctp</code>. This is our <code>addToCart.ctp</code>:</p>
+<pre><code>/**
+ * Add to cart method
+ *
+ * @param string|null $id &lt;%= $singularHumanName %&gt; id
+ * @return void
+ * @throws \Cake\Network\Exception\NotFoundException
+ */
+    public function addToCart($id = null) {
+        $&lt;%= $singularName%&gt; = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;get($id);
+        $event = new \Cake\Event\Event('Order.addToCart', $this, [
+            '&lt;%= $singularName%&gt;' =&gt; $&lt;%= $singularName%&gt;,
+            'user' =&gt; $this-&gt;Auth-&gt;user(),
+        ]);
+        \Cake\Event\EventManager::instance()-&gt;dispatch($event);
+        if ($event-&gt;result) {
+            $this-&gt;Flash-&gt;success('The &lt;%= $singularName%&gt; has been added to your cart.');
+        } else {
+            $this-&gt;Flash-&gt;error('The &lt;%= $singularName%&gt; could not be added to your cart.');
+        }
+        return $this-&gt;redirect($this-&gt;referer());
+    }
+</code></pre>
+<p>And here is our <code>removeFromCart.ctp</code>:</p>
+<pre><code>/**
+ * Remove from cart method
+ *
+ * @param string|null $id &lt;%= $singularHumanName %&gt; id
+ * @return void
+ * @throws \Cake\Network\Exception\NotFoundException
+ */
+    public function removeFromCart($id = null) {
+        $&lt;%= $singularName%&gt; = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;get($id);
+        $event = new \Cake\Event\Event('Order.removeFromCart', $this, [
+            '&lt;%= $singularName%&gt;' =&gt; $&lt;%= $singularName%&gt;,
+            'user' =&gt; $this-&gt;Auth-&gt;user(),
+        ]);
+        \Cake\Event\EventManager::instance()-&gt;dispatch($event);
+        if ($event-&gt;result) {
+            $this-&gt;Flash-&gt;success('The &lt;%= $singularName%&gt; has been removed from your cart.');
+        } else {
+            $this-&gt;Flash-&gt;error('The &lt;%= $singularName%&gt; could not be removed from your cart.');
+        }
+        return $this-&gt;redirect($this-&gt;referer());
+    }
+</code></pre>
+<p>A few notes:</p>
+<ul>
+  <li>We’re using events to add and remove items from our cart. Some people would call table/entity methods directly, but we’re doing this to keep our actions flexible.</li>
+  <li>We use the <code>Table::get()</code> method which may return a <code>NotFoundException</code>. If a user tries to add an invalid product to their cart, we should signal such using the Application’s configured Error Handler.</li>
+  <li>We aren’t handling adding multiple of the same product to our cart just yet. If you’d like to, please modify your templates, but we’re keeping our cart simple.</li>
+</ul>
+<p>We now need to add one of these actions to our <code>/products/index</code> page. We’ll need to first copy over the core <code>index.ctp</code> so we can modify it a bit:</p>
+<pre><code class="language-shell">TEMPLATE_DIR="src/Template/Bake/"
+BAKE_TEMPLATE_DIR="vendor/cakephp/cakephp/src/Template/Bake/"
+cd /vagrant/app
+cp $BAKE_TEMPLATE_DIR/Template/index.ctp $TEMPLATE_DIR/Template/index.ctp
+</code></pre>
+<p>Our new <code>src/Template/Bake/Template/index.ctp</code> does not take a list of related actions to perform on an item, so we’re going to add this. Around line 86, you’ll see a chunk of code that looks like the following:</p>
+<pre><code>&lt;td class="actions"&gt;
+    &lt;?= $this-&gt;Html-&gt;link(__('View'), ['action' =&gt; 'view', &lt;%= $pk %&gt;]) ?&gt;
+    &lt;?= $this-&gt;Html-&gt;link(__('Edit'), ['action' =&gt; 'edit', &lt;%= $pk %&gt;]) ?&gt;
+    &lt;?= $this-&gt;Form-&gt;postLink(__('Delete'), ['action' =&gt; 'delete', &lt;%= $pk %&gt;], ['confirm' =&gt; __('Are you sure you want to delete # {0}?', &lt;%= $pk %&gt;)]) ?&gt;
+&lt;/td&gt;
+</code></pre>
+<p>We’re going to replace it with the following:</p>
+<pre><code>&lt;td class="actions"&gt;
+    &lt;% foreach ($singularActions as $config) : %&gt;
+        &lt;?= $this-&gt;Html-&gt;link(__('&lt;%= $config['title'] %&gt;'), ['action' =&gt; '&lt;%= $config['action'] %&gt;', &lt;%= $pk %&gt;]) ?&gt;
+    &lt;% endforeach; %&gt;
+    &lt;% foreach ($singularConfirmActions as $config) : %&gt;
+        &lt;?= $this-&gt;Form-&gt;postLink(__('&lt;%= $config['title'] %&gt;'), ['action' =&gt; '&lt;%= $config['action'] %&gt;', &lt;%= $pk %&gt;], ['confirm' =&gt; __('&lt;%= $config['message'] %&gt;', &lt;%= $pk %&gt;)) ?&gt;
+    &lt;% endforeach; %&gt;
+&lt;/td&gt;
+</code></pre>
+<p>In the modified template, we’re removing the hardcoded list of actions displayed and introducing two new variables, <code>singularActions</code> and <code>singularConfirmActions</code>. These will act upon a single item listed on the index page. We’ll configure them in our <code>app/config/bootstrap_cli.php</code> with the following new event:</p>
+<pre><code class="language-php">EventManager::instance()-&gt;attach(function (Event $event) {
+    $view = $event-&gt;subject;
+    $name = Hash::get($view-&gt;viewVars, 'pluralHumanName');
+    $isIndexView = strpos($event-&gt;data[0], 'Bake/Template/index.ctp') !== false;
+    if ($isIndexView) {
+        $singularActions = [
+            ['action' =&gt; 'view', 'title' =&gt; 'View'],
+            ['action' =&gt; 'edit', 'title' =&gt; 'Edit'],
+        ];
+        $singularConfirmActions = [
+            ['action' =&gt; 'delete', 'title' =&gt; 'Delete', 'message' =&gt; 'Are you sure you want to delete # {0}?'],
+        ];
+        if ($name == 'Products') {
+            $singularActions = [
+                ['action' =&gt; 'view', 'title' =&gt; 'View'],
+                ['action' =&gt; 'addToCart', 'title' =&gt; 'Add To Cart'],
+            ];
+            $singularConfirmActions = [];
+        }
+        $view-&gt;viewVars['singularActions'] = $singularActions;
+        $view-&gt;viewVars['singularConfirmActions'] = $singularConfirmActions;
+    }
+}, 'Bake.beforeRender');
+</code></pre>
+<p>The above event will allow us to keep all other baked <code>index.ctp</code> template output the same, while allowing us to hijack the actions listed for the <code>Products</code> view to show our <code>Add To Cart</code> link.</p>
+<p>Finally, we will need to actually handle processing of our events. We’ll create an <code>app/config/events.php</code> and include it on our <code>app/config/bootstrap.php</code> like so:</p>
+<pre><code class="language-php">require __DIR__ . '/events.php';
+</code></pre>
+<p>We need two events, one to manage adding a product to the user’s cart, and one to manage removing the product from a user’s cart. We’ll have the user’s session at hand, as well as the product entity. Here is what our <code>Order.addToCart</code> event will look like:</p>
+<pre><code class="language-php">EventManager::instance()-&gt;attach(function (Event $event) {
+    $data = $event-&gt;data;
+    if (empty($data['user'])) {
+        // User is not logged in
+        return $event-&gt;result = false;
+    }
+    if (empty($data['product'])) {
+        // Invalid product specified
+        return $event-&gt;result = false;
+    }
+    $user = $data['user'];
+    $product = $data['product'];
+    if ($product-&gt;stock &lt;= 0) {
+        // No more stock for product
+        return $event-&gt;result = false;
+    }
+    $Orders = TableRegistry::get('Orders');
+    $order = $Orders-&gt;find()
+                    -&gt;where(['user_id' =&gt; $user['id']])
+                    -&gt;first();
+    if (empty($order)) {
+        // Create a new order where necessary
+        $order = $Orders-&gt;newEntity(['user_id' =&gt; $user['id']]);
+        $order = $Orders-&gt;save($order);
+    }
+    $OrderItems = TableRegistry::get('OrderItems');
+    $orderItem = $OrderItems-&gt;newEntity([
+        'order_id' =&gt; $order-&gt;id,
+        'product_id' =&gt; $product-&gt;id,
+        'quantity' =&gt; 1,
+        'price' =&gt; $product-&gt;price,
+    ]);
+    // Save the order item entry
+    if (!$OrderItems-&gt;save($orderItem)) {
+        return $event-&gt;result = false;
+    }
+    // Decrease the amount of stock
+    $Products = TableRegistry::get('Products');
+    $product-&gt;stock--;
+    return $event-&gt;result = !!$Products-&gt;save($product);
+}, 'Order.addToCart');
+</code></pre>
+<p>And our equally-well commented <code>Order.removeFromCart</code> event:</p>
+<pre><code class="language-php">EventManager::instance()-&gt;attach(function (Event $event) {
+    $data = $event-&gt;data;
+    if (empty($data['user'])) {
+        // User is not logged in
+        return $event-&gt;result = false;
+    }
+    if (empty($data['product'])) {
+        // Invalid product specified
+        return $event-&gt;result = false;
+    }
+    $user = $data['user'];
+    $product = $data['product'];
+    $Orders = TableRegistry::get('Orders');
+    $order = $Orders-&gt;find()
+                    -&gt;where(['user_id' =&gt; $user['id']])
+                    -&gt;first();
+    if (empty($order)) {
+        // There is no cart associated with the user
+        return $event-&gt;result = false;
+    }
+    $OrderItems = TableRegistry::get('OrderItems');
+    $orderItem = $OrderItems-&gt;find()
+                            -&gt;where(['order_id' =&gt; $order-&gt;id, 'product_id' =&gt; $product-&gt;id])
+                            -&gt;first();
+    if (empty($orderItem)) {
+        // Item not in user's cart
+        return $event-&gt;result = false;
+    }
+    if (!$OrderItems-&gt;delete($orderItem)) {
+        // Unable to remove item from cart
+        return $event-&gt;result = false;
+    }
+    // Increase product stock
+    $Products = TableRegistry::get('Products');
+    $product-&gt;stock++;
+    return $event-&gt;result = !!$Products-&gt;save($product);
+}, 'Order.removeFromCart');
+</code></pre>
+<blockquote>
+  <p>A real ecommerce solution will have much more stringent protocols surrounding adding/removing stock from a product. We’re doing it this way because it’s much simpler than going through the rabbit-hole, but please keep this in mind if you are building out your own solution for a customer. For instance, consider doing all table manipulation using a transaction.</p>
+</blockquote>
+<p>One last thing. We’ll want a new action to list all the items in a user’s order, as well as a way to actually call our <code>/products/removeFromCart</code> action. We’ll define a new Controller bake template in <code>src/Template/Bake/Element/Controller/cart.ctp</code></p>
+<pre><code>/**
+ * Cart method
+ *
+ * @return void
+ */
+    public function cart() {
+        $user_id = $this-&gt;Auth-&gt;user('id');
+        $&lt;%= $singularName%&gt; = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;find()
+                        -&gt;where(['user_id' =&gt; $user_id])
+                        -&gt;first();
+        if (empty($&lt;%= $singularName%&gt;)) {
+            $&lt;%= $singularName%&gt; = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;newEntity(['user_id' =&gt; $user_id]);
+            $&lt;%= $singularName%&gt; = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;save($&lt;%= $singularName%&gt;);
+        }
+        $items = $this-&gt;&lt;%= $currentModelName %&gt;-&gt;OrderItems-&gt;find()
+                                  -&gt;where(['order_id' =&gt; $&lt;%= $singularName%&gt;-&gt;id])
+                                  -&gt;contain(['Products'])
+                                  -&gt;all();
+        $this-&gt;set(compact('&lt;%= $singularName%&gt;', 'items'));
+    }
+</code></pre>
+<p>And we’ll restrict our <code>Orders</code> controller to just this action in our <code>app/config/bootstrap_cli.php</code> with the following check:</p>
+<pre><code class="language-php">if ($isController &amp;&amp; $name == 'Orders') {
+    $view-&gt;viewVars['actions'] = ['cart'];
+}
+</code></pre>
+<p>And our simple <code>src/Template/Bake/Template/cart.ctp</code> will be the following:</p>
+<pre><code>&lt;div class="orders index large-10 medium-9 columns"&gt;
+    &lt;table cellpadding="0" cellspacing="0"&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Name&lt;/th&gt;
+                &lt;th&gt;Quantity&lt;/th&gt;
+                &lt;th&gt;Price&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            &lt;?php foreach ($items as $item) : ?&gt;
+            &lt;tr&gt;
+                &lt;td&gt;&lt;?= $item-&gt;product-&gt;name ?&gt;&lt;/td&gt;
+                &lt;td&gt;&lt;?= $item-&gt;quantity ?&gt;&lt;/td&gt;
+                &lt;td&gt;&lt;?= $item-&gt;price ?&gt;&lt;/td&gt;
+                &lt;td&gt;
+                    &lt;?= $this-&gt;Html-&gt;link(__('View'), ['controller' =&gt; 'Products', 'action' =&gt; 'view', $item-&gt;product_id]) ?&gt;
+                    &lt;?= $this-&gt;Html-&gt;link(__('Remove from Cart'), ['controller' =&gt; 'Products', 'action' =&gt; 'removeFromCart', $item-&gt;product_id]) ?&gt;
+                &lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;?php endforeach; ?&gt;
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+&lt;/div&gt;
+</code></pre>
+<p>We can <em>now</em> run bake to recreate the respective controllers and templates and we should have a reasonable cart system!</p>
+<pre><code class="language-shell">cd /vagrant/app
+bin/cake bake controller orders -f
+bin/cake bake controller products -f
+bin/cake bake view orders -f
+bin/cake bake view products -f
+</code></pre>
+<p>You can access your cart by going to <code>/orders/cart</code>.</p>
+<h2 id="homework-time">Homework Time</h2>
+<p>Your homework today is as follows:</p>
+<ul>
+  <li>Remove all those extra pesky actions on the index page</li>
+  <li>Add a button to add products to your cart from the product view page</li>
+  <li>Link to the cart in your header (checkout your <code>src/Template/Layout/default.ctp</code>)</li>
+  <li>Add a custom route for <code>/orders/cart</code> to be <code>/cart</code></li>
+  <li>Add a <code>total</code> to your cart page.</li>
+  <li>Require that user’s be authenticated before adding/removing/viewing their cart</li>
+</ul>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-13 17:26:00 +0000">13 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 13</strong> of <strong>15</strong> in the series "CakeAdvent 2014".</p>
+    <ol>
+      <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
+      <li><a href="/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
+      <li><a href="/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">Customizing Bake in CakePHP 3</a></li>
+      <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
+      <li><a href="/2014/12/05/creating-table-callback-events/">Creating Table Callback Events</a></li>
+      <li><a href="/2014/12/06/email-users-when-a-new-comment-is-posted/">Emailing users when a new comment is posted</a></li>
+      <li><a href="/2014/12/07/parsing-markdown-comments/">Parsing markdown comments</a></li>
+      <li><a href="/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/">Closing Issues in our Anonymous Issue Tracker using Events</a></li>
+      <li><a href="/2014/12/09/contributing-to-cakephp/">Contributing to CakePHP</a></li>
+      <li><a href="/2014/12/10/designing-a-store-application-in-cakephp/">Designing a Store application in CakePHP</a></li>
+      <li><a href="/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/">Adding an Authentication layer to our CakePHP Store</a></li>
+      <li><a href="/2014/12/12/adding-dummy-data-to-our-store/">Adding dummy data via a custom faker shell to our store</a></li>
+      <li>Building a user cart system in CakePHP</li>
+      <li><a href="/2014/12/14/processing-payments-with-cakephp-3/">Adding dummy data via a custom faker shell to our store</a></li>
+      <li><a href="/2014/12/15/sending-email-invoices-to-users-on-payment/">Sending email invoices to users on payment</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2014/12/13/building-a-user-cart-system-in-cakephp/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/';
+        var disqus_title      = "CakeAdvent-2014: Building a user cart system in CakePHP";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>

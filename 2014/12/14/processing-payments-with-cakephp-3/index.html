@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2014: Adding dummy data via a custom faker shell to our store</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 5 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="keywords" content="cakeadvent-2014, cakephp, composer, payments, stripe" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2014: Adding dummy data via a custom faker shell to our store" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/" />
+    <meta property="og:description" content="Part 5 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2014: Adding dummy data via a custom faker shell to our store" />
+    <meta name="twitter:description" content="Part 5 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <link rel="alternate" type="application/rss+xml" title="Adding dummy data via a custom faker shell to our store » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Adding dummy data via a custom faker shell to our store
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Adding dummy data via a custom faker shell to our store!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>Today we’ll actually process a charge from our user - because making money is nice.</p>
+<p>As good PHP citizens, the CakePHP community does not re-implement existing libraries in the 3.x release - CakeTime with Carbon and the Migrations plugin with Phinx are good examples.</p>
+<p>Given the CakePHP philosophy, we’ll use the Omnipay library. Omnipay provides a single interface for each payment processor, allowing developers to create a process that works best for their developers.</p>
+<p>First, you’ll want to install Omnipay. We’ll be using stripe to process transactions, so install the omnipay adapter for that as well:</p>
+<pre><code class="language-shell">composer require omnipay/omnipay
+composer require omnipay/stripe
+</code></pre>
+<p>We need to also configure our stripe integration in our <code>app/config/app.php</code> file. We’ll simply add our Stripe’s <code>api_key</code> - found <a href="https://dashboard.stripe.com/account/apikeys">here</a> - as so to the array:</p>
+<pre><code class="language-php">    'Stripe' =&gt; [
+        // using the test keyS for now
+        'secret_key' =&gt; 'sk_test_SOME_KEY',
+        'publishable_key' =&gt; 'pk_test_SOME_KEY',
+    ],
+</code></pre>
+<p>Next, we’ll create a new action in our <code>orders</code> page called <code>checkout</code>. We’ll use bake again so that we can continue to add new actions without modifying the files themselves. Here is what our action - located in <code>src/Template/Bake/Element/Controller/checkout.ctp</code> - will look like (see inline comments for details):</p>
+<pre><code>/**
+ * Checkout method
+ *
+ * @return void
+ */
+    public function checkout() {
+        // Find the existing order
+        $user_id = $this-&gt;Auth-&gt;user('id');
+        $order = $this-&gt;Orders-&gt;find()
+                        -&gt;where(['user_id' =&gt; $user_id])
+                        -&gt;contain(['OrderItems'])
+                        -&gt;first();
+        // Redirect back to the cart if there is no order or any order items
+        if (empty($order) || empty($order-&gt;order_items)) {
+            $this-&gt;Flash-&gt;error(__('No items in cart'));
+            return $this-&gt;redirect(['action' =&gt; 'cart']);
+        }
+        $amount = array_reduce($order-&gt;order_items, function ($carry, $item) {
+            return $carry + $item-&gt;price;
+        }, 0);
+        $this-&gt;set(compact('order', 'amount'));
+        if (!$this-&gt;request-&gt;is('post')) {
+            return;
+        }
+        // Create an Omnipay Stripe gateway object and configure it
+        $gateway = \Omnipay\Omnipay::create('Stripe');
+        $gateway-&gt;setApiKey(\Cake\Core\Configure::read('Stripe.secret_key'));
+        // Create a purchase with the stripe token and the amount in the cart
+        $response = $gateway-&gt;purchase([
+            'amount' =&gt; $amount,
+            'currency' =&gt; 'USD',
+            'token' =&gt; $this-&gt;request-&gt;data('Order.stripeToken')
+        ])-&gt;send();
+        // Check to see if the purchase was successful
+        if ($response-&gt;isSuccessful()) {
+            // Do something with the data
+            \Cake\Log\Log::debug(json_encode($response-&gt;getData()));
+            $this-&gt;Flash-&gt;error(__('Payment successful!'));
+            return $this-&gt;redirect(['action' =&gt; 'cart']);
+        } else {
+            $this-&gt;Flash-&gt;error(__('Error processing payment: {0}', $response-&gt;getMessage()));
+        }
+    }
+</code></pre>
+<p>And this will be our <code>src/Template/Bake/Template/checkout.ctp</code> file. It’s a bit long, but basically it allows a user to submit a credit card to stripe without touching your servers, and then subsequently submits a token to your app that you can use to actually process a payment:</p>
+<pre><code class="language-php">&lt;div class="&lt;%= $pluralVar %&gt; form"&gt;
+&lt;?= $this-&gt;Form-&gt;create(null, ['class' =&gt; 'payment-form']); ?&gt;
+    &lt;fieldset&gt;
+        &lt;legend&gt;&lt;?= __('Enter your details to submit the order ({0} total)', $amount) ?&gt;&lt;/legend&gt;
+        &lt;span class="payment-errors"&gt;&lt;/span&gt;
+        &lt;?= $this-&gt;Form-&gt;input('Order.number', ['label' =&gt; 'Card Number']); ?&gt;
+        &lt;?= $this-&gt;Form-&gt;input('Order.cvc', ['label' =&gt; 'CVC']); ?&gt;
+        &lt;?= $this-&gt;Form-&gt;input('Order.exp-month', ['label' =&gt; 'Expiration Month (MM)']); ?&gt;
+        &lt;?= $this-&gt;Form-&gt;input('Order.exp-year', ['label' =&gt; 'Expiration Year (YYYY)']); ?&gt;
+    &lt;/fieldset&gt;
+    &lt;?= $this-&gt;Form-&gt;button(__('Submit Order')); ?&gt;
+&lt;?= $this-&gt;Form-&gt;end(); ?&gt;
+&lt;/div&gt;
+&lt;script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="https://js.stripe.com/v2/"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+// The JS needs access to the publishable stripe key
+Stripe.setPublishableKey('&lt;?php echo \Cake\Core\Configure::read('Stripe.publishable_key'); ?&gt;');
+// We need to create a callback to process the stripe payement, as
+// well as show errors or submit the token in case of success.
+var stripeResponseHandler = function(status, response) {
+  var $form = $('.payment-form');
+  if (response.error) {
+    // Show the errors on the form
+    $form.find('.payment-errors').text(response.error.message);
+    $form.find('button').prop('disabled', false);
+  } else {
+    // token contains id, last4, and card type
+    var token = response.id;
+    // Reset form data we do not want to submit to the server
+    $('#order-number, #order-cvc, #order-exp-month, #order-xp-year').val("");
+    // Insert the token into the form so it gets submitted to the server
+    $form.append($('&lt;input type="hidden" name="Order[stripeToken]" /&gt;').val(token));
+    // and submit
+    $form.get(0).submit();
+  }
+};
+jQuery(function($) {
+  $('.payment-form').submit(function(e) {
+    // Prevent the form from submitting with the default action
+    e.preventDefault();
+    var $form = $(this);
+    // Disable the submit button to prevent repeated clicks
+    $form.find('button').prop('disabled', true);
+    Stripe.card.createToken({
+      number: $('#order-number').val(),
+      cvc: $('#order-cvc').val(),
+      exp_month: $('#order-exp-month').val(),
+      exp_year: $('#order-exp-year').val()
+    }, stripeResponseHandler);
+  });
+});
+&lt;/script&gt;
+</code></pre>
+<p>Now we need to tell bake to create these this action and it’s related template in our <code>app/config/bootstrap_cli.php</code>. The actions for the <code>Orders</code> controller should look something like the following:</p>
+<pre><code class="language-php">if ($isController &amp;&amp; $name == 'Orders') {
+    $view-&gt;viewVars['actions'] = ['cart', 'checkout'];
+}
+</code></pre>
+<p>And we can now rebake the controller and templates for the OrdersController:</p>
+<pre><code class="language-shell">cd /vagrant/app
+bin/cake bake controller orders -f
+bin/cake bake view orders -f
+</code></pre>
+<p>Assuming you are using test credentials, you can use the card number <code>4242424242424242</code> with any CVC and a valid expiration date to successfully complete a purchase.</p>
+<h2 id="homework-time">Homework Time!</h2>
+<p>While our cart is getting there - only two more posts to go! - we still need to add a few features to actually complete the transaction process. These features are strictly up to you to implement, though I’ve included pointers where necessary:</p>
+<ul>
+  <li>Store the response from stripe in our database. I would create a <code>payments</code> table and store all the data related to an order payment there.</li>
+  <li>Mark an order as “paid”. Once paid, we can then do any extra processing necessary. Perhaps trigger a Cake Event that we can use to handle the actual “shipping” of products.</li>
+  <li>Ensure that user’s don’t accidentally pay twice. We can do this by making any retrieval of the <code>Order</code> require that an order be in a <code>pending</code> state (and make all orders pending by default). You can quite easily write a migration for this.</li>
+  <li>Add a <em>Successful Payment</em> page that we redirect to once payment has been made.</li>
+  <li>Add an Order status page, as well as a page to view all of a user’s orders.</li>
+</ul>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-14 17:26:00 +0000">14 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 14</strong> of <strong>15</strong> in the series "CakeAdvent 2014".</p>
+    <ol>
+      <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
+      <li><a href="/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
+      <li><a href="/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/">Customizing Bake in CakePHP 3</a></li>
+      <li><a href="/2014/12/04/schema-migrations-with-cakephp-3/">Schema Migrations with CakePHP 3</a></li>
+      <li><a href="/2014/12/05/creating-table-callback-events/">Creating Table Callback Events</a></li>
+      <li><a href="/2014/12/06/email-users-when-a-new-comment-is-posted/">Emailing users when a new comment is posted</a></li>
+      <li><a href="/2014/12/07/parsing-markdown-comments/">Parsing markdown comments</a></li>
+      <li><a href="/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/">Closing Issues in our Anonymous Issue Tracker using Events</a></li>
+      <li><a href="/2014/12/09/contributing-to-cakephp/">Contributing to CakePHP</a></li>
+      <li><a href="/2014/12/10/designing-a-store-application-in-cakephp/">Designing a Store application in CakePHP</a></li>
+      <li><a href="/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/">Adding an Authentication layer to our CakePHP Store</a></li>
+      <li><a href="/2014/12/12/adding-dummy-data-to-our-store/">Adding dummy data via a custom faker shell to our store</a></li>
+      <li><a href="/2014/12/13/building-a-user-cart-system-in-cakephp/">Building a user cart system in CakePHP</a></li>
+      <li>Adding dummy data via a custom faker shell to our store</li>
+      <li><a href="/2014/12/15/sending-email-invoices-to-users-on-payment/">Sending email invoices to users on payment</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2014/12/14/processing-payments-with-cakephp-3/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/';
+        var disqus_title      = "CakeAdvent-2014: Adding dummy data via a custom faker shell to our store";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>

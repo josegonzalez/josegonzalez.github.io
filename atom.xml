@@ -4,13 +4,37 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2014-12-13T00:21:43+00:00</updated>
+ <updated>2014-12-16T15:11:40+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Sending email invoices to users on payment]]></title>
+   <link href="http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/"/>
+   <updated>2014-12-15T13:42:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/</id>
+   <content type="html"><![CDATA[Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[Adding dummy data via a custom faker shell to our store]]></title>
+   <link href="http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/"/>
+   <updated>2014-12-14T17:26:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/</id>
+   <content type="html"><![CDATA[Part 5 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[Building a user cart system in CakePHP]]></title>
+   <link href="http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/"/>
+   <updated>2014-12-13T17:26:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/</id>
+   <content type="html"><![CDATA[Part 4 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Adding dummy data via a custom faker shell to our store]]></title>

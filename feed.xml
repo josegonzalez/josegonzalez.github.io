@@ -5,9 +5,661 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 13 Dec 2014 00:21:43 +0000</pubDate>
-    <lastBuildDate>Sat, 13 Dec 2014 00:21:43 +0000</lastBuildDate>
+    <pubDate>Tue, 16 Dec 2014 15:11:40 +0000</pubDate>
+    <lastBuildDate>Tue, 16 Dec 2014 15:11:40 +0000</lastBuildDate>
     <generator>Jekyll v2.5.2</generator>
+    
+      <item>
+        <title>Sending email invoices to users on payment</title>
+        <description>&lt;p&gt;Once a user has made a purchase, they will likely want some sort of proof that the purchase went through. We can send them an email at every step of the way. We’ll start by sending an email as soon as the purchase was completed.&lt;/p&gt;
+
+&lt;p&gt;CakePHP’s email system allows us to use Templates to send email. We previously briefly covered email sending while building the anonymous issue tracker - though simply using raw messages. CakePHP is capable of sending messages both as plaintext and as html, and is also capable of wrapping emails in layouts. Here is a simple, contrived example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Load the class at the top of your class using the `use` statement
+use Cake\Network\Email\Email;
+
+// Construct an email object
+$email = new Email();
+
+// Send the email using the template in `src/Template/Email/TYPE/herp.ctp`
+// and the layout in `src/Template/Layout/Email/TYPE/derp.ctp`
+// Type is the type of the message
+$email-&amp;gt;template('herp', 'derp');
+
+// Send the email as a multi-part type message, both as `text` and `html`.
+// This means that the previous `template` call configures 4 different
+// files for use when sending
+$email-&amp;gt;emailFormat('both');
+
+// Send the email to this user
+$email-&amp;gt;to('camilla@number1.com');
+
+// Specify this user to send as
+$email-&amp;gt;from('app@domain.com');
+
+// Actually send the email!
+$email-&amp;gt;send();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;What we are going to do is send a simple, plain-text email that uses a text template and a text layout. Let’s start by creating a &lt;code&gt;src/Template/Email/text/purchase.ctp&lt;/code&gt; file with the following contents:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Hi!
+
+We're messaging you to let you know someone made a purchase for &amp;lt;?= $amount ?&amp;gt; at &amp;lt;?= $purchase_time ?&amp;gt; under the email &amp;lt;?= $user['email'] ?&amp;gt;. If this seems incorrect, let us know!
+
+The following items were purchased:
+
+&amp;lt;?php foreach ($order_items as $order_item) :?&amp;gt;
+- &amp;lt;?= $order_item-&amp;gt;product-&amp;gt;name ?&amp;gt;: $&amp;lt;?= $order_item-&amp;gt;price ?&amp;gt;
+&amp;lt;?php endforeach; ?&amp;gt;
+
+If you have any questions, feel free to respond to this email!
+
+- Awesome Store
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;While we won’t modify the default text layout, please note that the default CakePHP layouts contain a message stating that the email was sent from the CakePHP framework. You can remove these if you like&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Now that we have our email set, lets create a new event in our &lt;code&gt;app/config/events.php&lt;/code&gt; that we can use to send the email. We’ll call it &lt;code&gt;Order.postPurchase&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Network\Email\Email;
+
+EventManager::instance()-&amp;gt;attach(function (Event $event) {
+  $amount = $event-&amp;gt;data['amount'];
+  $order_items = $event-&amp;gt;data['order']-&amp;gt;order_items;
+  $purchase_time = date('Y-m-d H:i:s');
+  $user = $event-&amp;gt;data['user'];
+
+  $email = new Email();
+  $email-&amp;gt;template('purchase', 'default')
+      -&amp;gt;emailFormat('text')
+      -&amp;gt;to($user['email'])
+      -&amp;gt;from('store@example.com')
+      -&amp;gt;viewVars(compact('amount', 'order_items', 'purchase_time', 'user'))
+      -&amp;gt;send();
+}, 'Order.postPurchase');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll ensure we actually trigger this event in our &lt;code&gt;checkout&lt;/code&gt; action. Modify the bake &lt;code&gt;checkout.ctp&lt;/code&gt; element to include the following when the &lt;code&gt;$response-&amp;gt;isSuccessful()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$event = new \Cake\Event\Event('Order.postPurchase', $this, [
+    'amount' =&amp;gt; $amount,
+    'order' =&amp;gt; $order,
+    'user' =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
+]);
+\Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You’ll need configure your email settings in &lt;code&gt;app/config/app.php&lt;/code&gt;, but once you do, we will be sending users email whenever they’ve successfully completed a purchase! Note that now that we are using templates, we can &lt;em&gt;also&lt;/em&gt; use helpers as you would in any other template file, which allows you to build more complex emails and drive campaigns to users.&lt;/p&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time&lt;/h2&gt;
+
+&lt;p&gt;You can actually do a few cool things with email - that I’ve done in other CakePHP websites and other frameworks:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Log all emails to CLI and the Database when in Debug mode so that you can view what &lt;em&gt;would&lt;/em&gt; have been sent to a user instead of potentially spamming users. CakePHP allows you to build arbitrary Transport classes to make this possible.&lt;/li&gt;
+  &lt;li&gt;Make a PostPurchaseEmail class that can take all it’s configuration within the constructor. This way you can simply instantiate that particular email class and let it worry about how it should configure the email.&lt;/li&gt;
+  &lt;li&gt;Send both an html and a text representation of the same email. &lt;a href=&quot;http://templates.mailchimp.com/&quot;&gt;Mailchimp provides some templates&lt;/a&gt; you can model your email layouts after to get wider email client support.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+
+</description>
+        <pubDate>Mon, 15 Dec 2014 13:42:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/</guid>
+        
+        <category>cakeadvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>email</category>
+        
+        <category>templates</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Adding dummy data via a custom faker shell to our store</title>
+        <description>&lt;p&gt;Today we’ll actually process a charge from our user - because making money is nice.&lt;/p&gt;
+
+&lt;p&gt;As good PHP citizens, the CakePHP community does not re-implement existing libraries in the 3.x release - CakeTime with Carbon and the Migrations plugin with Phinx are good examples.&lt;/p&gt;
+
+&lt;p&gt;Given the CakePHP philosophy, we’ll use the Omnipay library. Omnipay provides a single interface for each payment processor, allowing developers to create a process that works best for their developers.&lt;/p&gt;
+
+&lt;p&gt;First, you’ll want to install Omnipay. We’ll be using stripe to process transactions, so install the omnipay adapter for that as well:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require omnipay/omnipay
+composer require omnipay/stripe
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We need to also configure our stripe integration in our &lt;code&gt;app/config/app.php&lt;/code&gt; file. We’ll simply add our Stripe’s &lt;code&gt;api_key&lt;/code&gt; - found &lt;a href=&quot;https://dashboard.stripe.com/account/apikeys&quot;&gt;here&lt;/a&gt; - as so to the array:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    'Stripe' =&amp;gt; [
+        // using the test keyS for now
+        'secret_key' =&amp;gt; 'sk_test_SOME_KEY',
+        'publishable_key' =&amp;gt; 'pk_test_SOME_KEY',
+    ],
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll create a new action in our &lt;code&gt;orders&lt;/code&gt; page called &lt;code&gt;checkout&lt;/code&gt;. We’ll use bake again so that we can continue to add new actions without modifying the files themselves. Here is what our action - located in &lt;code&gt;src/Template/Bake/Element/Controller/checkout.ctp&lt;/code&gt; - will look like (see inline comments for details):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/**
+ * Checkout method
+ *
+ * @return void
+ */
+    public function checkout() {
+        // Find the existing order
+        $user_id = $this-&amp;gt;Auth-&amp;gt;user('id');
+        $order = $this-&amp;gt;Orders-&amp;gt;find()
+                        -&amp;gt;where(['user_id' =&amp;gt; $user_id])
+                        -&amp;gt;contain(['OrderItems'])
+                        -&amp;gt;first();
+
+        // Redirect back to the cart if there is no order or any order items
+        if (empty($order) || empty($order-&amp;gt;order_items)) {
+            $this-&amp;gt;Flash-&amp;gt;error(__('No items in cart'));
+            return $this-&amp;gt;redirect(['action' =&amp;gt; 'cart']);
+        }
+
+        $amount = array_reduce($order-&amp;gt;order_items, function ($carry, $item) {
+            return $carry + $item-&amp;gt;price;
+        }, 0);
+
+        $this-&amp;gt;set(compact('order', 'amount'));
+        if (!$this-&amp;gt;request-&amp;gt;is('post')) {
+            return;
+        }
+
+        // Create an Omnipay Stripe gateway object and configure it
+        $gateway = \Omnipay\Omnipay::create('Stripe');
+        $gateway-&amp;gt;setApiKey(\Cake\Core\Configure::read('Stripe.secret_key'));
+
+        // Create a purchase with the stripe token and the amount in the cart
+        $response = $gateway-&amp;gt;purchase([
+            'amount' =&amp;gt; $amount,
+            'currency' =&amp;gt; 'USD',
+            'token' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('Order.stripeToken')
+        ])-&amp;gt;send();
+
+        // Check to see if the purchase was successful
+        if ($response-&amp;gt;isSuccessful()) {
+            // Do something with the data
+            \Cake\Log\Log::debug(json_encode($response-&amp;gt;getData()));
+
+            $this-&amp;gt;Flash-&amp;gt;error(__('Payment successful!'));
+            return $this-&amp;gt;redirect(['action' =&amp;gt; 'cart']);
+        } else {
+            $this-&amp;gt;Flash-&amp;gt;error(__('Error processing payment: {0}', $response-&amp;gt;getMessage()));
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And this will be our &lt;code&gt;src/Template/Bake/Template/checkout.ctp&lt;/code&gt; file. It’s a bit long, but basically it allows a user to submit a credit card to stripe without touching your servers, and then subsequently submits a token to your app that you can use to actually process a payment:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;&amp;lt;%= $pluralVar %&amp;gt; form&quot;&amp;gt;
+&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create(null, ['class' =&amp;gt; 'payment-form']); ?&amp;gt;
+    &amp;lt;fieldset&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __('Enter your details to submit the order ({0} total)', $amount) ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;span class=&quot;payment-errors&quot;&amp;gt;&amp;lt;/span&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('Order.number', ['label' =&amp;gt; 'Card Number']); ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('Order.cvc', ['label' =&amp;gt; 'CVC']); ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('Order.exp-month', ['label' =&amp;gt; 'Expiration Month (MM)']); ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('Order.exp-year', ['label' =&amp;gt; 'Expiration Year (YYYY)']); ?&amp;gt;
+    &amp;lt;/fieldset&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__('Submit Order')); ?&amp;gt;
+&amp;lt;?= $this-&amp;gt;Form-&amp;gt;end(); ?&amp;gt;
+&amp;lt;/div&amp;gt;
+
+&amp;lt;script type=&quot;text/javascript&quot; src=&quot;http://code.jquery.com/jquery-1.10.2.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+&amp;lt;script type=&quot;text/javascript&quot; src=&quot;https://js.stripe.com/v2/&quot;&amp;gt;&amp;lt;/script&amp;gt;
+&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+// The JS needs access to the publishable stripe key
+Stripe.setPublishableKey('&amp;lt;?php echo \Cake\Core\Configure::read('Stripe.publishable_key'); ?&amp;gt;');
+
+// We need to create a callback to process the stripe payement, as
+// well as show errors or submit the token in case of success.
+var stripeResponseHandler = function(status, response) {
+  var $form = $('.payment-form');
+
+  if (response.error) {
+    // Show the errors on the form
+    $form.find('.payment-errors').text(response.error.message);
+    $form.find('button').prop('disabled', false);
+  } else {
+    // token contains id, last4, and card type
+    var token = response.id;
+    // Reset form data we do not want to submit to the server
+    $('#order-number, #order-cvc, #order-exp-month, #order-xp-year').val(&quot;&quot;);
+    // Insert the token into the form so it gets submitted to the server
+    $form.append($('&amp;lt;input type=&quot;hidden&quot; name=&quot;Order[stripeToken]&quot; /&amp;gt;').val(token));
+    // and submit
+    $form.get(0).submit();
+  }
+};
+
+jQuery(function($) {
+  $('.payment-form').submit(function(e) {
+    // Prevent the form from submitting with the default action
+    e.preventDefault();
+
+    var $form = $(this);
+
+    // Disable the submit button to prevent repeated clicks
+    $form.find('button').prop('disabled', true);
+
+    Stripe.card.createToken({
+      number: $('#order-number').val(),
+      cvc: $('#order-cvc').val(),
+      exp_month: $('#order-exp-month').val(),
+      exp_year: $('#order-exp-year').val()
+    }, stripeResponseHandler);
+  });
+});
+&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we need to tell bake to create these this action and it’s related template in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;. The actions for the &lt;code&gt;Orders&lt;/code&gt; controller should look something like the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == 'Orders') {
+    $view-&amp;gt;viewVars['actions'] = ['cart', 'checkout'];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we can now rebake the controller and templates for the OrdersController:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
+bin/cake bake controller orders -f
+bin/cake bake view orders -f
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Assuming you are using test credentials, you can use the card number &lt;code&gt;4242424242424242&lt;/code&gt; with any CVC and a valid expiration date to successfully complete a purchase.&lt;/p&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h2&gt;
+
+&lt;p&gt;While our cart is getting there - only two more posts to go! - we still need to add a few features to actually complete the transaction process. These features are strictly up to you to implement, though I’ve included pointers where necessary:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Store the response from stripe in our database. I would create a &lt;code&gt;payments&lt;/code&gt; table and store all the data related to an order payment there.&lt;/li&gt;
+  &lt;li&gt;Mark an order as “paid”. Once paid, we can then do any extra processing necessary. Perhaps trigger a Cake Event that we can use to handle the actual “shipping” of products.&lt;/li&gt;
+  &lt;li&gt;Ensure that user’s don’t accidentally pay twice. We can do this by making any retrieval of the &lt;code&gt;Order&lt;/code&gt; require that an order be in a &lt;code&gt;pending&lt;/code&gt; state (and make all orders pending by default). You can quite easily write a migration for this.&lt;/li&gt;
+  &lt;li&gt;Add a &lt;em&gt;Successful Payment&lt;/em&gt; page that we redirect to once payment has been made.&lt;/li&gt;
+  &lt;li&gt;Add an Order status page, as well as a page to view all of a user’s orders.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+
+</description>
+        <pubDate>Sun, 14 Dec 2014 17:26:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/</guid>
+        
+        <category>cakeadvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        <category>payments</category>
+        
+        <category>stripe</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Building a user cart system in CakePHP</title>
+        <description>&lt;p&gt;Today’s post will be fairly straightforward. We should now have dummy data in our application, can browse products, and authenticate as users to actually start using our store. So lets allow people to add items to their carts.&lt;/p&gt;
+
+&lt;p&gt;First thing we’ll need is to customize the methods available to the Products controller. We already have a bake event in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;, so we’ll add the following bit of code to limit the actions (as well as add two new ones);&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == 'Products') {
+    $view-&amp;gt;viewVars['actions'] = ['index', 'view', 'add', 'addToCart', 'removeFromCart'];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll create two new bake controller elements in our &lt;code&gt;src/Template/Bake/Element/Controller&lt;/code&gt; directory. One will be our &lt;code&gt;addToCart.ctp&lt;/code&gt; file, and the other will be &lt;code&gt;removeFromCart.ctp&lt;/code&gt;. This is our &lt;code&gt;addToCart.ctp&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/**
+ * Add to cart method
+ *
+ * @param string|null $id &amp;lt;%= $singularHumanName %&amp;gt; id
+ * @return void
+ * @throws \Cake\Network\Exception\NotFoundException
+ */
+    public function addToCart($id = null) {
+        $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;get($id);
+        $event = new \Cake\Event\Event('Order.addToCart', $this, [
+            '&amp;lt;%= $singularName%&amp;gt;' =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;,
+            'user' =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
+        ]);
+        \Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
+        if ($event-&amp;gt;result) {
+            $this-&amp;gt;Flash-&amp;gt;success('The &amp;lt;%= $singularName%&amp;gt; has been added to your cart.');
+        } else {
+            $this-&amp;gt;Flash-&amp;gt;error('The &amp;lt;%= $singularName%&amp;gt; could not be added to your cart.');
+        }
+        return $this-&amp;gt;redirect($this-&amp;gt;referer());
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is our &lt;code&gt;removeFromCart.ctp&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/**
+ * Remove from cart method
+ *
+ * @param string|null $id &amp;lt;%= $singularHumanName %&amp;gt; id
+ * @return void
+ * @throws \Cake\Network\Exception\NotFoundException
+ */
+    public function removeFromCart($id = null) {
+        $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;get($id);
+        $event = new \Cake\Event\Event('Order.removeFromCart', $this, [
+            '&amp;lt;%= $singularName%&amp;gt;' =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;,
+            'user' =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
+        ]);
+        \Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
+        if ($event-&amp;gt;result) {
+            $this-&amp;gt;Flash-&amp;gt;success('The &amp;lt;%= $singularName%&amp;gt; has been removed from your cart.');
+        } else {
+            $this-&amp;gt;Flash-&amp;gt;error('The &amp;lt;%= $singularName%&amp;gt; could not be removed from your cart.');
+        }
+        return $this-&amp;gt;redirect($this-&amp;gt;referer());
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We’re using events to add and remove items from our cart. Some people would call table/entity methods directly, but we’re doing this to keep our actions flexible.&lt;/li&gt;
+  &lt;li&gt;We use the &lt;code&gt;Table::get()&lt;/code&gt; method which may return a &lt;code&gt;NotFoundException&lt;/code&gt;. If a user tries to add an invalid product to their cart, we should signal such using the Application’s configured Error Handler.&lt;/li&gt;
+  &lt;li&gt;We aren’t handling adding multiple of the same product to our cart just yet. If you’d like to, please modify your templates, but we’re keeping our cart simple.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We now need to add one of these actions to our &lt;code&gt;/products/index&lt;/code&gt; page. We’ll need to first copy over the core &lt;code&gt;index.ctp&lt;/code&gt; so we can modify it a bit:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;TEMPLATE_DIR=&quot;src/Template/Bake/&quot;
+BAKE_TEMPLATE_DIR=&quot;vendor/cakephp/cakephp/src/Template/Bake/&quot;
+cd /vagrant/app
+cp $BAKE_TEMPLATE_DIR/Template/index.ctp $TEMPLATE_DIR/Template/index.ctp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Our new &lt;code&gt;src/Template/Bake/Template/index.ctp&lt;/code&gt; does not take a list of related actions to perform on an item, so we’re going to add this. Around line 86, you’ll see a chunk of code that looks like the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;td class=&quot;actions&quot;&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('View'), ['action' =&amp;gt; 'view', &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('Edit'), ['action' =&amp;gt; 'edit', &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;postLink(__('Delete'), ['action' =&amp;gt; 'delete', &amp;lt;%= $pk %&amp;gt;], ['confirm' =&amp;gt; __('Are you sure you want to delete # {0}?', &amp;lt;%= $pk %&amp;gt;)]) ?&amp;gt;
+&amp;lt;/td&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’re going to replace it with the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;td class=&quot;actions&quot;&amp;gt;
+    &amp;lt;% foreach ($singularActions as $config) : %&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('&amp;lt;%= $config['title'] %&amp;gt;'), ['action' =&amp;gt; '&amp;lt;%= $config['action'] %&amp;gt;', &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
+    &amp;lt;% endforeach; %&amp;gt;
+    &amp;lt;% foreach ($singularConfirmActions as $config) : %&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;postLink(__('&amp;lt;%= $config['title'] %&amp;gt;'), ['action' =&amp;gt; '&amp;lt;%= $config['action'] %&amp;gt;', &amp;lt;%= $pk %&amp;gt;], ['confirm' =&amp;gt; __('&amp;lt;%= $config['message'] %&amp;gt;', &amp;lt;%= $pk %&amp;gt;)) ?&amp;gt;
+    &amp;lt;% endforeach; %&amp;gt;
+&amp;lt;/td&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the modified template, we’re removing the hardcoded list of actions displayed and introducing two new variables, &lt;code&gt;singularActions&lt;/code&gt; and &lt;code&gt;singularConfirmActions&lt;/code&gt;. These will act upon a single item listed on the index page. We’ll configure them in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt; with the following new event:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
+    $view = $event-&amp;gt;subject;
+    $name = Hash::get($view-&amp;gt;viewVars, 'pluralHumanName');
+    $isIndexView = strpos($event-&amp;gt;data[0], 'Bake/Template/index.ctp') !== false;
+
+    if ($isIndexView) {
+        $singularActions = [
+            ['action' =&amp;gt; 'view', 'title' =&amp;gt; 'View'],
+            ['action' =&amp;gt; 'edit', 'title' =&amp;gt; 'Edit'],
+        ];
+        $singularConfirmActions = [
+            ['action' =&amp;gt; 'delete', 'title' =&amp;gt; 'Delete', 'message' =&amp;gt; 'Are you sure you want to delete # {0}?'],
+        ];
+        if ($name == 'Products') {
+            $singularActions = [
+                ['action' =&amp;gt; 'view', 'title' =&amp;gt; 'View'],
+                ['action' =&amp;gt; 'addToCart', 'title' =&amp;gt; 'Add To Cart'],
+            ];
+            $singularConfirmActions = [];
+        }
+
+        $view-&amp;gt;viewVars['singularActions'] = $singularActions;
+        $view-&amp;gt;viewVars['singularConfirmActions'] = $singularConfirmActions;
+    }
+}, 'Bake.beforeRender');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above event will allow us to keep all other baked &lt;code&gt;index.ctp&lt;/code&gt; template output the same, while allowing us to hijack the actions listed for the &lt;code&gt;Products&lt;/code&gt; view to show our &lt;code&gt;Add To Cart&lt;/code&gt; link.&lt;/p&gt;
+
+&lt;p&gt;Finally, we will need to actually handle processing of our events. We’ll create an &lt;code&gt;app/config/events.php&lt;/code&gt; and include it on our &lt;code&gt;app/config/bootstrap.php&lt;/code&gt; like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;require __DIR__ . '/events.php';
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We need two events, one to manage adding a product to the user’s cart, and one to manage removing the product from a user’s cart. We’ll have the user’s session at hand, as well as the product entity. Here is what our &lt;code&gt;Order.addToCart&lt;/code&gt; event will look like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
+    $data = $event-&amp;gt;data;
+    if (empty($data['user'])) {
+        // User is not logged in
+        return $event-&amp;gt;result = false;
+    }
+
+    if (empty($data['product'])) {
+        // Invalid product specified
+        return $event-&amp;gt;result = false;
+    }
+
+    $user = $data['user'];
+    $product = $data['product'];
+    if ($product-&amp;gt;stock &amp;lt;= 0) {
+        // No more stock for product
+        return $event-&amp;gt;result = false;
+    }
+
+    $Orders = TableRegistry::get('Orders');
+    $order = $Orders-&amp;gt;find()
+                    -&amp;gt;where(['user_id' =&amp;gt; $user['id']])
+                    -&amp;gt;first();
+
+    if (empty($order)) {
+        // Create a new order where necessary
+        $order = $Orders-&amp;gt;newEntity(['user_id' =&amp;gt; $user['id']]);
+        $order = $Orders-&amp;gt;save($order);
+    }
+
+    $OrderItems = TableRegistry::get('OrderItems');
+    $orderItem = $OrderItems-&amp;gt;newEntity([
+        'order_id' =&amp;gt; $order-&amp;gt;id,
+        'product_id' =&amp;gt; $product-&amp;gt;id,
+        'quantity' =&amp;gt; 1,
+        'price' =&amp;gt; $product-&amp;gt;price,
+    ]);
+
+    // Save the order item entry
+    if (!$OrderItems-&amp;gt;save($orderItem)) {
+        return $event-&amp;gt;result = false;
+    }
+
+    // Decrease the amount of stock
+    $Products = TableRegistry::get('Products');
+    $product-&amp;gt;stock--;
+    return $event-&amp;gt;result = !!$Products-&amp;gt;save($product);
+}, 'Order.addToCart');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And our equally-well commented &lt;code&gt;Order.removeFromCart&lt;/code&gt; event:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
+    $data = $event-&amp;gt;data;
+    if (empty($data['user'])) {
+        // User is not logged in
+        return $event-&amp;gt;result = false;
+    }
+
+    if (empty($data['product'])) {
+        // Invalid product specified
+        return $event-&amp;gt;result = false;
+    }
+
+    $user = $data['user'];
+    $product = $data['product'];
+
+    $Orders = TableRegistry::get('Orders');
+    $order = $Orders-&amp;gt;find()
+                    -&amp;gt;where(['user_id' =&amp;gt; $user['id']])
+                    -&amp;gt;first();
+
+    if (empty($order)) {
+        // There is no cart associated with the user
+        return $event-&amp;gt;result = false;
+    }
+
+    $OrderItems = TableRegistry::get('OrderItems');
+    $orderItem = $OrderItems-&amp;gt;find()
+                            -&amp;gt;where(['order_id' =&amp;gt; $order-&amp;gt;id, 'product_id' =&amp;gt; $product-&amp;gt;id])
+                            -&amp;gt;first();
+
+    if (empty($orderItem)) {
+        // Item not in user's cart
+        return $event-&amp;gt;result = false;
+    }
+
+    if (!$OrderItems-&amp;gt;delete($orderItem)) {
+        // Unable to remove item from cart
+        return $event-&amp;gt;result = false;
+    }
+
+    // Increase product stock
+    $Products = TableRegistry::get('Products');
+    $product-&amp;gt;stock++;
+    return $event-&amp;gt;result = !!$Products-&amp;gt;save($product);
+}, 'Order.removeFromCart');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;A real ecommerce solution will have much more stringent protocols surrounding adding/removing stock from a product. We’re doing it this way because it’s much simpler than going through the rabbit-hole, but please keep this in mind if you are building out your own solution for a customer. For instance, consider doing all table manipulation using a transaction.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;One last thing. We’ll want a new action to list all the items in a user’s order, as well as a way to actually call our &lt;code&gt;/products/removeFromCart&lt;/code&gt; action. We’ll define a new Controller bake template in &lt;code&gt;src/Template/Bake/Element/Controller/cart.ctp&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/**
+ * Cart method
+ *
+ * @return void
+ */
+    public function cart() {
+        $user_id = $this-&amp;gt;Auth-&amp;gt;user('id');
+        $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;find()
+                        -&amp;gt;where(['user_id' =&amp;gt; $user_id])
+                        -&amp;gt;first();
+
+        if (empty($&amp;lt;%= $singularName%&amp;gt;)) {
+            $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity(['user_id' =&amp;gt; $user_id]);
+            $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;save($&amp;lt;%= $singularName%&amp;gt;);
+        }
+
+        $items = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;OrderItems-&amp;gt;find()
+                                  -&amp;gt;where(['order_id' =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;-&amp;gt;id])
+                                  -&amp;gt;contain(['Products'])
+                                  -&amp;gt;all();
+
+        $this-&amp;gt;set(compact('&amp;lt;%= $singularName%&amp;gt;', 'items'));
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we’ll restrict our &lt;code&gt;Orders&lt;/code&gt; controller to just this action in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt; with the following check:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == 'Orders') {
+    $view-&amp;gt;viewVars['actions'] = ['cart'];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And our simple &lt;code&gt;src/Template/Bake/Template/cart.ctp&lt;/code&gt; will be the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;div class=&quot;orders index large-10 medium-9 columns&quot;&amp;gt;
+    &amp;lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&amp;gt;
+        &amp;lt;thead&amp;gt;
+            &amp;lt;tr&amp;gt;
+                &amp;lt;th&amp;gt;Name&amp;lt;/th&amp;gt;
+                &amp;lt;th&amp;gt;Quantity&amp;lt;/th&amp;gt;
+                &amp;lt;th&amp;gt;Price&amp;lt;/th&amp;gt;
+                &amp;lt;th&amp;gt;Actions&amp;lt;/th&amp;gt;
+            &amp;lt;/tr&amp;gt;
+        &amp;lt;/thead&amp;gt;
+        &amp;lt;tbody&amp;gt;
+            &amp;lt;?php foreach ($items as $item) : ?&amp;gt;
+            &amp;lt;tr&amp;gt;
+                &amp;lt;td&amp;gt;&amp;lt;?= $item-&amp;gt;product-&amp;gt;name ?&amp;gt;&amp;lt;/td&amp;gt;
+                &amp;lt;td&amp;gt;&amp;lt;?= $item-&amp;gt;quantity ?&amp;gt;&amp;lt;/td&amp;gt;
+                &amp;lt;td&amp;gt;&amp;lt;?= $item-&amp;gt;price ?&amp;gt;&amp;lt;/td&amp;gt;
+                &amp;lt;td&amp;gt;
+                    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('View'), ['controller' =&amp;gt; 'Products', 'action' =&amp;gt; 'view', $item-&amp;gt;product_id]) ?&amp;gt;
+                    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('Remove from Cart'), ['controller' =&amp;gt; 'Products', 'action' =&amp;gt; 'removeFromCart', $item-&amp;gt;product_id]) ?&amp;gt;
+                &amp;lt;/td&amp;gt;
+            &amp;lt;/tr&amp;gt;
+            &amp;lt;?php endforeach; ?&amp;gt;
+        &amp;lt;/tbody&amp;gt;
+    &amp;lt;/table&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can &lt;em&gt;now&lt;/em&gt; run bake to recreate the respective controllers and templates and we should have a reasonable cart system!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
+bin/cake bake controller orders -f
+bin/cake bake controller products -f
+bin/cake bake view orders -f
+bin/cake bake view products -f
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can access your cart by going to &lt;code&gt;/orders/cart&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time&lt;/h2&gt;
+
+&lt;p&gt;Your homework today is as follows:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Remove all those extra pesky actions on the index page&lt;/li&gt;
+  &lt;li&gt;Add a button to add products to your cart from the product view page&lt;/li&gt;
+  &lt;li&gt;Link to the cart in your header (checkout your &lt;code&gt;src/Template/Layout/default.ctp&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;Add a custom route for &lt;code&gt;/orders/cart&lt;/code&gt; to be &lt;code&gt;/cart&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Add a &lt;code&gt;total&lt;/code&gt; to your cart page.&lt;/li&gt;
+  &lt;li&gt;Require that user’s be authenticated before adding/removing/viewing their cart&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 13 Dec 2014 17:26:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/</guid>
+        
+        <category>cakeadvent-2014</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        <category>cart management</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Adding dummy data via a custom faker shell to our store</title>
@@ -158,7 +810,7 @@ public function login() {
             $this-&amp;gt;Auth-&amp;gt;setUser($user);
             return $this-&amp;gt;redirect($this-&amp;gt;Auth-&amp;gt;redirectUrl());
         }
-        $this-&amp;gt;Flash-&amp;gt;error(__('Invalid username or password, try again'));
+        $this-&amp;gt;Flash-&amp;gt;error(__('Invalid email or password, try again'));
     }
 }
 &lt;/code&gt;&lt;/pre&gt;
@@ -226,8 +878,8 @@ bin/cake bake controller users -f
 &amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render('auth') ?&amp;gt;
 &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
     &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __('Please enter your username and password') ?&amp;gt;&amp;lt;/legend&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('username') ?&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __('Please enter your email and password') ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('email') ?&amp;gt;
         &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('password') ?&amp;gt;
     &amp;lt;/fieldset&amp;gt;
 &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__('Login')); ?&amp;gt;
@@ -251,7 +903,7 @@ echo $this-&amp;gt;element('form');
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Validation\Validator;` at the top of your class
 public function validationDefault(Validator $validator) {
     return $validator
-        -&amp;gt;notEmpty('username', 'A username is required')
+        -&amp;gt;notEmpty('email', 'An email address is required')
         -&amp;gt;notEmpty('password', 'A password is required');
 }
 &lt;/code&gt;&lt;/pre&gt;
@@ -310,7 +962,7 @@ protected function _setPassword($password) {
   &lt;li&gt;It would be useful to create a shell to pre-seed users from random data or custom data. You may guess what the next blog post will concern :)&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.&lt;/p&gt;
+&lt;p&gt;We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
 </description>
         <pubDate>Thu, 11 Dec 2014 18:26:00 +0000</pubDate>
         <link>http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/</link>
@@ -511,7 +1163,7 @@ Router::scope('/', function ($routes) {
   &lt;li&gt;Much moar&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.&lt;/p&gt;
+&lt;p&gt;We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
 </description>
         <pubDate>Wed, 10 Dec 2014 17:24:00 +0000</pubDate>
         <link>http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/</link>
@@ -935,598 +1587,6 @@ EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, 
         <category>email</category>
         
         <category>entities</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Creating Table Callback Events</title>
-        <description>&lt;p&gt;For yesterday’s homework, you should have generated the following migration:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Phinx\Migration\AbstractMigration;
-
-class WebookUrl extends AbstractMigration {
-  public function change() {
-
-    $table = $this-&amp;gt;table('comments');
-    $table
-      -&amp;gt;addColumn('webhook_url', 'string', [
-        'limit' =&amp;gt; '255',
-        'null' =&amp;gt; '1',
-        'default' =&amp;gt; '',
-      ])
-      -&amp;gt;save();
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A couple other notes (while CakePHP 3 is still in beta):&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Using the field &lt;code&gt;unsigned&lt;/code&gt; is currently invalid. You can either remove those designations from your initial migration, or make them the inverse and use &lt;code&gt;signed&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;In order to properly disable the automatic &lt;code&gt;id&lt;/code&gt; field that phinx does, you’ll need to remove the following from the initial schema &lt;code&gt;$table&lt;/code&gt; instantiations:&lt;/p&gt;
-
-    &lt;pre&gt;&lt;code&gt;-&amp;gt;addColumn('id', 'integer', [
-  'limit' =&amp;gt; '11',
-  'null' =&amp;gt; '',
-  'default' =&amp;gt; '',
-])
-&lt;/code&gt;&lt;/pre&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;To actually start using migrations from now on, you should drop your existing tables (which is okay since we’re starting fresh): and run the following command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
-bin/cake orm_cache clear
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You will also need to make the &lt;code&gt;webhook_url&lt;/code&gt; to the &lt;code&gt;$_accessible&lt;/code&gt; property in your &lt;code&gt;src/Model/Entity/Issue.php&lt;/code&gt; file. You can do this manually (if you have customizations) or with the bake shell:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake model comments --force --no-table
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In future tutorials, we’ll avoid these issues, but just keep this in mind for now.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Webhooks are actually pretty easy to setup. Whenever a comment is created, we’ll want to notify all other comment webhooks that the issue was updated. To do so, we can hook into the &lt;code&gt;CommentsTable::afterSave()&lt;/code&gt; method.&lt;/p&gt;
-
-&lt;p&gt;A &lt;code&gt;Table::afterSave()&lt;/code&gt; call takes the following arguments:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;Event $event&lt;/code&gt;: The actual event that is occurring&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;Entity $entity&lt;/code&gt;: The entity that was just saved&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;ArrayObject $options&lt;/code&gt;: An array of options that was passed into the &lt;code&gt;Table::save()&lt;/code&gt; call.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If you don’t create a concrete &lt;code&gt;afterSave()&lt;/code&gt; method, the event isn’t fired on the Table class, so unfortunately we can’t bind to the global event easily. Instead, we’ll fire a custom &lt;code&gt;CommentsTable.afterSave&lt;/code&gt; event from our own custom &lt;code&gt;afterSave()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function afterSave(Event $event, Entity $entity, ArrayObject $options) {
-  $this-&amp;gt;dispatchEvent('CommentsTable.afterSave', compact('entity', 'options'));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You also will want to include the following classes at the top of your table class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use ArrayObject;
-use Cake\Event\Event;
-use Cake\Orm\Entity;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;In the future, it may be possible to use custom bake events to insert elements into Table and Entity classes. Stay tuned for bake updates!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Now that we’ve fired our custom event, we can add a new event for it! What I like doing is centralizing my global events in an &lt;code&gt;app/config/events.php&lt;/code&gt; file, so lets add the following line to the &lt;code&gt;app/config/bootstrap.php&lt;/code&gt; file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;require __DIR__ . '/events.php';
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll add the following event to our &lt;code&gt;app/config/events.php&lt;/code&gt; file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Event\Event;
-use Cake\Event\EventManager;
-use Cake\Network\Http\Client;
-use Cake\ORM\Entity;
-use Cake\ORM\TableRegistry;
-
-EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $table = TableRegistry::get('Comments');
-    $comments = $table-&amp;gt;find('all')-&amp;gt;where([
-        'Comments.id !=' =&amp;gt; $entity-&amp;gt;id,
-        'Comments.issue_id' =&amp;gt; $entity-&amp;gt;issue_id,
-        'Comments.webhook_url IS NOT' =&amp;gt; null,
-    ]);
-    foreach ($comments as $comment) {
-        $data = $comment-&amp;gt;toArray();
-        unset($data['email_address']);
-        unset($data['webhook_url']);
-
-        $http = new Client();
-        $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($data), [
-          'type' =&amp;gt; 'json'
-        ]);
-    }
-}, 'CommentsTable.afterSave');
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A lot of new code. Lets disect this a bit:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;When you want an arbitrary Table class, you can use &lt;code&gt;TableRegistry::get()&lt;/code&gt; to retrieve it.&lt;/li&gt;
-  &lt;li&gt;The new ORM uses method chaining in order to change the query being used. Note that it is a lazy query, so you need to iterate over the result &lt;em&gt;or&lt;/em&gt; call the methods &lt;code&gt;count()&lt;/code&gt;, &lt;code&gt;all()&lt;/code&gt;, &lt;code&gt;first()&lt;/code&gt;, or &lt;code&gt;firstOrFail()&lt;/code&gt; in order to execute the query. Consult the &lt;a href=&quot;http://book.cakephp.org/3.0/en/orm/query-builder.html&quot;&gt;query builder docs&lt;/a&gt; for more details.&lt;/li&gt;
-  &lt;li&gt;Every entity has a &lt;code&gt;toArray()&lt;/code&gt; method, which uses the &lt;code&gt;Entity::visibleProperties()&lt;/code&gt; method to decide what to expose. You can limit this by adding fields to the &lt;code&gt;$_hidden&lt;/code&gt; Entity property. Out of laziness, we didn’t use any entity features to remove the &lt;code&gt;email_address&lt;/code&gt; field from the array output. See &lt;a href=&quot;http://book.cakephp.org/3.0/en/orm/entities.html#converting-to-arrays-json&quot;&gt;array/json conversion docs&lt;/a&gt; if you’d like to do so.&lt;/li&gt;
-  &lt;li&gt;Every entity is json serializable by default. The EntityTrait class - included in the Entity class - has a &lt;code&gt;jsonSerialize&lt;/code&gt; method which calls &lt;code&gt;toArray()&lt;/code&gt;. Pretty nifty.&lt;/li&gt;
-  &lt;li&gt;CakePHP includes a &lt;a href=&quot;http://book.cakephp.org/3.0/en/core-libraries/httpclient.html&quot;&gt;simple HttpClient&lt;/a&gt; that you can use to interact with external webservices. It’s &lt;em&gt;quite&lt;/em&gt; useful. In our case, we’re specifying that we should post json to the api.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;At this point, you’ll want to regenerate your &lt;code&gt;src/Template/Issues/view.ctp&lt;/code&gt; file in order to add the &lt;code&gt;webhook_url&lt;/code&gt; field to test. You can do so via the following command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;bin/cake bake view issues --force
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now all you need to do is test your integration. You can do so by creating a new issue and adding comments to that issue. If you want to generate a test url, I recommend using the excellent &lt;a href=&quot;http://requestb.in/&quot;&gt;http://requestb.in/&lt;/a&gt; to make a url that captures your response.&lt;/p&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h2&gt;
-
-&lt;p&gt;There is no homework, it’s the weekend :) . Go forth and use your new knowledge to extend your app however you please.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 05 Dec 2014 17:34:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/05/creating-table-callback-events/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/05/creating-table-callback-events/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>models</category>
-        
-        <category>events</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Schema Migrations with CakePHP 3</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;I corrected a few issues with the previous post regarding the redirect and &lt;code&gt;requirePost&lt;/code&gt; event. They’ve been corrected.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;In our previous post, I gave you all some homework:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Make the form actions optional - and turn them off for embedded forms.&lt;/li&gt;
-  &lt;li&gt;Create a nicer comment list than the current version.&lt;/li&gt;
-  &lt;li&gt;Hide the &lt;code&gt;issue_id&lt;/code&gt; field on the form without removing it completely&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;For the first task, you can extract the form actions into a separate element and make the inclusion of that element conditional - default true - on a variable you specify from the event.&lt;/p&gt;
-
-&lt;p&gt;For the second task, using a custom element for related entities is the way to go.&lt;/p&gt;
-
-&lt;p&gt;For the third task, you will want to populate a new variable - lets call it &lt;code&gt;$inputOptions&lt;/code&gt; - and have it be an array of &lt;code&gt;field&lt;/code&gt; =&amp;gt; &lt;code&gt;options&lt;/code&gt; for the field. Each field being output should be in this array with a default empty array as it’s options. You can use the &lt;code&gt;BakeHelper::stringifyList&lt;/code&gt; to turn those options into a nicely formatted string array.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;One thing that is a pain is managing database schema changes. While we had &lt;a href=&quot;https://github.com/cakedc/migrations&quot;&gt;CakeDC/migrations&lt;/a&gt; in the 2.x world, CakePHP 3 is about embracing existing solutions to problems. In CakePHP 3, we’ve delegated the task to the excellent &lt;a href=&quot;https://phinx.org/&quot;&gt;Phinx&lt;/a&gt; library. Phinx is a database migration tool that CakePHP provides a wrapper for with the &lt;a href=&quot;https://github.com/cakephp/migrations&quot;&gt;CakePHP/migrations&lt;/a&gt; plugin. You can use Phinx outside of CakePHP as well, so switching back and forth between CakePHP and other PHP frameworks should be a breeze.&lt;/p&gt;
-
-&lt;p&gt;To install the migrations plugin, we’ll use composer:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
-vagrant ssh
-
-cd /vagrant/app
-composer require cakephp/migrations:dev-master
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;At this point both phinx and the plugin will be installed. Plugins in CakePHP must be enabled before they can be used, and the CakePHP/migrations plugin is no different. Since it’s only useful on the command-line, we’ll enable it with the following code on our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Core\Plugin;
-
-Plugin::load('Migrations');
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that it’s enabled, we can generate our initial migration from the existing database:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-bin/cake bake migration Initial
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The output should be similar to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Welcome to CakePHP v3.0.0-beta3 Console
----------------------------------------------------------------
-App : src
-Path: /vagrant/app/src/
----------------------------------------------------------------
-
-Baking migration class for Connection default
-
-Creating file /vagrant/app/config/Migrations/20141204225440_initial.php
-Wrote `/vagrant/app/config/Migrations/20141204225440_initial.php`
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If we look at that file, we’ll see a phinx-style migration that contains all the information about our current database schema. This can be useful for bootstrapping a new database (though our database works just fine for now). It’s pretty similar to the old migrations plugin - you get an &lt;code&gt;up&lt;/code&gt;, &lt;code&gt;down&lt;/code&gt;, and &lt;code&gt;change&lt;/code&gt; method - but uses an object-oriented approach to changing the database.&lt;/p&gt;
-
-&lt;p&gt;You can rollback any migration with the &lt;code&gt;down()&lt;/code&gt; callback by running the following command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations rollback
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And if you have created new migrations, you can migrate up to them:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;One note, there is currently an issue where the Phinx library auto-includes an auto-increment &lt;code&gt;id&lt;/code&gt; field for every database. This might not be desired for certain tables, in which case you’ll want to manually disable the field:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$table = $this-&amp;gt;table('statuses', [
-    'id' =&amp;gt; false,
-    'primary_key' =&amp;gt; ['id']
-]);
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;For more docs, see the &lt;a href=&quot;http://docs.phinx.org/en/latest/migrations.html#creating-a-new-migration&quot;&gt;phinx documentation here&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h2&gt;
-
-&lt;p&gt;This was a relatively short introduction to database migrations, but I felt it important enough to cover as we’ll be using them extensively over the next few tutorials. Your homework is actually pretty simple. We need to keep track of a &lt;code&gt;webhook_url&lt;/code&gt; string field with a length of 256 characters in our &lt;code&gt;comments&lt;/code&gt; table. Create a new migration and add the field to the table. The command to create an empty migration is as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations create WebhookUrl
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note, there is a bug in Phinx’s - not Cake’s! - templates where the end-docblock for the &lt;code&gt;change()&lt;/code&gt; method is in the wrong place. We’ll get that fixed up before CakePHP 3 goes stable :)&lt;/p&gt;
-</description>
-        <pubDate>Thu, 04 Dec 2014 14:22:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/04/schema-migrations-with-cakephp-3/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>composer</category>
-        
-        <category>migrations</category>
-        
-        <category>phinx</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Customizing Bake in CakePHP 3</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;Note: There was an error in the sql schema for the comments table from yesterday’s post. If you have the old version, please change it with the following statement in mysql:&lt;/p&gt;
-
-  &lt;p&gt;&lt;code&gt;ALTER TABLE database_name.comments CHANGE comment_id issue_id INT&lt;/code&gt;&lt;/p&gt;
-
-  &lt;p&gt;You will also need to regenerate your model classes and clear out the cache:&lt;/p&gt;
-
-  &lt;p&gt;bin/cake bake model comments –force&lt;br /&gt;
-  bin/cake bake model issues –force&lt;br /&gt;
-  bin/cake orm_cache clear&lt;/p&gt;
-
-  &lt;p&gt;I’ve already corrected yesterdays post, so this change may not be necessary for some users.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;CakePHP has always had the Bake shell command - you saw it in action &lt;a href=&quot;http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/&quot;&gt;yesterday&lt;/a&gt; - but it’s always been a bit difficult to work with. You would need to escape your actual php code, making it difficult to actually think about the contents of the template. Thanks to some excellent work by &lt;a href=&quot;http://ad7six.com/&quot;&gt;Andy Dawson&lt;/a&gt;, we now have quite a bit of flexibility in writing bake templates.&lt;/p&gt;
-
-&lt;p&gt;In CakePHP, we can use Helpers and elements in our bake templates. As well, CakePHP uses ASP-style tags - &lt;code&gt;&amp;lt;%&lt;/code&gt;, &lt;code&gt;&amp;lt;%=&lt;/code&gt;, and &lt;code&gt;%&amp;gt;&lt;/code&gt; - to execute php code. This sounds weird, but here is an example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace &amp;lt;%= $namespace %&amp;gt;\View\Helper;
-
-use Cake\View\Helper;
-use Cake\View\View;
-
-/**
- * &amp;lt;%= $name %&amp;gt; helper
- */
-class &amp;lt;%= $name %&amp;gt;Helper extends Helper {
-
-/**
- * Default configuration.
- *
- * @var array
- */
-  protected $_defaultConfig = [];
-
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Any code in enclosed in &lt;code&gt;&amp;lt;%&lt;/code&gt; and &lt;code&gt;%&amp;gt;&lt;/code&gt; is executed by CakePHP - &lt;code&gt;&amp;lt;%=&lt;/code&gt; can be used to auto-echo variables - while everything else is just normal php. The above template - when baking a &lt;code&gt;PostHelper&lt;/code&gt;, for instance - turns into the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\View\Helper;
-
-use Cake\View\Helper;
-use Cake\View\View;
-
-/**
- * Post helper
- */
-class PostHelper extends Helper {
-
-/**
- * Default configuration.
- *
- * @var array
- */
-  protected $_defaultConfig = [];
-
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;As well, the intermediate template is output to your &lt;code&gt;tmp&lt;/code&gt; directory, meaning you can use the intermediate files to figure out what PHP code will be executed when we &lt;em&gt;actually&lt;/em&gt; generate your files. One last thing is that the new View-based bake allows us to hook events into the actual bake process, which means we can add/edit/remove any data going into the view. Pretty cool.&lt;/p&gt;
-
-&lt;p&gt;Now lets actually customize our bake templates. We’re going to customize the controller template to only bake the &lt;code&gt;index&lt;/code&gt;, &lt;code&gt;view&lt;/code&gt; and &lt;code&gt;add&lt;/code&gt; for the issues controller, and modify the views such that the &lt;code&gt;view&lt;/code&gt; will contain a form that people can use to submit comments. To do so, lets attach an event to Bake. Add the following to your &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Event\Event;
-use Cake\Event\EventManager;
-use Cake\Utility\Hash;
-
-EventManager::instance()-&amp;gt;attach(function (Event $event) {
-    $view = $event-&amp;gt;subject;
-    $name = Hash::get($view-&amp;gt;viewVars, 'name');
-    $isController = strpos($event-&amp;gt;data[0], 'Bake/Controller/controller.ctp') !== false;
-    if ($isController !== false &amp;amp;&amp;amp; $name == 'Issues') {
-        $view-&amp;gt;viewVars['actions'] = ['index', 'view', 'add'];
-    }
-    if ($isController &amp;amp;&amp;amp; $name == 'Comments') {
-        $view-&amp;gt;viewVars['actions'] = ['add'];
-    }
-}, 'Bake.beforeRender');
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;In CakePHP 3, shells all include the new &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;, as well as the &lt;code&gt;app/config/bootstrap.php&lt;/code&gt;, which makes cli-only changes like the above a breeze.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This event will:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Attach to the event &lt;code&gt;Bake.beforeRender&lt;/code&gt;, which allows us to modify any data going into the template.&lt;/li&gt;
-  &lt;li&gt;Retrieve the &lt;code&gt;name&lt;/code&gt; of the template (baked tests do not currently populate this variable).&lt;/li&gt;
-  &lt;li&gt;If the &lt;code&gt;filename&lt;/code&gt; ends with &lt;code&gt;Bake/Controller/controller.ctp&lt;/code&gt; - the template used for controllers - and we are baking “issues”, it will force the actions to be just &lt;code&gt;['index', 'view', 'add']&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;We also only allow &lt;code&gt;add&lt;/code&gt; for the &lt;code&gt;Comments&lt;/code&gt; controller&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;To test this, lets run bake:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
-vagrant ssh
-
-cd /vagrant/app
-bin/cake bake controller comments --force
-bin/cake bake controller issues --force
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Bake will force-overwrite (using the &lt;code&gt;--force&lt;/code&gt; argument) your existing Controller and it’s test. If you open them in your editor, you’ll see we only have our desired three actions! The overide for our Comments controller is also in effect :)&lt;/p&gt;
-
-&lt;p&gt;One thing we’ll want to do is exclude &lt;code&gt;GET&lt;/code&gt; requests to the &lt;code&gt;/comments/add&lt;/code&gt; endpoint. Users should only post to it from the form that will be embedded on the &lt;code&gt;/issues/view&lt;/code&gt; page, and it should also redirect back to the issue. After the line setting actions for the &lt;code&gt;Comments&lt;/code&gt; controller, add the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$view-&amp;gt;set('redirect', '[&quot;controller&quot; =&amp;gt; &quot;Issues&quot;, &quot;action&quot; =&amp;gt; &quot;view&quot;, $comment-&amp;gt;issue_id]');
-$view-&amp;gt;set('requirePost', true);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above two variables will be used in our custom &lt;code&gt;src/Template/Bake/Element/Controller/add.ctp&lt;/code&gt;. Controllers use elements to bake each action - meaning we can create custom actions as elements in the aforementioned directory - and the add action is no different. While you can copy the core one to that location, I’ll just show you the updated version we’ll be using:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%
-$compact = [&quot;'&quot; . $singularName . &quot;'&quot;];
-if (empty($redirect)) {
-    $redirect = &quot;['action' =&amp;gt; 'index']&quot;;
-}
-%&amp;gt;
-
-/**
- * Add method
- *
- * @return void
- */
-    public function add() {
-&amp;lt;% if (!empty($requirePost)) : %&amp;gt;
-        if (!$this-&amp;gt;request-&amp;gt;is('post')) {
-            $this-&amp;gt;Flash-&amp;gt;error('This action requires a post request');
-            $this-&amp;gt;redirect($this-&amp;gt;request-&amp;gt;referer());
-        }
-&amp;lt;% endif; %&amp;gt;
-        $&amp;lt;%= $singularName %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity($this-&amp;gt;request-&amp;gt;data);
-        if ($this-&amp;gt;request-&amp;gt;is('post')) {
-            if ($this-&amp;gt;&amp;lt;%= $currentModelName; %&amp;gt;-&amp;gt;save($&amp;lt;%= $singularName %&amp;gt;)) {
-                $this-&amp;gt;Flash-&amp;gt;success('The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; has been saved.');
-                return $this-&amp;gt;redirect(&amp;lt;%= $redirect %&amp;gt;);
-            } else {
-                $this-&amp;gt;Flash-&amp;gt;error('The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; could not be saved. Please, try again.');
-            }
-        }
-&amp;lt;%
-        $associations = array_merge(
-            $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, 'BelongsTo'),
-            $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, 'BelongsToMany')
-        );
-        foreach ($associations as $assoc):
-            $association = $modelObj-&amp;gt;association($assoc);
-            $otherName = $association-&amp;gt;target()-&amp;gt;alias();
-            $otherPlural = $this-&amp;gt;_variableName($otherName);
-%&amp;gt;
-        $&amp;lt;%= $otherPlural %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;&amp;lt;%= $otherName %&amp;gt;-&amp;gt;find('list');
-&amp;lt;%
-            $compact[] = &quot;'$otherPlural'&quot;;
-        endforeach;
-%&amp;gt;
-        $this-&amp;gt;set(compact(&amp;lt;%= join(', ', $compact) %&amp;gt;));
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;There are two small changes here. One is that we default the redirect to a string containing the “index” action. This is a custom variable we added - and are overriding just for the &lt;code&gt;Comments&lt;/code&gt; controller. The &lt;code&gt;$requirePost&lt;/code&gt; variable is also a custom one, and we inserted a bit of logic to require that the request is a post, otherwise we redirect to the referring page :)&lt;/p&gt;
-
-&lt;p&gt;We’ll now modify the &lt;code&gt;view.ctp&lt;/code&gt;  template to include a post form on the issues controller. You can copy the existing one to something we can modify with the following commands:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;TEMPLATE_DIR=&quot;src/Template/Bake/&quot;
-BAKE_TEMPLATE_DIR=&quot;vendor/cakephp/cakephp/src/Template/Bake/&quot;
-cd /vagrant/app
-mkdir -p $TEMPLATE_DIR
-cp $BAKE_TEMPLATE_DIR/Template/view.ctp $TEMPLATE_DIR/Template/view.ctp
-
-## Copy over the form.ctp element file so we can do some light editing
-cp $BAKE_TEMPLATE_DIR/Element/form.ctp $TEMPLATE_DIR/Element/form.ctp
-
-## Also copy over the controller's view.ctp action file
-cp $BAKE_TEMPLATE_DIR/Element/Controller/view.ctp $TEMPLATE_DIR/Element/Controller/view.ctp
-
-## Create a stub element for later use:
-touch $TEMPLATE_DIR/Element/add_related.ctp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We need to modify the &lt;code&gt;form.ctp&lt;/code&gt; to allow us to set a custom action for the &lt;code&gt;POST&lt;/code&gt; request. The following bit of code should replace the line containing &lt;code&gt;$this-&amp;gt;Form-&amp;gt;create&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create($&amp;lt;%= $singularVar %&amp;gt;, &amp;lt;% if (empty($formOptions)) : %&amp;gt;[]&amp;lt;% else : %&amp;gt;&amp;lt;%= var_export($formOptions) %&amp;gt;&amp;lt;% endif;%&amp;gt;); ?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I order to show the related form, we’ll need to modify the &lt;code&gt;Bake/Template/view.ctp&lt;/code&gt; we copied over. It’s rather long and complicated, but we’ll simply add the following line to the end:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%
-if (!empty($relatedForm)) {
-  $this-&amp;gt;element('add_related', $relatedForm);
-}
-%&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, set the following contents in your &lt;code&gt;add_related.ctp&lt;/code&gt; file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%= $this-&amp;gt;element('form', $relatedForm) %&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that the initial setup is done, we need to populate this new &lt;code&gt;$relatedForm&lt;/code&gt; variable in our &lt;code&gt;Bake.beforeRender&lt;/code&gt; event. The following event will do just that:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\ORM\TableRegistry;
-
-EventManager::instance()-&amp;gt;attach(function (Event $event) {
-    $view = $event-&amp;gt;subject;
-    $name = Hash::get($view-&amp;gt;viewVars, 'pluralHumanName');
-    $isAddView = strpos($event-&amp;gt;data[0], 'Bake/Template/view.ctp') !== false;
-    if ($isAddView &amp;amp;&amp;amp; $name == 'Issues') {
-        $modelObj = TableRegistry::get('Comments');
-        $view-&amp;gt;set('relatedForm', [
-            'action' =&amp;gt; 'Add',
-            'schema' =&amp;gt; $modelObj-&amp;gt;schema(),
-            'primaryKey' =&amp;gt; (array)$modelObj-&amp;gt;primaryKey(),
-            'displayField' =&amp;gt; $modelObj-&amp;gt;displayField(),
-            'singularVar' =&amp;gt; 'comment',
-            'pluralVar' =&amp;gt; 'comments',
-            'singularHumanName' =&amp;gt; 'Comment',
-            'pluralHumanName' =&amp;gt; 'Comments',
-            'fields' =&amp;gt; $modelObj-&amp;gt;schema()-&amp;gt;columns(),
-            'associations' =&amp;gt; [],
-            'keyFields' =&amp;gt; [],
-            'formOptions' =&amp;gt; [
-                'url' =&amp;gt; [
-                    'controller' =&amp;gt; 'Comments',
-                    'action' =&amp;gt; 'add',
-                ],
-            ],
-        ]);
-    }
-}, 'Bake.beforeRender');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You can always bind more than one listener to the event, so this is fine. If you want, you can also combine the two events, but this is easier to keep track of for me.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;If the above seems like a lot, that’s because it is. Those variables are necessary for the &lt;code&gt;form.ctp&lt;/code&gt; element to do it’s magic. Unfortunately, there isn’t a good way to generically call this for a template from the core, but a solution may come soon. In any case, a couple notes if you bake now:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;There will be another &lt;code&gt;actions&lt;/code&gt; list right above the form. This is currently not optional in the core &lt;code&gt;form.ctp&lt;/code&gt; we copied, though you are welcome to make it optional in your own :)&lt;/li&gt;
-  &lt;li&gt;The &lt;code&gt;issue_id&lt;/code&gt; field isn’t hidden. We cannot arbitrarily pass in options for fields in the core &lt;code&gt;form.ctp&lt;/code&gt; we copied. Again, you can implement this feature in your own custom element, but we’ll try and make this easier before a final release :)&lt;/li&gt;
-  &lt;li&gt;The form will break because we are missing a &lt;code&gt;$comment&lt;/code&gt; entity.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;To add the &lt;code&gt;$comment&lt;/code&gt; entity, lets modify the &lt;code&gt;src/Template/Bake/Element/Controller/view.ctp&lt;/code&gt; we previously copied over. Add the following before the last brace:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;% if (!empty($addRelatedEntity)) : %&amp;gt;
-        $&amp;lt;%= $addRelatedEntity['entityName'] %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;&amp;lt;%= $addRelatedEntity['modelName'] %&amp;gt;-&amp;gt;newEntity();
-        $this-&amp;gt;set('&amp;lt;%= $addRelatedEntity['entityName'] %&amp;gt;', $&amp;lt;%= $addRelatedEntity['entityName'] %&amp;gt;);
-        $this-&amp;gt;set('&amp;lt;%= $pluralName %&amp;gt;', [
-          $&amp;lt;%= $singularName %&amp;gt;-&amp;gt;&amp;lt;%= $modelObj-&amp;gt;primaryKey() %&amp;gt; =&amp;gt; $&amp;lt;%= $singularName %&amp;gt;-&amp;gt;&amp;lt;%= $modelObj-&amp;gt;displayField() %&amp;gt;,
-        ]);
-&amp;lt;% endif %&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Create a new entity for the related model&lt;/li&gt;
-  &lt;li&gt;Set that empty entity for the view&lt;/li&gt;
-  &lt;li&gt;Set a dummy list for the form containing just the current issue.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;To populate the &lt;code&gt;view.ctp&lt;/code&gt; Controller template properly, we’ll need to add one more event to our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
-    $view = $event-&amp;gt;subject;
-    $name = Hash::get($view-&amp;gt;viewVars, 'name');
-    $isController = strpos($event-&amp;gt;data[0], 'Bake/Controller/controller.ctp') !== false;
-    if ($isController !== false &amp;amp;&amp;amp; $name == 'Issues') {
-        $view-&amp;gt;viewVars['addRelatedEntity'] = [
-            'modelName' =&amp;gt; 'Comments',
-            'entityName' =&amp;gt; 'comment',
-        ];
-    }
-}, 'Bake.beforeRender');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now lets run bake:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-
-bin/cake bake controller issues --force
-bin/cake bake view issues --force
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And we’ll have a working form on our view page!&lt;/p&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time&lt;/h2&gt;
-
-&lt;p&gt;I won’t write &lt;em&gt;all&lt;/em&gt; the code, but hopefully the above gives you a good idea as to how to modify bake templates. Your homework is:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Make the form actions optional - and turn them off for embedded forms.&lt;/li&gt;
-  &lt;li&gt;Create a nicer comment list than the current version.&lt;/li&gt;
-  &lt;li&gt;Hide the &lt;code&gt;issue_id&lt;/code&gt; field on the form without removing it completely&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Tomorrow’s CakeAdvent entry will contain a solution, but this should be a good way for you to start creating your own custom bake templates :) Until then!&lt;/p&gt;
-</description>
-        <pubDate>Wed, 03 Dec 2014 16:22:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/03/customizing-bake-and-installing-plugins-with-cakephp-3/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>bake</category>
         
         
         <category>cakephp</category>

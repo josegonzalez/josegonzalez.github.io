@@ -15,6 +15,21 @@
 
 
   <url>
+      <loc>http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/</loc>
+      <lastmod>2014-12-15</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/</loc>
+      <lastmod>2014-12-14</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/</loc>
+      <lastmod>2014-12-13</lastmod>
+  </url>
+
+  <url>
       <loc>http://josediazgonzalez.com/2014/12/12/adding-dummy-data-to-our-store/</loc>
       <lastmod>2014-12-12</lastmod>
   </url>

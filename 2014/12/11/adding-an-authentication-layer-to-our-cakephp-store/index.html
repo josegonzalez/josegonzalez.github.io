@@ -100,7 +100,7 @@ public function login() {
             $this-&gt;Auth-&gt;setUser($user);
             return $this-&gt;redirect($this-&gt;Auth-&gt;redirectUrl());
         }
-        $this-&gt;Flash-&gt;error(__('Invalid username or password, try again'));
+        $this-&gt;Flash-&gt;error(__('Invalid email or password, try again'));
     }
 }
 </code></pre>
@@ -158,8 +158,8 @@ bin/cake bake controller users -f
 &lt;?= $this-&gt;Flash-&gt;render('auth') ?&gt;
 &lt;?= $this-&gt;Form-&gt;create() ?&gt;
     &lt;fieldset&gt;
-        &lt;legend&gt;&lt;?= __('Please enter your username and password') ?&gt;&lt;/legend&gt;
-        &lt;?= $this-&gt;Form-&gt;input('username') ?&gt;
+        &lt;legend&gt;&lt;?= __('Please enter your email and password') ?&gt;&lt;/legend&gt;
+        &lt;?= $this-&gt;Form-&gt;input('email') ?&gt;
         &lt;?= $this-&gt;Form-&gt;input('password') ?&gt;
     &lt;/fieldset&gt;
 &lt;?= $this-&gt;Form-&gt;button(__('Login')); ?&gt;
@@ -177,7 +177,7 @@ echo $this-&gt;element('form');
 <pre><code class="language-php">// Also include `use Cake\Validation\Validator;` at the top of your class
 public function validationDefault(Validator $validator) {
     return $validator
-        -&gt;notEmpty('username', 'A username is required')
+        -&gt;notEmpty('email', 'An email address is required')
         -&gt;notEmpty('password', 'A password is required');
 }
 </code></pre>
@@ -225,7 +225,7 @@ protected function _setPassword($password) {
   <li>We can no longer re-bake our user Entity or Table classes. Boo. A wise developer would crack open new bake templates and add in the appropriate hooks to include traits instead of adding methods, or even switch those methods to bake elements.</li>
   <li>It would be useful to create a shell to pre-seed users from random data or custom data. You may guess what the next blog post will concern :)</li>
 </ul>
-<p>We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along as via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow (if you’re reading this on the 2nd of December!) for more delicious content.</p>
+<p>We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
   </div>
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-11 18:26:00 +0000">11 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
@@ -249,7 +249,7 @@ protected function _setPassword($password) {
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 11</strong> of <strong>12</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 11</strong> of <strong>15</strong> in the series "CakeAdvent 2014".</p>
     <ol>
       <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li><a href="/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
@@ -263,6 +263,9 @@ protected function _setPassword($password) {
       <li><a href="/2014/12/10/designing-a-store-application-in-cakephp/">Designing a Store application in CakePHP</a></li>
       <li>Adding an Authentication layer to our CakePHP Store</li>
       <li><a href="/2014/12/12/adding-dummy-data-to-our-store/">Adding dummy data via a custom faker shell to our store</a></li>
+      <li><a href="/2014/12/13/building-a-user-cart-system-in-cakephp/">Building a user cart system in CakePHP</a></li>
+      <li><a href="/2014/12/14/processing-payments-with-cakephp-3/">Adding dummy data via a custom faker shell to our store</a></li>
+      <li><a href="/2014/12/15/sending-email-invoices-to-users-on-payment/">Sending email invoices to users on payment</a></li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>

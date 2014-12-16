@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2014: Contributing to CakePHP</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/">
+    <title>CakeAdvent-2014: Sending email invoices to users on payment</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -21,19 +21,19 @@
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
-    <meta name="description" content="Find out various ways to contribute back to the CakePHP project" />
-    <meta name="keywords" content="cakeadvent-2014, cakephp" />
+    <meta name="description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <meta name="keywords" content="cakeadvent-2014, cakephp, email, templates" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2014: Contributing to CakePHP" />
+    <meta property="og:title" content="CakeAdvent-2014: Sending email invoices to users on payment" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/" />
-    <meta property="og:description" content="Find out various ways to contribute back to the CakePHP project" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/" />
+    <meta property="og:description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2014: Contributing to CakePHP" />
-    <meta name="twitter:description" content="Find out various ways to contribute back to the CakePHP project" />
-    <link rel="alternate" type="application/rss+xml" title="Contributing to CakePHP » Feed" href="/atom.xml">
+    <meta name="twitter:title" content="CakeAdvent-2014: Sending email invoices to users on payment" />
+    <meta name="twitter:description" content="Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively" />
+    <link rel="alternate" type="application/rss+xml" title="Sending email invoices to users on payment » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,36 +64,85 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Contributing to CakePHP
+        Sending email invoices to users on payment
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Contributing to CakePHP!">
+        <a href="#comments" title="Comment on Sending email invoices to users on payment!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>This is an extremely short post where I’ll ask that you all give back (not just monetarily) but with your time. Here are some projects that will need feedback before 3.0 goes general availability:</p>
+    <p>Once a user has made a purchase, they will likely want some sort of proof that the purchase went through. We can send them an email at every step of the way. We’ll start by sending an email as soon as the purchase was completed.</p>
+<p>CakePHP’s email system allows us to use Templates to send email. We previously briefly covered email sending while building the anonymous issue tracker - though simply using raw messages. CakePHP is capable of sending messages both as plaintext and as html, and is also capable of wrapping emails in layouts. Here is a simple, contrived example:</p>
+<pre><code class="language-php">// Load the class at the top of your class using the `use` statement
+use Cake\Network\Email\Email;
+// Construct an email object
+$email = new Email();
+// Send the email using the template in `src/Template/Email/TYPE/herp.ctp`
+// and the layout in `src/Template/Layout/Email/TYPE/derp.ctp`
+// Type is the type of the message
+$email-&gt;template('herp', 'derp');
+// Send the email as a multi-part type message, both as `text` and `html`.
+// This means that the previous `template` call configures 4 different
+// files for use when sending
+$email-&gt;emailFormat('both');
+// Send the email to this user
+$email-&gt;to('camilla@number1.com');
+// Specify this user to send as
+$email-&gt;from('app@domain.com');
+// Actually send the email!
+$email-&gt;send();
+</code></pre>
+<p>What we are going to do is send a simple, plain-text email that uses a text template and a text layout. Let’s start by creating a <code>src/Template/Email/text/purchase.ctp</code> file with the following contents:</p>
+<pre><code class="language-php">Hi!
+We're messaging you to let you know someone made a purchase for &lt;?= $amount ?&gt; at &lt;?= $purchase_time ?&gt; under the email &lt;?= $user['email'] ?&gt;. If this seems incorrect, let us know!
+The following items were purchased:
+&lt;?php foreach ($order_items as $order_item) :?&gt;
+- &lt;?= $order_item-&gt;product-&gt;name ?&gt;: $&lt;?= $order_item-&gt;price ?&gt;
+&lt;?php endforeach; ?&gt;
+If you have any questions, feel free to respond to this email!
+- Awesome Store
+</code></pre>
+<blockquote>
+  <p>While we won’t modify the default text layout, please note that the default CakePHP layouts contain a message stating that the email was sent from the CakePHP framework. You can remove these if you like</p>
+</blockquote>
+<p>Now that we have our email set, lets create a new event in our <code>app/config/events.php</code> that we can use to send the email. We’ll call it <code>Order.postPurchase</code>:</p>
+<pre><code class="language-php">use Cake\Network\Email\Email;
+EventManager::instance()-&gt;attach(function (Event $event) {
+  $amount = $event-&gt;data['amount'];
+  $order_items = $event-&gt;data['order']-&gt;order_items;
+  $purchase_time = date('Y-m-d H:i:s');
+  $user = $event-&gt;data['user'];
+  $email = new Email();
+  $email-&gt;template('purchase', 'default')
+      -&gt;emailFormat('text')
+      -&gt;to($user['email'])
+      -&gt;from('store@example.com')
+      -&gt;viewVars(compact('amount', 'order_items', 'purchase_time', 'user'))
+      -&gt;send();
+}, 'Order.postPurchase');
+</code></pre>
+<p>Next, we’ll ensure we actually trigger this event in our <code>checkout</code> action. Modify the bake <code>checkout.ctp</code> element to include the following when the <code>$response-&gt;isSuccessful()</code>:</p>
+<pre><code class="language-php">$event = new \Cake\Event\Event('Order.postPurchase', $this, [
+    'amount' =&gt; $amount,
+    'order' =&gt; $order,
+    'user' =&gt; $this-&gt;Auth-&gt;user(),
+]);
+\Cake\Event\EventManager::instance()-&gt;dispatch($event);
+</code></pre>
+<p>You’ll need configure your email settings in <code>app/config/app.php</code>, but once you do, we will be sending users email whenever they’ve successfully completed a purchase! Note that now that we are using templates, we can <em>also</em> use helpers as you would in any other template file, which allows you to build more complex emails and drive campaigns to users.</p>
+<h2 id="homework-time">Homework Time</h2>
+<p>You can actually do a few cool things with email - that I’ve done in other CakePHP websites and other frameworks:</p>
 <ul>
-  <li><a href="https://github.com/cakephp/cakephp/pull/5296">Retooling Validation</a></li>
-  <li><a href="https://github.com/cakephp/cakephp/issues/5319">Bake Improvements</a></li>
-  <li><a href="https://github.com/cakephp/cakephp/issues/5251">Table-less FormModel classes</a></li>
-  <li><a href="https://github.com/cakephp/cakephp/issues/5251"><em>Maybe</em> supporting users without ext-intl</a></li>
-  <li><a href="https://github.com/cakephp/migrations/pull/34">Migrations project needs some work</a></li>
+  <li>Log all emails to CLI and the Database when in Debug mode so that you can view what <em>would</em> have been sent to a user instead of potentially spamming users. CakePHP allows you to build arbitrary Transport classes to make this possible.</li>
+  <li>Make a PostPurchaseEmail class that can take all it’s configuration within the constructor. This way you can simply instantiate that particular email class and let it worry about how it should configure the email.</li>
+  <li>Send both an html and a text representation of the same email. <a href="http://templates.mailchimp.com/">Mailchimp provides some templates</a> you can model your email layouts after to get wider email client support.</li>
 </ul>
-<p>Some repos that need some love:</p>
-<ul>
-  <li><a href="https://github.com/cakephp/datasources">Datasources needs an update</a></li>
-  <li><a href="https://github.com/croogo/croogo">Croogo CMS doesn’t yet boot</a></li>
-  <li><a href="https://github.com/cakephp/upgrade">Break the Upgrade plugin!</a></li>
-  <li><a href="https://github.com/cakephp/docs/tree/3.0">Doc work for 3.x</a></li>
-  <li><a href="https://github.com/cakephp/cakepackages">Filtering 3.x packages on the plugins site</a></li>
-</ul>
-<p>CakePHP is a community project. If any of the above aren’t things you’re interested - but you’d love to give back - feel free to give feedback on existing features, write blog posts, and release updates of existing open source projects.</p>
-<p>Until tomorrow!</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="http://josediazgonzalez.com/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-09 17:31:00 +0000">09 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in CakePHP" rel="category">CakePHP</a> on <a href="http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2014-12-15 13:42:00 +0000">15 Dec 2014</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -114,7 +163,7 @@
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 9</strong> of <strong>15</strong> in the series "CakeAdvent 2014".</p>
+    <p>This entry is <strong>part 15</strong> of <strong>15</strong> in the series "CakeAdvent 2014".</p>
     <ol>
       <li><a href="/2014/12/01/cakephp-advent-calendar-2014/">CakePHP Advent Calendar 2014</a></li>
       <li><a href="/2014/12/02/designing-an-anonymous-issue-tracker-in-cakephp/">Designing an anonymous issue tracker in CakePHP</a></li>
@@ -124,13 +173,13 @@
       <li><a href="/2014/12/06/email-users-when-a-new-comment-is-posted/">Emailing users when a new comment is posted</a></li>
       <li><a href="/2014/12/07/parsing-markdown-comments/">Parsing markdown comments</a></li>
       <li><a href="/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/">Closing Issues in our Anonymous Issue Tracker using Events</a></li>
-      <li>Contributing to CakePHP</li>
+      <li><a href="/2014/12/09/contributing-to-cakephp/">Contributing to CakePHP</a></li>
       <li><a href="/2014/12/10/designing-a-store-application-in-cakephp/">Designing a Store application in CakePHP</a></li>
       <li><a href="/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/">Adding an Authentication layer to our CakePHP Store</a></li>
       <li><a href="/2014/12/12/adding-dummy-data-to-our-store/">Adding dummy data via a custom faker shell to our store</a></li>
       <li><a href="/2014/12/13/building-a-user-cart-system-in-cakephp/">Building a user cart system in CakePHP</a></li>
       <li><a href="/2014/12/14/processing-payments-with-cakephp-3/">Adding dummy data via a custom faker shell to our store</a></li>
-      <li><a href="/2014/12/15/sending-email-invoices-to-users-on-payment/">Sending email invoices to users on payment</a></li>
+      <li>Sending email invoices to users on payment</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -169,9 +218,9 @@
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2014/12/09/contributing-to-cakephp/';
-        var disqus_url        = 'http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/';
-        var disqus_title      = "CakeAdvent-2014: Contributing to CakePHP";
+        var disqus_identifier = '/2014/12/15/sending-email-invoices-to-users-on-payment/';
+        var disqus_url        = 'http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/';
+        var disqus_title      = "CakeAdvent-2014: Sending email invoices to users on payment";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

@@ -1,6 +1,27 @@
 [
   {
     "type": "post",
+    "title": "Sending email invoices to users on payment",
+    "url": "/2014/12/15/sending-email-invoices-to-users-on-payment/",
+    "description": "Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["cakephp","designed","effectively","email","invoices","part","payment","posts","sending","series","teach","use","users"]
+  },
+  {
+    "type": "post",
+    "title": "Adding dummy data via a custom faker shell to our store",
+    "url": "/2014/12/14/processing-payments-with-cakephp-3/",
+    "description": "Part 5 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["adding","cakephp","custom","data","designed","dummy","effectively","faker","part","posts","series","store","teach","use","via"]
+  },
+  {
+    "type": "post",
+    "title": "Building a user cart system in CakePHP",
+    "url": "/2014/12/13/building-a-user-cart-system-in-cakephp/",
+    "description": "Part 4 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
+    "tokens": ["building","cakephp","cart","designed","effectively","part","posts","series","system","teach","use","user"]
+  },
+  {
+    "type": "post",
     "title": "Adding dummy data via a custom faker shell to our store",
     "url": "/2014/12/12/adding-dummy-data-to-our-store/",
     "description": "Part 3 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
@@ -1232,6 +1253,30 @@
     "title": "helpers",
     "url": "/tags/helpers/",
     "tokens": ["helpers"]
+  },
+  {
+    "type": "tag",
+    "title": "cart management",
+    "url": "/tags/cart-management/",
+    "tokens": ["cart","management"]
+  },
+  {
+    "type": "tag",
+    "title": "payments",
+    "url": "/tags/payments/",
+    "tokens": ["payments"]
+  },
+  {
+    "type": "tag",
+    "title": "stripe",
+    "url": "/tags/stripe/",
+    "tokens": ["stripe"]
+  },
+  {
+    "type": "tag",
+    "title": "templates",
+    "url": "/tags/templates/",
+    "tokens": ["templates"]
   },
   false
 ]
