@@ -76,31 +76,31 @@
     <blockquote class="pullquote">
 This text is the first in a long series to correct an extremely disastrous talk at CakeFest 2011. It will also hopefully apply to more than CakePHP.
 </blockquote>
-<p>Inspired by the blog post series <a href="http://ericholscher.com/blog/2010/nov/8/building-django-app-server-chef/">Building a Django App Server with Chef</a>, and <a href="http://seatgeek.com">SeatGeek&#8217;s</a> very own <a href="http://mindsifter.com/">Michael D&#8217;Auria</a>, I decided to stop screwing around with my server installation and automate the process.</p>
-<p>Every so often, I have the need to move from one host to another, whether because the price of the host is becoming prohibitive, or another host has some features that the former did not. On occasion, I also need to setup new instances of CakePHP/Lithium/Zend applications for some side project, contract work, or for a friend who is afraid of systems administration. While I do enjoy the <a href="http://articles.slicehost.com">Slicehost</a> installation guides, they sometimes either are out of date or don&#8217;t have the requisite information for installing software. As such, each time I have to install a new instance, I do it slightly differently, or forget to update old instances with new software.</p>
-<p>So I set about looking at automating the entire process. My first pass was using a set of bash scripts. We all know how lovely bash can be. It doesn&#8217;t help that I don&#8217;t really know too much bash, so it ended up being a bunch of shell commands being exec&#8217;d. Fun times, and fairly error-prone.</p>
+<p>Inspired by the blog post series <a href="http://ericholscher.com/blog/2010/nov/8/building-django-app-server-chef/">Building a Django App Server with Chef</a>, and <a href="http://seatgeek.com">SeatGeek’s</a> very own <a href="http://mindsifter.com/">Michael D’Auria</a>, I decided to stop screwing around with my server installation and automate the process.</p>
+<p>Every so often, I have the need to move from one host to another, whether because the price of the host is becoming prohibitive, or another host has some features that the former did not. On occasion, I also need to setup new instances of CakePHP/Lithium/Zend applications for some side project, contract work, or for a friend who is afraid of systems administration. While I do enjoy the <a href="http://articles.slicehost.com">Slicehost</a> installation guides, they sometimes either are out of date or don’t have the requisite information for installing software. As such, each time I have to install a new instance, I do it slightly differently, or forget to update old instances with new software.</p>
+<p>So I set about looking at automating the entire process. My first pass was using a set of bash scripts. We all know how lovely bash can be. It doesn’t help that I don’t really know too much bash, so it ended up being a bunch of shell commands being exec’d. Fun times, and fairly error-prone.</p>
 <p>So I decided to look for existing tooling - fuck yeah open source - that would perhaps help me improve my workflow.</p>
 <h2 id="chef">Chef</h2>
 <blockquote>
 Chef is an open-source systems integration framework built specifically for automating the cloud.
 </blockquote>
 <p>This is mostly true. You can also use it for automating single servers.</p>
-<p>If you&#8217;re a web developer like me, you can think of Chef as a framework. It provides a couple common interfaces for things you might want to do:</p>
+<p>If you’re a web developer like me, you can think of Chef as a framework. It provides a couple common interfaces for things you might want to do:</p>
 <ul>
   <li>Creating Files</li>
   <li>Installing Software</li>
   <li>Configuring Applications</li>
   <li>Interacting with Services</li>
 </ul>
-<p>And allows you to build resources on top of it&#8217;s base to fully customize your setup. Let&#8217;s go over some Chef vocabulary:</p>
+<p>And allows you to build resources on top of it’s base to fully customize your setup. Let’s go over some Chef vocabulary:</p>
 <h2 id="commonly-used-terms">Commonly Used Terms</h2>
 <p>Please note that there are other terms to get used to, but these will suffice for now</p>
 <ul>
   <li>DNA: A configuration file for your server. It may contain packages to install, recipes to be run, and general configuration for use in installation.</li>
   <li>Recipe: A set of instructions that uses the Chef DSL for package installation, maintenance etc.</li>
-  <li>Cookbook: A collection of recipes that pertain to a server or set of servers. Note that you don&#8217;t need to use all the Recipes in a Cookbook, just like a real cookbook with all sorts of delicious pastries.</li>
+  <li>Cookbook: A collection of recipes that pertain to a server or set of servers. Note that you don’t need to use all the Recipes in a Cookbook, just like a real cookbook with all sorts of delicious pastries.</li>
   <li>Resource: A cross-platform abstraction of a common server task such as package installation or version control interaction. For example, CentOS uses <code>yum</code> to install packages while Ubuntu uses <code>apt</code>, but you can refer to both of these using</li>
-  <li>Templates: Files that are filled in by variables. These are usually <code>ERB</code> files, but if you&#8217;ve ever used a templating language, it&#8217;s not that different (<code>PHP</code> counts!)</li>
+  <li>Templates: Files that are filled in by variables. These are usually <code>ERB</code> files, but if you’ve ever used a templating language, it’s not that different (<code>PHP</code> counts!)</li>
 </ul>
 <h2 id="how-chef-works">How Chef Works</h2>
 <p>This is the general workflow:</p>
@@ -123,12 +123,12 @@ Chef is an open-source systems integration framework built specifically for auto
   <li>Whatever pre-processing your script does is performed - this is wholly up to you</li>
   <li>Your script runs should ensure the <code>chef</code> gem is properly installed on the machine, otherwise you just wasted a lot of time</li>
   <li>Scrip runs the chef gem against your cookbooks and <code>DNA</code> config.</li>
-  <li>Your <code>DNA</code> config file, be it <code>chef</code> or <code>ruby</code>, is parse and compiled. If this fails, you should probably validate that it&#8217;s good <code>json</code> or the <code>ruby</code> file parses</li>
-  <li>Packages specified in your <code>DNA</code> file are installed according to the architecture of your server. If you&#8217;re using CentOS ==&gt; <code>yum</code>, Gentoo ==&gt; <code>portage</code> etc.</li>
+  <li>Your <code>DNA</code> config file, be it <code>chef</code> or <code>ruby</code>, is parse and compiled. If this fails, you should probably validate that it’s good <code>json</code> or the <code>ruby</code> file parses</li>
+  <li>Packages specified in your <code>DNA</code> file are installed according to the architecture of your server. If you’re using CentOS ==&gt; <code>yum</code>, Gentoo ==&gt; <code>portage</code> etc.</li>
   <li>Recipes are run in the order specified in your <code>DNA</code> config file.</li>
   <li>If any recipe fails, Chef aborts, otherwise it continues happily until done. You get some lovely debug info in both cases.</li>
 </ul>
-<p>Okay, so not so complicated, but decently enough that it&#8217;s a 12-step process now, like Alcoholics Anonymous.</p>
+<p>Okay, so not so complicated, but decently enough that it’s a 12-step process now, like Alcoholics Anonymous.</p>
 <p><strong>To Be Continued</strong></p>
   </div>
     <footer class="entry-meta">

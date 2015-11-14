@@ -100,7 +100,7 @@ public function login() {
             $this-&gt;Auth-&gt;setUser($user);
             return $this-&gt;redirect($this-&gt;Auth-&gt;redirectUrl());
         }
-        $this-&gt;Flash-&gt;error(__('Invalid email or password, try again'));
+        $this-&gt;Flash-&gt;error(__('Invalid username or password, try again'));
     }
 }
 </code></pre>
@@ -158,8 +158,8 @@ bin/cake bake controller users -f
 &lt;?= $this-&gt;Flash-&gt;render('auth') ?&gt;
 &lt;?= $this-&gt;Form-&gt;create() ?&gt;
     &lt;fieldset&gt;
-        &lt;legend&gt;&lt;?= __('Please enter your email and password') ?&gt;&lt;/legend&gt;
-        &lt;?= $this-&gt;Form-&gt;input('email') ?&gt;
+        &lt;legend&gt;&lt;?= __('Please enter your username and password') ?&gt;&lt;/legend&gt;
+        &lt;?= $this-&gt;Form-&gt;input('username') ?&gt;
         &lt;?= $this-&gt;Form-&gt;input('password') ?&gt;
     &lt;/fieldset&gt;
 &lt;?= $this-&gt;Form-&gt;button(__('Login')); ?&gt;
@@ -177,7 +177,7 @@ echo $this-&gt;element('form');
 <pre><code class="language-php">// Also include `use Cake\Validation\Validator;` at the top of your class
 public function validationDefault(Validator $validator) {
     return $validator
-        -&gt;notEmpty('email', 'An email address is required')
+        -&gt;notEmpty('username', 'A username is required')
         -&gt;notEmpty('password', 'A password is required');
 }
 </code></pre>

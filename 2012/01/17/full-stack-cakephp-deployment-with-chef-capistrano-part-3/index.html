@@ -78,7 +78,7 @@ This text is the third in a long series to correct an extremely disastrous talk 
 </blockquote>
 <h2 id="templates">Templates</h2>
 <p>Templating in Chef is much like templating in any other framework. Chef templates use ERB - eRuby - which is a templating system that embeds Ruby into a document. If you know any Ruby, this should be a fairly trivial thing to learn. For CakePHP developers, think <code>ctp</code> files :)</p>
-<p>For PHP developers, the big difference is that it uses short-syntax - <code>&lt;? ?&gt;</code> - and the question marks are replaced with percent signs - <code>&lt;% %&gt;</code>. Along with the short syntax, there isn&#8217;t an <code>echo</code> statement, so if you want to <code>echo</code> a variable, <code>&lt;%= var %&gt;</code> will do it.</p>
+<p>For PHP developers, the big difference is that it uses short-syntax - <code>&lt;? ?&gt;</code> - and the question marks are replaced with percent signs - <code>&lt;% %&gt;</code>. Along with the short syntax, there isn’t an <code>echo</code> statement, so if you want to <code>echo</code> a variable, <code>&lt;%= var %&gt;</code> will do it.</p>
 <p>Another key change is in variable output within strings. In PHP, we can do:</p>
 <pre><code class="language-php">    $foo = 'bar';
     $baz = "{$foo}";
@@ -89,8 +89,8 @@ This text is the third in a long series to correct an extremely disastrous talk 
     baz = "#{foo}"
     puts baz # outputs: bar
 </code></pre>
-<p>That&#8217;s pretty neat I think, not that big of a change.</p>
-<p>Templates alone aren&#8217;t very useful, but they are normally used in conjunction with the <code>Template</code> resource in Chef as follows:</p>
+<p>That’s pretty neat I think, not that big of a change.</p>
+<p>Templates alone aren’t very useful, but they are normally used in conjunction with the <code>Template</code> resource in Chef as follows:</p>
 <pre><code class="language-ruby">template "/path/to/where/template/should/be/written/to" do
   source "some_template.erb"
   owner "root"
@@ -102,7 +102,7 @@ This text is the third in a long series to correct an extremely disastrous talk 
   )
 end
 </code></pre>
-<p>In the above example, we are creating the file <code>/path/to/where/template/should/be/written/to</code> from the <code>some_template.erb</code> file. We&#8217;re also setting the owner, group and the permissions of the file. The variables <code>var_name</code> and <code>an_array</code> would be available as variables in the view.</p>
+<p>In the above example, we are creating the file <code>/path/to/where/template/should/be/written/to</code> from the <code>some_template.erb</code> file. We’re also setting the owner, group and the permissions of the file. The variables <code>var_name</code> and <code>an_array</code> would be available as variables in the view.</p>
 <p>Pretty straight-forward I think.</p>
 <h2 id="attributes">Attributes</h2>
 <p>Attributes are fairly straight-forward. They allow you to set defaults for a particular cookbook by setting/modifying the variables in your <code>DNA</code> config.</p>
@@ -131,9 +131,9 @@ else
 end
 </code></pre>
 <p>Attributes are a good way of providing simple, cross-platform compatible defaults that can be later tweaked by way of <code>DNA</code> files. They allow you to provide a baseline configuration that might be modified in cases where we have more memory, lower disk throughput, or some other deviation from the norm.</p>
-<p>If you find that you&#8217;re constantly setting the same settings in your <code>DNA</code> file, feel free to modify the defaults to keep your setups DRY.</p>
+<p>If you find that you’re constantly setting the same settings in your <code>DNA</code> file, feel free to modify the defaults to keep your setups DRY.</p>
 <h2 id="custom-resources">Custom Resources</h2>
-<p>We&#8217;re going to fake out Custom Resources because the real way is a definite PITA. You can read about it in the Chef docs if you want.</p>
+<p>We’re going to fake out Custom Resources because the real way is a definite PITA. You can read about it in the Chef docs if you want.</p>
 <p>Definitions are the <del>poor</del> smart mans way of creating resources. Definitions are cool because you can import them across projects, and are very simple to understand by all. I would create a definition when you have a large amount of code you are executing multiple times, maybe in a loop, that really only varies by two or three variables.</p>
 <p>A good candidate is bringing up a new virtualhost for nginx.</p>
 <pre><code class="language-ruby"># Definition
@@ -151,7 +151,7 @@ define :nginx_up, :enable =&gt; true do
   end
 end
 </code></pre>
-<p>The above definition creates a templated virtualhost file and then enables it using nginx. While it is simple, it only displays a small portion of what you can do with definitions. You could simply bring up a virtualhost, or automatically create EBS-mounted volumes with 2 partitions, each having certain folders. That&#8217;s merely up to your imagination. Personally, I like the beauty of typing the following into my cookbooks:</p>
+<p>The above definition creates a templated virtualhost file and then enables it using nginx. While it is simple, it only displays a small portion of what you can do with definitions. You could simply bring up a virtualhost, or automatically create EBS-mounted volumes with 2 partitions, each having certain folders. That’s merely up to your imagination. Personally, I like the beauty of typing the following into my cookbooks:</p>
 <pre><code class="language-ruby"># info is an array of data
 nginx_up "#{info[:hostname]}.#{info[:base]}" do
   hostname "#{info[:hostname]}.#{info[:base]}"
@@ -181,17 +181,17 @@ end
 </code></pre>
 <p>By default, <code>php</code> maps to <code>php::default</code>, where <code>default.rb</code> is the <code>default</code> recipe for a cookbook. Please keep this in mind.</p>
 <h2 id="cookbook-creation">Cookbook Creation</h2>
-<p>Cookbooks are an amalgamation of recipes, definitions, templates, files etc. You should always have a <code>metadata.rb</code> or <code>metadata.json</code> file, which contains metadata about the file. If it is a complicated cookbook, feel free to include a <code>README</code> as well, in your preferred markup language (<code>markdown</code> is winning, fyi). You&#8217;ll also have one of several other filetypes, usually a recipe and a template, although they are all optional.</p>
-<p>Once you&#8217;ve put together a template, it&#8217;s usually quite easy to integrate it with your other cookbooks. Just name the cookbook <code>lower_under_score</code> and shove it in your <code>cookbooks</code> directory. If you are feeling especially helpful, you can also upload it to the <a href="http://community.opscode.com/">Opscore Community Site</a>. Please run your cookbook before sharing, and also clearly state what other cookbooks they depend upon.</p>
-<p>One last consideration is to make sure as much of your cookbook is configurable as possible, but with sane defaults. In this way, you&#8217;ll please the most users, while also encouraging &#8220;best&#8221; practices.</p>
+<p>Cookbooks are an amalgamation of recipes, definitions, templates, files etc. You should always have a <code>metadata.rb</code> or <code>metadata.json</code> file, which contains metadata about the file. If it is a complicated cookbook, feel free to include a <code>README</code> as well, in your preferred markup language (<code>markdown</code> is winning, fyi). You’ll also have one of several other filetypes, usually a recipe and a template, although they are all optional.</p>
+<p>Once you’ve put together a template, it’s usually quite easy to integrate it with your other cookbooks. Just name the cookbook <code>lower_under_score</code> and shove it in your <code>cookbooks</code> directory. If you are feeling especially helpful, you can also upload it to the <a href="http://community.opscode.com/">Opscore Community Site</a>. Please run your cookbook before sharing, and also clearly state what other cookbooks they depend upon.</p>
+<p>One last consideration is to make sure as much of your cookbook is configurable as possible, but with sane defaults. In this way, you’ll please the most users, while also encouraging “best” practices.</p>
 <h2 id="recap">Recap</h2>
-<p>We now have a pretty awesome <code>nginx_up</code> resource that can be used across multiple cookbooks. We could go further and make an abstracted <code>server_up</code> resource, but I&#8217;m pretty happy with our progress for now.</p>
-<p>So what&#8217;s next? Well, we have yet to deploy an entire server, and there is still the matter of what a <code>DNA</code> file actually is. As well, it would be useful to know how to actually push all of these files onto the server, and maintain the server as we move ahead. So the next post will cover the following:</p>
+<p>We now have a pretty awesome <code>nginx_up</code> resource that can be used across multiple cookbooks. We could go further and make an abstracted <code>server_up</code> resource, but I’m pretty happy with our progress for now.</p>
+<p>So what’s next? Well, we have yet to deploy an entire server, and there is still the matter of what a <code>DNA</code> file actually is. As well, it would be useful to know how to actually push all of these files onto the server, and maintain the server as we move ahead. So the next post will cover the following:</p>
 <ul>
   <li>Create a full-fledged cookbook</li>
   <li><code>DNA</code> files, how do they work?</li>
 </ul>
-<p>We&#8217;ll get to the rest at a later date.</p>
+<p>We’ll get to the rest at a later date.</p>
 <p><strong>To Be Continued</strong></p>
   </div>
     <footer class="entry-meta">

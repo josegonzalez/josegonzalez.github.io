@@ -5,9 +5,9 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 16 Dec 2014 15:21:23 +0000</pubDate>
-    <lastBuildDate>Tue, 16 Dec 2014 15:21:23 +0000</lastBuildDate>
-    <generator>Jekyll v2.5.2</generator>
+    <pubDate>Sat, 14 Nov 2015 09:54:34 +0000</pubDate>
+    <lastBuildDate>Sat, 14 Nov 2015 09:54:34 +0000</lastBuildDate>
+    <generator>Jekyll v2.5.3</generator>
     
       <item>
         <title>Sending email invoices to users on payment</title>
@@ -17,26 +17,20 @@
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Load the class at the top of your class using the `use` statement
 use Cake\Network\Email\Email;
-
 // Construct an email object
 $email = new Email();
-
 // Send the email using the template in `src/Template/Email/TYPE/herp.ctp`
 // and the layout in `src/Template/Layout/Email/TYPE/derp.ctp`
 // Type is the type of the message
-$email-&amp;gt;template('herp', 'derp');
-
+$email-&amp;gt;template(&#39;herp&#39;, &#39;derp&#39;);
 // Send the email as a multi-part type message, both as `text` and `html`.
 // This means that the previous `template` call configures 4 different
 // files for use when sending
-$email-&amp;gt;emailFormat('both');
-
+$email-&amp;gt;emailFormat(&#39;both&#39;);
 // Send the email to this user
-$email-&amp;gt;to('camilla@number1.com');
-
+$email-&amp;gt;to(&#39;camilla@number1.com&#39;);
 // Specify this user to send as
-$email-&amp;gt;from('app@domain.com');
-
+$email-&amp;gt;from(&#39;app@domain.com&#39;);
 // Actually send the email!
 $email-&amp;gt;send();
 &lt;/code&gt;&lt;/pre&gt;
@@ -44,17 +38,12 @@ $email-&amp;gt;send();
 &lt;p&gt;What we are going to do is send a simple, plain-text email that uses a text template and a text layout. Let’s start by creating a &lt;code&gt;src/Template/Email/text/purchase.ctp&lt;/code&gt; file with the following contents:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Hi!
-
-We're messaging you to let you know someone made a purchase for &amp;lt;?= $amount ?&amp;gt; at &amp;lt;?= $purchase_time ?&amp;gt; under the email &amp;lt;?= $user['email'] ?&amp;gt;. If this seems incorrect, let us know!
-
+We&#39;re messaging you to let you know someone made a purchase for &amp;lt;?= $amount ?&amp;gt; at &amp;lt;?= $purchase_time ?&amp;gt; under the email &amp;lt;?= $user[&#39;email&#39;] ?&amp;gt;. If this seems incorrect, let us know!
 The following items were purchased:
-
 &amp;lt;?php foreach ($order_items as $order_item) :?&amp;gt;
 - &amp;lt;?= $order_item-&amp;gt;product-&amp;gt;name ?&amp;gt;: $&amp;lt;?= $order_item-&amp;gt;price ?&amp;gt;
 &amp;lt;?php endforeach; ?&amp;gt;
-
 If you have any questions, feel free to respond to this email!
-
 - Awesome Store
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -65,29 +54,27 @@ If you have any questions, feel free to respond to this email!
 &lt;p&gt;Now that we have our email set, lets create a new event in our &lt;code&gt;app/config/events.php&lt;/code&gt; that we can use to send the email. We’ll call it &lt;code&gt;Order.postPurchase&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Network\Email\Email;
-
 EventManager::instance()-&amp;gt;attach(function (Event $event) {
-  $amount = $event-&amp;gt;data['amount'];
-  $order_items = $event-&amp;gt;data['order']-&amp;gt;order_items;
-  $purchase_time = date('Y-m-d H:i:s');
-  $user = $event-&amp;gt;data['user'];
-
+  $amount = $event-&amp;gt;data[&#39;amount&#39;];
+  $order_items = $event-&amp;gt;data[&#39;order&#39;]-&amp;gt;order_items;
+  $purchase_time = date(&#39;Y-m-d H:i:s&#39;);
+  $user = $event-&amp;gt;data[&#39;user&#39;];
   $email = new Email();
-  $email-&amp;gt;template('purchase', 'default')
-      -&amp;gt;emailFormat('text')
-      -&amp;gt;to($user['email'])
-      -&amp;gt;from('store@example.com')
-      -&amp;gt;viewVars(compact('amount', 'order_items', 'purchase_time', 'user'))
+  $email-&amp;gt;template(&#39;purchase&#39;, &#39;default&#39;)
+      -&amp;gt;emailFormat(&#39;text&#39;)
+      -&amp;gt;to($user[&#39;email&#39;])
+      -&amp;gt;from(&#39;store@example.com&#39;)
+      -&amp;gt;viewVars(compact(&#39;amount&#39;, &#39;order_items&#39;, &#39;purchase_time&#39;, &#39;user&#39;))
       -&amp;gt;send();
-}, 'Order.postPurchase');
+}, &#39;Order.postPurchase&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Next, we’ll ensure we actually trigger this event in our &lt;code&gt;checkout&lt;/code&gt; action. Modify the bake &lt;code&gt;checkout.ctp&lt;/code&gt; element to include the following when the &lt;code&gt;$response-&amp;gt;isSuccessful()&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$event = new \Cake\Event\Event('Order.postPurchase', $this, [
-    'amount' =&amp;gt; $amount,
-    'order' =&amp;gt; $order,
-    'user' =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$event = new \Cake\Event\Event(&#39;Order.postPurchase&#39;, $this, [
+    &#39;amount&#39; =&amp;gt; $amount,
+    &#39;order&#39; =&amp;gt; $order,
+    &#39;user&#39; =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
 ]);
 \Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
 &lt;/code&gt;&lt;/pre&gt;
@@ -140,10 +127,10 @@ composer require omnipay/stripe
 
 &lt;p&gt;We need to also configure our stripe integration in our &lt;code&gt;app/config/app.php&lt;/code&gt; file. We’ll simply add our Stripe’s &lt;code&gt;api_key&lt;/code&gt; - found &lt;a href=&quot;https://dashboard.stripe.com/account/apikeys&quot;&gt;here&lt;/a&gt; - as so to the array:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    'Stripe' =&amp;gt; [
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    &#39;Stripe&#39; =&amp;gt; [
         // using the test keyS for now
-        'secret_key' =&amp;gt; 'sk_test_SOME_KEY',
-        'publishable_key' =&amp;gt; 'pk_test_SOME_KEY',
+        &#39;secret_key&#39; =&amp;gt; &#39;sk_test_SOME_KEY&#39;,
+        &#39;publishable_key&#39; =&amp;gt; &#39;pk_test_SOME_KEY&#39;,
     ],
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -156,47 +143,40 @@ composer require omnipay/stripe
  */
     public function checkout() {
         // Find the existing order
-        $user_id = $this-&amp;gt;Auth-&amp;gt;user('id');
+        $user_id = $this-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
         $order = $this-&amp;gt;Orders-&amp;gt;find()
-                        -&amp;gt;where(['user_id' =&amp;gt; $user_id])
-                        -&amp;gt;contain(['OrderItems'])
+                        -&amp;gt;where([&#39;user_id&#39; =&amp;gt; $user_id])
+                        -&amp;gt;contain([&#39;OrderItems&#39;])
                         -&amp;gt;first();
-
         // Redirect back to the cart if there is no order or any order items
         if (empty($order) || empty($order-&amp;gt;order_items)) {
-            $this-&amp;gt;Flash-&amp;gt;error(__('No items in cart'));
-            return $this-&amp;gt;redirect(['action' =&amp;gt; 'cart']);
+            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;No items in cart&#39;));
+            return $this-&amp;gt;redirect([&#39;action&#39; =&amp;gt; &#39;cart&#39;]);
         }
-
         $amount = array_reduce($order-&amp;gt;order_items, function ($carry, $item) {
             return $carry + $item-&amp;gt;price;
         }, 0);
-
-        $this-&amp;gt;set(compact('order', 'amount'));
-        if (!$this-&amp;gt;request-&amp;gt;is('post')) {
+        $this-&amp;gt;set(compact(&#39;order&#39;, &#39;amount&#39;));
+        if (!$this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
             return;
         }
-
         // Create an Omnipay Stripe gateway object and configure it
-        $gateway = \Omnipay\Omnipay::create('Stripe');
-        $gateway-&amp;gt;setApiKey(\Cake\Core\Configure::read('Stripe.secret_key'));
-
+        $gateway = \Omnipay\Omnipay::create(&#39;Stripe&#39;);
+        $gateway-&amp;gt;setApiKey(\Cake\Core\Configure::read(&#39;Stripe.secret_key&#39;));
         // Create a purchase with the stripe token and the amount in the cart
         $response = $gateway-&amp;gt;purchase([
-            'amount' =&amp;gt; $amount,
-            'currency' =&amp;gt; 'USD',
-            'token' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('Order.stripeToken')
+            &#39;amount&#39; =&amp;gt; $amount,
+            &#39;currency&#39; =&amp;gt; &#39;USD&#39;,
+            &#39;token&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;Order.stripeToken&#39;)
         ])-&amp;gt;send();
-
         // Check to see if the purchase was successful
         if ($response-&amp;gt;isSuccessful()) {
             // Do something with the data
             \Cake\Log\Log::debug(json_encode($response-&amp;gt;getData()));
-
-            $this-&amp;gt;Flash-&amp;gt;error(__('Payment successful!'));
-            return $this-&amp;gt;redirect(['action' =&amp;gt; 'cart']);
+            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Payment successful!&#39;));
+            return $this-&amp;gt;redirect([&#39;action&#39; =&amp;gt; &#39;cart&#39;]);
         } else {
-            $this-&amp;gt;Flash-&amp;gt;error(__('Error processing payment: {0}', $response-&amp;gt;getMessage()));
+            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Error processing payment: {0}&#39;, $response-&amp;gt;getMessage()));
         }
     }
 &lt;/code&gt;&lt;/pre&gt;
@@ -204,61 +184,54 @@ composer require omnipay/stripe
 &lt;p&gt;And this will be our &lt;code&gt;src/Template/Bake/Template/checkout.ctp&lt;/code&gt; file. It’s a bit long, but basically it allows a user to submit a credit card to stripe without touching your servers, and then subsequently submits a token to your app that you can use to actually process a payment:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;&amp;lt;%= $pluralVar %&amp;gt; form&quot;&amp;gt;
-&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create(null, ['class' =&amp;gt; 'payment-form']); ?&amp;gt;
+&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create(null, [&#39;class&#39; =&amp;gt; &#39;payment-form&#39;]); ?&amp;gt;
     &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __('Enter your details to submit the order ({0} total)', $amount) ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Enter your details to submit the order ({0} total)&#39;, $amount) ?&amp;gt;&amp;lt;/legend&amp;gt;
         &amp;lt;span class=&quot;payment-errors&quot;&amp;gt;&amp;lt;/span&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('Order.number', ['label' =&amp;gt; 'Card Number']); ?&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('Order.cvc', ['label' =&amp;gt; 'CVC']); ?&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('Order.exp-month', ['label' =&amp;gt; 'Expiration Month (MM)']); ?&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('Order.exp-year', ['label' =&amp;gt; 'Expiration Year (YYYY)']); ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;Order.number&#39;, [&#39;label&#39; =&amp;gt; &#39;Card Number&#39;]); ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;Order.cvc&#39;, [&#39;label&#39; =&amp;gt; &#39;CVC&#39;]); ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;Order.exp-month&#39;, [&#39;label&#39; =&amp;gt; &#39;Expiration Month (MM)&#39;]); ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;Order.exp-year&#39;, [&#39;label&#39; =&amp;gt; &#39;Expiration Year (YYYY)&#39;]); ?&amp;gt;
     &amp;lt;/fieldset&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__('Submit Order')); ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Submit Order&#39;)); ?&amp;gt;
 &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end(); ?&amp;gt;
 &amp;lt;/div&amp;gt;
-
 &amp;lt;script type=&quot;text/javascript&quot; src=&quot;http://code.jquery.com/jquery-1.10.2.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
 &amp;lt;script type=&quot;text/javascript&quot; src=&quot;https://js.stripe.com/v2/&quot;&amp;gt;&amp;lt;/script&amp;gt;
 &amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
 // The JS needs access to the publishable stripe key
-Stripe.setPublishableKey('&amp;lt;?php echo \Cake\Core\Configure::read('Stripe.publishable_key'); ?&amp;gt;');
-
+Stripe.setPublishableKey(&#39;&amp;lt;?php echo \Cake\Core\Configure::read(&#39;Stripe.publishable_key&#39;); ?&amp;gt;&#39;);
 // We need to create a callback to process the stripe payement, as
 // well as show errors or submit the token in case of success.
 var stripeResponseHandler = function(status, response) {
-  var $form = $('.payment-form');
-
+  var $form = $(&#39;.payment-form&#39;);
   if (response.error) {
     // Show the errors on the form
-    $form.find('.payment-errors').text(response.error.message);
-    $form.find('button').prop('disabled', false);
+    $form.find(&#39;.payment-errors&#39;).text(response.error.message);
+    $form.find(&#39;button&#39;).prop(&#39;disabled&#39;, false);
   } else {
     // token contains id, last4, and card type
     var token = response.id;
     // Reset form data we do not want to submit to the server
-    $('#order-number, #order-cvc, #order-exp-month, #order-xp-year').val(&quot;&quot;);
+    $(&#39;#order-number, #order-cvc, #order-exp-month, #order-xp-year&#39;).val(&quot;&quot;);
     // Insert the token into the form so it gets submitted to the server
-    $form.append($('&amp;lt;input type=&quot;hidden&quot; name=&quot;Order[stripeToken]&quot; /&amp;gt;').val(token));
+    $form.append($(&#39;&amp;lt;input type=&quot;hidden&quot; name=&quot;Order[stripeToken]&quot; /&amp;gt;&#39;).val(token));
     // and submit
     $form.get(0).submit();
   }
 };
-
 jQuery(function($) {
-  $('.payment-form').submit(function(e) {
+  $(&#39;.payment-form&#39;).submit(function(e) {
     // Prevent the form from submitting with the default action
     e.preventDefault();
-
     var $form = $(this);
-
     // Disable the submit button to prevent repeated clicks
-    $form.find('button').prop('disabled', true);
-
+    $form.find(&#39;button&#39;).prop(&#39;disabled&#39;, true);
     Stripe.card.createToken({
-      number: $('#order-number').val(),
-      cvc: $('#order-cvc').val(),
-      exp_month: $('#order-exp-month').val(),
-      exp_year: $('#order-exp-year').val()
+      number: $(&#39;#order-number&#39;).val(),
+      cvc: $(&#39;#order-cvc&#39;).val(),
+      exp_month: $(&#39;#order-exp-month&#39;).val(),
+      exp_year: $(&#39;#order-exp-year&#39;).val()
     }, stripeResponseHandler);
   });
 });
@@ -267,8 +240,8 @@ jQuery(function($) {
 
 &lt;p&gt;Now we need to tell bake to create these this action and it’s related template in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;. The actions for the &lt;code&gt;Orders&lt;/code&gt; controller should look something like the following:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == 'Orders') {
-    $view-&amp;gt;viewVars['actions'] = ['cart', 'checkout'];
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == &#39;Orders&#39;) {
+    $view-&amp;gt;viewVars[&#39;actions&#39;] = [&#39;cart&#39;, &#39;checkout&#39;];
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -321,8 +294,8 @@ bin/cake bake view orders -f
 
 &lt;p&gt;First thing we’ll need is to customize the methods available to the Products controller. We already have a bake event in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;, so we’ll add the following bit of code to limit the actions (as well as add two new ones);&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == 'Products') {
-    $view-&amp;gt;viewVars['actions'] = ['index', 'view', 'add', 'addToCart', 'removeFromCart'];
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == &#39;Products&#39;) {
+    $view-&amp;gt;viewVars[&#39;actions&#39;] = [&#39;index&#39;, &#39;view&#39;, &#39;add&#39;, &#39;addToCart&#39;, &#39;removeFromCart&#39;];
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -337,15 +310,15 @@ bin/cake bake view orders -f
  */
     public function addToCart($id = null) {
         $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;get($id);
-        $event = new \Cake\Event\Event('Order.addToCart', $this, [
-            '&amp;lt;%= $singularName%&amp;gt;' =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;,
-            'user' =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
+        $event = new \Cake\Event\Event(&#39;Order.addToCart&#39;, $this, [
+            &#39;&amp;lt;%= $singularName%&amp;gt;&#39; =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;,
+            &#39;user&#39; =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
         ]);
         \Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
         if ($event-&amp;gt;result) {
-            $this-&amp;gt;Flash-&amp;gt;success('The &amp;lt;%= $singularName%&amp;gt; has been added to your cart.');
+            $this-&amp;gt;Flash-&amp;gt;success(&#39;The &amp;lt;%= $singularName%&amp;gt; has been added to your cart.&#39;);
         } else {
-            $this-&amp;gt;Flash-&amp;gt;error('The &amp;lt;%= $singularName%&amp;gt; could not be added to your cart.');
+            $this-&amp;gt;Flash-&amp;gt;error(&#39;The &amp;lt;%= $singularName%&amp;gt; could not be added to your cart.&#39;);
         }
         return $this-&amp;gt;redirect($this-&amp;gt;referer());
     }
@@ -362,15 +335,15 @@ bin/cake bake view orders -f
  */
     public function removeFromCart($id = null) {
         $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;get($id);
-        $event = new \Cake\Event\Event('Order.removeFromCart', $this, [
-            '&amp;lt;%= $singularName%&amp;gt;' =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;,
-            'user' =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
+        $event = new \Cake\Event\Event(&#39;Order.removeFromCart&#39;, $this, [
+            &#39;&amp;lt;%= $singularName%&amp;gt;&#39; =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;,
+            &#39;user&#39; =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
         ]);
         \Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
         if ($event-&amp;gt;result) {
-            $this-&amp;gt;Flash-&amp;gt;success('The &amp;lt;%= $singularName%&amp;gt; has been removed from your cart.');
+            $this-&amp;gt;Flash-&amp;gt;success(&#39;The &amp;lt;%= $singularName%&amp;gt; has been removed from your cart.&#39;);
         } else {
-            $this-&amp;gt;Flash-&amp;gt;error('The &amp;lt;%= $singularName%&amp;gt; could not be removed from your cart.');
+            $this-&amp;gt;Flash-&amp;gt;error(&#39;The &amp;lt;%= $singularName%&amp;gt; could not be removed from your cart.&#39;);
         }
         return $this-&amp;gt;redirect($this-&amp;gt;referer());
     }
@@ -395,9 +368,9 @@ cp $BAKE_TEMPLATE_DIR/Template/index.ctp $TEMPLATE_DIR/Template/index.ctp
 &lt;p&gt;Our new &lt;code&gt;src/Template/Bake/Template/index.ctp&lt;/code&gt; does not take a list of related actions to perform on an item, so we’re going to add this. Around line 86, you’ll see a chunk of code that looks like the following:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;&amp;lt;td class=&quot;actions&quot;&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('View'), ['action' =&amp;gt; 'view', &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('Edit'), ['action' =&amp;gt; 'edit', &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;postLink(__('Delete'), ['action' =&amp;gt; 'delete', &amp;lt;%= $pk %&amp;gt;], ['confirm' =&amp;gt; __('Are you sure you want to delete # {0}?', &amp;lt;%= $pk %&amp;gt;)]) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;View&#39;), [&#39;action&#39; =&amp;gt; &#39;view&#39;, &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;Edit&#39;), [&#39;action&#39; =&amp;gt; &#39;edit&#39;, &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;postLink(__(&#39;Delete&#39;), [&#39;action&#39; =&amp;gt; &#39;delete&#39;, &amp;lt;%= $pk %&amp;gt;], [&#39;confirm&#39; =&amp;gt; __(&#39;Are you sure you want to delete # {0}?&#39;, &amp;lt;%= $pk %&amp;gt;)]) ?&amp;gt;
 &amp;lt;/td&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -405,10 +378,10 @@ cp $BAKE_TEMPLATE_DIR/Template/index.ctp $TEMPLATE_DIR/Template/index.ctp
 
 &lt;pre&gt;&lt;code&gt;&amp;lt;td class=&quot;actions&quot;&amp;gt;
     &amp;lt;% foreach ($singularActions as $config) : %&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('&amp;lt;%= $config['title'] %&amp;gt;'), ['action' =&amp;gt; '&amp;lt;%= $config['action'] %&amp;gt;', &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;&amp;lt;%= $config[&#39;title&#39;] %&amp;gt;&#39;), [&#39;action&#39; =&amp;gt; &#39;&amp;lt;%= $config[&#39;action&#39;] %&amp;gt;&#39;, &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
     &amp;lt;% endforeach; %&amp;gt;
     &amp;lt;% foreach ($singularConfirmActions as $config) : %&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;postLink(__('&amp;lt;%= $config['title'] %&amp;gt;'), ['action' =&amp;gt; '&amp;lt;%= $config['action'] %&amp;gt;', &amp;lt;%= $pk %&amp;gt;], ['confirm' =&amp;gt; __('&amp;lt;%= $config['message'] %&amp;gt;', &amp;lt;%= $pk %&amp;gt;)) ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;postLink(__(&#39;&amp;lt;%= $config[&#39;title&#39;] %&amp;gt;&#39;), [&#39;action&#39; =&amp;gt; &#39;&amp;lt;%= $config[&#39;action&#39;] %&amp;gt;&#39;, &amp;lt;%= $pk %&amp;gt;], [&#39;confirm&#39; =&amp;gt; __(&#39;&amp;lt;%= $config[&#39;message&#39;] %&amp;gt;&#39;, &amp;lt;%= $pk %&amp;gt;)) ?&amp;gt;
     &amp;lt;% endforeach; %&amp;gt;
 &amp;lt;/td&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -417,144 +390,127 @@ cp $BAKE_TEMPLATE_DIR/Template/index.ctp $TEMPLATE_DIR/Template/index.ctp
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
     $view = $event-&amp;gt;subject;
-    $name = Hash::get($view-&amp;gt;viewVars, 'pluralHumanName');
-    $isIndexView = strpos($event-&amp;gt;data[0], 'Bake/Template/index.ctp') !== false;
-
+    $name = Hash::get($view-&amp;gt;viewVars, &#39;pluralHumanName&#39;);
+    $isIndexView = strpos($event-&amp;gt;data[0], &#39;Bake/Template/index.ctp&#39;) !== false;
     if ($isIndexView) {
         $singularActions = [
-            ['action' =&amp;gt; 'view', 'title' =&amp;gt; 'View'],
-            ['action' =&amp;gt; 'edit', 'title' =&amp;gt; 'Edit'],
+            [&#39;action&#39; =&amp;gt; &#39;view&#39;, &#39;title&#39; =&amp;gt; &#39;View&#39;],
+            [&#39;action&#39; =&amp;gt; &#39;edit&#39;, &#39;title&#39; =&amp;gt; &#39;Edit&#39;],
         ];
         $singularConfirmActions = [
-            ['action' =&amp;gt; 'delete', 'title' =&amp;gt; 'Delete', 'message' =&amp;gt; 'Are you sure you want to delete # {0}?'],
+            [&#39;action&#39; =&amp;gt; &#39;delete&#39;, &#39;title&#39; =&amp;gt; &#39;Delete&#39;, &#39;message&#39; =&amp;gt; &#39;Are you sure you want to delete # {0}?&#39;],
         ];
-        if ($name == 'Products') {
+        if ($name == &#39;Products&#39;) {
             $singularActions = [
-                ['action' =&amp;gt; 'view', 'title' =&amp;gt; 'View'],
-                ['action' =&amp;gt; 'addToCart', 'title' =&amp;gt; 'Add To Cart'],
+                [&#39;action&#39; =&amp;gt; &#39;view&#39;, &#39;title&#39; =&amp;gt; &#39;View&#39;],
+                [&#39;action&#39; =&amp;gt; &#39;addToCart&#39;, &#39;title&#39; =&amp;gt; &#39;Add To Cart&#39;],
             ];
             $singularConfirmActions = [];
         }
-
-        $view-&amp;gt;viewVars['singularActions'] = $singularActions;
-        $view-&amp;gt;viewVars['singularConfirmActions'] = $singularConfirmActions;
+        $view-&amp;gt;viewVars[&#39;singularActions&#39;] = $singularActions;
+        $view-&amp;gt;viewVars[&#39;singularConfirmActions&#39;] = $singularConfirmActions;
     }
-}, 'Bake.beforeRender');
+}, &#39;Bake.beforeRender&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The above event will allow us to keep all other baked &lt;code&gt;index.ctp&lt;/code&gt; template output the same, while allowing us to hijack the actions listed for the &lt;code&gt;Products&lt;/code&gt; view to show our &lt;code&gt;Add To Cart&lt;/code&gt; link.&lt;/p&gt;
 
 &lt;p&gt;Finally, we will need to actually handle processing of our events. We’ll create an &lt;code&gt;app/config/events.php&lt;/code&gt; and include it on our &lt;code&gt;app/config/bootstrap.php&lt;/code&gt; like so:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;require __DIR__ . '/events.php';
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;require __DIR__ . &#39;/events.php&#39;;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;We need two events, one to manage adding a product to the user’s cart, and one to manage removing the product from a user’s cart. We’ll have the user’s session at hand, as well as the product entity. Here is what our &lt;code&gt;Order.addToCart&lt;/code&gt; event will look like:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
     $data = $event-&amp;gt;data;
-    if (empty($data['user'])) {
+    if (empty($data[&#39;user&#39;])) {
         // User is not logged in
         return $event-&amp;gt;result = false;
     }
-
-    if (empty($data['product'])) {
+    if (empty($data[&#39;product&#39;])) {
         // Invalid product specified
         return $event-&amp;gt;result = false;
     }
-
-    $user = $data['user'];
-    $product = $data['product'];
+    $user = $data[&#39;user&#39;];
+    $product = $data[&#39;product&#39;];
     if ($product-&amp;gt;stock &amp;lt;= 0) {
         // No more stock for product
         return $event-&amp;gt;result = false;
     }
-
-    $Orders = TableRegistry::get('Orders');
+    $Orders = TableRegistry::get(&#39;Orders&#39;);
     $order = $Orders-&amp;gt;find()
-                    -&amp;gt;where(['user_id' =&amp;gt; $user['id']])
+                    -&amp;gt;where([&#39;user_id&#39; =&amp;gt; $user[&#39;id&#39;]])
                     -&amp;gt;first();
-
     if (empty($order)) {
         // Create a new order where necessary
-        $order = $Orders-&amp;gt;newEntity(['user_id' =&amp;gt; $user['id']]);
+        $order = $Orders-&amp;gt;newEntity([&#39;user_id&#39; =&amp;gt; $user[&#39;id&#39;]]);
         $order = $Orders-&amp;gt;save($order);
     }
-
-    $OrderItems = TableRegistry::get('OrderItems');
+    $OrderItems = TableRegistry::get(&#39;OrderItems&#39;);
     $orderItem = $OrderItems-&amp;gt;newEntity([
-        'order_id' =&amp;gt; $order-&amp;gt;id,
-        'product_id' =&amp;gt; $product-&amp;gt;id,
-        'quantity' =&amp;gt; 1,
-        'price' =&amp;gt; $product-&amp;gt;price,
+        &#39;order_id&#39; =&amp;gt; $order-&amp;gt;id,
+        &#39;product_id&#39; =&amp;gt; $product-&amp;gt;id,
+        &#39;quantity&#39; =&amp;gt; 1,
+        &#39;price&#39; =&amp;gt; $product-&amp;gt;price,
     ]);
-
     // Save the order item entry
     if (!$OrderItems-&amp;gt;save($orderItem)) {
         return $event-&amp;gt;result = false;
     }
-
     // Decrease the amount of stock
-    $Products = TableRegistry::get('Products');
+    $Products = TableRegistry::get(&#39;Products&#39;);
     $product-&amp;gt;stock--;
     return $event-&amp;gt;result = !!$Products-&amp;gt;save($product);
-}, 'Order.addToCart');
+}, &#39;Order.addToCart&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And our equally-well commented &lt;code&gt;Order.removeFromCart&lt;/code&gt; event:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
     $data = $event-&amp;gt;data;
-    if (empty($data['user'])) {
+    if (empty($data[&#39;user&#39;])) {
         // User is not logged in
         return $event-&amp;gt;result = false;
     }
-
-    if (empty($data['product'])) {
+    if (empty($data[&#39;product&#39;])) {
         // Invalid product specified
         return $event-&amp;gt;result = false;
     }
-
-    $user = $data['user'];
-    $product = $data['product'];
-
-    $Orders = TableRegistry::get('Orders');
+    $user = $data[&#39;user&#39;];
+    $product = $data[&#39;product&#39;];
+    $Orders = TableRegistry::get(&#39;Orders&#39;);
     $order = $Orders-&amp;gt;find()
-                    -&amp;gt;where(['user_id' =&amp;gt; $user['id']])
+                    -&amp;gt;where([&#39;user_id&#39; =&amp;gt; $user[&#39;id&#39;]])
                     -&amp;gt;first();
-
     if (empty($order)) {
         // There is no cart associated with the user
         return $event-&amp;gt;result = false;
     }
-
-    $OrderItems = TableRegistry::get('OrderItems');
+    $OrderItems = TableRegistry::get(&#39;OrderItems&#39;);
     $orderItem = $OrderItems-&amp;gt;find()
-                            -&amp;gt;where(['order_id' =&amp;gt; $order-&amp;gt;id, 'product_id' =&amp;gt; $product-&amp;gt;id])
+                            -&amp;gt;where([&#39;order_id&#39; =&amp;gt; $order-&amp;gt;id, &#39;product_id&#39; =&amp;gt; $product-&amp;gt;id])
                             -&amp;gt;first();
-
     if (empty($orderItem)) {
-        // Item not in user's cart
+        // Item not in user&#39;s cart
         return $event-&amp;gt;result = false;
     }
-
     if (!$OrderItems-&amp;gt;delete($orderItem)) {
         // Unable to remove item from cart
         return $event-&amp;gt;result = false;
     }
-
     // Increase product stock
-    $Products = TableRegistry::get('Products');
+    $Products = TableRegistry::get(&#39;Products&#39;);
     $product-&amp;gt;stock++;
     return $event-&amp;gt;result = !!$Products-&amp;gt;save($product);
-}, 'Order.removeFromCart');
+}, &#39;Order.removeFromCart&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;A real ecommerce solution will have much more stringent protocols surrounding adding/removing stock from a product. We’re doing it this way because it’s much simpler than going through the rabbit-hole, but please keep this in mind if you are building out your own solution for a customer. For instance, consider doing all table manipulation using a transaction.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;One last thing. We’ll want a new action to list all the items in a user’s order, as well as a way to actually call our &lt;code&gt;/products/removeFromCart&lt;/code&gt; action. We’ll define a new Controller bake template in &lt;code&gt;src/Template/Bake/Element/Controller/cart.ctp&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;One last thing. We’ll want a new action to list all the items in a user’s order, as well as a way to actually call our &lt;code&gt;/products/removeFromCart&lt;/code&gt; action. We’ll define a new Controller bake template in &lt;code&gt;src/Template/Bake/Element/Controller/cart.ctp&lt;/code&gt;.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;/**
  * Cart method
@@ -562,29 +518,26 @@ cp $BAKE_TEMPLATE_DIR/Template/index.ctp $TEMPLATE_DIR/Template/index.ctp
  * @return void
  */
     public function cart() {
-        $user_id = $this-&amp;gt;Auth-&amp;gt;user('id');
+        $user_id = $this-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
         $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;find()
-                        -&amp;gt;where(['user_id' =&amp;gt; $user_id])
+                        -&amp;gt;where([&#39;user_id&#39; =&amp;gt; $user_id])
                         -&amp;gt;first();
-
         if (empty($&amp;lt;%= $singularName%&amp;gt;)) {
-            $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity(['user_id' =&amp;gt; $user_id]);
+            $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity([&#39;user_id&#39; =&amp;gt; $user_id]);
             $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;save($&amp;lt;%= $singularName%&amp;gt;);
         }
-
         $items = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;OrderItems-&amp;gt;find()
-                                  -&amp;gt;where(['order_id' =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;-&amp;gt;id])
-                                  -&amp;gt;contain(['Products'])
+                                  -&amp;gt;where([&#39;order_id&#39; =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;-&amp;gt;id])
+                                  -&amp;gt;contain([&#39;Products&#39;])
                                   -&amp;gt;all();
-
-        $this-&amp;gt;set(compact('&amp;lt;%= $singularName%&amp;gt;', 'items'));
+        $this-&amp;gt;set(compact(&#39;&amp;lt;%= $singularName%&amp;gt;&#39;, &#39;items&#39;));
     }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And we’ll restrict our &lt;code&gt;Orders&lt;/code&gt; controller to just this action in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt; with the following check:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == 'Orders') {
-    $view-&amp;gt;viewVars['actions'] = ['cart'];
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == &#39;Orders&#39;) {
+    $view-&amp;gt;viewVars[&#39;actions&#39;] = [&#39;cart&#39;];
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -607,8 +560,8 @@ cp $BAKE_TEMPLATE_DIR/Template/index.ctp $TEMPLATE_DIR/Template/index.ctp
                 &amp;lt;td&amp;gt;&amp;lt;?= $item-&amp;gt;quantity ?&amp;gt;&amp;lt;/td&amp;gt;
                 &amp;lt;td&amp;gt;&amp;lt;?= $item-&amp;gt;price ?&amp;gt;&amp;lt;/td&amp;gt;
                 &amp;lt;td&amp;gt;
-                    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('View'), ['controller' =&amp;gt; 'Products', 'action' =&amp;gt; 'view', $item-&amp;gt;product_id]) ?&amp;gt;
-                    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__('Remove from Cart'), ['controller' =&amp;gt; 'Products', 'action' =&amp;gt; 'removeFromCart', $item-&amp;gt;product_id]) ?&amp;gt;
+                    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;View&#39;), [&#39;controller&#39; =&amp;gt; &#39;Products&#39;, &#39;action&#39; =&amp;gt; &#39;view&#39;, $item-&amp;gt;product_id]) ?&amp;gt;
+                    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;Remove from Cart&#39;), [&#39;controller&#39; =&amp;gt; &#39;Products&#39;, &#39;action&#39; =&amp;gt; &#39;removeFromCart&#39;, $item-&amp;gt;product_id]) ?&amp;gt;
                 &amp;lt;/td&amp;gt;
             &amp;lt;/tr&amp;gt;
             &amp;lt;?php endforeach; ?&amp;gt;
@@ -704,21 +657,21 @@ Path: /vagrant/app/src/
 
 &lt;p&gt;To populate a specific type of entity, we need to create an EntityPopulator object. The Faker library provides a custom populator for the CakePHP framework, which we’ll leverage in our case. You simply need to provide the name of the table class:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$entityPopulator = new \Faker\ORM\CakePHP\EntityPopulator('Users');
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$entityPopulator = new \Faker\ORM\CakePHP\EntityPopulator(&#39;Users&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Finally, we need to create a populator object that will actually insert data into the database. We need to pass in our EntityPopulator object, a number of records to insert, as well as custom formatters. The formatters come from providers - we added the &lt;code&gt;Internet&lt;/code&gt; provider above - or your own text. Faker tries to autodetect data types, but will default to stuff like &lt;code&gt;plaintext&lt;/code&gt; for &lt;code&gt;email&lt;/code&gt; fields, so we need to override this:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$populator = new \Faker\ORM\CakePHP\Populator($faker);
 $populator-&amp;gt;addEntity($entityPopulator, 20, [
-  'email' =&amp;gt; function () use ($faker) { return $faker-&amp;gt;email(); },
-  'password' =&amp;gt; 'password',
+  &#39;email&#39; =&amp;gt; function () use ($faker) { return $faker-&amp;gt;email(); },
+  &#39;password&#39; =&amp;gt; &#39;password&#39;,
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The last thing is to actually populate our table!&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$populator-&amp;gt;execute(['validate' =&amp;gt; false]);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$populator-&amp;gt;execute([&#39;validate&#39; =&amp;gt; false]);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The full code sample will look like the following:&lt;/p&gt;
@@ -727,15 +680,15 @@ $populator-&amp;gt;addEntity($entityPopulator, 20, [
 $faker = \Faker\Factory::create();
 $faker-&amp;gt;addProvider(new \Faker\Provider\Internet($faker));
 
-$entityPopulator = new \Faker\ORM\CakePHP\EntityPopulator('Users');
+$entityPopulator = new \Faker\ORM\CakePHP\EntityPopulator(&#39;Users&#39;);
 $populator = new \Faker\ORM\CakePHP\Populator($faker);
 $populator-&amp;gt;addEntity($entityPopulator, 20, [
-  'email' =&amp;gt; function () use ($faker) { return $faker-&amp;gt;email(); },
-  'password' =&amp;gt; 'password',
+  &#39;email&#39; =&amp;gt; function () use ($faker) { return $faker-&amp;gt;email(); },
+  &#39;password&#39; =&amp;gt; &#39;password&#39;,
 ]);
 
 $this-&amp;gt;out(&quot;Inserting&quot;);
-$populator-&amp;gt;execute(['validate' =&amp;gt; false]);
+$populator-&amp;gt;execute([&#39;validate&#39; =&amp;gt; false]);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;blockquote&gt;
@@ -786,12 +739,12 @@ use Cake\Utility\Hash;
 
 EventManager::instance()-&amp;gt;attach(function (Event $event) {
     $view = $event-&amp;gt;subject;
-    $name = Hash::get($view-&amp;gt;viewVars, 'name');
-    $isController = strpos($event-&amp;gt;data[0], 'Bake/Controller/controller.ctp') !== false;
-    if ($isController &amp;amp;&amp;amp; $name == 'Users') {
-        $view-&amp;gt;viewVars['actions'] = ['login', 'logout', 'index', 'view', 'register', 'edit', 'delete'];
+    $name = Hash::get($view-&amp;gt;viewVars, &#39;name&#39;);
+    $isController = strpos($event-&amp;gt;data[0], &#39;Bake/Controller/controller.ctp&#39;) !== false;
+    if ($isController &amp;amp;&amp;amp; $name == &#39;Users&#39;) {
+        $view-&amp;gt;viewVars[&#39;actions&#39;] = [&#39;login&#39;, &#39;logout&#39;, &#39;index&#39;, &#39;view&#39;, &#39;register&#39;, &#39;edit&#39;, &#39;delete&#39;];
     }
-}, 'Bake.beforeRender');
+}, &#39;Bake.beforeRender&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now that this is set, we’ll need action templates for our &lt;code&gt;login&lt;/code&gt;, &lt;code&gt;logout&lt;/code&gt;, and &lt;code&gt;register&lt;/code&gt; methods. These do not come with CakePHP as they can be pretty specific, so we’ll include some pretty basic ones.&lt;/p&gt;
@@ -804,13 +757,13 @@ EventManager::instance()-&amp;gt;attach(function (Event $event) {
  * @return void
  */
 public function login() {
-    if ($this-&amp;gt;request-&amp;gt;is('post')) {
+    if ($this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
         $user = $this-&amp;gt;Auth-&amp;gt;identify();
         if ($user) {
             $this-&amp;gt;Auth-&amp;gt;setUser($user);
             return $this-&amp;gt;redirect($this-&amp;gt;Auth-&amp;gt;redirectUrl());
         }
-        $this-&amp;gt;Flash-&amp;gt;error(__('Invalid email or password, try again'));
+        $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Invalid username or password, try again&#39;));
     }
 }
 &lt;/code&gt;&lt;/pre&gt;
@@ -829,7 +782,7 @@ public function logout() {
 
 &lt;p&gt;And finally &lt;code&gt;app/src/Template/Bake/Element/Controller/register.ctp&lt;/code&gt; (which is simply &lt;code&gt;add.ctp&lt;/code&gt; but with the action name changed):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;% $compact = [&quot;'&quot; . $singularName . &quot;'&quot;]; %&amp;gt;
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;% $compact = [&quot;&#39;&quot; . $singularName . &quot;&#39;&quot;]; %&amp;gt;
 
 /**
  * Register method
@@ -838,30 +791,30 @@ public function logout() {
  */
   public function register() {
     $&amp;lt;%= $singularName %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity($this-&amp;gt;request-&amp;gt;data);
-    if ($this-&amp;gt;request-&amp;gt;is('post')) {
+    if ($this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
       if ($this-&amp;gt;&amp;lt;%= $currentModelName; %&amp;gt;-&amp;gt;save($&amp;lt;%= $singularName %&amp;gt;)) {
-        $this-&amp;gt;Flash-&amp;gt;success('The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; has been saved.');
-        return $this-&amp;gt;redirect(['action' =&amp;gt; 'index']);
+        $this-&amp;gt;Flash-&amp;gt;success(&#39;The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; has been saved.&#39;);
+        return $this-&amp;gt;redirect([&#39;action&#39; =&amp;gt; &#39;index&#39;]);
       } else {
-        $this-&amp;gt;Flash-&amp;gt;error('The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; could not be saved. Please, try again.');
+        $this-&amp;gt;Flash-&amp;gt;error(&#39;The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; could not be saved. Please, try again.&#39;);
       }
     }
 &amp;lt;%
     $associations = array_merge(
-      $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, 'BelongsTo'),
-      $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, 'BelongsToMany')
+      $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, &#39;BelongsTo&#39;),
+      $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, &#39;BelongsToMany&#39;)
     );
     foreach ($associations as $assoc):
       $association = $modelObj-&amp;gt;association($assoc);
       $otherName = $association-&amp;gt;target()-&amp;gt;alias();
       $otherPlural = $this-&amp;gt;_variableName($otherName);
 %&amp;gt;
-    $&amp;lt;%= $otherPlural %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;&amp;lt;%= $otherName %&amp;gt;-&amp;gt;find('list');
+    $&amp;lt;%= $otherPlural %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;&amp;lt;%= $otherName %&amp;gt;-&amp;gt;find(&#39;list&#39;);
 &amp;lt;%
-      $compact[] = &quot;'$otherPlural'&quot;;
+      $compact[] = &quot;&#39;$otherPlural&#39;&quot;;
     endforeach;
 %&amp;gt;
-    $this-&amp;gt;set(compact(&amp;lt;%= join(', ', $compact) %&amp;gt;));
+    $this-&amp;gt;set(compact(&amp;lt;%= join(&#39;, &#39;, $compact) %&amp;gt;));
   }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -875,14 +828,14 @@ bin/cake bake controller users -f
 &lt;p&gt;We also need a login view template at &lt;code&gt;app/src/Template/Bake/Template/login.ctp&lt;/code&gt;&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;&amp;lt;%= $pluralVar %&amp;gt; form&quot;&amp;gt;
-&amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render('auth') ?&amp;gt;
+&amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render(&#39;auth&#39;) ?&amp;gt;
 &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
     &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __('Please enter your email and password') ?&amp;gt;&amp;lt;/legend&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('email') ?&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input('password') ?&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Please enter your username and password&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;username&#39;) ?&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;) ?&amp;gt;
     &amp;lt;/fieldset&amp;gt;
-&amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__('Login')); ?&amp;gt;
+&amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Login&#39;)); ?&amp;gt;
 &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
 &amp;lt;/div&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
@@ -890,7 +843,7 @@ bin/cake bake controller users -f
 &lt;p&gt;And we need our &lt;code&gt;app/src/Template/Bake/Template/register.ctp&lt;/code&gt;, which will just call out to the &lt;code&gt;form.ctp&lt;/code&gt; element:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%
-echo $this-&amp;gt;element('form');
+echo $this-&amp;gt;element(&#39;form&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;To create these new views, we can simply use bake. Note that if a bake template does not exist for a given action, a corresponding view template is not created. This means we won’t have an empty &lt;code&gt;app/src/Template/Users/logout.ctp&lt;/code&gt; generated, which is nice.&lt;/p&gt;
@@ -903,8 +856,8 @@ echo $this-&amp;gt;element('form');
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Validation\Validator;` at the top of your class
 public function validationDefault(Validator $validator) {
     return $validator
-        -&amp;gt;notEmpty('email', 'An email address is required')
-        -&amp;gt;notEmpty('password', 'A password is required');
+        -&amp;gt;notEmpty(&#39;username&#39;, &#39;A username is required&#39;)
+        -&amp;gt;notEmpty(&#39;password&#39;, &#39;A password is required&#39;);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -915,18 +868,18 @@ public function validationDefault(Validator $validator) {
 &lt;p&gt;While we’ve templated out a bunch of stuff, we still need to actually handle login/logout. You can load the AuthComponent in your AppController::initialize() like so:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize() {
-    $this-&amp;gt;loadComponent('Flash');
-    $this-&amp;gt;loadComponent('Auth', [
+    $this-&amp;gt;loadComponent(&#39;Flash&#39;);
+    $this-&amp;gt;loadComponent(&#39;Auth&#39;, [
         // Where to redirect after a successful login
-        'loginRedirect' =&amp;gt; [
-            'controller' =&amp;gt; 'Products',
-            'action' =&amp;gt; 'index'
+        &#39;loginRedirect&#39; =&amp;gt; [
+            &#39;controller&#39; =&amp;gt; &#39;Products&#39;,
+            &#39;action&#39; =&amp;gt; &#39;index&#39;
         ],
         // Where to redirect after a user logs out
-        'logoutRedirect' =&amp;gt; [
-            'controller' =&amp;gt; 'Products',
-            'action' =&amp;gt; 'index',
-            'home'
+        &#39;logoutRedirect&#39; =&amp;gt; [
+            &#39;controller&#39; =&amp;gt; &#39;Products&#39;,
+            &#39;action&#39; =&amp;gt; &#39;index&#39;,
+            &#39;home&#39;
         ]
     ]);
 }
@@ -939,8 +892,8 @@ public function validationDefault(Validator $validator) {
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Event\Event;` at the top of your class
 public function beforeFilter(Event $event) {
     parent::beforeFilter($event);
-    if ($this-&amp;gt;request-&amp;gt;controller == 'Users') {
-        $this-&amp;gt;Auth-&amp;gt;allow(['add', 'logout']);
+    if ($this-&amp;gt;request-&amp;gt;controller == &#39;Users&#39;) {
+        $this-&amp;gt;Auth-&amp;gt;allow([&#39;add&#39;, &#39;logout&#39;]);
     } else {
         $this-&amp;gt;Auth-&amp;gt;allow();
     }
@@ -1093,7 +1046,7 @@ composer require cakephp/migrations:dev-migration-generation
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 use Cake\Core\Plugin;
 
-Plugin::load('Migrations');
+Plugin::load(&#39;Migrations&#39;);
 ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1141,8 +1094,8 @@ bin/cake bake all products
 use Cake\Core\Plugin;
 use Cake\Routing\Router;
 
-Router::scope('/', function ($routes) {
-  $routes-&amp;gt;connect('/', ['controller' =&amp;gt; 'Products', 'action' =&amp;gt; 'index']);
+Router::scope(&#39;/&#39;, function ($routes) {
+  $routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Products&#39;, &#39;action&#39; =&amp;gt; &#39;index&#39;]);
 
   $routes-&amp;gt;fallbacks();
 });
@@ -1229,10 +1182,10 @@ use Phinx\Migration\AbstractMigration;
 class ClosingIssues extends AbstractMigration {
   public function change() {
 
-    $table = $this-&amp;gt;table('issues');
+    $table = $this-&amp;gt;table(&#39;issues&#39;);
     $table
-      -&amp;gt;addColumn('is_closed', 'boolean', [
-        'default' =&amp;gt; false,
+      -&amp;gt;addColumn(&#39;is_closed&#39;, &#39;boolean&#39;, [
+        &#39;default&#39; =&amp;gt; false,
       ])
       -&amp;gt;save();
   }
@@ -1257,14 +1210,14 @@ EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, 
         return true;
     }
 
-    $table = TableRegistry::get('Issues');
-    $open_issue = $table-&amp;gt;find('all')-&amp;gt;where([
-        'Issues.id' =&amp;gt; $entity-&amp;gt;issue_id,
-        'Issues.is_closed' =&amp;gt; false,
+    $table = TableRegistry::get(&#39;Issues&#39;);
+    $open_issue = $table-&amp;gt;find(&#39;all&#39;)-&amp;gt;where([
+        &#39;Issues.id&#39; =&amp;gt; $entity-&amp;gt;issue_id,
+        &#39;Issues.is_closed&#39; =&amp;gt; false,
     ])-&amp;gt;first();
 
     return !empty($open_issue);
-}, 'Model.beforeValidate');
+}, &#39;Model.beforeValidate&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;A bit of explanation:&lt;/p&gt;
@@ -1322,7 +1275,7 @@ use Cake\View\View;
 
 class AppView extends View {
     public function initialize() {
-        $this-&amp;gt;loadHelper('Markdown');
+        $this-&amp;gt;loadHelper(&#39;Markdown&#39;);
     }
 }
 ?&amp;gt;
@@ -1420,23 +1373,23 @@ use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 
 EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $table = TableRegistry::get('Comments');
-    $comments = $table-&amp;gt;find('all')-&amp;gt;where([
-        'Comments.id !=' =&amp;gt; $entity-&amp;gt;id,
-        'Comments.issue_id' =&amp;gt; $entity-&amp;gt;issue_id,
-        'Comments.webhook_url IS NOT' =&amp;gt; null,
+    $table = TableRegistry::get(&#39;Comments&#39;);
+    $comments = $table-&amp;gt;find(&#39;all&#39;)-&amp;gt;where([
+        &#39;Comments.id !=&#39; =&amp;gt; $entity-&amp;gt;id,
+        &#39;Comments.issue_id&#39; =&amp;gt; $entity-&amp;gt;issue_id,
+        &#39;Comments.webhook_url IS NOT&#39; =&amp;gt; null,
     ]);
     foreach ($comments as $comment) {
         $data = $comment-&amp;gt;toArray();
-        unset($data['email_address']);
-        unset($data['webhook_url']);
+        unset($data[&#39;email_address&#39;]);
+        unset($data[&#39;webhook_url&#39;]);
 
         $http = new Client();
         $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($data), [
-          'type' =&amp;gt; 'json'
+          &#39;type&#39; =&amp;gt; &#39;json&#39;
         ]);
     }
-}, 'IssuesTable.afterSave');
+}, &#39;IssuesTable.afterSave&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The only part we’re going to change is &lt;em&gt;how&lt;/em&gt; we send the data - rather than via a POST, it will send an email. A couple notes:&lt;/p&gt;
@@ -1455,27 +1408,27 @@ EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// You can move the `\App\Model\Entity\Comment` to a `use` call at the top
 // of the class and then reference it with `Comment` in the `instanceof` check
 public function findNotifiable(Query $query, array $options) {
-    if (empty($options['comment']) || !($options['comment'] instanceof \App\Model\Entity\Comment)) {
-        throw new \InvalidArgumentException('Missing comment entity argument');
+    if (empty($options[&#39;comment&#39;]) || !($options[&#39;comment&#39;] instanceof \App\Model\Entity\Comment)) {
+        throw new \InvalidArgumentException(&#39;Missing comment entity argument&#39;);
     }
-    if (empty($options['notifierField']) {
-        throw new \InvalidArgumentException('Missing notifierField argument');
+    if (empty($options[&#39;notifierField&#39;]) {
+        throw new \InvalidArgumentException(&#39;Missing notifierField argument&#39;);
     }
 
     return $query-&amp;gt;where([
-        'Comments.id !=' =&amp;gt; $options['comment']-&amp;gt;id,
-        'Comments.issue_id' =&amp;gt; $options['comment']-&amp;gt;issue_id,
-        &quot;Comments.{$options['notifierField']} IS NOT&quot; =&amp;gt; null,
+        &#39;Comments.id !=&#39; =&amp;gt; $options[&#39;comment&#39;]-&amp;gt;id,
+        &#39;Comments.issue_id&#39; =&amp;gt; $options[&#39;comment&#39;]-&amp;gt;issue_id,
+        &quot;Comments.{$options[&#39;notifierField&#39;]} IS NOT&quot; =&amp;gt; null,
     ]);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;If you place the above in your &lt;code&gt;CommentsTable&lt;/code&gt; class, you can now call the custom find in the following way:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$table = TableRegistry::get('Comments');
-$comments = $table-&amp;gt;find('notifiable', [
-    'comment' =&amp;gt; $comment
-    'notifierField' =&amp;gt; 'webhook_url'
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$table = TableRegistry::get(&#39;Comments&#39;);
+$comments = $table-&amp;gt;find(&#39;notifiable&#39;, [
+    &#39;comment&#39; =&amp;gt; $comment
+    &#39;notifierField&#39; =&amp;gt; &#39;webhook_url&#39;
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1487,15 +1440,15 @@ $comments = $table-&amp;gt;find('notifiable', [
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function toPublicArray() {
   $data = $this-&amp;gt;toArray();
-  unset($data['email_address']);
-  unset($data['webhook_url']);
+  unset($data[&#39;email_address&#39;]);
+  unset($data[&#39;webhook_url&#39;]);
   return $data;
 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Adding the above to our &lt;code&gt;app/src/Model/Entity/Comment.php&lt;/code&gt; file will allow us to use the method in our code like so:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$comment = $table-&amp;gt;find('all')-&amp;gt;first();
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$comment = $table-&amp;gt;find(&#39;all&#39;)-&amp;gt;first();
 $publicData = $comment-&amp;gt;toPublicArray();
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1506,7 +1459,7 @@ namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
 class Comment extends Entity {
-  protected $_hidden = ['email_address', 'webhook_url'];
+  protected $_hidden = [&#39;email_address&#39;, &#39;webhook_url&#39;];
 
   // other code here
 }
@@ -1528,17 +1481,17 @@ use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 
 EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $comments = TableRegistry::get('Comments')-&amp;gt;find('notifiable', [
-        'comment' =&amp;gt; $entity,
-        'notifierField' =&amp;gt; 'webhook_url'
+    $comments = TableRegistry::get(&#39;Comments&#39;)-&amp;gt;find(&#39;notifiable&#39;, [
+        &#39;comment&#39; =&amp;gt; $entity,
+        &#39;notifierField&#39; =&amp;gt; &#39;webhook_url&#39;
     ]);
     foreach ($comments as $comment) {
         $http = new Client();
         $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($comment), [
-          'type' =&amp;gt; 'json'
+          &#39;type&#39; =&amp;gt; &#39;json&#39;
         ]);
     }
-}, 'IssuesTable.afterSave');
+}, &#39;IssuesTable.afterSave&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;em&gt;Much&lt;/em&gt; nicer.&lt;/p&gt;
@@ -1550,18 +1503,18 @@ EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Network\Email\Email;
 
 EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $comments = TableRegistry::get('Comments')-&amp;gt;find('notifiable', [
-        'comment' =&amp;gt; $entity,
-        'notifierField' =&amp;gt; 'email_address'
+    $comments = TableRegistry::get(&#39;Comments&#39;)-&amp;gt;find(&#39;notifiable&#39;, [
+        &#39;comment&#39; =&amp;gt; $entity,
+        &#39;notifierField&#39; =&amp;gt; &#39;email_address&#39;
     ]);
     foreach ($comments as $comment) {
         $email = new Email();
-        $email-&amp;gt;from(['me@example.com' =&amp;gt; 'Anonymous Issues'])
+        $email-&amp;gt;from([&#39;me@example.com&#39; =&amp;gt; &#39;Anonymous Issues&#39;])
             -&amp;gt;to($comment-&amp;gt;email_address)
             -&amp;gt;subject(sprintf(&quot;New comment on issue #%d&quot;, $comment-&amp;gt;issue_id))
             -&amp;gt;send($comment-&amp;gt;comment);
     }
-}, 'IssuesTable.afterSave');
+}, &#39;IssuesTable.afterSave&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The above is a contrived example of email sending. You could subclass the email class into a &lt;code&gt;NotificationEmail&lt;/code&gt; class and have it take a &lt;code&gt;Comment&lt;/code&gt; entity directly - as well as add custom logic around the message body or other configuration - but we’ll leave that as an exercise for larger applications.&lt;/p&gt;

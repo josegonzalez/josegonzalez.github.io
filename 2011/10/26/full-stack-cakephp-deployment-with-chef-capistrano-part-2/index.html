@@ -114,7 +114,7 @@ Cookbooks are the fundamental units of distribution in Chef.
   end
 end
 </code></pre>
-<p>If you&#8217;ll notice, I&#8217;m referencing <code>node</code> quite a few times. <code>node</code> is a reference to the configuration in your <code>DNA</code> file. I normally use <code>json</code> files, so <code>node[:static_applications]</code> is simply a key in that json file. In this case, I&#8217;m iterating over all the <code>:static_applications</code> which is a set of hostnames mapping to site configurations. Each one of these is actually a base path mapping to some configuration info as follows:</p>
+<p>If you’ll notice, I’m referencing <code>node</code> quite a few times. <code>node</code> is a reference to the configuration in your <code>DNA</code> file. I normally use <code>json</code> files, so <code>node[:static_applications]</code> is simply a key in that json file. In this case, I’m iterating over all the <code>:static_applications</code> which is a set of hostnames mapping to site configurations. Each one of these is actually a base path mapping to some configuration info as follows:</p>
 <pre><code class="language-javascript">{
   "static_applications": {
     "josediazgonzalez.com": {
@@ -143,7 +143,7 @@ end
 <h3 id="built-in-resources">Built-in Resources</h3>
 <p>There are quite a few built-in resources in Chef. The ones I use most often are <code>Directory</code>, <code>Git</code>, and <code>Template</code>, and some of these are actually in my example above (not template).</p>
 <p>The <code>Directory</code> resource merely creates a directory in a desired path with the desired config, such as directory owner and permissions.</p>
-<p>The <code>Git</code> resource is interesting because it&#8217;s actually a provider of the <code>SCM</code> resource. This means it provides some configuration, and a bit of magic, on top of the <code>SCM</code> resource to provide an implementation specific to Git, but that can be moved to, say, <code>SVN</code> with minimal work. If you&#8217;re coming from the CakePHP world, it&#8217;s akin to how <code>DboMysql</code> extends <code>DboSource</code> to provide <code>MySQL</code> specific interfaces.</p>
+<p>The <code>Git</code> resource is interesting because it’s actually a provider of the <code>SCM</code> resource. This means it provides some configuration, and a bit of magic, on top of the <code>SCM</code> resource to provide an implementation specific to Git, but that can be moved to, say, <code>SVN</code> with minimal work. If you’re coming from the CakePHP world, it’s akin to how <code>DboMysql</code> extends <code>DboSource</code> to provide <code>MySQL</code> specific interfaces.</p>
 <p>The <code>Template</code> resource allows you to template out files by passing it variables.</p>
 <h3 id="back-to-the-loops">Back to the Loops</h3>
 <p>So in my loop, I do the following:</p>
@@ -170,7 +170,7 @@ end
 </code></pre>
 <h2 id="recap">Recap</h2>
 <p>That may have seemed like a lot of information, but it should set the stage for pulling cookbooks together to build cogent deployments. We defined a short recipe, combined a few built-in resources with a custom resource, and configured the whole thing in our <code>dna.json</code>. If we had run this, assuming <code>nginx</code> and <code>git</code> were installed on the server, we would have three static applications deployed on our instance.</p>
-<p>Making a recipe isn&#8217;t very hard, as we found out above, but creating custom resources might seem a bit daunting. We&#8217;ll go over that, as well as templating and how to best use attributes in the next post.</p>
+<p>Making a recipe isn’t very hard, as we found out above, but creating custom resources might seem a bit daunting. We’ll go over that, as well as templating and how to best use attributes in the next post.</p>
 <p><strong>To Be Continued</strong></p>
   </div>
     <footer class="entry-meta">
