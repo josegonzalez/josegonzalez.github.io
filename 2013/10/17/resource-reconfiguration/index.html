@@ -111,7 +111,11 @@ EOF
 </blockquote>
 <p>We could then look up the replacement values for these services and attach them as necessary.</p>
 <p>Using a configuration management tool - such as Chef, Puppet, Ansible, etc. - will help you automate the update cycle for this file. A simple workflow could be:</p>
-<figure class="ditaa-figure"><a href="/images/ditaa/ditaa-71e11837375589a72b071986b3bc93dd.png" title="images/ditaa/ditaa-71e11837375589a72b071986b3bc93dd.png"><img src="/images/ditaa/ditaa-71e11837375589a72b071986b3bc93dd.png" title="images/ditaa/ditaa-71e11837375589a72b071986b3bc93dd.png" max-width="99%" /></a></figure>
+<p><code>&lt;pre&gt;
+/------------+ etcd /------------+ trigger /-----------+
+| www deploy |-----&gt;| lb watcher |--------&gt;| lb deploy |
++------------+      +------------+         +-----------+
+&lt;/pre&gt;</code></p>
 <p>You would depend upon a listener on an external service - perhaps <code>etcd</code>, perhaps <code>rabbitmq</code> - to ensure that resources are reprovisioned in other locations.</p>
 <p>You also want to maintain what resources a specific service <strong>provides</strong>. If you can specify this, then an external service can keep track of the global system state and be used to monitor what is available where. For example, we might provision the <code>www-app</code> service, which could specify its exports thusly:</p>
 <pre><code class="language-json">{
@@ -240,7 +244,7 @@ node.default['configuration']['datastores']['API_ELASTICSEARCH_CLUSTER_URL'] = '
 <p>TODO: Spec out how this works…</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/opschops" title="View all posts in Opschops" rel="category">Opschops</a> on <a href="http://josediazgonzalez.com/2013/10/17/resource-reconfiguration/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-10-17 11:38:00 +0000">17 Oct 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/opschops" title="View all posts in opschops" rel="category">opschops</a> on <a href="http://josediazgonzalez.com/2013/10/17/resource-reconfiguration/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-10-17 11:38:00 +0000">17 Oct 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">

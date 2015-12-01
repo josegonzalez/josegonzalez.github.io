@@ -185,7 +185,16 @@ kill -9 1337
 </blockquote>
 <h2 id="requirements-for-a-service">Requirements for a service</h2>
 <p>Services have, at the base case, a set of language, configuration, and environment requirements, etc. Consider the following:</p>
-<figure class="ditaa-figure"><a href="/images/ditaa/ditaa-3f0ea016539a84bf8674c8dab6464553.png" title="images/ditaa/ditaa-3f0ea016539a84bf8674c8dab6464553.png"><img src="/images/ditaa/ditaa-3f0ea016539a84bf8674c8dab6464553.png" title="images/ditaa/ditaa-3f0ea016539a84bf8674c8dab6464553.png" max-width="99%" /></a></figure>
+<p><code>&lt;pre&gt;
+/-----------------------+     +------------------------------+
+| document_generator.py |&lt;---&gt;| php symfony generate:document|
++-----------------------+     +-------------+----------------+
+            |                               |
+            v                               v
+     /---------------+                /----------+
+     | Elasticsearch |                | Database |
+     +---------------+                +----------+
+&lt;/pre&gt;</code></p>
 <p>Our document generator service requires:</p>
 <ul>
   <li><code>Python</code> for <code>document_generator.py</code></li>
@@ -228,7 +237,7 @@ kill -9 1337
 <p>Resource locators should be unique across your infrastructure. If you have multiple services providing <code>API_URL</code>, I believe this is incorrect. You might instead have <code>SANTAMARIA_URL</code> and <code>AUTOCOMPLETE_URL</code>. You wouldn’t name two components of your infrastructure <code>api</code>, so you shouldn’t commit the same sin with exported configuration.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/opschops" title="View all posts in Opschops" rel="category">Opschops</a> on <a href="http://josediazgonzalez.com/2013/10/18/service-definitions/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-10-18 07:06:00 +0000">18 Oct 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/opschops" title="View all posts in opschops" rel="category">opschops</a> on <a href="http://josediazgonzalez.com/2013/10/18/service-definitions/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-10-18 07:06:00 +0000">18 Oct 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
