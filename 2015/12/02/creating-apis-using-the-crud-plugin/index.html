@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2015: Creating APIs using the CRUD Plugin</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Silly hacks you can use in your cakephp applications" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, api, crud" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2015: Creating APIs using the CRUD Plugin" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/" />
+    <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2015: Creating APIs using the CRUD Plugin" />
+    <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
+    <link rel="alternate" type="application/rss+xml" title="Creating APIs using the CRUD Plugin » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Creating APIs using the CRUD Plugin
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Creating APIs using the CRUD Plugin!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>For anyone who has used CakePHP for the past 3 years, this will seem like kicking a dead horse, but here it is. The CRUD plugin is the finest way to rapidly build out apis in CakePHP, and certainly one of the best ways to do so in web application development.</p>
+<p>Lets say we were building an api for interacting with a blog. At the very least, we’d need the following controllers:</p>
+<ul>
+  <li>Tags</li>
+  <li>Categories</li>
+  <li>Posts</li>
+  <li>Users</li>
+</ul>
+<p>You can use cake bake to create/recreate them as many times as you’d like, and you can customize your bake templates to do <em>exactly</em> as you need. While this is certainly a fine approach, there are a few issues you’ll find with it:</p>
+<ul>
+  <li>It is quite destructive to existing code, as it overwrites files.</li>
+  <li>All the generated code still needs tests.</li>
+  <li>While bake finally supports automatically generating api responses, these responses do not always conform to a “sane” format.</li>
+  <li>You are generating hundreds of lines of code which still need to be audited.</li>
+</ul>
+<h2 id="a-typical-crud-application">A typical CRUD Application</h2>
+<p>Here is a CRUD blog plugin I wrote:</p>
+<pre><code class="language-php">&lt;?php
+namespace Blog\Controller\Admin;
+use Blog\Controller\AppController as BaseController;
+use Cake\Event\Event;
+use Crud\Controller\ControllerTrait;
+class AppController extends BaseController
+{
+    use ControllerTrait;
+    public function initialize()
+    {
+        parent::initialize();
+        $this-&gt;loadComponent('RequestHandler');
+        $this-&gt;loadComponent('Crud.Crud', [
+            'actions' =&gt; [
+                'Crud.Index',
+                'Crud.Add',
+                'Crud.Edit',
+                'Crud.View',
+                'Crud.Delete',
+            ],
+            'listeners' =&gt; [
+                'Crud.RelatedModels',
+                'Crud.Redirect',
+            ],
+        ]);
+    }
+}
+?&gt;
+</code></pre>
+<p>Yes, that’s 30 lines of code that sets up all my basic actions, responds with json/xml/whatever I like, with full unit-test coverage. The underlying controllers are relatively simple as well:</p>
+<pre><code class="language-php">&lt;?php
+namespace Blog\Controller\Admin;
+use Blog\Controller\Admin\AppController;
+class PostsController extends AppController
+{
+}
+?&gt;
+</code></pre>
+<p>If it feels like cheating, that’s because it is. But this isn’t an exam, and you have better things to do than worry about the minute details of <code>public function add</code>.</p>
+<h2 id="custom-actions">Custom Actions</h2>
+<p>One complaint about the CRUD plugin is that it seems limited to just CRUD-actions, and doesn’t seem to be easy to extend. Both of these are patently false.</p>
+<p>The CRUD plugin comes with 5 different base action classes:</p>
+<ul>
+  <li><code>CreateAction</code>: Create an entity.</li>
+  <li><code>DeleteAction</code>: Delete an entity.</li>
+  <li><code>EditAction</code>: Edit a single entity.</li>
+  <li><code>ViewAction</code>: View a single entity.</li>
+  <li><code>IndexAction</code>: List many entities via pagination.</li>
+</ul>
+<p>But we also have 3 special actions for dealing with entities in bulk:</p>
+<ul>
+  <li><code>BulkDeleteAction</code>: Delete one or more entities at once</li>
+  <li><code>BulkSetValueAction</code>: Set a value for many entities at the same time</li>
+  <li><code>BulkToggleAction</code>: Toggle boolean fields for many entities at once</li>
+</ul>
+<p>There is even a special action for the <a href="https://github.com/friendsofcake/crud-view">Crud-View</a> plugin:</p>
+<ul>
+  <li><code>LookupAction</code>: Displays a record from a data source for auto-complete purposes.</li>
+</ul>
+<p>While the names of these actions is set in stone, it is easy to imagine yourself creating an action for scoping certain fields for editing by a post submitter, and then giving an editor even more control. This is done through the use of custom CakePHP events like so:</p>
+<pre><code class="language-php">public function add()
+{
+    $this-&gt;Crud-&gt;on('beforeSave', function(\Cake\Event\Event $event) {
+        // do whatever you want with the event-&gt;subject and data
+    });
+    // continue on with the rest of the action
+    return $this-&gt;Crud-&gt;execute();
+}
+</code></pre>
+<p>The awesome thing about the CRUD plugin is that it is quite easy to create single-purpose actions for your own use. For instance, a recent plugin I was contracted to do has a custom <code>AutocompleteAction</code> that integrates with <a href="https://brianreavis.github.io/selectize.js/">selectize.js</a> to handle tagging. I’ve also created similar actions for Login/Logout.</p>
+<h2 id="going-further">Going Further</h2>
+<p>While CRUD does simplify a ton of work around creating APIs for applications, many applications <em>also</em> need administrative panels for users who don’t want to use <code>curl</code> to interact with your websites. Thankfully, the <a href="https://github.com/friendsofcake/crud-view"><code>Crud-View</code></a> plugin is available for just such purposes, and we’ll cover it’s use tomorrow.</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-02 13:42:00 +0000">02 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 2</strong> of <strong>2</strong> in the series "CakeAdvent 2015".</p>
+    <ol>
+      <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
+      <li>Creating APIs using the CRUD Plugin</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2015/12/02/creating-apis-using-the-crud-plugin/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/';
+        var disqus_title      = "CakeAdvent-2015: Creating APIs using the CRUD Plugin";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>

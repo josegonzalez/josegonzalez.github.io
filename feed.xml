@@ -5,9 +5,146 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 02 Dec 2015 01:25:06 +0000</pubDate>
-    <lastBuildDate>Wed, 02 Dec 2015 01:25:06 +0000</lastBuildDate>
+    <pubDate>Wed, 02 Dec 2015 23:49:50 +0000</pubDate>
+    <lastBuildDate>Wed, 02 Dec 2015 23:49:50 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Creating APIs using the CRUD Plugin</title>
+        <description>&lt;p&gt;For anyone who has used CakePHP for the past 3 years, this will seem like kicking a dead horse, but here it is. The CRUD plugin is the finest way to rapidly build out apis in CakePHP, and certainly one of the best ways to do so in web application development.&lt;/p&gt;
+
+&lt;p&gt;Lets say we were building an api for interacting with a blog. At the very least, we’d need the following controllers:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Tags&lt;/li&gt;
+  &lt;li&gt;Categories&lt;/li&gt;
+  &lt;li&gt;Posts&lt;/li&gt;
+  &lt;li&gt;Users&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can use cake bake to create/recreate them as many times as you’d like, and you can customize your bake templates to do &lt;em&gt;exactly&lt;/em&gt; as you need. While this is certainly a fine approach, there are a few issues you’ll find with it:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;It is quite destructive to existing code, as it overwrites files.&lt;/li&gt;
+  &lt;li&gt;All the generated code still needs tests.&lt;/li&gt;
+  &lt;li&gt;While bake finally supports automatically generating api responses, these responses do not always conform to a “sane” format.&lt;/li&gt;
+  &lt;li&gt;You are generating hundreds of lines of code which still need to be audited.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;a-typical-crud-application&quot;&gt;A typical CRUD Application&lt;/h2&gt;
+
+&lt;p&gt;Here is a CRUD blog plugin I wrote:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace Blog\Controller\Admin;
+
+use Blog\Controller\AppController as BaseController;
+use Cake\Event\Event;
+use Crud\Controller\ControllerTrait;
+
+class AppController extends BaseController
+{
+    use ControllerTrait;
+
+    public function initialize()
+    {
+        parent::initialize();
+        $this-&amp;gt;loadComponent(&#39;RequestHandler&#39;);
+        $this-&amp;gt;loadComponent(&#39;Crud.Crud&#39;, [
+            &#39;actions&#39; =&amp;gt; [
+                &#39;Crud.Index&#39;,
+                &#39;Crud.Add&#39;,
+                &#39;Crud.Edit&#39;,
+                &#39;Crud.View&#39;,
+                &#39;Crud.Delete&#39;,
+            ],
+            &#39;listeners&#39; =&amp;gt; [
+                &#39;Crud.RelatedModels&#39;,
+                &#39;Crud.Redirect&#39;,
+            ],
+        ]);
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yes, that’s 30 lines of code that sets up all my basic actions, responds with json/xml/whatever I like, with full unit-test coverage. The underlying controllers are relatively simple as well:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace Blog\Controller\Admin;
+
+use Blog\Controller\Admin\AppController;
+
+class PostsController extends AppController
+{
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If it feels like cheating, that’s because it is. But this isn’t an exam, and you have better things to do than worry about the minute details of &lt;code&gt;public function add&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;custom-actions&quot;&gt;Custom Actions&lt;/h2&gt;
+
+&lt;p&gt;One complaint about the CRUD plugin is that it seems limited to just CRUD-actions, and doesn’t seem to be easy to extend. Both of these are patently false.&lt;/p&gt;
+
+&lt;p&gt;The CRUD plugin comes with 5 different base action classes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;CreateAction&lt;/code&gt;: Create an entity.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;DeleteAction&lt;/code&gt;: Delete an entity.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;EditAction&lt;/code&gt;: Edit a single entity.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;ViewAction&lt;/code&gt;: View a single entity.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;IndexAction&lt;/code&gt;: List many entities via pagination.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;But we also have 3 special actions for dealing with entities in bulk:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;BulkDeleteAction&lt;/code&gt;: Delete one or more entities at once&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;BulkSetValueAction&lt;/code&gt;: Set a value for many entities at the same time&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;BulkToggleAction&lt;/code&gt;: Toggle boolean fields for many entities at once&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;There is even a special action for the &lt;a href=&quot;https://github.com/friendsofcake/crud-view&quot;&gt;Crud-View&lt;/a&gt; plugin:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;LookupAction&lt;/code&gt;: Displays a record from a data source for auto-complete purposes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;While the names of these actions is set in stone, it is easy to imagine yourself creating an action for scoping certain fields for editing by a post submitter, and then giving an editor even more control. This is done through the use of custom CakePHP events like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function add()
+{
+    $this-&amp;gt;Crud-&amp;gt;on(&#39;beforeSave&#39;, function(\Cake\Event\Event $event) {
+        // do whatever you want with the event-&amp;gt;subject and data
+    });
+    // continue on with the rest of the action
+    return $this-&amp;gt;Crud-&amp;gt;execute();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The awesome thing about the CRUD plugin is that it is quite easy to create single-purpose actions for your own use. For instance, a recent plugin I was contracted to do has a custom &lt;code&gt;AutocompleteAction&lt;/code&gt; that integrates with &lt;a href=&quot;https://brianreavis.github.io/selectize.js/&quot;&gt;selectize.js&lt;/a&gt; to handle tagging. I’ve also created similar actions for Login/Logout.&lt;/p&gt;
+
+&lt;h2 id=&quot;going-further&quot;&gt;Going Further&lt;/h2&gt;
+
+&lt;p&gt;While CRUD does simplify a ton of work around creating APIs for applications, many applications &lt;em&gt;also&lt;/em&gt; need administrative panels for users who don’t want to use &lt;code&gt;curl&lt;/code&gt; to interact with your websites. Thankfully, the &lt;a href=&quot;https://github.com/friendsofcake/crud-view&quot;&gt;&lt;code&gt;Crud-View&lt;/code&gt;&lt;/a&gt; plugin is available for just such purposes, and we’ll cover it’s use tomorrow.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 02 Dec 2015 13:42:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>api</category>
+        
+        <category>crud</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Using Fractal to transform entities for custom api endpoints</title>
@@ -1418,108 +1555,6 @@ EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, 
         <category>cakeadvent-2014</category>
         
         <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Parsing markdown comments</title>
-        <description>&lt;p&gt;In CakePHP 3, some things change significantly, and others stay pretty much the same. CakePHP 3 provides a new &lt;code&gt;AppView&lt;/code&gt; class in &lt;code&gt;app/src/View/AppView.php&lt;/code&gt;. You can do any of the following here:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Load helpers for every template&lt;/li&gt;
-  &lt;li&gt;Override &lt;code&gt;View&lt;/code&gt; methods&lt;/li&gt;
-  &lt;li&gt;Add custom methods that may not necessarily require a new helper&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;In our case, we’ll be making a new &lt;code&gt;MarkdownHelper&lt;/code&gt; available everywhere. As such, our &lt;code&gt;AppView&lt;/code&gt; will look similar to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\View;
-
-use Cake\View\View;
-
-class AppView extends View {
-    public function initialize() {
-        $this-&amp;gt;loadHelper(&#39;Markdown&#39;);
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;creating-a-new-helper&quot;&gt;Creating a new helper&lt;/h3&gt;
-
-&lt;p&gt;In our helper, we’re going to depend upon the &lt;code&gt;colinodell/commonmark-php&lt;/code&gt; package to render markdown that follows the &lt;a href=&quot;http://commonmark.org/&quot;&gt;CommonMark&lt;/a&gt; specification. First, you’ll want to install that package using &lt;code&gt;composer&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
-vagrant ssh
-
-cd /vagrant/app
-composer require colinodell/commonmark-php:0.3.0
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The &lt;code&gt;colinodell/commonmark-php&lt;/code&gt; package will be named &lt;code&gt;league/markdown&lt;/code&gt; shortly, but for now, these instructions should work fine.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Now we can create a very simple helper class. Helper classes allow us to format output for templates in a more user friendly format. We could, for instance, use a helper to generate the correct gravatar url for a given email address. Helpers allow you to consolidate your template logic into classes that can be easily tested and reused not just in a single application, but across multiple applications that need the same functionality.&lt;/p&gt;
-
-&lt;p&gt;You should first create the file containing your new helper:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-touch app/src/View/Helper/MarkdownHelper.php
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The contents of our helper will then be the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\View\Helper;
-
-use Cake\View\Helper;
-use Cake\View\View;
-use ColinODell\CommonMark\CommonMarkConverter;
-
-class MarkdownHelper extends Helper {
-    public function __construct(View $view, $config = []) {
-        parent::__construct($view, $config);
-        $this-&amp;gt;Converter = new CommonMarkConverter;
-    }
-
-    public function out($input) {
-      return $this-&amp;gt;Converter-&amp;gt;convertToHtml($input);
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To use our helper, anytime we output &lt;code&gt;Comment&lt;/code&gt; or &lt;code&gt;Issue&lt;/code&gt; contents, we would wrap them in a call to our helper:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// For issues
-$this-&amp;gt;Markdown-&amp;gt;out($issue-&amp;gt;text);
-
-// For comments
-$this-&amp;gt;Markdown-&amp;gt;out($comment-&amp;gt;comment);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Helpers can be a pretty simple way of consolidating logic in your template files. While in this case there wasn’t much work to be done, you might want to consider using helpers for outputting stuff like navigation bars, custom form elements, and automatically parsing urls into embeddable images and videos.&lt;/p&gt;
-
-&lt;h3 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h3&gt;
-
-&lt;p&gt;Since it’s still sunday, we’re going to skip homework. I’m going to personally listen to the guy playing jazz two apartment buildings down and go to Fifthsgiving in an hour. Let me know in the comments if you have any feedback, and see you all tomorrow!&lt;/p&gt;
-</description>
-        <pubDate>Sun, 07 Dec 2014 13:45:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/07/parsing-markdown-comments/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>composer</category>
-        
-        <category>helpers</category>
         
         
         <category>cakephp</category>

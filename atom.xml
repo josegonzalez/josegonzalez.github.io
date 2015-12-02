@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-02T01:25:06+00:00</updated>
+ <updated>2015-12-02T23:49:50+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Creating APIs using the CRUD Plugin]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/"/>
+   <updated>2015-12-02T13:42:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Using Fractal to transform entities for custom api endpoints]]></title>

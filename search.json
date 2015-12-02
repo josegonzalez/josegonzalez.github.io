@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Creating APIs using the CRUD Plugin",
+    "url": "/2015/12/02/creating-apis-using-the-crud-plugin/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["apis","applications","cakephp","can","creating","crud","hacks","plugin","silly","use","using"]
+  },
+  {
+    "type": "post",
     "title": "Using Fractal to transform entities for custom api endpoints",
     "url": "/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1296,6 +1303,12 @@
     "title": "api",
     "url": "/tags/api/",
     "tokens": ["api"]
+  },
+  {
+    "type": "tag",
+    "title": "crud",
+    "url": "/tags/crud/",
+    "tokens": ["crud"]
   },
   false
 ]
