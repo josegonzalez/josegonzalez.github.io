@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 02 Dec 2015 01:20:51 +0000</pubDate>
-    <lastBuildDate>Wed, 02 Dec 2015 01:20:51 +0000</lastBuildDate>
+    <pubDate>Wed, 02 Dec 2015 01:25:06 +0000</pubDate>
+    <lastBuildDate>Wed, 02 Dec 2015 01:25:06 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -99,8 +99,8 @@ $this-&amp;gt;set(&#39;_serialize&#39;, &#39;posts&#39;);
 
 &lt;p&gt;Next, we will define a transformer class. The namespace of each transformer class is interpolated based upon the current request path like so:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;# if you are missing any param, assume you don&#39;t
-# need that section in the class namespace
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// if you are missing any param, assume you don&#39;t
+// need that section in the class namespace
 $path = array_filter([
     &#39;App&#39;,
     &#39;Transformer&#39;,

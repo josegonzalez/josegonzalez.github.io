@@ -137,8 +137,8 @@ class Post extends Entity
 $this-&gt;set('_serialize', 'posts');
 </code></pre>
 <p>Next, we will define a transformer class. The namespace of each transformer class is interpolated based upon the current request path like so:</p>
-<pre><code class="language-php"># if you are missing any param, assume you don't
-# need that section in the class namespace
+<pre><code class="language-php">// if you are missing any param, assume you don't
+// need that section in the class namespace
 $path = array_filter([
     'App',
     'Transformer',
