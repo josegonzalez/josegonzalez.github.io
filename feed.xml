@@ -5,9 +5,177 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 01 Dec 2015 23:51:26 +0000</pubDate>
-    <lastBuildDate>Tue, 01 Dec 2015 23:51:26 +0000</lastBuildDate>
+    <pubDate>Wed, 02 Dec 2015 01:20:51 +0000</pubDate>
+    <lastBuildDate>Wed, 02 Dec 2015 01:20:51 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Using Fractal to transform entities for custom api endpoints</title>
+        <description>&lt;p&gt;In a CakePHP 3 application, you can very easily create Apis with entity objects. Each entity implements the &lt;code&gt;JsonSerializable&lt;/code&gt; interface, and you can customize the output by creating a custom &lt;code&gt;toArray()&lt;/code&gt; method (or &lt;code&gt;jsonSerialize()&lt;/code&gt; if you want to skip a step):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Entity;
+use Cake\ORM\Entity;
+use Cake\Routing\Router;
+
+class Post extends Entity
+{
+    public function toArray()
+    {
+        // Special logic goes here
+        $data = parent::toArray();
+        return $data;
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you serialized a set of these entities, you would have something like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-json&quot;&gt;{
+  [{
+    &quot;id&quot;: 6,
+    &quot;title&quot;: &quot;Herp derpes&quot;,
+    &quot;year&quot;: null
+  }]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Not great, especially if this serialization changes from endpoint to endpoint.&lt;/p&gt;
+
+&lt;p&gt;A few months ago, it was requested that there be a way to define endpoint-specific entity serialization, which is difficult with the above type of setup. There are a few methods to go about such a thing, one of which is to use a custom View class that will automatically wrap entities.&lt;/p&gt;
+
+&lt;h2 id=&quot;fractal&quot;&gt;Fractal&lt;/h2&gt;
+
+&lt;p&gt;Fractal is a php package by The PHP League whose description is as follows:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Fractal provides a presentation and transformation layer for complex data output, the like found in RESTful APIs, and works really well with JSON. Think of this as a view layer for your JSON/YAML/etc.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Isn’t that nice? Using fractal, we can write wrappers around arbitrary inputs and have arbitrary outputs. Fractal supports quite a few types of &lt;a href=&quot;http://fractal.thephpleague.com/transformers/&quot;&gt;transformations&lt;/a&gt; and &lt;a href=&quot;http://fractal.thephpleague.com/serializers/&quot;&gt;serializers&lt;/a&gt;, so be sure to check them out.&lt;/p&gt;
+
+&lt;p&gt;Note that we &lt;em&gt;could&lt;/em&gt; have created our own data-wrapping library, but why bother? We can and should use pre-existing libraries wherever possible for several reasons:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The code is (hopefully) better tested&lt;/li&gt;
+  &lt;li&gt;It may provide additional features you have not yet thought of&lt;/li&gt;
+  &lt;li&gt;More mindshare can sometimes mean easier onboarding of developers&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Similar to how we shouldn’t re-invent a framework for work purposes, we should also strive for code re-use wherever it is feasible. In our case, The PHP League provides &lt;a href=&quot;https://thephpleague.com/&quot;&gt;quite a few delicious libraries&lt;/a&gt; (in some cases similar to those provided by CakePHP itself!) we can sprinkle around our CakePHP application.&lt;/p&gt;
+
+&lt;h2 id=&quot;fractalentities&quot;&gt;FractalEntities&lt;/h2&gt;
+
+&lt;p&gt;Rather than have to build such integrations over and over, I built a single-purpose plugin for this case. As the use-case was very simple, it doesn’t have many options - nor docs for that matter - but this post should serve as a good example of how to use it going forward.&lt;/p&gt;
+
+&lt;p&gt;In our case, we’re going to use a wrapper plugin called FractalEntities to create a nicer-version of the json output that looks something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-json&quot;&gt;{
+  &quot;data&quot;: [{
+    &quot;id&quot;: 6,
+    &quot;title&quot;: &quot;Herp derpes&quot;,
+    &quot;year&quot;: null,
+    &quot;links&quot;: [{
+      &quot;rel&quot;: &quot;self&quot;,
+      &quot;uri&quot;: &quot;\/blog\/post-1&quot;
+    }]
+  }]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;First, lets start out by installing the plugin using composer:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;composer require josegonzalez/cakephp-fractal-entities
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will install our wrapper &lt;code&gt;TransformerView&lt;/code&gt; class which does the heavy lifting.&lt;/p&gt;
+
+&lt;p&gt;The simplest setup will be to set the current &lt;code&gt;Controller::$viewClass&lt;/code&gt; to the &lt;code&gt;TransformerView&lt;/code&gt; and set your data for serialization:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;viewClass = &#39;FractalEntities.Transformer&#39;;
+$this-&amp;gt;set(&#39;_serialize&#39;, &#39;posts&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we will define a transformer class. The namespace of each transformer class is interpolated based upon the current request path like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;# if you are missing any param, assume you don&#39;t
+# need that section in the class namespace
+$path = array_filter([
+    &#39;App&#39;,
+    &#39;Transformer&#39;,
+    $this-&amp;gt;request-&amp;gt;param(&#39;plugin&#39;),
+    $this-&amp;gt;request-&amp;gt;param(&#39;prefix&#39;),
+    $this-&amp;gt;request-&amp;gt;param(&#39;controller&#39;),
+    $this-&amp;gt;request-&amp;gt;param(&#39;action&#39;) . &#39;Transformer&#39;,
+], &#39;strlen&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For &lt;code&gt;/posts/view/1&lt;/code&gt; - assuming no plugins or prefixes - you will need the following file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;src/Transformer/Posts/ViewTransformer.php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;with the following class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Transformer\Posts;
+
+use App\Model\Entity\Post;
+use League\Fractal\TransformerAbstract;
+
+class IndexTransformer extends TransformerAbstract
+{
+    /**
+     * Creates a response item for each instance
+     *
+     * @param Post $post post entity
+     * @return array transformed post
+     */
+    public function transform(Post $post)
+    {
+        return [
+            &#39;id&#39; =&amp;gt; (int)$post-&amp;gt;get(&#39;id&#39;),
+            &#39;title&#39; =&amp;gt; $post-&amp;gt;get(&#39;title&#39;),
+            &#39;year&#39; =&amp;gt; $post-&amp;gt;get(&#39;published_date&#39;),
+            &#39;links&#39; =&amp;gt; [
+                [
+                    &#39;rel&#39; =&amp;gt; &#39;self&#39;,
+                    &#39;uri&#39; =&amp;gt; &#39;/books/&#39; . $post-&amp;gt;get(&#39;route&#39;),
+                ]
+            ],
+        ];
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All transformers will need a &lt;code&gt;transform&lt;/code&gt; method, which will take a single entity of whatever type you are turning into an api response. Note that due to our use of Fractal, we can be sure that whether we are converting a single entity or an entire resultset, the response will always be converted properly.&lt;/p&gt;
+
+&lt;h2 id=&quot;is-this-best-practice&quot;&gt;Is this “best practice”?&lt;/h2&gt;
+
+&lt;p&gt;The answer to that is “maybe”. Perhaps for your application, separating the presentation layer from your entity layer will work out really well due to the myriad of ways data can be represented. This might also result in a lot of extra classes that are harder to navigate, or extra magic that may be difficult to understand later.&lt;/p&gt;
+
+&lt;p&gt;One nice thing about this method is that it is quite easy to separate presentation-layer unit tests from those relating to the entity itself. Because the entity is being wrapped away from where your business logic is located, it’s much easier to reason about how the output itself.&lt;/p&gt;
+
+&lt;p&gt;Tomorrow I’ll show you a powerful alternative for json api creation.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 01 Dec 2015 13:42:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>api</category>
+        
+        <category>entities</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Sending email invoices to users on payment</title>
@@ -1352,194 +1520,6 @@ $this-&amp;gt;Markdown-&amp;gt;out($comment-&amp;gt;comment);
         <category>composer</category>
         
         <category>helpers</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Emailing users when a new comment is posted</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;The previous post had &lt;code&gt;IssuesTable.afterSave&lt;/code&gt; as the event in use. We’ve changed this to &lt;code&gt;CommentsTable.afterSave&lt;/code&gt; to better reflect what is occurring.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Similar to yesterday, we’ll want to &lt;em&gt;also&lt;/em&gt; notify users via email. If a user has specified their email address, we’ll want to notify them at their email address. Lets start by adding a new event to our &lt;code&gt;app/config/events.php&lt;/code&gt; file. It will follow the same basic pattern as the previous event. Here the previous event is for your recollection:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Event\Event;
-use Cake\Event\EventManager;
-use Cake\Network\Http\Client;
-use Cake\ORM\Entity;
-use Cake\ORM\TableRegistry;
-
-EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $table = TableRegistry::get(&#39;Comments&#39;);
-    $comments = $table-&amp;gt;find(&#39;all&#39;)-&amp;gt;where([
-        &#39;Comments.id !=&#39; =&amp;gt; $entity-&amp;gt;id,
-        &#39;Comments.issue_id&#39; =&amp;gt; $entity-&amp;gt;issue_id,
-        &#39;Comments.webhook_url IS NOT&#39; =&amp;gt; null,
-    ]);
-    foreach ($comments as $comment) {
-        $data = $comment-&amp;gt;toArray();
-        unset($data[&#39;email_address&#39;]);
-        unset($data[&#39;webhook_url&#39;]);
-
-        $http = new Client();
-        $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($data), [
-          &#39;type&#39; =&amp;gt; &#39;json&#39;
-        ]);
-    }
-}, &#39;IssuesTable.afterSave&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The only part we’re going to change is &lt;em&gt;how&lt;/em&gt; we send the data - rather than via a POST, it will send an email. A couple notes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The find is being duplicated each time&lt;/li&gt;
-  &lt;li&gt;We’re going to unset the &lt;code&gt;email_address&lt;/code&gt; and &lt;code&gt;webhook_url&lt;/code&gt; fields from the data array both times&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Boo. Code duplication that will probably happen again if we implement more callback-types. To reduce this, we’re going to add a custom finder to simplify our find call, and then a custom method to our Comment Entity class to output the public data.&lt;/p&gt;
-
-&lt;h3 id=&quot;custom-finders&quot;&gt;Custom finders&lt;/h3&gt;
-
-&lt;p&gt;In CakePHP 3, custom finders are simply methods that return custom query objects. As a result, hey are a bit simpler to manipulate than in CakePHP 2. Since our find call above was simply a query object manipulator, it will be quite simple to transform that into a custom find in our &lt;code&gt;app/src/Model/Table/CommentsTable.php&lt;/code&gt; file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// You can move the `\App\Model\Entity\Comment` to a `use` call at the top
-// of the class and then reference it with `Comment` in the `instanceof` check
-public function findNotifiable(Query $query, array $options) {
-    if (empty($options[&#39;comment&#39;]) || !($options[&#39;comment&#39;] instanceof \App\Model\Entity\Comment)) {
-        throw new \InvalidArgumentException(&#39;Missing comment entity argument&#39;);
-    }
-    if (empty($options[&#39;notifierField&#39;]) {
-        throw new \InvalidArgumentException(&#39;Missing notifierField argument&#39;);
-    }
-
-    return $query-&amp;gt;where([
-        &#39;Comments.id !=&#39; =&amp;gt; $options[&#39;comment&#39;]-&amp;gt;id,
-        &#39;Comments.issue_id&#39; =&amp;gt; $options[&#39;comment&#39;]-&amp;gt;issue_id,
-        &quot;Comments.{$options[&#39;notifierField&#39;]} IS NOT&quot; =&amp;gt; null,
-    ]);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you place the above in your &lt;code&gt;CommentsTable&lt;/code&gt; class, you can now call the custom find in the following way:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$table = TableRegistry::get(&#39;Comments&#39;);
-$comments = $table-&amp;gt;find(&#39;notifiable&#39;, [
-    &#39;comment&#39; =&amp;gt; $comment
-    &#39;notifierField&#39; =&amp;gt; &#39;webhook_url&#39;
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;While this allows you easily replace the &lt;code&gt;Model::beforeFind()&lt;/code&gt; in 2.x, you will need to use &lt;a href=&quot;http://book.cakephp.org/3.0/en/orm/query-builder.html#map-reduce&quot;&gt;map/reduce&lt;/a&gt; functions to simulate &lt;code&gt;Model::afterFind()&lt;/code&gt;. Note that you can place these within the custom finder as well, just that their syntax is a little different. We’ll explore them in a future post.&lt;/p&gt;
-
-&lt;h3 id=&quot;custom-entity-methods&quot;&gt;Custom entity methods&lt;/h3&gt;
-
-&lt;p&gt;Entities are simply objects returned by the ORM. Pretty straightforward. They replace the former array structure returned by a &lt;code&gt;Model::find()&lt;/code&gt;, allowing developers to add custom methods to the base objects, making dealing with data representation a bit easier. In our case, we’re going to wrap the &lt;code&gt;Comment::toArray()&lt;/code&gt; method with our own logic for setting property data:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function toPublicArray() {
-  $data = $this-&amp;gt;toArray();
-  unset($data[&#39;email_address&#39;]);
-  unset($data[&#39;webhook_url&#39;]);
-  return $data;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Adding the above to our &lt;code&gt;app/src/Model/Entity/Comment.php&lt;/code&gt; file will allow us to use the method in our code like so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$comment = $table-&amp;gt;find(&#39;all&#39;)-&amp;gt;first();
-$publicData = $comment-&amp;gt;toPublicArray();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;An &lt;em&gt;alternative&lt;/em&gt; is to modify the &lt;code&gt;$_hidden&lt;/code&gt; property of the Entity. This property will hide a field from the output of &lt;code&gt;$entity-&amp;gt;toArray()&lt;/code&gt; and &lt;code&gt;json_encode($entity)&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Entity;
-
-use Cake\ORM\Entity;
-class Comment extends Entity {
-  protected $_hidden = [&#39;email_address&#39;, &#39;webhook_url&#39;];
-
-  // other code here
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;With the above, we can continue using the &lt;code&gt;$entity-&amp;gt;toArray()&lt;/code&gt; method of data retrieval without worrying about whether the data being output contains sensitive information.&lt;/p&gt;
-
-&lt;p&gt;Going forward, we’ll assume you used the &lt;code&gt;$_hidden&lt;/code&gt; method.&lt;/p&gt;
-
-&lt;h3 id=&quot;a-reimagined-event&quot;&gt;A reimagined event:&lt;/h3&gt;
-
-&lt;p&gt;Now that we have the basics in place, our original webhook event looks like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Event\Event;
-use Cake\Event\EventManager;
-use Cake\Network\Http\Client;
-use Cake\ORM\Entity;
-use Cake\ORM\TableRegistry;
-
-EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $comments = TableRegistry::get(&#39;Comments&#39;)-&amp;gt;find(&#39;notifiable&#39;, [
-        &#39;comment&#39; =&amp;gt; $entity,
-        &#39;notifierField&#39; =&amp;gt; &#39;webhook_url&#39;
-    ]);
-    foreach ($comments as $comment) {
-        $http = new Client();
-        $http-&amp;gt;post($comment-&amp;gt;webhook_url, json_encode($comment), [
-          &#39;type&#39; =&amp;gt; &#39;json&#39;
-        ]);
-    }
-}, &#39;IssuesTable.afterSave&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;em&gt;Much&lt;/em&gt; nicer.&lt;/p&gt;
-
-&lt;h3 id=&quot;sending-email&quot;&gt;Sending email&lt;/h3&gt;
-
-&lt;p&gt;To send email, you’ll need to &lt;a href=&quot;http://book.cakephp.org/3.0/en/core-libraries/email.html#configuring-transports&quot;&gt;configure an email transport&lt;/a&gt;. I’m going assume you did that (gmail via smtp should work fine) so we’ll skip ahead to the actual email sending. Our new event will &lt;em&gt;also&lt;/em&gt; be in the &lt;code&gt;app/config/event.php&lt;/code&gt; file, so we only need to call &lt;code&gt;use&lt;/code&gt; on one more class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Network\Email\Email;
-
-EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    $comments = TableRegistry::get(&#39;Comments&#39;)-&amp;gt;find(&#39;notifiable&#39;, [
-        &#39;comment&#39; =&amp;gt; $entity,
-        &#39;notifierField&#39; =&amp;gt; &#39;email_address&#39;
-    ]);
-    foreach ($comments as $comment) {
-        $email = new Email();
-        $email-&amp;gt;from([&#39;me@example.com&#39; =&amp;gt; &#39;Anonymous Issues&#39;])
-            -&amp;gt;to($comment-&amp;gt;email_address)
-            -&amp;gt;subject(sprintf(&quot;New comment on issue #%d&quot;, $comment-&amp;gt;issue_id))
-            -&amp;gt;send($comment-&amp;gt;comment);
-    }
-}, &#39;IssuesTable.afterSave&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above is a contrived example of email sending. You could subclass the email class into a &lt;code&gt;NotificationEmail&lt;/code&gt; class and have it take a &lt;code&gt;Comment&lt;/code&gt; entity directly - as well as add custom logic around the message body or other configuration - but we’ll leave that as an exercise for larger applications.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;While this and the previous tutorial show how to make http requests and notifications in a web request, it may be prudent to move these into background tasks to keep the application responsive. We’ll look into doing just that in a separate post, but keep in mind that performing longer tasks in a web request is ill-advised.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h3&gt;
-
-&lt;p&gt;Lazy sunday tomorrow, so go do something for yourself. &lt;a href=&quot;http://littleanimalgifs.tumblr.com/random&quot;&gt;Here is a link&lt;/a&gt; to random animal gifs. Until next time!&lt;/p&gt;
-</description>
-        <pubDate>Sat, 06 Dec 2014 13:45:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/06/email-users-when-a-new-comment-is-posted/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/06/email-users-when-a-new-comment-is-posted/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>custom find</category>
-        
-        <category>email</category>
-        
-        <category>entities</category>
         
         
         <category>cakephp</category>

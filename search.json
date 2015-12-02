@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Using Fractal to transform entities for custom api endpoints",
+    "url": "/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["api","applications","cakephp","can","custom","endpoints","entities","fractal","hacks","silly","transform","use","using"]
+  },
+  {
+    "type": "post",
     "title": "Sending email invoices to users on payment",
     "url": "/2014/12/15/sending-email-invoices-to-users-on-payment/",
     "description": "Part 6 of 7 in a series of posts designed to teach you how to use CakePHP 3 effectively",
@@ -1277,6 +1284,18 @@
     "title": "templates",
     "url": "/tags/templates/",
     "tokens": ["templates"]
+  },
+  {
+    "type": "tag",
+    "title": "cakeadvent-2015",
+    "url": "/tags/cakeadvent-2015/",
+    "tokens": ["cakeadvent"]
+  },
+  {
+    "type": "tag",
+    "title": "api",
+    "url": "/tags/api/",
+    "tokens": ["api"]
   },
   false
 ]

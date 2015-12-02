@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2015: Using Fractal to transform entities for custom api endpoints</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Silly hacks you can use in your cakephp applications" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, api, entities" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2015: Using Fractal to transform entities for custom api endpoints" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/" />
+    <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2015: Using Fractal to transform entities for custom api endpoints" />
+    <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
+    <link rel="alternate" type="application/rss+xml" title="Using Fractal to transform entities for custom api endpoints » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Using Fractal to transform entities for custom api endpoints
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Using Fractal to transform entities for custom api endpoints!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>In a CakePHP 3 application, you can very easily create Apis with entity objects. Each entity implements the <code>JsonSerializable</code> interface, and you can customize the output by creating a custom <code>toArray()</code> method (or <code>jsonSerialize()</code> if you want to skip a step):</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Model\Entity;
+use Cake\ORM\Entity;
+use Cake\Routing\Router;
+class Post extends Entity
+{
+    public function toArray()
+    {
+        // Special logic goes here
+        $data = parent::toArray();
+        return $data;
+    }
+}
+?&gt;
+</code></pre>
+<p>If you serialized a set of these entities, you would have something like:</p>
+<pre><code class="language-json">{
+  [{
+    "id": 6,
+    "title": "Herp derpes",
+    "year": null
+  }]
+}
+</code></pre>
+<p>Not great, especially if this serialization changes from endpoint to endpoint.</p>
+<p>A few months ago, it was requested that there be a way to define endpoint-specific entity serialization, which is difficult with the above type of setup. There are a few methods to go about such a thing, one of which is to use a custom View class that will automatically wrap entities.</p>
+<h2 id="fractal">Fractal</h2>
+<p>Fractal is a php package by The PHP League whose description is as follows:</p>
+<blockquote>
+  <p>Fractal provides a presentation and transformation layer for complex data output, the like found in RESTful APIs, and works really well with JSON. Think of this as a view layer for your JSON/YAML/etc.</p>
+</blockquote>
+<p>Isn’t that nice? Using fractal, we can write wrappers around arbitrary inputs and have arbitrary outputs. Fractal supports quite a few types of <a href="http://fractal.thephpleague.com/transformers/">transformations</a> and <a href="http://fractal.thephpleague.com/serializers/">serializers</a>, so be sure to check them out.</p>
+<p>Note that we <em>could</em> have created our own data-wrapping library, but why bother? We can and should use pre-existing libraries wherever possible for several reasons:</p>
+<ul>
+  <li>The code is (hopefully) better tested</li>
+  <li>It may provide additional features you have not yet thought of</li>
+  <li>More mindshare can sometimes mean easier onboarding of developers</li>
+</ul>
+<p>Similar to how we shouldn’t re-invent a framework for work purposes, we should also strive for code re-use wherever it is feasible. In our case, The PHP League provides <a href="https://thephpleague.com/">quite a few delicious libraries</a> (in some cases similar to those provided by CakePHP itself!) we can sprinkle around our CakePHP application.</p>
+<h2 id="fractalentities">FractalEntities</h2>
+<p>Rather than have to build such integrations over and over, I built a single-purpose plugin for this case. As the use-case was very simple, it doesn’t have many options - nor docs for that matter - but this post should serve as a good example of how to use it going forward.</p>
+<p>In our case, we’re going to use a wrapper plugin called FractalEntities to create a nicer-version of the json output that looks something like this:</p>
+<pre><code class="language-json">{
+  "data": [{
+    "id": 6,
+    "title": "Herp derpes",
+    "year": null,
+    "links": [{
+      "rel": "self",
+      "uri": "\/blog\/post-1"
+    }]
+  }]
+}
+</code></pre>
+<p>First, lets start out by installing the plugin using composer:</p>
+<pre><code class="language-php">composer require josegonzalez/cakephp-fractal-entities
+</code></pre>
+<p>This will install our wrapper <code>TransformerView</code> class which does the heavy lifting.</p>
+<p>The simplest setup will be to set the current <code>Controller::$viewClass</code> to the <code>TransformerView</code> and set your data for serialization:</p>
+<pre><code class="language-php">$this-&gt;viewClass = 'FractalEntities.Transformer';
+$this-&gt;set('_serialize', 'posts');
+</code></pre>
+<p>Next, we will define a transformer class. The namespace of each transformer class is interpolated based upon the current request path like so:</p>
+<pre><code class="language-php"># if you are missing any param, assume you don't
+# need that section in the class namespace
+$path = array_filter([
+    'App',
+    'Transformer',
+    $this-&gt;request-&gt;param('plugin'),
+    $this-&gt;request-&gt;param('prefix'),
+    $this-&gt;request-&gt;param('controller'),
+    $this-&gt;request-&gt;param('action') . 'Transformer',
+], 'strlen');
+</code></pre>
+<p>For <code>/posts/view/1</code> - assuming no plugins or prefixes - you will need the following file:</p>
+<pre><code>src/Transformer/Posts/ViewTransformer.php
+</code></pre>
+<p>with the following class:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Transformer\Posts;
+use App\Model\Entity\Post;
+use League\Fractal\TransformerAbstract;
+class IndexTransformer extends TransformerAbstract
+{
+    /**
+     * Creates a response item for each instance
+     *
+     * @param Post $post post entity
+     * @return array transformed post
+     */
+    public function transform(Post $post)
+    {
+        return [
+            'id' =&gt; (int)$post-&gt;get('id'),
+            'title' =&gt; $post-&gt;get('title'),
+            'year' =&gt; $post-&gt;get('published_date'),
+            'links' =&gt; [
+                [
+                    'rel' =&gt; 'self',
+                    'uri' =&gt; '/books/' . $post-&gt;get('route'),
+                ]
+            ],
+        ];
+    }
+}
+?&gt;
+</code></pre>
+<p>All transformers will need a <code>transform</code> method, which will take a single entity of whatever type you are turning into an api response. Note that due to our use of Fractal, we can be sure that whether we are converting a single entity or an entire resultset, the response will always be converted properly.</p>
+<h2 id="is-this-best-practice">Is this “best practice”?</h2>
+<p>The answer to that is “maybe”. Perhaps for your application, separating the presentation layer from your entity layer will work out really well due to the myriad of ways data can be represented. This might also result in a lot of extra classes that are harder to navigate, or extra magic that may be difficult to understand later.</p>
+<p>One nice thing about this method is that it is quite easy to separate presentation-layer unit tests from those relating to the entity itself. Because the entity is being wrapped away from where your business logic is located, it’s much easier to reason about how the output itself.</p>
+<p>Tomorrow I’ll show you a powerful alternative for json api creation.</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-01 13:42:00 +0000">01 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 1</strong> of <strong>1</strong> in the series "CakeAdvent 2015".</p>
+    <ol>
+      <li>Using Fractal to transform entities for custom api endpoints</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/';
+        var disqus_title      = "CakeAdvent-2015: Using Fractal to transform entities for custom api endpoints";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>

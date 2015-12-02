@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-01T23:51:26+00:00</updated>
+ <updated>2015-12-02T01:20:51+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Using Fractal to transform entities for custom api endpoints]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/"/>
+   <updated>2015-12-01T13:42:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Sending email invoices to users on payment]]></title>
