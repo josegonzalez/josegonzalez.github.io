@@ -75,8 +75,9 @@
   <div class="entry-content">
     <p>Since time immemorial - okay, 2009 - it has been possible to set a custom view for CakePHP applications:</p>
 <pre><code class="language-php">// Don't try this, there isn't an ExcelView in the core :P
+$this-&gt;viewBuilder()-&gt;className('ExcelView')
 $this-&gt;viewClass = 'ExcelView';
-// Who remembers this?
+// Who remembers this from 1.x?
 $this-&gt;viewClass = 'MediaView';
 </code></pre>
 <p>Since then, the number of view classes has increased dramatically, and we even have ways to map certain types of responses to particular view classes:</p>
@@ -112,7 +113,7 @@ class AppController extends Controller
         $this-&gt;loadComponent('RequestHandler');
         $this-&gt;loadComponent('Flash');
         // setup the viewclass
-        $this-&gt;viewClass = 'CrudView\View\CrudView';
+        $this-&gt;viewBuilder()-&gt;className('CrudView\View\CrudView')
         $this-&gt;loadComponent('Crud.Crud', [
             'actions' =&gt; [
                 'Crud.Index',

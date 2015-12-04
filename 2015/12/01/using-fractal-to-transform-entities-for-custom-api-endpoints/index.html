@@ -133,7 +133,7 @@ class Post extends Entity
 </code></pre>
 <p>This will install our wrapper <code>TransformerView</code> class which does the heavy lifting.</p>
 <p>The simplest setup will be to set the current <code>Controller::$viewClass</code> to the <code>TransformerView</code> and set your data for serialization:</p>
-<pre><code class="language-php">$this-&gt;viewClass = 'FractalEntities.Transformer';
+<pre><code class="language-php">$this-&gt;viewBuilder()-&gt;className('FractalEntities.Transformer')
 $this-&gt;set('_serialize', 'posts');
 </code></pre>
 <p>Next, we will define a transformer class. The namespace of each transformer class is interpolated based upon the current request path like so:</p>

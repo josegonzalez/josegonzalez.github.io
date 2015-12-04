@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 04 Dec 2015 03:05:06 +0000</pubDate>
-    <lastBuildDate>Fri, 04 Dec 2015 03:05:06 +0000</lastBuildDate>
+    <pubDate>Fri, 04 Dec 2015 06:38:08 +0000</pubDate>
+    <lastBuildDate>Fri, 04 Dec 2015 06:38:08 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -14,9 +14,10 @@
         <description>&lt;p&gt;Since time immemorial - okay, 2009 - it has been possible to set a custom view for CakePHP applications:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Don&#39;t try this, there isn&#39;t an ExcelView in the core :P
+$this-&amp;gt;viewBuilder()-&amp;gt;className(&#39;ExcelView&#39;)
 $this-&amp;gt;viewClass = &#39;ExcelView&#39;;
 
-// Who remembers this?
+// Who remembers this from 1.x?
 $this-&amp;gt;viewClass = &#39;MediaView&#39;;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -66,7 +67,7 @@ class AppController extends Controller
         $this-&amp;gt;loadComponent(&#39;Flash&#39;);
 
         // setup the viewclass
-        $this-&amp;gt;viewClass = &#39;CrudView\View\CrudView&#39;;
+        $this-&amp;gt;viewBuilder()-&amp;gt;className(&#39;CrudView\View\CrudView&#39;)
         $this-&amp;gt;loadComponent(&#39;Crud.Crud&#39;, [
             &#39;actions&#39; =&amp;gt; [
                 &#39;Crud.Index&#39;,
@@ -421,7 +422,7 @@ class Post extends Entity
 
 &lt;p&gt;The simplest setup will be to set the current &lt;code&gt;Controller::$viewClass&lt;/code&gt; to the &lt;code&gt;TransformerView&lt;/code&gt; and set your data for serialization:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;viewClass = &#39;FractalEntities.Transformer&#39;;
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;viewBuilder()-&amp;gt;className(&#39;FractalEntities.Transformer&#39;)
 $this-&amp;gt;set(&#39;_serialize&#39;, &#39;posts&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
