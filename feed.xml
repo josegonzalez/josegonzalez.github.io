@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 04 Dec 2015 02:52:29 +0000</pubDate>
-    <lastBuildDate>Fri, 04 Dec 2015 02:52:29 +0000</lastBuildDate>
+    <pubDate>Fri, 04 Dec 2015 02:54:35 +0000</pubDate>
+    <lastBuildDate>Fri, 04 Dec 2015 02:54:35 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -42,7 +42,7 @@ $this-&amp;gt;viewClass = &#39;MediaView&#39;;
 
 &lt;p&gt;To start, you’ll want to install the bugger:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;composer require friendsofcake/crud-view:dev-master
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require friendsofcake/crud-view:dev-master
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The simplest method of using CrudView is to configure the Crud &lt;code&gt;listener&lt;/code&gt; and &lt;code&gt;viewClass&lt;/code&gt;:&lt;/p&gt;

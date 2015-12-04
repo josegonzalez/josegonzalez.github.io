@@ -170,7 +170,7 @@ EventManager::instance()-&gt;attach(function (Event $event, Entity $entity, Arra
   <li>CakePHP includes a <a href="http://book.cakephp.org/3.0/en/core-libraries/httpclient.html">simple HttpClient</a> that you can use to interact with external webservices. It’s <em>quite</em> useful. In our case, we’re specifying that we should post json to the api.</li>
 </ul>
 <p>At this point, you’ll want to regenerate your <code>src/Template/Issues/view.ctp</code> file in order to add the <code>webhook_url</code> field to test. You can do so via the following command:</p>
-<pre><code class="language-bash">bin/cake bake view issues --force
+<pre><code class="language-shell">bin/cake bake view issues --force
 </code></pre>
 <p>Now all you need to do is test your integration. You can do so by creating a new issue and adding comments to that issue. If you want to generate a test url, I recommend using the excellent <a href="http://requestb.in/">http://requestb.in/</a> to make a url that captures your response.</p>
 <h2 id="homework-time">Homework Time!</h2>
