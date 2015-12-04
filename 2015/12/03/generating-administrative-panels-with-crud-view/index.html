@@ -133,6 +133,7 @@ class AppController extends Controller
 ?&gt;
 </code></pre>
 <p>That’s it! We now have automatic view scaffolding for every controller that inherits from the <code>AppController</code>, <em>as well as</em> all the yummy api stuff the Crud plugin gives us by default.</p>
+<p><img src="/images/2015/03/admin.png" alt="Crud View Admin" /></p>
 <h3 id="hiding-sidebar-entries">Hiding Sidebar Entries</h3>
 <p>CrudView is only as smart as you configure it to be. By default, it will show <em>all</em> tables in the sidebar and link to their assumed administrative panels. I personally prefer not to show join tables, or anything related to database migrations, and as such my <code>AppController::beforeFilter</code> looks something like this:</p>
 <pre><code class="language-php">public function beforeFilter(Event $event)
@@ -145,16 +146,20 @@ class AppController extends Controller
     return parent::beforeFilter($event);
 }
 </code></pre>
+<p><img src="/images/2015/03/limit-sidebar.png" alt="Crud View Admin" /></p>
 <h3 id="showing-specific-fields-for-specific-actions">Showing specific fields for specific actions</h3>
-<p>On my index actions for Categories and Tags, I’d like to hide most fields and just show the <code>id</code> and <code>name</code>:</p>
+<p>On my index actions for Categories and Tags, I’d like to hide most fields and just show the <code>name</code> field:</p>
 <pre><code class="language-php">public function beforeFilter(Event $event)
     if ($this-&gt;request-&gt;action == 'index') {
-        $this-&gt;Crud-&gt;action()-&gt;config('scaffold.fields', $scaffoldFields);
+        $this-&gt;Crud-&gt;action()-&gt;config('scaffold.fields', ['name']);
     }
     return parent::beforeFilter($event);
 }
 </code></pre>
-<p>Of note, you can also set these config options in specific actions, the same as you would to customize the crud plugin, but sometimes you can avoid that with very trivial hacks. I wouldn’t do the above if there was 10 lines of configuration for the IndexAction, for instance.</p>
+<p><img src="/images/2015/03/show-specific-fields.png" alt="Showing specific fields" /></p>
+<blockquote>
+  <p>Of note, you can also set these config options in specific actions, the same as you would to customize the crud plugin, but sometimes you can avoid that with very trivial hacks. I wouldn’t do the above if there was 10 lines of configuration for the IndexAction, for instance.</p>
+</blockquote>
 <h3 id="exposing-bulk-actions">Exposing bulk actions</h3>
 <p>Sometimes I’d like to expose bulk post actions to my administrative users in a simple to use interface. CrudView takes a tact similar to wordpress and provides a checkboxes next to each row that can be used to “apply” configured actions:</p>
 <pre><code class="language-php">public function initialize()
@@ -195,6 +200,7 @@ public function setStatus()
     return $this-&gt;Crud-&gt;execute();
 }
 </code></pre>
+<p><img src="/images/2015/03/bulk-actions.png" alt="Showing specific fields" /></p>
 <p>Obviously the logic here can get incredibly complex, and you are welcome to integrate both Crud and CrudView to best express these sorts of experiences for your users.</p>
 <h2 id="youre-getting-sleepy">You’re getting sleepy</h2>
 <p>Building administrative interfaces isn’t the most illustrious job out there, but if you ever find yourself in a pinch, the CrudView plugin is there to help. Hopefully the above will give you enough of a primer to find your way through the plugin, and we’ll continue plugging on it until it’s both polished and well-documented. Until tomorrow!</p>

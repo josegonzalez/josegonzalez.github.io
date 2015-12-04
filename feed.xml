@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 04 Dec 2015 02:54:35 +0000</pubDate>
-    <lastBuildDate>Fri, 04 Dec 2015 02:54:35 +0000</lastBuildDate>
+    <pubDate>Fri, 04 Dec 2015 03:05:06 +0000</pubDate>
+    <lastBuildDate>Fri, 04 Dec 2015 03:05:06 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -89,6 +89,8 @@ class AppController extends Controller
 
 &lt;p&gt;That’s it! We now have automatic view scaffolding for every controller that inherits from the &lt;code&gt;AppController&lt;/code&gt;, &lt;em&gt;as well as&lt;/em&gt; all the yummy api stuff the Crud plugin gives us by default.&lt;/p&gt;
 
+&lt;p&gt;&lt;img src=&quot;/images/2015/03/admin.png&quot; alt=&quot;Crud View Admin&quot; /&gt;&lt;/p&gt;
+
 &lt;h3 id=&quot;hiding-sidebar-entries&quot;&gt;Hiding Sidebar Entries&lt;/h3&gt;
 
 &lt;p&gt;CrudView is only as smart as you configure it to be. By default, it will show &lt;em&gt;all&lt;/em&gt; tables in the sidebar and link to their assumed administrative panels. I personally prefer not to show join tables, or anything related to database migrations, and as such my &lt;code&gt;AppController::beforeFilter&lt;/code&gt; looks something like this:&lt;/p&gt;
@@ -105,19 +107,25 @@ class AppController extends Controller
 }
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;&lt;img src=&quot;/images/2015/03/limit-sidebar.png&quot; alt=&quot;Crud View Admin&quot; /&gt;&lt;/p&gt;
+
 &lt;h3 id=&quot;showing-specific-fields-for-specific-actions&quot;&gt;Showing specific fields for specific actions&lt;/h3&gt;
 
-&lt;p&gt;On my index actions for Categories and Tags, I’d like to hide most fields and just show the &lt;code&gt;id&lt;/code&gt; and &lt;code&gt;name&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;On my index actions for Categories and Tags, I’d like to hide most fields and just show the &lt;code&gt;name&lt;/code&gt; field:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function beforeFilter(Event $event)
     if ($this-&amp;gt;request-&amp;gt;action == &#39;index&#39;) {
-        $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.fields&#39;, $scaffoldFields);
+        $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.fields&#39;, [&#39;name&#39;]);
     }
     return parent::beforeFilter($event);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Of note, you can also set these config options in specific actions, the same as you would to customize the crud plugin, but sometimes you can avoid that with very trivial hacks. I wouldn’t do the above if there was 10 lines of configuration for the IndexAction, for instance.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/images/2015/03/show-specific-fields.png&quot; alt=&quot;Showing specific fields&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Of note, you can also set these config options in specific actions, the same as you would to customize the crud plugin, but sometimes you can avoid that with very trivial hacks. I wouldn’t do the above if there was 10 lines of configuration for the IndexAction, for instance.&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;h3 id=&quot;exposing-bulk-actions&quot;&gt;Exposing bulk actions&lt;/h3&gt;
 
@@ -164,6 +172,8 @@ public function setStatus()
     return $this-&amp;gt;Crud-&amp;gt;execute();
 }
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2015/03/bulk-actions.png&quot; alt=&quot;Showing specific fields&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Obviously the logic here can get incredibly complex, and you are welcome to integrate both Crud and CrudView to best express these sorts of experiences for your users.&lt;/p&gt;
 
