@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-02T23:57:27+00:00</updated>
+ <updated>2015-12-04T02:52:29+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Generating Administrative Panels with CrudView]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/"/>
+   <updated>2015-12-03T13:42:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Creating APIs using the CRUD Plugin]]></title>

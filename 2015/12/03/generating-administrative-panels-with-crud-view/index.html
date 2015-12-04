@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: Creating APIs using the CRUD Plugin</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/">
+    <title>CakeAdvent-2015: Generating Administrative Panels with CrudView</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -24,16 +24,16 @@
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="keywords" content="cakeadvent-2015, cakephp, api, crud" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: Creating APIs using the CRUD Plugin" />
+    <meta property="og:title" content="CakeAdvent-2015: Generating Administrative Panels with CrudView" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: Creating APIs using the CRUD Plugin" />
+    <meta name="twitter:title" content="CakeAdvent-2015: Generating Administrative Panels with CrudView" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="Creating APIs using the CRUD Plugin » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Generating Administrative Panels with CrudView » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,44 +64,55 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Creating APIs using the CRUD Plugin
+        Generating Administrative Panels with CrudView
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Creating APIs using the CRUD Plugin!">
+        <a href="#comments" title="Comment on Generating Administrative Panels with CrudView!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>For anyone who has used CakePHP for the past 3 years, this will seem like kicking a dead horse, but here it is. The <a href="https://github.com/friendsofcake/crud">CRUD</a> plugin is the finest way to rapidly build out apis in CakePHP, and certainly one of the best ways to do so in web application development.</p>
-<p>Lets say we were building an api for interacting with a blog. At the very least, we’d need the following controllers:</p>
-<ul>
-  <li>Tags</li>
-  <li>Categories</li>
-  <li>Posts</li>
-  <li>Users</li>
-</ul>
-<p>You can use cake bake to create/recreate them as many times as you’d like, and you can customize your bake templates to do <em>exactly</em> as you need. While this is certainly a fine approach, there are a few issues you’ll find with it:</p>
-<ul>
-  <li>It is quite destructive to existing code, as it overwrites files.</li>
-  <li>All the generated code still needs tests.</li>
-  <li>While bake finally supports automatically generating api responses, these responses do not always conform to a “sane” format.</li>
-  <li>You are generating hundreds of lines of code which still need to be audited.</li>
-</ul>
-<h2 id="a-typical-crud-application">A typical CRUD Application</h2>
-<p>Here is a CRUD blog plugin I wrote:</p>
+    <p>Since time immemorial - okay, 2009 - it has been possible to set a custom view for CakePHP applications:</p>
+<pre><code class="language-php">// Don't try this, there isn't an ExcelView in the core :P
+$this-&gt;viewClass = 'ExcelView';
+// Who remembers this?
+$this-&gt;viewClass = 'MediaView';
+</code></pre>
+<p>Since then, the number of view classes has increased dramatically, and we even have ways to map certain types of responses to particular view classes:</p>
+<pre><code class="language-php">$this-&gt;RequestHandler-&gt;config('viewClassMap', [
+    // troll all your xml users
+    'xml' =&gt; 'Json',
+    // this is from a plugin
+    'xlsx' =&gt; 'CakeExcel.Excel',
+    // so is this!
+    'csv' =&gt; 'CsvView.Csv',
+    // we are really into this plugin thing aren't we
+    'rss' =&gt; 'Feed.Rss'
+]);
+</code></pre>
+<p>One of the nice things about views is that they completely take over the rendering step, allowing you to create views that automatically generate interactive experiences. Similar to how the Crud plugin allows users to generate api responses, the CrudView plugin allows users to generate administrative panels.</p>
+<h2 id="crudview">CrudView</h2>
+<p>The CrudView plugin is actually one of the more difficult plugins to use, owing to the fact that there is basically zero documentation - we’re working on it! It works similar to how the Crud plugin does, using <code>events</code> and <code>config</code> options to lay everything out <em>just</em> right.</p>
+<p>To start, you’ll want to install the bugger:</p>
+<pre><code class="language-bash">composer require friendsofcake/crud-view:dev-master
+</code></pre>
+<p>The simplest method of using CrudView is to configure the Crud <code>listener</code> and <code>viewClass</code>:</p>
 <pre><code class="language-php">&lt;?php
-namespace Blog\Controller\Admin;
-use Blog\Controller\AppController as BaseController;
-use Cake\Event\Event;
+namespace App\Controller;
+use Cake\Controller\Controller;
+use Crud\Controller;
 use Crud\Controller\ControllerTrait;
-class AppController extends BaseController
+class AppController extends Controller
 {
     use ControllerTrait;
     public function initialize()
     {
         parent::initialize();
         $this-&gt;loadComponent('RequestHandler');
+        $this-&gt;loadComponent('Flash');
+        // setup the viewclass
+        $this-&gt;viewClass = 'CrudView\View\CrudView';
         $this-&gt;loadComponent('Crud.Crud', [
             'actions' =&gt; [
                 'Crud.Index',
@@ -111,6 +122,8 @@ class AppController extends BaseController
                 'Crud.Delete',
             ],
             'listeners' =&gt; [
+                // and ensure we have the listener configured
+                'CrudView.View',
                 'Crud.RelatedModels',
                 'Crud.Redirect',
             ],
@@ -119,53 +132,75 @@ class AppController extends BaseController
 }
 ?&gt;
 </code></pre>
-<p>Yes, that’s 30 lines of code that sets up all my basic actions, responds with json/xml/whatever I like, with full unit-test coverage. The underlying controllers are relatively simple as well:</p>
-<pre><code class="language-php">&lt;?php
-namespace Blog\Controller\Admin;
-use Blog\Controller\Admin\AppController;
-class PostsController extends AppController
+<p>That’s it! We now have automatic view scaffolding for every controller that inherits from the <code>AppController</code>, <em>as well as</em> all the yummy api stuff the Crud plugin gives us by default.</p>
+<h3 id="hiding-sidebar-entries">Hiding Sidebar Entries</h3>
+<p>CrudView is only as smart as you configure it to be. By default, it will show <em>all</em> tables in the sidebar and link to their assumed administrative panels. I personally prefer not to show join tables, or anything related to database migrations, and as such my <code>AppController::beforeFilter</code> looks something like this:</p>
+<pre><code class="language-php">public function beforeFilter(Event $event)
 {
+    $this-&gt;Crud-&gt;action()-&gt;config('scaffold.tables_blacklist', [
+        'blog_phinxlog',
+        'phinxlog',
+        'posts_tags',
+    ]);
+    return parent::beforeFilter($event);
 }
-?&gt;
 </code></pre>
-<p>If it feels like cheating, that’s because it is. But this isn’t an exam, and you have better things to do than worry about the minute details of <code>public function add</code>.</p>
-<h2 id="custom-actions">Custom Actions</h2>
-<p>One complaint about the CRUD plugin is that it seems limited to just CRUD-actions, and doesn’t seem to be easy to extend. Both of these are patently false.</p>
-<p>The CRUD plugin comes with 5 different base action classes:</p>
-<ul>
-  <li><code>CreateAction</code>: Create an entity.</li>
-  <li><code>DeleteAction</code>: Delete an entity.</li>
-  <li><code>EditAction</code>: Edit a single entity.</li>
-  <li><code>ViewAction</code>: View a single entity.</li>
-  <li><code>IndexAction</code>: List many entities via pagination.</li>
-</ul>
-<p>But we also have 3 special actions for dealing with entities in bulk:</p>
-<ul>
-  <li><code>BulkDeleteAction</code>: Delete one or more entities at once</li>
-  <li><code>BulkSetValueAction</code>: Set a value for many entities at the same time</li>
-  <li><code>BulkToggleAction</code>: Toggle boolean fields for many entities at once</li>
-</ul>
-<p>There is even a special action for the <a href="https://github.com/friendsofcake/crud-view">Crud-View</a> plugin:</p>
-<ul>
-  <li><code>LookupAction</code>: Displays a record from a data source for auto-complete purposes.</li>
-</ul>
-<p>While the names of these actions is set in stone, it is easy to imagine yourself creating an action for scoping certain fields for editing by a post submitter, and then giving an editor even more control. This is done through the use of custom CakePHP events like so:</p>
-<pre><code class="language-php">public function add()
+<h3 id="showing-specific-fields-for-specific-actions">Showing specific fields for specific actions</h3>
+<p>On my index actions for Categories and Tags, I’d like to hide most fields and just show the <code>id</code> and <code>name</code>:</p>
+<pre><code class="language-php">public function beforeFilter(Event $event)
+    if ($this-&gt;request-&gt;action == 'index') {
+        $this-&gt;Crud-&gt;action()-&gt;config('scaffold.fields', $scaffoldFields);
+    }
+    return parent::beforeFilter($event);
+}
+</code></pre>
+<p>Of note, you can also set these config options in specific actions, the same as you would to customize the crud plugin, but sometimes you can avoid that with very trivial hacks. I wouldn’t do the above if there was 10 lines of configuration for the IndexAction, for instance.</p>
+<h3 id="exposing-bulk-actions">Exposing bulk actions</h3>
+<p>Sometimes I’d like to expose bulk post actions to my administrative users in a simple to use interface. CrudView takes a tact similar to wordpress and provides a checkboxes next to each row that can be used to “apply” configured actions:</p>
+<pre><code class="language-php">public function initialize()
 {
-    $this-&gt;Crud-&gt;on('beforeSave', function(\Cake\Event\Event $event) {
-        // do whatever you want with the event-&gt;subject and data
-    });
-    // continue on with the rest of the action
+    parent::initialize();
+    // map a fiew bulk actions
+    $this-&gt;Crud-&gt;mapAction('deleteAll', 'Crud.Bulk/Delete');
+    $this-&gt;Crud-&gt;mapAction('setStatus', [
+        'className' =&gt; 'Crud.Bulk/SetValue',
+        'field' =&gt; 'status',
+    ]);
+}
+public function beforeFilter(Event $event)
+{
+    // provide the proper links to the actions
+    $this-&gt;Crud-&gt;action()-&gt;config('scaffold.bulk_actions', [
+        Router::url(['action' =&gt; 'deleteAll']) =&gt; __('Delete selected'),
+        Router::url(['action' =&gt; 'setStatus', 'status' =&gt; 'published']) =&gt; __('Make published'),
+        Router::url(['action' =&gt; 'setStatus', 'status' =&gt; 'pending-review']) =&gt; __('Set to pending'),
+    ]);
+    return parent::beforeFilter($event);
+}
+public function setStatus()
+{
+    $this-&gt;_statusOptions = [
+        'published' =&gt; 'Published',
+        'pitch' =&gt; 'Pitch',
+        'assigned' =&gt; 'Assigned',
+        'in-progress' =&gt; 'In Progress',
+        'pending-review' =&gt; 'Pending Review',
+    ];
+    $value = $this-&gt;request-&gt;query('status');
+    if (!in_array($value, array_keys($this-&gt;_statusOptions))) {
+        throw new BadRequestException('No valid status specified');
+    }
+    // ZHU LI, DO THE THING!
+    $this-&gt;Crud-&gt;action()-&gt;config('value', $value);
     return $this-&gt;Crud-&gt;execute();
 }
 </code></pre>
-<p>The awesome thing about the CRUD plugin is that it is quite easy to create single-purpose actions for your own use. For instance, a recent plugin I was contracted to do has a custom <code>AutocompleteAction</code> that integrates with <a href="https://brianreavis.github.io/selectize.js/">selectize.js</a> to handle tagging. I’ve also created similar actions for Login/Logout.</p>
-<h2 id="going-further">Going Further</h2>
-<p>While CRUD does simplify a ton of work around creating APIs for applications, many applications <em>also</em> need administrative panels for users who don’t want to use <code>curl</code> to interact with your websites. Thankfully, the <a href="https://github.com/friendsofcake/crud-view"><code>Crud-View</code></a> plugin is available for just such purposes, and we’ll cover it’s use tomorrow.</p>
-<p>Bonus: Read this lovely tutorial on adding <a href="http://www.bravo-kernel.com/2015/04/how-to-add-jwt-authentication-to-a-cakephp-3-rest-api/">JWT Auth to a Crud application</a>.</p>
+<p>Obviously the logic here can get incredibly complex, and you are welcome to integrate both Crud and CrudView to best express these sorts of experiences for your users.</p>
+<h2 id="youre-getting-sleepy">You’re getting sleepy</h2>
+<p>Building administrative interfaces isn’t the most illustrious job out there, but if you ever find yourself in a pinch, the CrudView plugin is there to help. Hopefully the above will give you enough of a primer to find your way through the plugin, and we’ll continue plugging on it until it’s both polished and well-documented. Until tomorrow!</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-02 13:42:00 +0000">02 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-03 13:42:00 +0000">03 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -186,11 +221,11 @@ class PostsController extends AppController
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 2</strong> of <strong>3</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 3</strong> of <strong>3</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
-      <li>Creating APIs using the CRUD Plugin</li>
-      <li><a href="/2015/12/03/generating-administrative-panels-with-crud-view/">Generating Administrative Panels with CrudView</a></li>
+      <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
+      <li>Generating Administrative Panels with CrudView</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -229,9 +264,9 @@ class PostsController extends AppController
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/02/creating-apis-using-the-crud-plugin/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/02/creating-apis-using-the-crud-plugin/';
-        var disqus_title      = "CakeAdvent-2015: Creating APIs using the CRUD Plugin";
+        var disqus_identifier = '/2015/12/03/generating-administrative-panels-with-crud-view/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/';
+        var disqus_title      = "CakeAdvent-2015: Generating Administrative Panels with CrudView";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

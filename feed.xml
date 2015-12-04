@@ -5,9 +5,188 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 02 Dec 2015 23:57:27 +0000</pubDate>
-    <lastBuildDate>Wed, 02 Dec 2015 23:57:27 +0000</lastBuildDate>
+    <pubDate>Fri, 04 Dec 2015 02:52:29 +0000</pubDate>
+    <lastBuildDate>Fri, 04 Dec 2015 02:52:29 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Generating Administrative Panels with CrudView</title>
+        <description>&lt;p&gt;Since time immemorial - okay, 2009 - it has been possible to set a custom view for CakePHP applications:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Don&#39;t try this, there isn&#39;t an ExcelView in the core :P
+$this-&amp;gt;viewClass = &#39;ExcelView&#39;;
+
+// Who remembers this?
+$this-&amp;gt;viewClass = &#39;MediaView&#39;;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since then, the number of view classes has increased dramatically, and we even have ways to map certain types of responses to particular view classes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;RequestHandler-&amp;gt;config(&#39;viewClassMap&#39;, [
+    // troll all your xml users
+    &#39;xml&#39; =&amp;gt; &#39;Json&#39;,
+    // this is from a plugin
+    &#39;xlsx&#39; =&amp;gt; &#39;CakeExcel.Excel&#39;,
+    // so is this!
+    &#39;csv&#39; =&amp;gt; &#39;CsvView.Csv&#39;,
+    // we are really into this plugin thing aren&#39;t we
+    &#39;rss&#39; =&amp;gt; &#39;Feed.Rss&#39;
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One of the nice things about views is that they completely take over the rendering step, allowing you to create views that automatically generate interactive experiences. Similar to how the Crud plugin allows users to generate api responses, the CrudView plugin allows users to generate administrative panels.&lt;/p&gt;
+
+&lt;h2 id=&quot;crudview&quot;&gt;CrudView&lt;/h2&gt;
+
+&lt;p&gt;The CrudView plugin is actually one of the more difficult plugins to use, owing to the fact that there is basically zero documentation - we’re working on it! It works similar to how the Crud plugin does, using &lt;code&gt;events&lt;/code&gt; and &lt;code&gt;config&lt;/code&gt; options to lay everything out &lt;em&gt;just&lt;/em&gt; right.&lt;/p&gt;
+
+&lt;p&gt;To start, you’ll want to install the bugger:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;composer require friendsofcake/crud-view:dev-master
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The simplest method of using CrudView is to configure the Crud &lt;code&gt;listener&lt;/code&gt; and &lt;code&gt;viewClass&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Controller;
+
+use Cake\Controller\Controller;
+use Crud\Controller;
+use Crud\Controller\ControllerTrait;
+
+class AppController extends Controller
+{
+    use ControllerTrait;
+
+    public function initialize()
+    {
+        parent::initialize();
+
+        $this-&amp;gt;loadComponent(&#39;RequestHandler&#39;);
+        $this-&amp;gt;loadComponent(&#39;Flash&#39;);
+
+        // setup the viewclass
+        $this-&amp;gt;viewClass = &#39;CrudView\View\CrudView&#39;;
+        $this-&amp;gt;loadComponent(&#39;Crud.Crud&#39;, [
+            &#39;actions&#39; =&amp;gt; [
+                &#39;Crud.Index&#39;,
+                &#39;Crud.Add&#39;,
+                &#39;Crud.Edit&#39;,
+                &#39;Crud.View&#39;,
+                &#39;Crud.Delete&#39;,
+            ],
+            &#39;listeners&#39; =&amp;gt; [
+                // and ensure we have the listener configured
+                &#39;CrudView.View&#39;,
+                &#39;Crud.RelatedModels&#39;,
+                &#39;Crud.Redirect&#39;,
+            ],
+        ]);
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That’s it! We now have automatic view scaffolding for every controller that inherits from the &lt;code&gt;AppController&lt;/code&gt;, &lt;em&gt;as well as&lt;/em&gt; all the yummy api stuff the Crud plugin gives us by default.&lt;/p&gt;
+
+&lt;h3 id=&quot;hiding-sidebar-entries&quot;&gt;Hiding Sidebar Entries&lt;/h3&gt;
+
+&lt;p&gt;CrudView is only as smart as you configure it to be. By default, it will show &lt;em&gt;all&lt;/em&gt; tables in the sidebar and link to their assumed administrative panels. I personally prefer not to show join tables, or anything related to database migrations, and as such my &lt;code&gt;AppController::beforeFilter&lt;/code&gt; looks something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function beforeFilter(Event $event)
+{
+    $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.tables_blacklist&#39;, [
+        &#39;blog_phinxlog&#39;,
+        &#39;phinxlog&#39;,
+        &#39;posts_tags&#39;,
+    ]);
+
+    return parent::beforeFilter($event);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;showing-specific-fields-for-specific-actions&quot;&gt;Showing specific fields for specific actions&lt;/h3&gt;
+
+&lt;p&gt;On my index actions for Categories and Tags, I’d like to hide most fields and just show the &lt;code&gt;id&lt;/code&gt; and &lt;code&gt;name&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function beforeFilter(Event $event)
+    if ($this-&amp;gt;request-&amp;gt;action == &#39;index&#39;) {
+        $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.fields&#39;, $scaffoldFields);
+    }
+    return parent::beforeFilter($event);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Of note, you can also set these config options in specific actions, the same as you would to customize the crud plugin, but sometimes you can avoid that with very trivial hacks. I wouldn’t do the above if there was 10 lines of configuration for the IndexAction, for instance.&lt;/p&gt;
+
+&lt;h3 id=&quot;exposing-bulk-actions&quot;&gt;Exposing bulk actions&lt;/h3&gt;
+
+&lt;p&gt;Sometimes I’d like to expose bulk post actions to my administrative users in a simple to use interface. CrudView takes a tact similar to wordpress and provides a checkboxes next to each row that can be used to “apply” configured actions:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize()
+{
+    parent::initialize();
+    // map a fiew bulk actions
+    $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;deleteAll&#39;, &#39;Crud.Bulk/Delete&#39;);
+    $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;setStatus&#39;, [
+        &#39;className&#39; =&amp;gt; &#39;Crud.Bulk/SetValue&#39;,
+        &#39;field&#39; =&amp;gt; &#39;status&#39;,
+    ]);
+}
+public function beforeFilter(Event $event)
+{
+    // provide the proper links to the actions
+    $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.bulk_actions&#39;, [
+        Router::url([&#39;action&#39; =&amp;gt; &#39;deleteAll&#39;]) =&amp;gt; __(&#39;Delete selected&#39;),
+        Router::url([&#39;action&#39; =&amp;gt; &#39;setStatus&#39;, &#39;status&#39; =&amp;gt; &#39;published&#39;]) =&amp;gt; __(&#39;Make published&#39;),
+        Router::url([&#39;action&#39; =&amp;gt; &#39;setStatus&#39;, &#39;status&#39; =&amp;gt; &#39;pending-review&#39;]) =&amp;gt; __(&#39;Set to pending&#39;),
+    ]);
+    return parent::beforeFilter($event);
+}
+
+public function setStatus()
+{
+    $this-&amp;gt;_statusOptions = [
+        &#39;published&#39; =&amp;gt; &#39;Published&#39;,
+        &#39;pitch&#39; =&amp;gt; &#39;Pitch&#39;,
+        &#39;assigned&#39; =&amp;gt; &#39;Assigned&#39;,
+        &#39;in-progress&#39; =&amp;gt; &#39;In Progress&#39;,
+        &#39;pending-review&#39; =&amp;gt; &#39;Pending Review&#39;,
+    ];
+
+    $value = $this-&amp;gt;request-&amp;gt;query(&#39;status&#39;);
+    if (!in_array($value, array_keys($this-&amp;gt;_statusOptions))) {
+        throw new BadRequestException(&#39;No valid status specified&#39;);
+    }
+
+    // ZHU LI, DO THE THING!
+    $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;value&#39;, $value);
+    return $this-&amp;gt;Crud-&amp;gt;execute();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Obviously the logic here can get incredibly complex, and you are welcome to integrate both Crud and CrudView to best express these sorts of experiences for your users.&lt;/p&gt;
+
+&lt;h2 id=&quot;youre-getting-sleepy&quot;&gt;You’re getting sleepy&lt;/h2&gt;
+
+&lt;p&gt;Building administrative interfaces isn’t the most illustrious job out there, but if you ever find yourself in a pinch, the CrudView plugin is there to help. Hopefully the above will give you enough of a primer to find your way through the plugin, and we’ll continue plugging on it until it’s both polished and well-documented. Until tomorrow!&lt;/p&gt;
+</description>
+        <pubDate>Thu, 03 Dec 2015 13:42:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>api</category>
+        
+        <category>crud</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Creating APIs using the CRUD Plugin</title>
@@ -1469,90 +1648,6 @@ Router::scope(&#39;/&#39;, function ($routes) {
         <pubDate>Tue, 09 Dec 2014 17:31:00 +0000</pubDate>
         <link>http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Closing Issues in our Anonymous Issue Tracker using Events</title>
-        <description>&lt;p&gt;One thing that you’ll want to eventually handle is closing issues. We’ll do this using a simple Event. We need to first add the following migration to handle whether an issue is closed or not:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Phinx\Migration\AbstractMigration;
-
-class ClosingIssues extends AbstractMigration {
-  public function change() {
-
-    $table = $this-&amp;gt;table(&#39;issues&#39;);
-    $table
-      -&amp;gt;addColumn(&#39;is_closed&#39;, &#39;boolean&#39;, [
-        &#39;default&#39; =&amp;gt; false,
-      ])
-      -&amp;gt;save();
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You’ll want to run the migration and clear your orm cache:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
-bin/cake orm_cache clear
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, you should add this field to the &lt;code&gt;IssueEntity::$_accessible&lt;/code&gt; array.&lt;/p&gt;
-
-&lt;p&gt;Whenever an issue has it’s &lt;code&gt;is_closed&lt;/code&gt; field set to true in the database (1 in mysql), then we should disable commenting on said entity. We can do this by hooking into the &lt;code&gt;Model.beforeValidate&lt;/code&gt; event in our &lt;code&gt;app/config/events.php&lt;/code&gt; file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use App\Model\Entity\Comment;
-
-EventManager::instance()-&amp;gt;attach(function (Event $event, Entity $entity, ArrayObject $options) {
-    if (!($entity instanceof Comment)) {
-        return true;
-    }
-
-    $table = TableRegistry::get(&#39;Issues&#39;);
-    $open_issue = $table-&amp;gt;find(&#39;all&#39;)-&amp;gt;where([
-        &#39;Issues.id&#39; =&amp;gt; $entity-&amp;gt;issue_id,
-        &#39;Issues.is_closed&#39; =&amp;gt; false,
-    ])-&amp;gt;first();
-
-    return !empty($open_issue);
-}, &#39;Model.beforeValidate&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A bit of explanation:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;We’re only going to trigger this event for &lt;code&gt;Comment&lt;/code&gt; entities, hence the &lt;code&gt;instanceof&lt;/code&gt; check&lt;/li&gt;
-  &lt;li&gt;Since we only want to allow commenting on open issues, we need to find the entity matching our comment’s issue only if &lt;code&gt;is_closed&lt;/code&gt; is false.&lt;/li&gt;
-  &lt;li&gt;If an event returns false, then &lt;code&gt;Event-&amp;gt;stopPropagation&lt;/code&gt; is automatically called. For the &lt;code&gt;Model.beforeValidate&lt;/code&gt; event, if the event is stopped, then the validation fails, so therefore if the &lt;code&gt;open_issue&lt;/code&gt; is empty, then we fail validation.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Quite simple! We can refactor this into a validation rule, but we will avoid doing so for now as validation is currently being refactored in 3.x.&lt;/p&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework time!&lt;/h2&gt;
-
-&lt;p&gt;A few more things you’ll want to do:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Provide some interface to actually close an issue. You can perhaps place this functionality behind basic auth, build a cake shell to handle closing issues, or simply allow anyone to close issues. It’s up to you.&lt;/li&gt;
-  &lt;li&gt;You need to hide the form if the issue is closed. You can do this by modifying your bake templates to handle this case and rebaking.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;With the above change, our anonymous issue tracker is “feature-complete”. We’ve covered quite a bit of CakePHP in building this application, but are definitely many more features to cover. Stay tuned for the next tutorial series, where we’ll cover creating an ecommerce store from scratch, including use authentication, payment processing and more!&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along as via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar.&lt;/p&gt;
-</description>
-        <pubDate>Mon, 08 Dec 2014 17:31:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/08/closing-issues-in-our-anonymous-issue-tracker/</guid>
         
         <category>cakeadvent-2014</category>
         

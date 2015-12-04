@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Generating Administrative Panels with CrudView",
+    "url": "/2015/12/03/generating-administrative-panels-with-crud-view/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["administrative","applications","cakephp","can","crudview","generating","hacks","panels","silly","use"]
+  },
+  {
+    "type": "post",
     "title": "Creating APIs using the CRUD Plugin",
     "url": "/2015/12/02/creating-apis-using-the-crud-plugin/",
     "description": "Silly hacks you can use in your cakephp applications",
