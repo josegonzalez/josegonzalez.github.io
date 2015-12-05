@@ -5,9 +5,154 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 04 Dec 2015 06:38:08 +0000</pubDate>
-    <lastBuildDate>Fri, 04 Dec 2015 06:38:08 +0000</lastBuildDate>
+    <pubDate>Sat, 05 Dec 2015 07:50:06 +0000</pubDate>
+    <lastBuildDate>Sat, 05 Dec 2015 07:50:06 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>What exactly belongs in an entity?</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;Sorry for the lateness, I was at a basketball game. The Nets lost against the Knicks, if anyone was wondering.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I’ve been in a few arguments about what an “entity” is. CakePHP 3 introduced them as a new way of representing a distinct set of data from a collection of “things”. Typically, that means a row in a table.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$post = new Post;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For a very long time, this was not how CakePHP abstracted information. You had an array, you modified an array, you saved an array, you deleted an array. GRONK WAS HAPPY!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://www.catster.com/wp-content/uploads/2015/06/RobGronkowski4.png&quot; alt=&quot;My cowork Rick O&#39;Hanlon&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Honestly though, the array stuff was quite annoying, and most (all?) CakePHP are happy we replaced them in CakePHP 3. The ORM changes that came along with it were… weird, but make sense once you think about them. But what exactly do I gain with an entity?&lt;/p&gt;
+
+&lt;h2 id=&quot;custom-entity-data&quot;&gt;Custom Entity Data&lt;/h2&gt;
+
+&lt;p&gt;An entity is a bag of data. It is a data bag. You put some data in it, and you can get that data out.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;breathe&lt;/em&gt; &lt;em&gt;plays anna nalick&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;When you first use an entity, you should treat it as a dumb object. Previously, we would say “Fat Models, Skinny Controllers”. I think the same way about entities. Entities are fairly stupid. They know about themselves and not much else. That is to say, entities don’t and shouldn’t know how to save themselves, what it means to be a valid entity (save the mid-life crisis for a table), or really much of anything.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Entities are for holding data and virtually constructed data.&lt;/em&gt; If you have a &lt;code&gt;Post&lt;/code&gt; entity with information about a post, it may be able to constuct it’s published date, the number of views it has, or whether it is active or not, but it should &lt;em&gt;not&lt;/em&gt; know whether or not it is the latest version of a post, or whether it’s internal state is valid. These things should be left to tables and validators.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;In the case of validators, they may change the state of an entity to add errors etc., but I don’t think of this as the state. The ORM will refuse to save an invalid entity, so really all you have is a bad bag of data that you need to clean up. The validation errors tell you how to do that.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;what-is-in-an-entity&quot;&gt;What is in an Entity?&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://1.bp.blogspot.com/-6d78XHD9qIQ/TsE7oLbG_nI/AAAAAAAAABE/XgB3ci9zv4o/s1600/Baby+names.jpg&quot; alt=&quot;No really, what the hell does an entity stand for?&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We’ve always had “App” classes in PHP. What is an &lt;code&gt;App&lt;/code&gt; class? It’s literally a parent class that we use to contain some amount of default logic. You can create as many of these as you’d like. The &lt;code&gt;App&lt;/code&gt; prefix is just a standard, I like to call mine &lt;code&gt;Lolipop&lt;/code&gt;  classes when no one is looking.&lt;/p&gt;
+
+&lt;p&gt;Here is my default &lt;code&gt;LolipopEntity&lt;/code&gt; class (hey, we have object oriented programming up in the hizouze!). You can place what you’d like in yours, I recommend seeing what is common and just doing that once:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Entity;
+
+use App\Model\Entity\Traits\JsonApi;
+use Cake\ORM\Entity;
+
+class LolipopEntity extends Entity
+{
+    use JsonApi;
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Okay, that is cheating. You can see I include the &lt;code&gt;JsonApi&lt;/code&gt; trait, and here it is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Entity\Traits;
+
+use Cake\Routing\Router;
+use Cake\Utility\Inflector;
+
+trait JsonApi
+{
+    public static function className()
+    {
+        $classname = get_called_class();
+        if (preg_match(&#39;@\\\\([\w]+)$@&#39;, $classname, $matches)) {
+            $classname = $matches[1];
+        }
+
+        return $classname;
+    }
+
+    public function _getType()
+    {
+        $classname = static::className();
+        return Inflector::classify($classname);
+    }
+
+    public function _getRoute()
+    {
+        $classname = static::className();
+
+        return [
+            &#39;controller&#39; =&amp;gt; Inflector::pluralize(Inflector::classify($classname)),
+            &#39;action&#39; =&amp;gt; &#39;view&#39;,
+            &#39;_method&#39; =&amp;gt; &#39;GET&#39;,
+            &#39;id&#39; =&amp;gt; $this-&amp;gt;id,
+        ];
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;JsonApi&lt;/code&gt; trait is something I use for building out APIs. My &lt;code&gt;AppEntity&lt;/code&gt; sometimes includes a &lt;code&gt;toArray&lt;/code&gt; that pulls in these false methods, or I include them manually in subclasses. I also have other related methods that build upon the data an entity has to create information &lt;em&gt;about&lt;/em&gt; that entity.&lt;/p&gt;
+
+&lt;p&gt;Entities are bags of data, and while they are supposed to be stupid, in my view they should understand how to reference themselves. This is controversial amongst the core developers, but I take this stance because I like to keep my code DRY.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;DONT REPEAT YOURSELF. Repeat after me (because I won’t!).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Let’s say you have a database of events. Each event has a url, and you have custom routes for that url (to include seo information etc.). Each time you change the custom route, you may or may not have to change route information included to generate that route.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Html-&amp;gt;link(&#39;Awesome Event with Milkshakes&#39;, [
+  &#39;controller&#39; =&amp;gt; &#39;Events&#39;,
+  &#39;action&#39; =&amp;gt; &#39;view&#39;,
+  &#39;id&#39; =&amp;gt; $entity-&amp;gt;id,
+  &#39;slug&#39; =&amp;gt; $entity-&amp;gt;slug,
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At some point, writing the above out gets annoying. And while the reference to an object happens in the presentation layer and is probably easily done in a helper, isn’t it nice to do something like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Html-&amp;gt;link(&#39;Awesome Event with Milkshakes&#39;, $entity-&amp;gt;getRoute());
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The alternative is a helper to which you pass an entity, or always writing out the array.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-best-practice-or-at-least-a-practice&quot;&gt;A Best Practice, or at least a “Practice”&lt;/h2&gt;
+
+&lt;p&gt;While I may disagree with the core developers on what goes where, we can all agree that at the end of the day, you should strive to write the least amount of code that works which won’t give you a headache at some other time. In my case, it is adding some presentational data to the &lt;code&gt;entity&lt;/code&gt; object. Maybe in your case, that means never using plugins or shirking away from namespaces.&lt;/p&gt;
+
+&lt;p&gt;Remember, there are many ways to skin a cat (please don’t hurt my cat). So long as you aren’t increasing anyone’s cognitive load, choose the method that involves the least code.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Always code as if the person who ends up maintaining your code is a violent psychopath who knows where you live. - &lt;a href=&quot;http://c2.com/cgi/wiki?CodeForTheMaintainer&quot;&gt;Code For The Maintainer&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        <pubDate>Fri, 04 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/04/whats-in-an-entity/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/04/whats-in-an-entity/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>table</category>
+        
+        <category>entity</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Generating Administrative Panels with CrudView</title>
@@ -1624,45 +1769,6 @@ Router::scope(&#39;/&#39;, function ($routes) {
         <category>cakephp</category>
         
         <category>composer</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Contributing to CakePHP</title>
-        <description>&lt;p&gt;This is an extremely short post where I’ll ask that you all give back (not just monetarily) but with your time. Here are some projects that will need feedback before 3.0 goes general availability:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/pull/5296&quot;&gt;Retooling Validation&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5319&quot;&gt;Bake Improvements&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5251&quot;&gt;Table-less FormModel classes&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakephp/issues/5251&quot;&gt;&lt;em&gt;Maybe&lt;/em&gt; supporting users without ext-intl&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/migrations/pull/34&quot;&gt;Migrations project needs some work&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Some repos that need some love:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/datasources&quot;&gt;Datasources needs an update&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/croogo/croogo&quot;&gt;Croogo CMS doesn’t yet boot&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/upgrade&quot;&gt;Break the Upgrade plugin!&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/docs/tree/3.0&quot;&gt;Doc work for 3.x&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/cakephp/cakepackages&quot;&gt;Filtering 3.x packages on the plugins site&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;CakePHP is a community project. If any of the above aren’t things you’re interested - but you’d love to give back - feel free to give feedback on existing features, write blog posts, and release updates of existing open source projects.&lt;/p&gt;
-
-&lt;p&gt;Until tomorrow!&lt;/p&gt;
-</description>
-        <pubDate>Tue, 09 Dec 2014 17:31:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/09/contributing-to-cakephp/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
         
         
         <category>cakephp</category>

@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "What exactly belongs in an entity?",
+    "url": "/2015/12/04/whats-in-an-entity/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","belongs","cakephp","can","entity","exactly","hacks","silly","use"]
+  },
+  {
+    "type": "post",
     "title": "Generating Administrative Panels with CrudView",
     "url": "/2015/12/03/generating-administrative-panels-with-crud-view/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1316,6 +1323,18 @@
     "title": "crud",
     "url": "/tags/crud/",
     "tokens": ["crud"]
+  },
+  {
+    "type": "tag",
+    "title": "table",
+    "url": "/tags/table/",
+    "tokens": ["table"]
+  },
+  {
+    "type": "tag",
+    "title": "entity",
+    "url": "/tags/entity/",
+    "tokens": ["entity"]
   },
   false
 ]
