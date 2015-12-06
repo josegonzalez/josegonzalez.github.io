@@ -5,9 +5,213 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 05 Dec 2015 07:50:06 +0000</pubDate>
-    <lastBuildDate>Sat, 05 Dec 2015 07:50:06 +0000</lastBuildDate>
+    <pubDate>Sun, 06 Dec 2015 00:59:23 +0000</pubDate>
+    <lastBuildDate>Sun, 06 Dec 2015 00:59:23 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Uploading files and images with CakePHP 3</title>
+        <description>&lt;p&gt;I’ve been working for years on upload plugins. CakePHP 1.2 users might remember MeioUpload - such a good plugin, it did &lt;em&gt;all&lt;/em&gt; the things. Which ended up being a bad move for maintainability. Something I took to heart when I worked on other alternatives, and when I finally wrote my &lt;a href=&quot;https://github.com/josegonzalez/cakephp-upload&quot;&gt;CakePHP Upload&lt;/a&gt; plugin. Until recently however, it supported only 2.x, and in this post-3.0 world, this just wouldn’t cut it.&lt;/p&gt;
+
+&lt;p&gt;If you are using CakePHP 3, there have been a &lt;a href=&quot;https://github.com/WyriHaximus/FlyPie&quot;&gt;few&lt;/a&gt; &lt;a href=&quot;https://github.com/josbeir/image&quot;&gt;different&lt;/a&gt; &lt;a href=&quot;https://github.com/davidyell/CakePHP3-Proffer&quot;&gt;upload&lt;/a&gt; &lt;a href=&quot;https://github.com/Xety/Cake3-Upload&quot;&gt;plugins&lt;/a&gt;. In my mind, the &lt;a href=&quot;https://github.com/davidyell/CakePHP3-Proffer&quot;&gt;Proffer&lt;/a&gt; plugin is the spiritual successor to the 2.x Upload plugin. If you need something more or less drop-in, I recommend looking into it. But this post isn’t about the Proffer plugin, but rather the new version of my &lt;a href=&quot;https://github.com/josegonzalez/cakephp-upload&quot;&gt;own upload plugin&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;focus&quot;&gt;Focus&lt;/h2&gt;
+
+&lt;p&gt;One thing I hated about the old plugin version is the fact that I was manually handling image thumbnails. There are plenty &lt;a href=&quot;https://github.com/avalanche123/Imagine&quot;&gt;of&lt;/a&gt; &lt;a href=&quot;https://github.com/Gregwar/Image&quot;&gt;awesome&lt;/a&gt; &lt;a href=&quot;https://github.com/Intervention/image&quot;&gt;packages&lt;/a&gt; to handle this already. Upload did it in a hacky way, with interpolated php logic coming from a regex-parsed string. And only sometimes did it work. And anything advanced, like adding a watermark, was mostly impossible. Sad panda.&lt;/p&gt;
+
+&lt;p&gt;If you wanted to upload a file to S3, that was impossible without further work. Handling local files required a hacky behavior. Quite annoying when really the code changes should have been minimal.&lt;/p&gt;
+
+&lt;p&gt;The other thing is that it was hard to test the code. So many codepaths to handle complex logic that honestly didn’t need to be there.&lt;/p&gt;
+
+&lt;p&gt;So with the 3.x plugin, I’ve resolved to the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Only add code with 100% unit test coverage.&lt;/li&gt;
+  &lt;li&gt;Stick to file uploading only.&lt;/li&gt;
+  &lt;li&gt;Use external libraries for handling file storage.&lt;/li&gt;
+  &lt;li&gt;Remove code that wasn’t strictly related to file uploading, like validation or image manipulation.&lt;/li&gt;
+  &lt;li&gt;Provide class-based entry points into the lifecycle of a file upload.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;uploading-a-file&quot;&gt;Uploading a file&lt;/h2&gt;
+
+&lt;p&gt;First install the thing:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require josegonzalez/cakephp-upload
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and then load it in your &lt;code&gt;config/bootstrap.php&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load(&#39;Josegonzalez/Upload&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is a sample &lt;code&gt;UsersTable&lt;/code&gt; that implements file uploading:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Table;
+
+use App\Model\Entity\User;
+use Cake\ORM\Table;
+
+class UsersTable extends Table
+{
+
+    public function initialize(array $config)
+    {
+        $this-&amp;gt;table(&#39;users&#39;);
+        $this-&amp;gt;displayField(&#39;name&#39;);
+        $this-&amp;gt;primaryKey(&#39;id&#39;);
+        $this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
+            &#39;photo&#39;,
+        ]);
+    }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty basic. It will upload anything to the path &lt;code&gt;webroot/files/Users/photo/ID&lt;/code&gt;, and save metadata about the file to the &lt;code&gt;photo&lt;/code&gt; field. We still have a few of the same config options, with many of the same defaults. For instance, we may wish to change the upload path to be outside of &lt;code&gt;webroot&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
+    &#39;photo&#39; =&amp;gt; [
+        &#39;path&#39; =&amp;gt; &#39;static{DS}{model}{DS}{field}{DS}{primaryKey}&#39;,
+    ],
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We also save metadata about the file upload to three fields, &lt;code&gt;dir&lt;/code&gt;, &lt;code&gt;size&lt;/code&gt;, and &lt;code&gt;type&lt;/code&gt;. We can customize those just as easily:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
+    &#39;photo&#39; =&amp;gt; [
+        &#39;fields&#39; =&amp;gt; [
+            &#39;dir&#39; =&amp;gt; &#39;photo_dir&#39;,
+            &#39;size&#39; =&amp;gt; &#39;size_dir&#39;,
+            &#39;type&#39; =&amp;gt; &#39;type_dir&#39;,
+        ],
+    ],
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also upload multiple files:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
+    &#39;photo&#39;,
+    &#39;video&#39;
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;customizing-the-file-upload&quot;&gt;Customizing the file upload&lt;/h2&gt;
+
+&lt;p&gt;CakePHP Upload does all the heavy-lifting using a new interface system. You can configure new classes to implement three key areas of file handling:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
+    &#39;photo&#39; =&amp;gt; [
+        // A pathProcessor handles both returning the basepath
+        // as well as what the initial filename should be set to
+        &#39;pathProcessor&#39; =&amp;gt; &#39;Josegonzalez\Upload\File\Path\DefaultProcessor&#39;
+
+        // Allows you to create new files from the original source,
+        // or possibly even modify/remove the original source file
+        // from the upload process
+        &#39;transformer&#39; =&amp;gt; &#39;Josegonzalez\Upload\File\Transformer\DefaultTransformer&#39;
+
+        // Handles writing a file to disk... or S3... or Dropbox... or FTP... or /dev/null
+        &#39;writer&#39; =&amp;gt; &#39;Josegonzalez\Upload\File\Writer\DefaultWriter&#39;,
+    ],
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For anyone wondering, the above system allows us to do any of the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Handle arbitrary naming and pathing schemas&lt;/li&gt;
+  &lt;li&gt;Add or remove original files to the upload&lt;/li&gt;
+  &lt;li&gt;Extract video thumbnails&lt;/li&gt;
+  &lt;li&gt;Add watermarks to files&lt;/li&gt;
+  &lt;li&gt;Sanitize uploaded files&lt;/li&gt;
+  &lt;li&gt;Write those files to anywhere &lt;a href=&quot;http://flysystem.thephpleague.com/&quot;&gt;Flysystem&lt;/a&gt; supports&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Want to create a thumbnail and upload both the original and your new file to S3? Install the AWS S3 Flysystem adapter:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require league/flysystem-aws-s3-v3
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And follow along as we rock your socks off&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$client = \Aws\S3\S3Client::factory([
+    &#39;credentials&#39; =&amp;gt; [
+        &#39;key&#39;    =&amp;gt; &#39;your-key&#39;,
+        &#39;secret&#39; =&amp;gt; &#39;your-secret&#39;,
+    ],
+    &#39;region&#39; =&amp;gt; &#39;your-region&#39;,
+    &#39;version&#39; =&amp;gt; &#39;latest&#39;,
+]);
+$adapter = new \League\Flysystem\AwsS3v3\AwsS3Adapter(
+    $client,
+    &#39;your-bucket-name&#39;,
+    &#39;optional-prefix&#39;
+);
+
+$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
+    &#39;photo&#39; =&amp;gt; [
+        // Ensure the default filesystem writer writes using
+        // our S3 adapter
+        &#39;filesystem&#39; =&amp;gt; [
+            &#39;adapter&#39; =&amp;gt; $adapter
+        ],
+
+        // This can also be in a class that implements
+        // the TransformerInterface or any callable type.
+        &#39;transformer&#39; =&amp;gt; function (Table $table, Entity $entity, $data, $field, $settings) {
+            $tmp = tmpfile();
+            $size = new \Imagine\Image\Box(40, 40);
+            $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET;
+            $imagine = new \Imagine\Gd\Imagine();
+            $imagine-&amp;gt;open($data[&#39;tmp_name&#39;])
+                    -&amp;gt;thumbnail($size, $mode)
+                    -&amp;gt;save($tmp);
+            return [
+                $tmp =&amp;gt; &#39;thumbnail-&#39; . $data[&#39;name&#39;],
+                $data[&#39;tmp_name&#39;] =&amp;gt; $data[&#39;name&#39;]
+            ];
+        }
+    ],
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A list of methods needed to implement the proper interfaces &lt;a href=&quot;https://cakephp-upload.readthedocs.org/en/latest/interfaces.html&quot;&gt;are here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;things-yet-to-do&quot;&gt;Things yet to do&lt;/h2&gt;
+
+&lt;p&gt;One thing that is sorely missing is upload file validation. Yes, you’re going to have to write these on your own. The Proffer plugin has these available, though in my mind the validation rules should be in their own plugin so &lt;em&gt;all&lt;/em&gt; upload plugins can benefit by just adding a &lt;code&gt;require&lt;/code&gt; statement to their &lt;code&gt;composer.json&lt;/code&gt;. Also, I’m lazy, and didn’t want to write a custom Validator class.&lt;/p&gt;
+
+&lt;p&gt;Documentation is a bit sparse - the above docs are the first to show exactly how powerful the plugin can be - but that will be ameliorated over time.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-note-of-caution&quot;&gt;A note of caution&lt;/h2&gt;
+
+&lt;p&gt;One thing I’d like to stress is that the less you do during a page request, the faster your response time will be and the more likely your users will use your site. Here’s a &lt;a href=&quot;http://searchengineland.com/googles-push-to-speed-up-your-web-site-42177&quot;&gt;helpful post&lt;/a&gt; on just how important that be to numbers like, idk, user retention and revenue.&lt;/p&gt;
+
+&lt;p&gt;Given that information, I’d caution you against handling image manipulation etc. within a web request. This will work fine for some websites and internal administrative tools, but at some point you’re going to have to bite the bullet and refactor this code (and potentially even move the image uploading to outside of PHP entirely!). If only there was a way of combining file uploading and background processing…&lt;/p&gt;
+
+&lt;p&gt;Until next time!&lt;/p&gt;
+</description>
+        <pubDate>Fri, 04 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/04/uploading-files-and-images/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/04/uploading-files-and-images/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>upload</category>
+        
+        <category>files</category>
+        
+        <category>images</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>What exactly belongs in an entity?</title>
@@ -1562,207 +1766,6 @@ protected function _setPassword($password) {
         <pubDate>Thu, 11 Dec 2014 18:26:00 +0000</pubDate>
         <link>http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>composer</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Designing a Store application in CakePHP</title>
-        <description>&lt;p&gt;This CakeAdvent 2014 tutorial will walk you through the creation of a simple ecommerce store application using CakePHP 3. To start with, we’ll be setting up our development environment, installing our app template, creating our database, and using the tools CakePHP provides to get our application up fast.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Lets start by cloning the &lt;a href=&quot;https://github.com/friendsofcake/vagrant-chef&quot;&gt;FriendsOfCake/vagrant-chef&lt;/a&gt; repository. This repository will provide a full-featured cakephp working environment within a virtual linux server, allowing us to use each and every feature our app will need without worrying about how to install software on our machines.&lt;/p&gt;
-
-&lt;p&gt;Assuming you already installed Git, Vagrant and Virtualbox, you can simply clone the &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; repo and start the virtual machine. This should take around 5 minutes on a decent DSL connection, and need only be done once.:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git clone git@github.com:FriendsOfCake/vagrant-chef.git store
-cd store
-
-# bring up the working vm
-vagrant up
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that the virtualmachine is running, you can ssh onto it. Windows users will need to use &lt;a href=&quot;http://www.chiark.greenend.org.uk/~sgtatham/putty/&quot;&gt;Putty&lt;/a&gt; or similar, but please refer to the vagrant docs on how to connect.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ssh onto the vm
-vagrant ssh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that you are connected to your development environment, you should be able to create an application. &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; currently expects the application to be available in it’s &lt;code&gt;app&lt;/code&gt; directory, so we’ll keep that in mind.&lt;/p&gt;
-
-&lt;p&gt;As of CakePHP 3, we create new applications using the &lt;a href=&quot;https://getcomposer.org/&quot;&gt;Composer&lt;/a&gt; &lt;code&gt;create-project&lt;/code&gt; command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --prefer-dist -s dev cakephp/app app
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running the above will have output similar to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Installing cakephp/app (dev-master 28008873514274db441338eff5e2d07e75274f48)
-  - Installing cakephp/app (dev-master master)
-    Downloading: 100%
-
-Created project in app
-Loading composer repositories with package information
-Installing dependencies (including require-dev)
-  - Installing cakephp/plugin-installer (0.0.1)
-    Downloading: 100%
-
-  - Installing aura/installer-default (1.0.0)
-    Downloading: 100%
-
-  - Installing nesbot/carbon (1.13.0)
-    Downloading: 100%
-
-  - Installing psr/log (1.0.0)
-    Downloading: 100%
-
-  - Installing aura/intl (1.1.1)
-    Downloading: 100%
-
-  - Installing ircmaxell/password-compat (v1.0.4)
-    Downloading: 100%
-
-  - Installing cakephp/cakephp (3.0.x-dev 360c04e)
-    Downloading: 100%
-
-  - Installing cakephp/debug_kit (3.0.x-dev 8a6f3da)
-    Downloading: 100%
-
-  - Installing mobiledetect/mobiledetectlib (2.8.11)
-    Downloading: 100%
-
-  - Installing d11wtq/boris (v1.0.8)
-    Downloading: 100%
-
-Writing lock file
-Generating autoload files
-Created `config/app.php` file
-Permissions set on /vagrant/app/tmp/cache
-Permissions set on /vagrant/app/tmp/cache/models
-Permissions set on /vagrant/app/tmp/cache/persistent
-Permissions set on /vagrant/app/tmp/cache/views
-Permissions set on /vagrant/app/tmp/sessions
-Permissions set on /vagrant/app/tmp/tests
-Permissions set on /vagrant/app/tmp
-Permissions set on /vagrant/app/logs
-Updated Security.salt value in config/app.php
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In previous versions of cake, you would need to configure your security salt and change permissions, though we now take care of this for you automatically. You’ll still need to change your database permissions in your &lt;code&gt;app/config/app.php&lt;/code&gt; file. &lt;code&gt;FriendsOfCake/vagrant-chef&lt;/code&gt; comes preinstalled with many datastores, so we’ll use MySQL for this sample application. The following are the credentials you will need to change in your &lt;code&gt;app/config/app.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;username: &lt;code&gt;root&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;password: &lt;code&gt;bananas&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;database: &lt;code&gt;database_name&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Now that we’ve setup our database, we can import an initial schema into our app. There is currently no automated way to create a schema - though it’s coming quite soon - so we’ll connect to MySQL:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;mysql -uroot -pbananas
-# run the following command within the mysql connection
-use database_name;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In our last app, we generated migrations by hand and did some mangling of the db. We’ll skip that and use an alpha version of the migrations plugin. Install it using the following command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-
-composer require cakephp/migrations:dev-migration-generation
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;We’ll eventually need to use at least dev-master. For now, the functionality we need is in a pull request.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;At this point both phinx and the plugin will be installed. Plugins in CakePHP must be enabled before they can be used, and the CakePHP/migrations plugin is no different. Since it’s only useful on the command-line, we’ll enable it with the following code on our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Core\Plugin;
-
-Plugin::load(&#39;Migrations&#39;);
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we need to create our store’s tables:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-
-# when creating new tables, you should follow the following format for creating a migration
-# - bin/cake bake migration [create_TABLE_NAME] &amp;lt;fields&amp;gt; &amp;lt;go&amp;gt; &amp;lt;here&amp;gt;
-#
-# reference fields with the following format:
-# - field:fieldType:indexType:indexName
-bin/cake bake migration create_users email:string:index password:string created modified
-bin/cake bake migration create_categories name:string:index created modified
-bin/cake bake migration create_order_items order_id:integer product_id:integer quantity:integer price:float created modified
-bin/cake bake migration create_orders user_id:integer created modified
-bin/cake bake migration create_products name:string stock:integer price:float category_id:integer created modified
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;When creating new tables, Phinx will automatically add the &lt;code&gt;id&lt;/code&gt; field, so we don’t need to specify it. As well, the migrations plugin is smart enough to auto-assign types to certain fields.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Now you can run your migrations&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-
-bin/cake migrations migrate
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, we can bake all the initial files necessary for our application:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-
-bin/cake bake all users
-bin/cake bake all categories
-bin/cake bake all order_items
-bin/cake bake all orders
-bin/cake bake all products
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, lets show the &lt;code&gt;/products&lt;/code&gt; view by default when browsing our site. Modify your &lt;code&gt;app/config/routes.php&lt;/code&gt; to have the following contents:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Core\Plugin;
-use Cake\Routing\Router;
-
-Router::scope(&#39;/&#39;, function ($routes) {
-  $routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Products&#39;, &#39;action&#39; =&amp;gt; &#39;index&#39;]);
-
-  $routes-&amp;gt;fallbacks();
-});
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now if you browse to http://192.168.13.37/, you’ll see our default &lt;code&gt;products&lt;/code&gt; index page!&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;The above went by really quickly, and while it’s still early, our application looks pretty good already. We have a working development environment with any datastore we need, a scaffolded app via the excellent Composer package, run database migrations all from the command-line been introduced to the Bake Shell, and learned a little about customizing our routes. What’s next?&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Setting up authentication&lt;/li&gt;
-  &lt;li&gt;Seeding our store with reasonable information&lt;/li&gt;
-  &lt;li&gt;Managing our order for specific users&lt;/li&gt;
-  &lt;li&gt;Add payment processing&lt;/li&gt;
-  &lt;li&gt;Much moar&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Wed, 10 Dec 2014 17:24:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/10/designing-a-store-application-in-cakephp/</guid>
         
         <category>cakeadvent-2014</category>
         

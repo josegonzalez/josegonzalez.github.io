@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2015: Uploading files and images with CakePHP 3</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/04/uploading-files-and-images/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Silly hacks you can use in your cakephp applications" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, upload, files, images" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2015: Uploading files and images with CakePHP 3" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/04/uploading-files-and-images/" />
+    <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2015: Uploading files and images with CakePHP 3" />
+    <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
+    <link rel="alternate" type="application/rss+xml" title="Uploading files and images with CakePHP 3 » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Uploading files and images with CakePHP 3
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Uploading files and images with CakePHP 3!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>I’ve been working for years on upload plugins. CakePHP 1.2 users might remember MeioUpload - such a good plugin, it did <em>all</em> the things. Which ended up being a bad move for maintainability. Something I took to heart when I worked on other alternatives, and when I finally wrote my <a href="https://github.com/josegonzalez/cakephp-upload">CakePHP Upload</a> plugin. Until recently however, it supported only 2.x, and in this post-3.0 world, this just wouldn’t cut it.</p>
+<p>If you are using CakePHP 3, there have been a <a href="https://github.com/WyriHaximus/FlyPie">few</a> <a href="https://github.com/josbeir/image">different</a> <a href="https://github.com/davidyell/CakePHP3-Proffer">upload</a> <a href="https://github.com/Xety/Cake3-Upload">plugins</a>. In my mind, the <a href="https://github.com/davidyell/CakePHP3-Proffer">Proffer</a> plugin is the spiritual successor to the 2.x Upload plugin. If you need something more or less drop-in, I recommend looking into it. But this post isn’t about the Proffer plugin, but rather the new version of my <a href="https://github.com/josegonzalez/cakephp-upload">own upload plugin</a>.</p>
+<h2 id="focus">Focus</h2>
+<p>One thing I hated about the old plugin version is the fact that I was manually handling image thumbnails. There are plenty <a href="https://github.com/avalanche123/Imagine">of</a> <a href="https://github.com/Gregwar/Image">awesome</a> <a href="https://github.com/Intervention/image">packages</a> to handle this already. Upload did it in a hacky way, with interpolated php logic coming from a regex-parsed string. And only sometimes did it work. And anything advanced, like adding a watermark, was mostly impossible. Sad panda.</p>
+<p>If you wanted to upload a file to S3, that was impossible without further work. Handling local files required a hacky behavior. Quite annoying when really the code changes should have been minimal.</p>
+<p>The other thing is that it was hard to test the code. So many codepaths to handle complex logic that honestly didn’t need to be there.</p>
+<p>So with the 3.x plugin, I’ve resolved to the following:</p>
+<ul>
+  <li>Only add code with 100% unit test coverage.</li>
+  <li>Stick to file uploading only.</li>
+  <li>Use external libraries for handling file storage.</li>
+  <li>Remove code that wasn’t strictly related to file uploading, like validation or image manipulation.</li>
+  <li>Provide class-based entry points into the lifecycle of a file upload.</li>
+</ul>
+<h2 id="uploading-a-file">Uploading a file</h2>
+<p>First install the thing:</p>
+<pre><code class="language-shell">composer require josegonzalez/cakephp-upload
+</code></pre>
+<p>and then load it in your <code>config/bootstrap.php</code></p>
+<pre><code class="language-php">Plugin::load('Josegonzalez/Upload');
+</code></pre>
+<p>This is a sample <code>UsersTable</code> that implements file uploading:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Model\Table;
+use App\Model\Entity\User;
+use Cake\ORM\Table;
+class UsersTable extends Table
+{
+    public function initialize(array $config)
+    {
+        $this-&gt;table('users');
+        $this-&gt;displayField('name');
+        $this-&gt;primaryKey('id');
+        $this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
+            'photo',
+        ]);
+    }
+?&gt;
+</code></pre>
+<p>Pretty basic. It will upload anything to the path <code>webroot/files/Users/photo/ID</code>, and save metadata about the file to the <code>photo</code> field. We still have a few of the same config options, with many of the same defaults. For instance, we may wish to change the upload path to be outside of <code>webroot</code>:</p>
+<pre><code class="language-php">$this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
+    'photo' =&gt; [
+        'path' =&gt; 'static{DS}{model}{DS}{field}{DS}{primaryKey}',
+    ],
+]);
+</code></pre>
+<p>We also save metadata about the file upload to three fields, <code>dir</code>, <code>size</code>, and <code>type</code>. We can customize those just as easily:</p>
+<pre><code class="language-php">$this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
+    'photo' =&gt; [
+        'fields' =&gt; [
+            'dir' =&gt; 'photo_dir',
+            'size' =&gt; 'size_dir',
+            'type' =&gt; 'type_dir',
+        ],
+    ],
+]);
+</code></pre>
+<p>You can also upload multiple files:</p>
+<pre><code class="language-php">$this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
+    'photo',
+    'video'
+]);
+</code></pre>
+<h2 id="customizing-the-file-upload">Customizing the file upload</h2>
+<p>CakePHP Upload does all the heavy-lifting using a new interface system. You can configure new classes to implement three key areas of file handling:</p>
+<pre><code class="language-php">$this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
+    'photo' =&gt; [
+        // A pathProcessor handles both returning the basepath
+        // as well as what the initial filename should be set to
+        'pathProcessor' =&gt; 'Josegonzalez\Upload\File\Path\DefaultProcessor'
+        // Allows you to create new files from the original source,
+        // or possibly even modify/remove the original source file
+        // from the upload process
+        'transformer' =&gt; 'Josegonzalez\Upload\File\Transformer\DefaultTransformer'
+        // Handles writing a file to disk... or S3... or Dropbox... or FTP... or /dev/null
+        'writer' =&gt; 'Josegonzalez\Upload\File\Writer\DefaultWriter',
+    ],
+]);
+</code></pre>
+<p>For anyone wondering, the above system allows us to do any of the following:</p>
+<ul>
+  <li>Handle arbitrary naming and pathing schemas</li>
+  <li>Add or remove original files to the upload</li>
+  <li>Extract video thumbnails</li>
+  <li>Add watermarks to files</li>
+  <li>Sanitize uploaded files</li>
+  <li>Write those files to anywhere <a href="http://flysystem.thephpleague.com/">Flysystem</a> supports</li>
+</ul>
+<p>Want to create a thumbnail and upload both the original and your new file to S3? Install the AWS S3 Flysystem adapter:</p>
+<pre><code class="language-shell">composer require league/flysystem-aws-s3-v3
+</code></pre>
+<p>And follow along as we rock your socks off</p>
+<pre><code class="language-php">$client = \Aws\S3\S3Client::factory([
+    'credentials' =&gt; [
+        'key'    =&gt; 'your-key',
+        'secret' =&gt; 'your-secret',
+    ],
+    'region' =&gt; 'your-region',
+    'version' =&gt; 'latest',
+]);
+$adapter = new \League\Flysystem\AwsS3v3\AwsS3Adapter(
+    $client,
+    'your-bucket-name',
+    'optional-prefix'
+);
+$this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
+    'photo' =&gt; [
+        // Ensure the default filesystem writer writes using
+        // our S3 adapter
+        'filesystem' =&gt; [
+            'adapter' =&gt; $adapter
+        ],
+        // This can also be in a class that implements
+        // the TransformerInterface or any callable type.
+        'transformer' =&gt; function (Table $table, Entity $entity, $data, $field, $settings) {
+            $tmp = tmpfile();
+            $size = new \Imagine\Image\Box(40, 40);
+            $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET;
+            $imagine = new \Imagine\Gd\Imagine();
+            $imagine-&gt;open($data['tmp_name'])
+                    -&gt;thumbnail($size, $mode)
+                    -&gt;save($tmp);
+            return [
+                $tmp =&gt; 'thumbnail-' . $data['name'],
+                $data['tmp_name'] =&gt; $data['name']
+            ];
+        }
+    ],
+]);
+</code></pre>
+<p>A list of methods needed to implement the proper interfaces <a href="https://cakephp-upload.readthedocs.org/en/latest/interfaces.html">are here</a>.</p>
+<h2 id="things-yet-to-do">Things yet to do</h2>
+<p>One thing that is sorely missing is upload file validation. Yes, you’re going to have to write these on your own. The Proffer plugin has these available, though in my mind the validation rules should be in their own plugin so <em>all</em> upload plugins can benefit by just adding a <code>require</code> statement to their <code>composer.json</code>. Also, I’m lazy, and didn’t want to write a custom Validator class.</p>
+<p>Documentation is a bit sparse - the above docs are the first to show exactly how powerful the plugin can be - but that will be ameliorated over time.</p>
+<h2 id="a-note-of-caution">A note of caution</h2>
+<p>One thing I’d like to stress is that the less you do during a page request, the faster your response time will be and the more likely your users will use your site. Here’s a <a href="http://searchengineland.com/googles-push-to-speed-up-your-web-site-42177">helpful post</a> on just how important that be to numbers like, idk, user retention and revenue.</p>
+<p>Given that information, I’d caution you against handling image manipulation etc. within a web request. This will work fine for some websites and internal administrative tools, but at some point you’re going to have to bite the bullet and refactor this code (and potentially even move the image uploading to outside of PHP entirely!). If only there was a way of combining file uploading and background processing…</p>
+<p>Until next time!</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/04/uploading-files-and-images/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-04 12:00:00 +0000">04 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 5</strong> of <strong>5</strong> in the series "CakeAdvent 2015".</p>
+    <ol>
+      <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
+      <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
+      <li><a href="/2015/12/03/generating-administrative-panels-with-crud-view/">Generating Administrative Panels with CrudView</a></li>
+      <li><a href="/2015/12/04/whats-in-an-entity/">What exactly belongs in an entity?</a></li>
+      <li>Uploading files and images with CakePHP 3</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2015/12/04/uploading-files-and-images/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/04/uploading-files-and-images/';
+        var disqus_title      = "CakeAdvent-2015: Uploading files and images with CakePHP 3";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>

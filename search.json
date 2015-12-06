@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Uploading files and images with CakePHP 3",
+    "url": "/2015/12/04/uploading-files-and-images/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","files","hacks","images","silly","uploading","use"]
+  },
+  {
+    "type": "post",
     "title": "What exactly belongs in an entity?",
     "url": "/2015/12/04/whats-in-an-entity/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1335,6 +1342,24 @@
     "title": "entity",
     "url": "/tags/entity/",
     "tokens": ["entity"]
+  },
+  {
+    "type": "tag",
+    "title": "upload",
+    "url": "/tags/upload/",
+    "tokens": ["upload"]
+  },
+  {
+    "type": "tag",
+    "title": "files",
+    "url": "/tags/files/",
+    "tokens": ["files"]
+  },
+  {
+    "type": "tag",
+    "title": "images",
+    "url": "/tags/images/",
+    "tokens": ["images"]
   },
   false
 ]
