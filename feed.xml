@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 06 Dec 2015 00:59:23 +0000</pubDate>
-    <lastBuildDate>Sun, 06 Dec 2015 00:59:23 +0000</lastBuildDate>
+    <pubDate>Sun, 06 Dec 2015 01:02:09 +0000</pubDate>
+    <lastBuildDate>Sun, 06 Dec 2015 01:02:09 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -156,24 +156,31 @@ $this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
         // Ensure the default filesystem writer writes using
         // our S3 adapter
         &#39;filesystem&#39; =&amp;gt; [
-            &#39;adapter&#39; =&amp;gt; $adapter
+            &#39;adapter&#39; =&amp;gt; $adapter,
         ],
 
         // This can also be in a class that implements
         // the TransformerInterface or any callable type.
         &#39;transformer&#39; =&amp;gt; function (Table $table, Entity $entity, $data, $field, $settings) {
+            // Store the thumbnail in a temporary file
             $tmp = tmpfile();
+
+            // Use the Imagine library to DO THE THING
             $size = new \Imagine\Image\Box(40, 40);
             $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET;
             $imagine = new \Imagine\Gd\Imagine();
+
+            // Save that modified file to our temp file
             $imagine-&amp;gt;open($data[&#39;tmp_name&#39;])
                     -&amp;gt;thumbnail($size, $mode)
                     -&amp;gt;save($tmp);
+
+            // Now return the original *and* the thumbnail
             return [
+                $data[&#39;tmp_name&#39;] =&amp;gt; $data[&#39;name&#39;],
                 $tmp =&amp;gt; &#39;thumbnail-&#39; . $data[&#39;name&#39;],
-                $data[&#39;tmp_name&#39;] =&amp;gt; $data[&#39;name&#39;]
             ];
-        }
+        },
     ],
 ]);
 &lt;/code&gt;&lt;/pre&gt;

@@ -183,23 +183,27 @@ $this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
         // Ensure the default filesystem writer writes using
         // our S3 adapter
         'filesystem' =&gt; [
-            'adapter' =&gt; $adapter
+            'adapter' =&gt; $adapter,
         ],
         // This can also be in a class that implements
         // the TransformerInterface or any callable type.
         'transformer' =&gt; function (Table $table, Entity $entity, $data, $field, $settings) {
+            // Store the thumbnail in a temporary file
             $tmp = tmpfile();
+            // Use the Imagine library to DO THE THING
             $size = new \Imagine\Image\Box(40, 40);
             $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET;
             $imagine = new \Imagine\Gd\Imagine();
+            // Save that modified file to our temp file
             $imagine-&gt;open($data['tmp_name'])
                     -&gt;thumbnail($size, $mode)
                     -&gt;save($tmp);
+            // Now return the original *and* the thumbnail
             return [
+                $data['tmp_name'] =&gt; $data['name'],
                 $tmp =&gt; 'thumbnail-' . $data['name'],
-                $data['tmp_name'] =&gt; $data['name']
             ];
-        }
+        },
     ],
 ]);
 </code></pre>
