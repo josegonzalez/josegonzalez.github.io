@@ -5,9 +5,216 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 06 Dec 2015 01:02:09 +0000</pubDate>
-    <lastBuildDate>Sun, 06 Dec 2015 01:02:09 +0000</lastBuildDate>
+    <pubDate>Tue, 08 Dec 2015 03:14:08 +0000</pubDate>
+    <lastBuildDate>Tue, 08 Dec 2015 03:14:08 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Error Handling in CakePHP 3</title>
+        <description>&lt;p&gt;In CakePHP, you can attach custom error and exception handlers. The default one displays a stack trace in debug mode, and a set of http errors when debug is off. That’s nice and all, but sometimes you need to know when your users are encountering errors, and since you aren’t psychic, we need to store those somewhere. Thankfully, there are quite a few services that allow us to track bugs:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://airbrake.io/&quot;&gt;Airbrake&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://bugsnag.com/&quot;&gt;Bugsnag&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://getsentry.com/welcome/&quot;&gt;Sentry&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://opbeat.com/&quot;&gt;Opbeat&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;etc.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One annoying thing about error/exception handling in CakePHP is needing to attach two handlers:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// in your config/bootstrap.php
+$isCli = php_sapi_name() === &#39;cli&#39;;
+if ($isCli) {
+    (new ConsoleErrorHandler(Configure::consume(&#39;Error&#39;)))-&amp;gt;register();
+} else {
+    (new ErrorHandler(Configure::consume(&#39;Error&#39;)))-&amp;gt;register();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;ConsoleErrorHandler&lt;/code&gt;: For cli-based exceptions&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;ErrorHandler&lt;/code&gt;: For web-based exceptions&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This is necessary as the exception handler needs to render the exception information differently; the web error handler might want to use json for responses, or show an html message with an interactive stacktrace.&lt;/p&gt;
+
+&lt;p&gt;You &lt;em&gt;also&lt;/em&gt; have to have two methods in your handlers:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;handleError&lt;/code&gt;: For PHP Errors. PHP 7 does some &lt;a href=&quot;https://secure.php.net/manual/en/language.errors.php7.php&quot;&gt;magic&lt;/a&gt; to make these catchable, so perhaps this one will go away someday.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;handleException&lt;/code&gt;: For thrown Exception instances.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Rather than implement all error handling logic twice, we’ll go the trait-based route.&lt;/p&gt;
+
+&lt;h2 id=&quot;traits&quot;&gt;Traits&lt;/h2&gt;
+
+&lt;p&gt;Traits are composable units of behavior. They are similar to CakePHP Behaviors, though built into the PHP Core. They come in handy for exception handling in CakePHP as it becomes easy to implement the core logic of capturing an exception and just using that in multiple classes.&lt;/p&gt;
+
+&lt;p&gt;Below is a trait for the &lt;code&gt;Bugsnag&lt;/code&gt; service:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Error\Bugsnag;
+
+use Bugsnag_Client;
+use Cake\Core\Configure;
+use Exception;
+
+trait BugsnagTrait
+{
+
+    public function handleError($code, $description, $file = null, $line = null, $context = null)
+    {
+        $client = $this-&amp;gt;client();
+        if ($client) {
+            $client-&amp;gt;errorHandler($code, $description, $file, $line);
+        }
+
+        return parent::handleError($code, $description, $file, $line, $context);
+    }
+
+    public function handleException(Exception $exception)
+    {
+        $client = $this-&amp;gt;client();
+        if ($client) {
+            $client-&amp;gt;notifyException($exception);
+        }
+
+        return parent::handleException($exception);
+    }
+
+    protected function client()
+    {
+        $apiKey = Configure::read(&#39;Bugsnag.apiKey&#39;);
+        if (!$apiKey &amp;amp;&amp;amp; defined(&#39;BUGSNAG_API_KEY&#39;)) {
+            $apiKey = BUGSNAG_API_KEY;
+        }
+
+        if (!$apiKey) {
+            return null;
+        }
+
+        $client = null;
+        if ($apiKey) {
+            $client = new Bugsnag_Client($apiKey);
+            $config = Configure::read(&#39;Bugsnag.config&#39;);
+            foreach ($config as $key =&amp;gt; $value) {
+                if (method_exists($client, $key)) {
+                    $client-&amp;gt;$key($value);
+                }
+            }
+        }
+
+        return $client;
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is what my &lt;code&gt;ErrorHandler&lt;/code&gt; looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Error\Bugsnag;
+
+use App\Error\Bugsnag\BugsnagTrait;
+use Cake\Error\ErrorHandler as CoreErrorHandler;
+
+class ErrorHandler extends CoreErrorHandler
+{
+    use BugsnagTrait;
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice how the &lt;code&gt;ErrorHandler&lt;/code&gt; class itself is devoid of any “real” logic? I’ve pushed all the heavy-lifting into the trait and then just ensured my &lt;code&gt;ErrorHandler&lt;/code&gt; extends the CakePHP core &lt;code&gt;ErrorHandler&lt;/code&gt;. Similarly, my &lt;code&gt;ConsoleErrorHandler&lt;/code&gt; is quite empty as well:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Error\Bugsnag;
+
+use App\Error\Bugsnag\BugsnagTrait;
+use Cake\Console\ConsoleErrorHandler as CoreConsoleErrorHandler;
+
+class ConsoleErrorHandler extends CoreConsoleErrorHandler
+{
+    use BugsnagTrait;
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework time&lt;/h2&gt;
+
+&lt;p&gt;While the logic I implemented is fairly easy to understand, it may also not give the full picture around the exception. For instance, many error collection services provide the ability to add extra metadata to an error, such as the user that was signed in, or client information such as operating system version. &lt;code&gt;ExceptionRenderer&lt;/code&gt; instances can have access to this information using their &lt;code&gt;_getController&lt;/code&gt; methods, and it wouldn’t be too much work to copy that logic into your &lt;code&gt;ErrorHandler&lt;/code&gt; to add extra metadata to the request.&lt;/p&gt;
+
+&lt;p&gt;I recommend customizing the error handler to fit your needs - adding metadata, or perhaps using a different service - and seeing what helps you find, replicate, and fix bugs your automated testing didn’t catch.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 07 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>errors</category>
+        
+        <category>exceptions</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Invoking Callable Classes</title>
+        <description>&lt;p&gt;CakePHP has offered the use of callables for invoking related logic since 2.x with the event system. They are great for expressing self-contained pieces of logic, but not so much for avoiding spaghetti code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;eventManager()-&amp;gt;on(&#39;event&#39;, function (\Cake\Event\Event $event) {
+    // complex logic here
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This only gets worse in CakePHP 3, where you now have to deal with formatters, custom rules, and other such niceties that are easier to handle via callbacks.&lt;/p&gt;
+
+&lt;p&gt;One other drawback is that your code is no longer testable in isolation. You need to execute the enclosing block in order to even try to trigger the anonymous function. Thankfully, callables can be classes!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \Cake\Event\Event;
+class SomeCallable
+{
+    public function __invoke(Event $event)
+    {
+        // complex logic here
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since PHP 5.4, we also have the &lt;code&gt;Callable&lt;/code&gt; typehint, which you can use in your own functions when interacting with either invokable classes or anonymous functions.&lt;/p&gt;
+
+&lt;p&gt;Some notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I try and place my callables in a logical namespace. Formatters go in &lt;code&gt;\App\Table\Formatters&lt;/code&gt;. Event handlers go in &lt;code&gt;\App\Event\Handlers&lt;/code&gt;. You get the idea.&lt;/li&gt;
+  &lt;li&gt;You can pass in the callable by sending in an instance of that class. &lt;code&gt;__invoke&lt;/code&gt; will be run automatically.&lt;/li&gt;
+  &lt;li&gt;I like adding a &lt;code&gt;run&lt;/code&gt; or &lt;code&gt;perform&lt;/code&gt; method that calls the &lt;code&gt;__invoke&lt;/code&gt; method. This makes it easy for me to reuse the class in non-callable situations.&lt;/li&gt;
+  &lt;li&gt;You can test these just like any other class, or refactor your long anonymous function into a set of helper methods to simplify readability.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Sun, 06 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/06/invoking-callable-classes/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/06/invoking-callable-classes/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>callables</category>
+        
+        <category>events</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Uploading files and images with CakePHP 3</title>
@@ -201,9 +408,9 @@ $this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
 
 &lt;p&gt;Until next time!&lt;/p&gt;
 </description>
-        <pubDate>Fri, 04 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/04/uploading-files-and-images/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/04/uploading-files-and-images/</guid>
+        <pubDate>Sat, 05 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/05/uploading-files-and-images/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/05/uploading-files-and-images/</guid>
         
         <category>cakeadvent-2015</category>
         
@@ -1461,324 +1668,6 @@ bin/cake bake view products -f
         <category>composer</category>
         
         <category>cart management</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Adding dummy data via a custom faker shell to our store</title>
-        <description>&lt;p&gt;The excellent &lt;a href=&quot;http://jadb.io&quot;&gt;Jad Bittar&lt;/a&gt; added support for Faker to the Cake3 ORM as a plugin, so we can use this to generate dummy data for our application. This will allow us to easily test stuff going forward. Let’s start by installing the plugin:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require gourmet/faker
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will pull in both the CakePHP plugin as well as the Faker library. Next, lets generate a shell to generate dummy data:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-
-# generate a dummy data shell
-bin/cake bake shell DummyData
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The new shell will be created in &lt;code&gt;app/src/Shell/DummyDataShell.php&lt;/code&gt;. It has a &lt;code&gt;main&lt;/code&gt; method which you can modify, and if you run the following command now:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake dummy_data
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You’ll have the following - pretty plain - output:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;vagrant@precise32:/vagrant/app$ bin/cake dummy_data
-
-Welcome to CakePHP v3.0.0-beta3 Console
----------------------------------------------------------------
-App : src
-Path: /vagrant/app/src/
----------------------------------------------------------------
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lets actually do something with this new shell. In our &lt;code&gt;DummyDataShell::main()&lt;/code&gt; method, we’ll need to create a &lt;code&gt;faker&lt;/code&gt; object&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$faker = \Faker\Factory::create();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Faker uses providers to give custom data types to fields. We’ll first populate the &lt;code&gt;users&lt;/code&gt; table, and to do so, we’ll need to provide fake email addresses. To do so, we’ll need to add the &lt;code&gt;Internet&lt;/code&gt; provider:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$faker-&amp;gt;addProvider(new \Faker\Provider\Internet($faker));
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To populate a specific type of entity, we need to create an EntityPopulator object. The Faker library provides a custom populator for the CakePHP framework, which we’ll leverage in our case. You simply need to provide the name of the table class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$entityPopulator = new \Faker\ORM\CakePHP\EntityPopulator(&#39;Users&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, we need to create a populator object that will actually insert data into the database. We need to pass in our EntityPopulator object, a number of records to insert, as well as custom formatters. The formatters come from providers - we added the &lt;code&gt;Internet&lt;/code&gt; provider above - or your own text. Faker tries to autodetect data types, but will default to stuff like &lt;code&gt;plaintext&lt;/code&gt; for &lt;code&gt;email&lt;/code&gt; fields, so we need to override this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$populator = new \Faker\ORM\CakePHP\Populator($faker);
-$populator-&amp;gt;addEntity($entityPopulator, 20, [
-  &#39;email&#39; =&amp;gt; function () use ($faker) { return $faker-&amp;gt;email(); },
-  &#39;password&#39; =&amp;gt; &#39;password&#39;,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The last thing is to actually populate our table!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$populator-&amp;gt;execute([&#39;validate&#39; =&amp;gt; false]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The full code sample will look like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;out(&quot;Creating user populator&quot;);
-$faker = \Faker\Factory::create();
-$faker-&amp;gt;addProvider(new \Faker\Provider\Internet($faker));
-
-$entityPopulator = new \Faker\ORM\CakePHP\EntityPopulator(&#39;Users&#39;);
-$populator = new \Faker\ORM\CakePHP\Populator($faker);
-$populator-&amp;gt;addEntity($entityPopulator, 20, [
-  &#39;email&#39; =&amp;gt; function () use ($faker) { return $faker-&amp;gt;email(); },
-  &#39;password&#39; =&amp;gt; &#39;password&#39;,
-]);
-
-$this-&amp;gt;out(&quot;Inserting&quot;);
-$populator-&amp;gt;execute([&#39;validate&#39; =&amp;gt; false]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;I’ve added some calls to &lt;code&gt;$this-&amp;gt;out()&lt;/code&gt; to provide feedback in my shell. You can omit these or add more as you like. This is a special helper method available in shells&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;If you run this, you’ll recieve the following output:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;vagrant@precise32:/vagrant/app$ bin/cake dummy_data
-
-Welcome to CakePHP v3.0.0-beta3 Console
----------------------------------------------------------------
-App : src
-Path: /vagrant/app/src/
----------------------------------------------------------------
-Creating user populator
-Inserting
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;But more importantly, you’ll have 20 beautiful user records with passwords. You should be able to login as any of these users.&lt;/p&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework time!&lt;/h2&gt;
-
-&lt;p&gt;If you thought you’d get off this week, you thought incorrectly. Your homework is to create dummy data for every model we have in our app - a store without products is kind of useless. You can ignore the &lt;code&gt;Orders&lt;/code&gt; and &lt;code&gt;OrderItems&lt;/code&gt; models.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 12 Dec 2014 18:26:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/12/adding-dummy-data-to-our-store/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/12/adding-dummy-data-to-our-store/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>composer</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Adding an Authentication layer to our CakePHP Store</title>
-        <description>&lt;p&gt;We already have basic scaffolding for our application, so lets get authentication working. First, we’ll add the login/logout methods by modifying our bake skeleton. Add the following to your &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Event\Event;
-use Cake\Event\EventManager;
-use Cake\Utility\Hash;
-
-EventManager::instance()-&amp;gt;attach(function (Event $event) {
-    $view = $event-&amp;gt;subject;
-    $name = Hash::get($view-&amp;gt;viewVars, &#39;name&#39;);
-    $isController = strpos($event-&amp;gt;data[0], &#39;Bake/Controller/controller.ctp&#39;) !== false;
-    if ($isController &amp;amp;&amp;amp; $name == &#39;Users&#39;) {
-        $view-&amp;gt;viewVars[&#39;actions&#39;] = [&#39;login&#39;, &#39;logout&#39;, &#39;index&#39;, &#39;view&#39;, &#39;register&#39;, &#39;edit&#39;, &#39;delete&#39;];
-    }
-}, &#39;Bake.beforeRender&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that this is set, we’ll need action templates for our &lt;code&gt;login&lt;/code&gt;, &lt;code&gt;logout&lt;/code&gt;, and &lt;code&gt;register&lt;/code&gt; methods. These do not come with CakePHP as they can be pretty specific, so we’ll include some pretty basic ones.&lt;/p&gt;
-
-&lt;p&gt;Here is &lt;code&gt;app/src/Template/Bake/Element/Controller/login.ctp&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Login method
- *
- * @return void
- */
-public function login() {
-    if ($this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
-        $user = $this-&amp;gt;Auth-&amp;gt;identify();
-        if ($user) {
-            $this-&amp;gt;Auth-&amp;gt;setUser($user);
-            return $this-&amp;gt;redirect($this-&amp;gt;Auth-&amp;gt;redirectUrl());
-        }
-        $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Invalid username or password, try again&#39;));
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here is &lt;code&gt;app/src/Template/Bake/Element/Controller/logout.ctp&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Logout method
- *
- * @return void
- */
-public function logout() {
-    return $this-&amp;gt;redirect($this-&amp;gt;Auth-&amp;gt;logout());
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And finally &lt;code&gt;app/src/Template/Bake/Element/Controller/register.ctp&lt;/code&gt; (which is simply &lt;code&gt;add.ctp&lt;/code&gt; but with the action name changed):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;% $compact = [&quot;&#39;&quot; . $singularName . &quot;&#39;&quot;]; %&amp;gt;
-
-/**
- * Register method
- *
- * @return void
- */
-  public function register() {
-    $&amp;lt;%= $singularName %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity($this-&amp;gt;request-&amp;gt;data);
-    if ($this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
-      if ($this-&amp;gt;&amp;lt;%= $currentModelName; %&amp;gt;-&amp;gt;save($&amp;lt;%= $singularName %&amp;gt;)) {
-        $this-&amp;gt;Flash-&amp;gt;success(&#39;The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; has been saved.&#39;);
-        return $this-&amp;gt;redirect([&#39;action&#39; =&amp;gt; &#39;index&#39;]);
-      } else {
-        $this-&amp;gt;Flash-&amp;gt;error(&#39;The &amp;lt;%= strtolower($singularHumanName) %&amp;gt; could not be saved. Please, try again.&#39;);
-      }
-    }
-&amp;lt;%
-    $associations = array_merge(
-      $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, &#39;BelongsTo&#39;),
-      $this-&amp;gt;Bake-&amp;gt;aliasExtractor($modelObj, &#39;BelongsToMany&#39;)
-    );
-    foreach ($associations as $assoc):
-      $association = $modelObj-&amp;gt;association($assoc);
-      $otherName = $association-&amp;gt;target()-&amp;gt;alias();
-      $otherPlural = $this-&amp;gt;_variableName($otherName);
-%&amp;gt;
-    $&amp;lt;%= $otherPlural %&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;&amp;lt;%= $otherName %&amp;gt;-&amp;gt;find(&#39;list&#39;);
-&amp;lt;%
-      $compact[] = &quot;&#39;$otherPlural&#39;&quot;;
-    endforeach;
-%&amp;gt;
-    $this-&amp;gt;set(compact(&amp;lt;%= join(&#39;, &#39;, $compact) %&amp;gt;));
-  }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can rebake your UsersController now:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-
-bin/cake bake controller users -f
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We also need a login view template at &lt;code&gt;app/src/Template/Bake/Template/login.ctp&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;&amp;lt;%= $pluralVar %&amp;gt; form&quot;&amp;gt;
-&amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render(&#39;auth&#39;) ?&amp;gt;
-&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
-    &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Please enter your username and password&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;username&#39;) ?&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;) ?&amp;gt;
-    &amp;lt;/fieldset&amp;gt;
-&amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Login&#39;)); ?&amp;gt;
-&amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And we need our &lt;code&gt;app/src/Template/Bake/Template/register.ctp&lt;/code&gt;, which will just call out to the &lt;code&gt;form.ctp&lt;/code&gt; element:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;%
-echo $this-&amp;gt;element(&#39;form&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To create these new views, we can simply use bake. Note that if a bake template does not exist for a given action, a corresponding view template is not created. This means we won’t have an empty &lt;code&gt;app/src/Template/Users/logout.ctp&lt;/code&gt; generated, which is nice.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake view users -f
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When users register themselves, we want to ensure they have correct data in the database. CakePHP exposes Validators for this exact purpose, and we’ll add a custom validator to our &lt;code&gt;UsersTable&lt;/code&gt; to handle this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Validation\Validator;` at the top of your class
-public function validationDefault(Validator $validator) {
-    return $validator
-        -&amp;gt;notEmpty(&#39;username&#39;, &#39;A username is required&#39;)
-        -&amp;gt;notEmpty(&#39;password&#39;, &#39;A password is required&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;We’ll go into Validators in more detail in a future post. For now, just be aware that they exist and can be used on any type of data.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;While we’ve templated out a bunch of stuff, we still need to actually handle login/logout. You can load the AuthComponent in your AppController::initialize() like so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize() {
-    $this-&amp;gt;loadComponent(&#39;Flash&#39;);
-    $this-&amp;gt;loadComponent(&#39;Auth&#39;, [
-        // Where to redirect after a successful login
-        &#39;loginRedirect&#39; =&amp;gt; [
-            &#39;controller&#39; =&amp;gt; &#39;Products&#39;,
-            &#39;action&#39; =&amp;gt; &#39;index&#39;
-        ],
-        // Where to redirect after a user logs out
-        &#39;logoutRedirect&#39; =&amp;gt; [
-            &#39;controller&#39; =&amp;gt; &#39;Products&#39;,
-            &#39;action&#39; =&amp;gt; &#39;index&#39;,
-            &#39;home&#39;
-        ]
-    ]);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In previous CakePHP versions, you would use the beforeFilter, but in the current version, we load behaviors/components/helpers inside of the &lt;code&gt;initialize()&lt;/code&gt; method of a class.&lt;/p&gt;
-
-&lt;p&gt;We also need to allow access to our logout action - as well as let users actually register. In all other actions, we’ll currently allow &lt;em&gt;everything&lt;/em&gt; to happen - and lock this down as we build out the application! We can do so by adding access to those methods from within our &lt;code&gt;AppController::beforeFilter()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Event\Event;` at the top of your class
-public function beforeFilter(Event $event) {
-    parent::beforeFilter($event);
-    if ($this-&amp;gt;request-&amp;gt;controller == &#39;Users&#39;) {
-        $this-&amp;gt;Auth-&amp;gt;allow([&#39;add&#39;, &#39;logout&#39;]);
-    } else {
-        $this-&amp;gt;Auth-&amp;gt;allow();
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;One last thing is that we need to take care of password hashing. Since CakePHP 2, the framework does not automatically hash password fields. This is due to developers getting weird errors with non-user password fields being hashed (or not hashed!) with certain configurations. In CakePHP 3, we can handle this easily by adding a new setter method for the &lt;code&gt;password&lt;/code&gt; field to our &lt;code&gt;app/src/Model/Entity/User.php&lt;/code&gt; entity. Note that setter methods are prefixed by &lt;code&gt;_set&lt;/code&gt; and the field is &lt;code&gt;UpperCamelCase&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Also include `use Cake\Auth\DefaultPasswordHasher;` at the top of your class
-protected function _setPassword($password) {
-    return (new DefaultPasswordHasher)-&amp;gt;hash($password);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And we now have a functioning authentication layer on top of our store application. A couple notes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;We can no longer re-bake our user Entity or Table classes. Boo. A wise developer would crack open new bake templates and add in the appropriate hooks to include traits instead of adding methods, or even switch those methods to bake elements.&lt;/li&gt;
-  &lt;li&gt;It would be useful to create a shell to pre-seed users from random data or custom data. You may guess what the next blog post will concern :)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We’ll cover those over the next few installment of CakeAdvent 2014. Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 11 Dec 2014 18:26:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/11/adding-an-authentication-layer-to-our-cakephp-store/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>composer</category>
         
         
         <category>cakephp</category>

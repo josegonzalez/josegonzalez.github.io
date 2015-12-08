@@ -1,8 +1,22 @@
 [
   {
     "type": "post",
+    "title": "Error Handling in CakePHP 3",
+    "url": "/2015/12/07/error-handling-in-cakephp-3/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","error","hacks","handling","silly","use"]
+  },
+  {
+    "type": "post",
+    "title": "Invoking Callable Classes",
+    "url": "/2015/12/06/invoking-callable-classes/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","callable","can","classes","hacks","invoking","silly","use"]
+  },
+  {
+    "type": "post",
     "title": "Uploading files and images with CakePHP 3",
-    "url": "/2015/12/04/uploading-files-and-images/",
+    "url": "/2015/12/05/uploading-files-and-images/",
     "description": "Silly hacks you can use in your cakephp applications",
     "tokens": ["applications","cakephp","can","files","hacks","images","silly","uploading","use"]
   },
@@ -1360,6 +1374,18 @@
     "title": "images",
     "url": "/tags/images/",
     "tokens": ["images"]
+  },
+  {
+    "type": "tag",
+    "title": "callables",
+    "url": "/tags/callables/",
+    "tokens": ["callables"]
+  },
+  {
+    "type": "tag",
+    "title": "errors",
+    "url": "/tags/errors/",
+    "tokens": ["errors"]
   },
   false
 ]
