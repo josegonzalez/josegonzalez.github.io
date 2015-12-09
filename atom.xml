@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-08T03:14:08+00:00</updated>
+ <updated>2015-12-09T01:24:24+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Debugging Data in CakePHP 3]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/08/debugging-data-in-cakephp-3/"/>
+   <updated>2015-12-08T12:00:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/08/debugging-data-in-cakephp-3/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Error Handling in CakePHP 3]]></title>

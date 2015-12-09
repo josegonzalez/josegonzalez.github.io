@@ -5,9 +5,103 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 08 Dec 2015 03:14:08 +0000</pubDate>
-    <lastBuildDate>Tue, 08 Dec 2015 03:14:08 +0000</lastBuildDate>
+    <pubDate>Wed, 09 Dec 2015 01:24:24 +0000</pubDate>
+    <lastBuildDate>Wed, 09 Dec 2015 01:24:24 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Debugging Data in CakePHP 3</title>
+        <description>&lt;p&gt;Since upgrading to CakePHP 3, you may have noticed a few changes. Yes, it’s faster, better for your cholesterol, and likely good for your Vitamin D intake&lt;sup&gt;&lt;a href=&quot;If you work less because you are working smarter, you are more likely to go outside and get some Sun. Remember to do that every so often!&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;. However, what I’m referring to is the nicer debugging output.&lt;/p&gt;
+
+&lt;p&gt;Typically when you debug an object in PHP, you use something like &lt;code&gt;print_r()&lt;/code&gt; or &lt;code&gt;var_dump()&lt;/code&gt;. With scalar types - &lt;code&gt;int&lt;/code&gt;, &lt;code&gt;float&lt;/code&gt;, &lt;code&gt;string&lt;/code&gt; and &lt;code&gt;bool&lt;/code&gt; - you’ll get a pretty simple representation:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;php &amp;gt; $i = 1;
+php &amp;gt; var_dump($i);
+int(1)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Thats really all you need. But if you try doing the same thing with an object:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;class Person
+{
+  public $name = &#39;Alex Super Tramp&#39;;
+  public $age = 100;
+  private $property = &#39;property&#39;;
+}
+
+// debugging
+php &amp;gt; $p = new Person;
+php &amp;gt; var_dump($p);
+class Person#1 (3) {
+  public $name =&amp;gt;
+  string(16) &quot;Alex Super Tramp&quot;
+  public $age =&amp;gt;
+  int(100)
+  private $property =&amp;gt;
+  string(8) &quot;property&quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You get pretty verbose output on that object. For simple objects, this might not be so bad, but the problem is compounded when you are trying to debug a &lt;code&gt;Table&lt;/code&gt; class, or a &lt;code&gt;Controller&lt;/code&gt; etc. Fortunately, in CakePHP 3 we take advantage of a special magic method, &lt;code&gt;__debugInfo()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;magic-methods-to-the-rescue&quot;&gt;Magic Methods to the rescue&lt;/h2&gt;
+
+&lt;p&gt;Since PHP 5.6, you can add the method &lt;code&gt;__debugInfo()&lt;/code&gt; to any class. When instances of said class are passed through &lt;code&gt;var_dump()&lt;/code&gt;, PHP will automatically use the &lt;code&gt;array&lt;/code&gt; returned by this method to display debug info about that instance.&lt;/p&gt;
+
+&lt;p&gt;If the method is omitted, PHP will fallback to outputting &lt;em&gt;all&lt;/em&gt; properties in that instance. Here is a lovely example of this in action.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;class Person
+{
+  public $name = &#39;Alex Super Tramp&#39;;
+  public $age = 100;
+  private $property = &#39;property&#39;;
+  public function __debugInfo()
+  {
+    return [&#39;name&#39; =&amp;gt; $this-&amp;gt;name];
+  }
+}
+
+// debugging
+php &amp;gt; $p = new Person;
+php &amp;gt; var_dump($p);
+object Person#1 (1) {
+  [&quot;name&quot;] =&amp;gt;
+  string(16) &quot;Alex Super Tramp&quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Fancy, right? Remember, while CakePHP &lt;em&gt;does&lt;/em&gt; support this feature automatically in 5.6, users of older PHP versions will fallback to the old, yucky data dump.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-this-affects-you&quot;&gt;How this affects you&lt;/h2&gt;
+
+&lt;p&gt;There are a few places where &lt;code&gt;__debugInfo()&lt;/code&gt; has been useful:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;Form&lt;/code&gt; instances output metadata about the schema, errors, and validation rules.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;ResultSet&lt;/code&gt; instances output the query that is executed.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;Cell&lt;/code&gt; objects will output the environment in which they were created (view layer as well as the current request/response objects).&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;Entities&lt;/code&gt; will output a plethora of data regarding the current state of the entity. Useful for seeing if the entity is new or has been changed.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You’re also quite welcome to add your own &lt;code&gt;__debugInfo()&lt;/code&gt; methods to custom classes. For those of you who are curious, I definitely recommend looking at the list of &lt;a href=&quot;https://secure.php.net/manual/en/language.oop5.magic.php&quot;&gt;PHP Magic Methods&lt;/a&gt;, which might just be handy&lt;sup&gt;&lt;a href=&quot;My current favorite magic method is the `__invoke()` method :)&quot;&gt;2&lt;/a&gt;&lt;/sup&gt; in a pinch!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+</description>
+        <pubDate>Tue, 08 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/08/debugging-data-in-cakephp-3/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/08/debugging-data-in-cakephp-3/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>magic methods</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Error Handling in CakePHP 3</title>
@@ -1342,332 +1436,6 @@ bin/cake bake view orders -f
         <category>payments</category>
         
         <category>stripe</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Building a user cart system in CakePHP</title>
-        <description>&lt;p&gt;Today’s post will be fairly straightforward. We should now have dummy data in our application, can browse products, and authenticate as users to actually start using our store. So lets allow people to add items to their carts.&lt;/p&gt;
-
-&lt;p&gt;First thing we’ll need is to customize the methods available to the Products controller. We already have a bake event in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;, so we’ll add the following bit of code to limit the actions (as well as add two new ones);&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == &#39;Products&#39;) {
-    $view-&amp;gt;viewVars[&#39;actions&#39;] = [&#39;index&#39;, &#39;view&#39;, &#39;add&#39;, &#39;addToCart&#39;, &#39;removeFromCart&#39;];
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll create two new bake controller elements in our &lt;code&gt;src/Template/Bake/Element/Controller&lt;/code&gt; directory. One will be our &lt;code&gt;addToCart.ctp&lt;/code&gt; file, and the other will be &lt;code&gt;removeFromCart.ctp&lt;/code&gt;. This is our &lt;code&gt;addToCart.ctp&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;/**
- * Add to cart method
- *
- * @param string|null $id &amp;lt;%= $singularHumanName %&amp;gt; id
- * @return void
- * @throws \Cake\Network\Exception\NotFoundException
- */
-    public function addToCart($id = null) {
-        $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;get($id);
-        $event = new \Cake\Event\Event(&#39;Order.addToCart&#39;, $this, [
-            &#39;&amp;lt;%= $singularName%&amp;gt;&#39; =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;,
-            &#39;user&#39; =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
-        ]);
-        \Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
-        if ($event-&amp;gt;result) {
-            $this-&amp;gt;Flash-&amp;gt;success(&#39;The &amp;lt;%= $singularName%&amp;gt; has been added to your cart.&#39;);
-        } else {
-            $this-&amp;gt;Flash-&amp;gt;error(&#39;The &amp;lt;%= $singularName%&amp;gt; could not be added to your cart.&#39;);
-        }
-        return $this-&amp;gt;redirect($this-&amp;gt;referer());
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here is our &lt;code&gt;removeFromCart.ctp&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;/**
- * Remove from cart method
- *
- * @param string|null $id &amp;lt;%= $singularHumanName %&amp;gt; id
- * @return void
- * @throws \Cake\Network\Exception\NotFoundException
- */
-    public function removeFromCart($id = null) {
-        $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;get($id);
-        $event = new \Cake\Event\Event(&#39;Order.removeFromCart&#39;, $this, [
-            &#39;&amp;lt;%= $singularName%&amp;gt;&#39; =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;,
-            &#39;user&#39; =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
-        ]);
-        \Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
-        if ($event-&amp;gt;result) {
-            $this-&amp;gt;Flash-&amp;gt;success(&#39;The &amp;lt;%= $singularName%&amp;gt; has been removed from your cart.&#39;);
-        } else {
-            $this-&amp;gt;Flash-&amp;gt;error(&#39;The &amp;lt;%= $singularName%&amp;gt; could not be removed from your cart.&#39;);
-        }
-        return $this-&amp;gt;redirect($this-&amp;gt;referer());
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A few notes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;We’re using events to add and remove items from our cart. Some people would call table/entity methods directly, but we’re doing this to keep our actions flexible.&lt;/li&gt;
-  &lt;li&gt;We use the &lt;code&gt;Table::get()&lt;/code&gt; method which may return a &lt;code&gt;NotFoundException&lt;/code&gt;. If a user tries to add an invalid product to their cart, we should signal such using the Application’s configured Error Handler.&lt;/li&gt;
-  &lt;li&gt;We aren’t handling adding multiple of the same product to our cart just yet. If you’d like to, please modify your templates, but we’re keeping our cart simple.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We now need to add one of these actions to our &lt;code&gt;/products/index&lt;/code&gt; page. We’ll need to first copy over the core &lt;code&gt;index.ctp&lt;/code&gt; so we can modify it a bit:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;TEMPLATE_DIR=&quot;src/Template/Bake/&quot;
-BAKE_TEMPLATE_DIR=&quot;vendor/cakephp/cakephp/src/Template/Bake/&quot;
-cd /vagrant/app
-cp $BAKE_TEMPLATE_DIR/Template/index.ctp $TEMPLATE_DIR/Template/index.ctp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Our new &lt;code&gt;src/Template/Bake/Template/index.ctp&lt;/code&gt; does not take a list of related actions to perform on an item, so we’re going to add this. Around line 86, you’ll see a chunk of code that looks like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;td class=&quot;actions&quot;&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;View&#39;), [&#39;action&#39; =&amp;gt; &#39;view&#39;, &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;Edit&#39;), [&#39;action&#39; =&amp;gt; &#39;edit&#39;, &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;postLink(__(&#39;Delete&#39;), [&#39;action&#39; =&amp;gt; &#39;delete&#39;, &amp;lt;%= $pk %&amp;gt;], [&#39;confirm&#39; =&amp;gt; __(&#39;Are you sure you want to delete # {0}?&#39;, &amp;lt;%= $pk %&amp;gt;)]) ?&amp;gt;
-&amp;lt;/td&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’re going to replace it with the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;td class=&quot;actions&quot;&amp;gt;
-    &amp;lt;% foreach ($singularActions as $config) : %&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;&amp;lt;%= $config[&#39;title&#39;] %&amp;gt;&#39;), [&#39;action&#39; =&amp;gt; &#39;&amp;lt;%= $config[&#39;action&#39;] %&amp;gt;&#39;, &amp;lt;%= $pk %&amp;gt;]) ?&amp;gt;
-    &amp;lt;% endforeach; %&amp;gt;
-    &amp;lt;% foreach ($singularConfirmActions as $config) : %&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;postLink(__(&#39;&amp;lt;%= $config[&#39;title&#39;] %&amp;gt;&#39;), [&#39;action&#39; =&amp;gt; &#39;&amp;lt;%= $config[&#39;action&#39;] %&amp;gt;&#39;, &amp;lt;%= $pk %&amp;gt;], [&#39;confirm&#39; =&amp;gt; __(&#39;&amp;lt;%= $config[&#39;message&#39;] %&amp;gt;&#39;, &amp;lt;%= $pk %&amp;gt;)) ?&amp;gt;
-    &amp;lt;% endforeach; %&amp;gt;
-&amp;lt;/td&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In the modified template, we’re removing the hardcoded list of actions displayed and introducing two new variables, &lt;code&gt;singularActions&lt;/code&gt; and &lt;code&gt;singularConfirmActions&lt;/code&gt;. These will act upon a single item listed on the index page. We’ll configure them in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt; with the following new event:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
-    $view = $event-&amp;gt;subject;
-    $name = Hash::get($view-&amp;gt;viewVars, &#39;pluralHumanName&#39;);
-    $isIndexView = strpos($event-&amp;gt;data[0], &#39;Bake/Template/index.ctp&#39;) !== false;
-    if ($isIndexView) {
-        $singularActions = [
-            [&#39;action&#39; =&amp;gt; &#39;view&#39;, &#39;title&#39; =&amp;gt; &#39;View&#39;],
-            [&#39;action&#39; =&amp;gt; &#39;edit&#39;, &#39;title&#39; =&amp;gt; &#39;Edit&#39;],
-        ];
-        $singularConfirmActions = [
-            [&#39;action&#39; =&amp;gt; &#39;delete&#39;, &#39;title&#39; =&amp;gt; &#39;Delete&#39;, &#39;message&#39; =&amp;gt; &#39;Are you sure you want to delete # {0}?&#39;],
-        ];
-        if ($name == &#39;Products&#39;) {
-            $singularActions = [
-                [&#39;action&#39; =&amp;gt; &#39;view&#39;, &#39;title&#39; =&amp;gt; &#39;View&#39;],
-                [&#39;action&#39; =&amp;gt; &#39;addToCart&#39;, &#39;title&#39; =&amp;gt; &#39;Add To Cart&#39;],
-            ];
-            $singularConfirmActions = [];
-        }
-        $view-&amp;gt;viewVars[&#39;singularActions&#39;] = $singularActions;
-        $view-&amp;gt;viewVars[&#39;singularConfirmActions&#39;] = $singularConfirmActions;
-    }
-}, &#39;Bake.beforeRender&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above event will allow us to keep all other baked &lt;code&gt;index.ctp&lt;/code&gt; template output the same, while allowing us to hijack the actions listed for the &lt;code&gt;Products&lt;/code&gt; view to show our &lt;code&gt;Add To Cart&lt;/code&gt; link.&lt;/p&gt;
-
-&lt;p&gt;Finally, we will need to actually handle processing of our events. We’ll create an &lt;code&gt;app/config/events.php&lt;/code&gt; and include it on our &lt;code&gt;app/config/bootstrap.php&lt;/code&gt; like so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;require __DIR__ . &#39;/events.php&#39;;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We need two events, one to manage adding a product to the user’s cart, and one to manage removing the product from a user’s cart. We’ll have the user’s session at hand, as well as the product entity. Here is what our &lt;code&gt;Order.addToCart&lt;/code&gt; event will look like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
-    $data = $event-&amp;gt;data;
-    if (empty($data[&#39;user&#39;])) {
-        // User is not logged in
-        return $event-&amp;gt;result = false;
-    }
-    if (empty($data[&#39;product&#39;])) {
-        // Invalid product specified
-        return $event-&amp;gt;result = false;
-    }
-    $user = $data[&#39;user&#39;];
-    $product = $data[&#39;product&#39;];
-    if ($product-&amp;gt;stock &amp;lt;= 0) {
-        // No more stock for product
-        return $event-&amp;gt;result = false;
-    }
-    $Orders = TableRegistry::get(&#39;Orders&#39;);
-    $order = $Orders-&amp;gt;find()
-                    -&amp;gt;where([&#39;user_id&#39; =&amp;gt; $user[&#39;id&#39;]])
-                    -&amp;gt;first();
-    if (empty($order)) {
-        // Create a new order where necessary
-        $order = $Orders-&amp;gt;newEntity([&#39;user_id&#39; =&amp;gt; $user[&#39;id&#39;]]);
-        $order = $Orders-&amp;gt;save($order);
-    }
-    $OrderItems = TableRegistry::get(&#39;OrderItems&#39;);
-    $orderItem = $OrderItems-&amp;gt;newEntity([
-        &#39;order_id&#39; =&amp;gt; $order-&amp;gt;id,
-        &#39;product_id&#39; =&amp;gt; $product-&amp;gt;id,
-        &#39;quantity&#39; =&amp;gt; 1,
-        &#39;price&#39; =&amp;gt; $product-&amp;gt;price,
-    ]);
-    // Save the order item entry
-    if (!$OrderItems-&amp;gt;save($orderItem)) {
-        return $event-&amp;gt;result = false;
-    }
-    // Decrease the amount of stock
-    $Products = TableRegistry::get(&#39;Products&#39;);
-    $product-&amp;gt;stock--;
-    return $event-&amp;gt;result = !!$Products-&amp;gt;save($product);
-}, &#39;Order.addToCart&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And our equally-well commented &lt;code&gt;Order.removeFromCart&lt;/code&gt; event:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;EventManager::instance()-&amp;gt;attach(function (Event $event) {
-    $data = $event-&amp;gt;data;
-    if (empty($data[&#39;user&#39;])) {
-        // User is not logged in
-        return $event-&amp;gt;result = false;
-    }
-    if (empty($data[&#39;product&#39;])) {
-        // Invalid product specified
-        return $event-&amp;gt;result = false;
-    }
-    $user = $data[&#39;user&#39;];
-    $product = $data[&#39;product&#39;];
-    $Orders = TableRegistry::get(&#39;Orders&#39;);
-    $order = $Orders-&amp;gt;find()
-                    -&amp;gt;where([&#39;user_id&#39; =&amp;gt; $user[&#39;id&#39;]])
-                    -&amp;gt;first();
-    if (empty($order)) {
-        // There is no cart associated with the user
-        return $event-&amp;gt;result = false;
-    }
-    $OrderItems = TableRegistry::get(&#39;OrderItems&#39;);
-    $orderItem = $OrderItems-&amp;gt;find()
-                            -&amp;gt;where([&#39;order_id&#39; =&amp;gt; $order-&amp;gt;id, &#39;product_id&#39; =&amp;gt; $product-&amp;gt;id])
-                            -&amp;gt;first();
-    if (empty($orderItem)) {
-        // Item not in user&#39;s cart
-        return $event-&amp;gt;result = false;
-    }
-    if (!$OrderItems-&amp;gt;delete($orderItem)) {
-        // Unable to remove item from cart
-        return $event-&amp;gt;result = false;
-    }
-    // Increase product stock
-    $Products = TableRegistry::get(&#39;Products&#39;);
-    $product-&amp;gt;stock++;
-    return $event-&amp;gt;result = !!$Products-&amp;gt;save($product);
-}, &#39;Order.removeFromCart&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A real ecommerce solution will have much more stringent protocols surrounding adding/removing stock from a product. We’re doing it this way because it’s much simpler than going through the rabbit-hole, but please keep this in mind if you are building out your own solution for a customer. For instance, consider doing all table manipulation using a transaction.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;One last thing. We’ll want a new action to list all the items in a user’s order, as well as a way to actually call our &lt;code&gt;/products/removeFromCart&lt;/code&gt; action. We’ll define a new Controller bake template in &lt;code&gt;src/Template/Bake/Element/Controller/cart.ctp&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;/**
- * Cart method
- *
- * @return void
- */
-    public function cart() {
-        $user_id = $this-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
-        $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;find()
-                        -&amp;gt;where([&#39;user_id&#39; =&amp;gt; $user_id])
-                        -&amp;gt;first();
-        if (empty($&amp;lt;%= $singularName%&amp;gt;)) {
-            $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;newEntity([&#39;user_id&#39; =&amp;gt; $user_id]);
-            $&amp;lt;%= $singularName%&amp;gt; = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;save($&amp;lt;%= $singularName%&amp;gt;);
-        }
-        $items = $this-&amp;gt;&amp;lt;%= $currentModelName %&amp;gt;-&amp;gt;OrderItems-&amp;gt;find()
-                                  -&amp;gt;where([&#39;order_id&#39; =&amp;gt; $&amp;lt;%= $singularName%&amp;gt;-&amp;gt;id])
-                                  -&amp;gt;contain([&#39;Products&#39;])
-                                  -&amp;gt;all();
-        $this-&amp;gt;set(compact(&#39;&amp;lt;%= $singularName%&amp;gt;&#39;, &#39;items&#39;));
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And we’ll restrict our &lt;code&gt;Orders&lt;/code&gt; controller to just this action in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt; with the following check:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == &#39;Orders&#39;) {
-    $view-&amp;gt;viewVars[&#39;actions&#39;] = [&#39;cart&#39;];
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And our simple &lt;code&gt;src/Template/Bake/Template/cart.ctp&lt;/code&gt; will be the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;div class=&quot;orders index large-10 medium-9 columns&quot;&amp;gt;
-    &amp;lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&amp;gt;
-        &amp;lt;thead&amp;gt;
-            &amp;lt;tr&amp;gt;
-                &amp;lt;th&amp;gt;Name&amp;lt;/th&amp;gt;
-                &amp;lt;th&amp;gt;Quantity&amp;lt;/th&amp;gt;
-                &amp;lt;th&amp;gt;Price&amp;lt;/th&amp;gt;
-                &amp;lt;th&amp;gt;Actions&amp;lt;/th&amp;gt;
-            &amp;lt;/tr&amp;gt;
-        &amp;lt;/thead&amp;gt;
-        &amp;lt;tbody&amp;gt;
-            &amp;lt;?php foreach ($items as $item) : ?&amp;gt;
-            &amp;lt;tr&amp;gt;
-                &amp;lt;td&amp;gt;&amp;lt;?= $item-&amp;gt;product-&amp;gt;name ?&amp;gt;&amp;lt;/td&amp;gt;
-                &amp;lt;td&amp;gt;&amp;lt;?= $item-&amp;gt;quantity ?&amp;gt;&amp;lt;/td&amp;gt;
-                &amp;lt;td&amp;gt;&amp;lt;?= $item-&amp;gt;price ?&amp;gt;&amp;lt;/td&amp;gt;
-                &amp;lt;td&amp;gt;
-                    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;View&#39;), [&#39;controller&#39; =&amp;gt; &#39;Products&#39;, &#39;action&#39; =&amp;gt; &#39;view&#39;, $item-&amp;gt;product_id]) ?&amp;gt;
-                    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(__(&#39;Remove from Cart&#39;), [&#39;controller&#39; =&amp;gt; &#39;Products&#39;, &#39;action&#39; =&amp;gt; &#39;removeFromCart&#39;, $item-&amp;gt;product_id]) ?&amp;gt;
-                &amp;lt;/td&amp;gt;
-            &amp;lt;/tr&amp;gt;
-            &amp;lt;?php endforeach; ?&amp;gt;
-        &amp;lt;/tbody&amp;gt;
-    &amp;lt;/table&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can &lt;em&gt;now&lt;/em&gt; run bake to recreate the respective controllers and templates and we should have a reasonable cart system!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-bin/cake bake controller orders -f
-bin/cake bake controller products -f
-bin/cake bake view orders -f
-bin/cake bake view products -f
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can access your cart by going to &lt;code&gt;/orders/cart&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time&lt;/h2&gt;
-
-&lt;p&gt;Your homework today is as follows:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Remove all those extra pesky actions on the index page&lt;/li&gt;
-  &lt;li&gt;Add a button to add products to your cart from the product view page&lt;/li&gt;
-  &lt;li&gt;Link to the cart in your header (checkout your &lt;code&gt;src/Template/Layout/default.ctp&lt;/code&gt;)&lt;/li&gt;
-  &lt;li&gt;Add a custom route for &lt;code&gt;/orders/cart&lt;/code&gt; to be &lt;code&gt;/cart&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Add a &lt;code&gt;total&lt;/code&gt; to your cart page.&lt;/li&gt;
-  &lt;li&gt;Require that user’s be authenticated before adding/removing/viewing their cart&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-
-</description>
-        <pubDate>Sat, 13 Dec 2014 17:26:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/13/building-a-user-cart-system-in-cakephp/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>composer</category>
-        
-        <category>cart management</category>
         
         
         <category>cakephp</category>

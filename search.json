@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Debugging Data in CakePHP 3",
+    "url": "/2015/12/08/debugging-data-in-cakephp-3/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","data","debugging","hacks","silly","use"]
+  },
+  {
+    "type": "post",
     "title": "Error Handling in CakePHP 3",
     "url": "/2015/12/07/error-handling-in-cakephp-3/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1386,6 +1393,12 @@
     "title": "errors",
     "url": "/tags/errors/",
     "tokens": ["errors"]
+  },
+  {
+    "type": "tag",
+    "title": "magic methods",
+    "url": "/tags/magic-methods/",
+    "tokens": ["magic","methods"]
   },
   false
 ]

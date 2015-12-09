@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: Error Handling in CakePHP 3</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/">
+    <title>CakeAdvent-2015: Debugging Data in CakePHP 3</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/08/debugging-data-in-cakephp-3/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
-    <meta name="keywords" content="cakeadvent-2015, cakephp, errors, exceptions" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, magic-methods" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: Error Handling in CakePHP 3" />
+    <meta property="og:title" content="CakeAdvent-2015: Debugging Data in CakePHP 3" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/08/debugging-data-in-cakephp-3/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: Error Handling in CakePHP 3" />
+    <meta name="twitter:title" content="CakeAdvent-2015: Debugging Data in CakePHP 3" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="Error Handling in CakePHP 3 » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Debugging Data in CakePHP 3 » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,121 +64,76 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Error Handling in CakePHP 3
+        Debugging Data in CakePHP 3
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Error Handling in CakePHP 3!">
+        <a href="#comments" title="Comment on Debugging Data in CakePHP 3!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>In CakePHP, you can attach custom error and exception handlers. The default one displays a stack trace in debug mode, and a set of http errors when debug is off. That’s nice and all, but sometimes you need to know when your users are encountering errors, and since you aren’t psychic, we need to store those somewhere. Thankfully, there are quite a few services that allow us to track bugs:</p>
-<ul>
-  <li><a href="https://airbrake.io/">Airbrake</a></li>
-  <li><a href="https://bugsnag.com/">Bugsnag</a></li>
-  <li><a href="https://getsentry.com/welcome/">Sentry</a></li>
-  <li><a href="https://opbeat.com/">Opbeat</a></li>
-  <li>etc.</li>
-</ul>
-<p>One annoying thing about error/exception handling in CakePHP is needing to attach two handlers:</p>
-<pre><code class="language-php">// in your config/bootstrap.php
-$isCli = php_sapi_name() === 'cli';
-if ($isCli) {
-    (new ConsoleErrorHandler(Configure::consume('Error')))-&gt;register();
-} else {
-    (new ErrorHandler(Configure::consume('Error')))-&gt;register();
-}
+    <p>Since upgrading to CakePHP 3, you may have noticed a few changes. Yes, it’s faster, better for your cholesterol, and likely good for your Vitamin D intake<sup><a href="If you work less because you are working smarter, you are more likely to go outside and get some Sun. Remember to do that every so often!">1</a></sup>. However, what I’m referring to is the nicer debugging output.</p>
+<p>Typically when you debug an object in PHP, you use something like <code>print_r()</code> or <code>var_dump()</code>. With scalar types - <code>int</code>, <code>float</code>, <code>string</code> and <code>bool</code> - you’ll get a pretty simple representation:</p>
+<pre><code class="language-php">php &gt; $i = 1;
+php &gt; var_dump($i);
+int(1)
 </code></pre>
-<ul>
-  <li><code>ConsoleErrorHandler</code>: For cli-based exceptions</li>
-  <li><code>ErrorHandler</code>: For web-based exceptions</li>
-</ul>
-<p>This is necessary as the exception handler needs to render the exception information differently; the web error handler might want to use json for responses, or show an html message with an interactive stacktrace.</p>
-<p>You <em>also</em> have to have two methods in your handlers:</p>
-<ul>
-  <li><code>handleError</code>: For PHP Errors. PHP 7 does some <a href="https://secure.php.net/manual/en/language.errors.php7.php">magic</a> to make these catchable, so perhaps this one will go away someday.</li>
-  <li><code>handleException</code>: For thrown Exception instances.</li>
-</ul>
-<p>Rather than implement all error handling logic twice, we’ll go the trait-based route.</p>
-<h2 id="traits">Traits</h2>
-<p>Traits are composable units of behavior. They are similar to CakePHP Behaviors, though built into the PHP Core. They come in handy for exception handling in CakePHP as it becomes easy to implement the core logic of capturing an exception and just using that in multiple classes.</p>
-<p>Below is a trait for the <code>Bugsnag</code> service:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\Error\Bugsnag;
-use Bugsnag_Client;
-use Cake\Core\Configure;
-use Exception;
-trait BugsnagTrait
+<p>Thats really all you need. But if you try doing the same thing with an object:</p>
+<pre><code class="language-php">class Person
 {
-    public function handleError($code, $description, $file = null, $line = null, $context = null)
-    {
-        $client = $this-&gt;client();
-        if ($client) {
-            $client-&gt;errorHandler($code, $description, $file, $line);
-        }
-        return parent::handleError($code, $description, $file, $line, $context);
-    }
-    public function handleException(Exception $exception)
-    {
-        $client = $this-&gt;client();
-        if ($client) {
-            $client-&gt;notifyException($exception);
-        }
-        return parent::handleException($exception);
-    }
-    protected function client()
-    {
-        $apiKey = Configure::read('Bugsnag.apiKey');
-        if (!$apiKey &amp;&amp; defined('BUGSNAG_API_KEY')) {
-            $apiKey = BUGSNAG_API_KEY;
-        }
-        if (!$apiKey) {
-            return null;
-        }
-        $client = null;
-        if ($apiKey) {
-            $client = new Bugsnag_Client($apiKey);
-            $config = Configure::read('Bugsnag.config');
-            foreach ($config as $key =&gt; $value) {
-                if (method_exists($client, $key)) {
-                    $client-&gt;$key($value);
-                }
-            }
-        }
-        return $client;
-    }
+  public $name = 'Alex Super Tramp';
+  public $age = 100;
+  private $property = 'property';
 }
-?&gt;
+// debugging
+php &gt; $p = new Person;
+php &gt; var_dump($p);
+class Person#1 (3) {
+  public $name =&gt;
+  string(16) "Alex Super Tramp"
+  public $age =&gt;
+  int(100)
+  private $property =&gt;
+  string(8) "property"
+}
 </code></pre>
-<p>And here is what my <code>ErrorHandler</code> looks like:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\Error\Bugsnag;
-use App\Error\Bugsnag\BugsnagTrait;
-use Cake\Error\ErrorHandler as CoreErrorHandler;
-class ErrorHandler extends CoreErrorHandler
+<p>You get pretty verbose output on that object. For simple objects, this might not be so bad, but the problem is compounded when you are trying to debug a <code>Table</code> class, or a <code>Controller</code> etc. Fortunately, in CakePHP 3 we take advantage of a special magic method, <code>__debugInfo()</code>.</p>
+<h2 id="magic-methods-to-the-rescue">Magic Methods to the rescue</h2>
+<p>Since PHP 5.6, you can add the method <code>__debugInfo()</code> to any class. When instances of said class are passed through <code>var_dump()</code>, PHP will automatically use the <code>array</code> returned by this method to display debug info about that instance.</p>
+<p>If the method is omitted, PHP will fallback to outputting <em>all</em> properties in that instance. Here is a lovely example of this in action.</p>
+<pre><code class="language-php">class Person
 {
-    use BugsnagTrait;
+  public $name = 'Alex Super Tramp';
+  public $age = 100;
+  private $property = 'property';
+  public function __debugInfo()
+  {
+    return ['name' =&gt; $this-&gt;name];
+  }
 }
-?&gt;
-</code></pre>
-<p>Notice how the <code>ErrorHandler</code> class itself is devoid of any “real” logic? I’ve pushed all the heavy-lifting into the trait and then just ensured my <code>ErrorHandler</code> extends the CakePHP core <code>ErrorHandler</code>. Similarly, my <code>ConsoleErrorHandler</code> is quite empty as well:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\Error\Bugsnag;
-use App\Error\Bugsnag\BugsnagTrait;
-use Cake\Console\ConsoleErrorHandler as CoreConsoleErrorHandler;
-class ConsoleErrorHandler extends CoreConsoleErrorHandler
-{
-    use BugsnagTrait;
+// debugging
+php &gt; $p = new Person;
+php &gt; var_dump($p);
+object Person#1 (1) {
+  ["name"] =&gt;
+  string(16) "Alex Super Tramp"
 }
-?&gt;
 </code></pre>
-<h2 id="homework-time">Homework time</h2>
-<p>While the logic I implemented is fairly easy to understand, it may also not give the full picture around the exception. For instance, many error collection services provide the ability to add extra metadata to an error, such as the user that was signed in, or client information such as operating system version. <code>ExceptionRenderer</code> instances can have access to this information using their <code>_getController</code> methods, and it wouldn’t be too much work to copy that logic into your <code>ErrorHandler</code> to add extra metadata to the request.</p>
-<p>I recommend customizing the error handler to fit your needs - adding metadata, or perhaps using a different service - and seeing what helps you find, replicate, and fix bugs your automated testing didn’t catch.</p>
+<p>Fancy, right? Remember, while CakePHP <em>does</em> support this feature automatically in 5.6, users of older PHP versions will fallback to the old, yucky data dump.</p>
+<h2 id="how-this-affects-you">How this affects you</h2>
+<p>There are a few places where <code>__debugInfo()</code> has been useful:</p>
+<ul>
+  <li><code>Form</code> instances output metadata about the schema, errors, and validation rules.</li>
+  <li><code>ResultSet</code> instances output the query that is executed.</li>
+  <li><code>Cell</code> objects will output the environment in which they were created (view layer as well as the current request/response objects).</li>
+  <li><code>Entities</code> will output a plethora of data regarding the current state of the entity. Useful for seeing if the entity is new or has been changed.</li>
+</ul>
+<p>You’re also quite welcome to add your own <code>__debugInfo()</code> methods to custom classes. For those of you who are curious, I definitely recommend looking at the list of <a href="https://secure.php.net/manual/en/language.oop5.magic.php">PHP Magic Methods</a>, which might just be handy<sup><a href="My current favorite magic method is the `__invoke()` method :)">2</a></sup> in a pinch!</p>
+<hr />
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-07 12:00:00 +0000">07 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/08/debugging-data-in-cakephp-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-08 12:00:00 +0000">08 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -199,7 +154,7 @@ class ConsoleErrorHandler extends CoreConsoleErrorHandler
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 7</strong> of <strong>8</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 8</strong> of <strong>8</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
       <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
@@ -207,8 +162,8 @@ class ConsoleErrorHandler extends CoreConsoleErrorHandler
       <li><a href="/2015/12/04/whats-in-an-entity/">What exactly belongs in an entity?</a></li>
       <li><a href="/2015/12/05/uploading-files-and-images/">Uploading files and images with CakePHP 3</a></li>
       <li><a href="/2015/12/06/invoking-callable-classes/">Invoking Callable Classes</a></li>
-      <li>Error Handling in CakePHP 3</li>
-      <li><a href="/2015/12/08/debugging-data-in-cakephp-3/">Debugging Data in CakePHP 3</a></li>
+      <li><a href="/2015/12/07/error-handling-in-cakephp-3/">Error Handling in CakePHP 3</a></li>
+      <li>Debugging Data in CakePHP 3</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -247,9 +202,9 @@ class ConsoleErrorHandler extends CoreConsoleErrorHandler
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/07/error-handling-in-cakephp-3/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/';
-        var disqus_title      = "CakeAdvent-2015: Error Handling in CakePHP 3";
+        var disqus_identifier = '/2015/12/08/debugging-data-in-cakephp-3/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/08/debugging-data-in-cakephp-3/';
+        var disqus_title      = "CakeAdvent-2015: Debugging Data in CakePHP 3";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
