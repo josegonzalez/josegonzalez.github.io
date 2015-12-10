@@ -5,9 +5,86 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 09 Dec 2015 01:26:29 +0000</pubDate>
-    <lastBuildDate>Wed, 09 Dec 2015 01:26:29 +0000</lastBuildDate>
+    <pubDate>Thu, 10 Dec 2015 02:06:11 +0000</pubDate>
+    <lastBuildDate>Thu, 10 Dec 2015 02:06:11 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Customizing your Application Template</title>
+        <description>&lt;p&gt;CakePHP has long had the ability to generate new projects via the &lt;code&gt;bake&lt;/code&gt; command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;// my custom cat project
+cake bake project camila
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;With the above command, CakePHP would scaffold out all the necessary directories and files for a new project (&lt;code&gt;AppModel&lt;/code&gt;, &lt;code&gt;AppController&lt;/code&gt;, configuration files, etc.). You could even customize this using a &lt;a href=&quot;http://book.cakephp.org/2.0/en/console-and-shells/code-generation-with-bake.html#for-baking-custom-projects&quot;&gt;bake skeleton&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;// be sure to copy in my cat project instead
+cake bake project camila --skel Console/Templates/cat
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In CakePHP 3, this feature of bake has mostly gone away in favor of using &lt;code&gt;composer&lt;/code&gt; to handle scaffolding. When starting a new project, you typically do something like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --prefer-dist cakephp/app camila
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Composer’s &lt;code&gt;create-project&lt;/code&gt; command is great for scaffolding out new projects and is used for a variety of things:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Framework-specific application repos&lt;/li&gt;
+  &lt;li&gt;Framework-specific plugin modules&lt;/li&gt;
+  &lt;li&gt;Generic composer packages&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The great thing about this command is that the “skeletons” are in all actually composer packages. This means it is extremely easy to use your normal distribution methods to release new versions of the package, something the CakePHP project has done with it’s &lt;a href=&quot;https://github.com/cakephp/app&quot;&gt;cakephp/app&lt;/a&gt; repository.&lt;/p&gt;
+
+&lt;p&gt;Now, as a side-effect of this, you can &lt;em&gt;*also*&lt;/em&gt; fork any existing composer skeleton and add your own customizations. For instance, lets say we wanted to have a composer skeleton with the following plugins installed automatically:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/josegonzalez/cakephp-upload&quot;&gt;josegonzalez/upload&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/friendsofcake/crud&quot;&gt;friendsofcake/crud&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/friendsofcake/crud-view&quot;&gt;friendsofcake/crud-view&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/thephpleague/fractal&quot;&gt;league/fractal&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/usemuffin/trash&quot;&gt;usemuffin/trash&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We can simply do the following:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Fork the &lt;a href=&quot;https://github.com/cakephp/app&quot;&gt;cakephp/app&lt;/a&gt; repository on github.&lt;/li&gt;
+  &lt;li&gt;Change the name in the fork’s composer.json to &lt;code&gt;myname/app&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Add any custom requirements to the &lt;code&gt;composer.json&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Make a new tag/release on github.&lt;/li&gt;
+  &lt;li&gt;Add it to &lt;a href=&quot;https://packagist.org&quot;&gt;packagist.org&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Pretty simple. We can now use this project as a baseline for all of our new CakePHP projects:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --prefer-dist myname/app camila
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Apart from adding custom plugins, one thing you may want to look is customizing the initial project files. For instance, if you find yourself constantly adding certain helper classes, or modifying how configuration is loaded, this is a good chance to improve the base state of your initial applications.&lt;/p&gt;
+
+&lt;p&gt;As every project is slightly different, please try and keep application-specific enhancements to a minimum, as they may only serve as a hindrance when using your skeleton. No one wants to setup an app and then spend an hour deleting useless code :)&lt;/p&gt;
+
+&lt;p&gt;For those of you who are interested in such a project, &lt;a href=&quot;https://github.com/loadsys/CakePHP-Skeleton&quot;&gt;here is an advanced skeleton&lt;/a&gt; from the good folks at &lt;a href=&quot;https://www.loadsys.com/&quot;&gt;Loadsys Web Strategies&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 09 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>composer</category>
+        
+        <category>create-project</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Debugging Data in CakePHP 3</title>
@@ -1259,183 +1336,6 @@ EventManager::instance()-&amp;gt;attach(function (Event $event) {
         <category>email</category>
         
         <category>templates</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Processing Payments with CakePHP 3 and Omnipay</title>
-        <description>&lt;p&gt;Today we’ll actually process a charge from our user - because making money is nice.&lt;/p&gt;
-
-&lt;p&gt;As good PHP citizens, the CakePHP community does not re-implement existing libraries in the 3.x release - CakeTime with Carbon and the Migrations plugin with Phinx are good examples.&lt;/p&gt;
-
-&lt;p&gt;Given the CakePHP philosophy, we’ll use the Omnipay library. Omnipay provides a single interface for each payment processor, allowing developers to create a process that works best for their developers.&lt;/p&gt;
-
-&lt;p&gt;First, you’ll want to install Omnipay. We’ll be using stripe to process transactions, so install the omnipay adapter for that as well:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require omnipay/omnipay
-composer require omnipay/stripe
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We need to also configure our stripe integration in our &lt;code&gt;app/config/app.php&lt;/code&gt; file. We’ll simply add our Stripe’s &lt;code&gt;api_key&lt;/code&gt; - found &lt;a href=&quot;https://dashboard.stripe.com/account/apikeys&quot;&gt;here&lt;/a&gt; - as so to the array:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    &#39;Stripe&#39; =&amp;gt; [
-        // using the test keyS for now
-        &#39;secret_key&#39; =&amp;gt; &#39;sk_test_SOME_KEY&#39;,
-        &#39;publishable_key&#39; =&amp;gt; &#39;pk_test_SOME_KEY&#39;,
-    ],
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll create a new action in our &lt;code&gt;orders&lt;/code&gt; page called &lt;code&gt;checkout&lt;/code&gt;. We’ll use bake again so that we can continue to add new actions without modifying the files themselves. Here is what our action - located in &lt;code&gt;src/Template/Bake/Element/Controller/checkout.ctp&lt;/code&gt; - will look like (see inline comments for details):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;/**
- * Checkout method
- *
- * @return void
- */
-    public function checkout() {
-        // Find the existing order
-        $user_id = $this-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
-        $order = $this-&amp;gt;Orders-&amp;gt;find()
-                        -&amp;gt;where([&#39;user_id&#39; =&amp;gt; $user_id])
-                        -&amp;gt;contain([&#39;OrderItems&#39;])
-                        -&amp;gt;first();
-        // Redirect back to the cart if there is no order or any order items
-        if (empty($order) || empty($order-&amp;gt;order_items)) {
-            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;No items in cart&#39;));
-            return $this-&amp;gt;redirect([&#39;action&#39; =&amp;gt; &#39;cart&#39;]);
-        }
-        $amount = array_reduce($order-&amp;gt;order_items, function ($carry, $item) {
-            return $carry + $item-&amp;gt;price;
-        }, 0);
-        $this-&amp;gt;set(compact(&#39;order&#39;, &#39;amount&#39;));
-        if (!$this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
-            return;
-        }
-        // Create an Omnipay Stripe gateway object and configure it
-        $gateway = \Omnipay\Omnipay::create(&#39;Stripe&#39;);
-        $gateway-&amp;gt;setApiKey(\Cake\Core\Configure::read(&#39;Stripe.secret_key&#39;));
-        // Create a purchase with the stripe token and the amount in the cart
-        $response = $gateway-&amp;gt;purchase([
-            &#39;amount&#39; =&amp;gt; $amount,
-            &#39;currency&#39; =&amp;gt; &#39;USD&#39;,
-            &#39;token&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;Order.stripeToken&#39;)
-        ])-&amp;gt;send();
-        // Check to see if the purchase was successful
-        if ($response-&amp;gt;isSuccessful()) {
-            // Do something with the data
-            \Cake\Log\Log::debug(json_encode($response-&amp;gt;getData()));
-            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Payment successful!&#39;));
-            return $this-&amp;gt;redirect([&#39;action&#39; =&amp;gt; &#39;cart&#39;]);
-        } else {
-            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Error processing payment: {0}&#39;, $response-&amp;gt;getMessage()));
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And this will be our &lt;code&gt;src/Template/Bake/Template/checkout.ctp&lt;/code&gt; file. It’s a bit long, but basically it allows a user to submit a credit card to stripe without touching your servers, and then subsequently submits a token to your app that you can use to actually process a payment:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;&amp;lt;%= $pluralVar %&amp;gt; form&quot;&amp;gt;
-&amp;lt;?= $this-&amp;gt;Form-&amp;gt;create(null, [&#39;class&#39; =&amp;gt; &#39;payment-form&#39;]); ?&amp;gt;
-    &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Enter your details to submit the order ({0} total)&#39;, $amount) ?&amp;gt;&amp;lt;/legend&amp;gt;
-        &amp;lt;span class=&quot;payment-errors&quot;&amp;gt;&amp;lt;/span&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;Order.number&#39;, [&#39;label&#39; =&amp;gt; &#39;Card Number&#39;]); ?&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;Order.cvc&#39;, [&#39;label&#39; =&amp;gt; &#39;CVC&#39;]); ?&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;Order.exp-month&#39;, [&#39;label&#39; =&amp;gt; &#39;Expiration Month (MM)&#39;]); ?&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;Order.exp-year&#39;, [&#39;label&#39; =&amp;gt; &#39;Expiration Year (YYYY)&#39;]); ?&amp;gt;
-    &amp;lt;/fieldset&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Submit Order&#39;)); ?&amp;gt;
-&amp;lt;?= $this-&amp;gt;Form-&amp;gt;end(); ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&amp;lt;script type=&quot;text/javascript&quot; src=&quot;http://code.jquery.com/jquery-1.10.2.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-&amp;lt;script type=&quot;text/javascript&quot; src=&quot;https://js.stripe.com/v2/&quot;&amp;gt;&amp;lt;/script&amp;gt;
-&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
-// The JS needs access to the publishable stripe key
-Stripe.setPublishableKey(&#39;&amp;lt;?php echo \Cake\Core\Configure::read(&#39;Stripe.publishable_key&#39;); ?&amp;gt;&#39;);
-// We need to create a callback to process the stripe payement, as
-// well as show errors or submit the token in case of success.
-var stripeResponseHandler = function(status, response) {
-  var $form = $(&#39;.payment-form&#39;);
-  if (response.error) {
-    // Show the errors on the form
-    $form.find(&#39;.payment-errors&#39;).text(response.error.message);
-    $form.find(&#39;button&#39;).prop(&#39;disabled&#39;, false);
-  } else {
-    // token contains id, last4, and card type
-    var token = response.id;
-    // Reset form data we do not want to submit to the server
-    $(&#39;#order-number, #order-cvc, #order-exp-month, #order-xp-year&#39;).val(&quot;&quot;);
-    // Insert the token into the form so it gets submitted to the server
-    $form.append($(&#39;&amp;lt;input type=&quot;hidden&quot; name=&quot;Order[stripeToken]&quot; /&amp;gt;&#39;).val(token));
-    // and submit
-    $form.get(0).submit();
-  }
-};
-jQuery(function($) {
-  $(&#39;.payment-form&#39;).submit(function(e) {
-    // Prevent the form from submitting with the default action
-    e.preventDefault();
-    var $form = $(this);
-    // Disable the submit button to prevent repeated clicks
-    $form.find(&#39;button&#39;).prop(&#39;disabled&#39;, true);
-    Stripe.card.createToken({
-      number: $(&#39;#order-number&#39;).val(),
-      cvc: $(&#39;#order-cvc&#39;).val(),
-      exp_month: $(&#39;#order-exp-month&#39;).val(),
-      exp_year: $(&#39;#order-exp-year&#39;).val()
-    }, stripeResponseHandler);
-  });
-});
-&amp;lt;/script&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we need to tell bake to create these this action and it’s related template in our &lt;code&gt;app/config/bootstrap_cli.php&lt;/code&gt;. The actions for the &lt;code&gt;Orders&lt;/code&gt; controller should look something like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($isController &amp;amp;&amp;amp; $name == &#39;Orders&#39;) {
-    $view-&amp;gt;viewVars[&#39;actions&#39;] = [&#39;cart&#39;, &#39;checkout&#39;];
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And we can now rebake the controller and templates for the OrdersController:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd /vagrant/app
-bin/cake bake controller orders -f
-bin/cake bake view orders -f
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Assuming you are using test credentials, you can use the card number &lt;code&gt;4242424242424242&lt;/code&gt; with any CVC and a valid expiration date to successfully complete a purchase.&lt;/p&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time!&lt;/h2&gt;
-
-&lt;p&gt;While our cart is getting there - only two more posts to go! - we still need to add a few features to actually complete the transaction process. These features are strictly up to you to implement, though I’ve included pointers where necessary:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Store the response from stripe in our database. I would create a &lt;code&gt;payments&lt;/code&gt; table and store all the data related to an order payment there.&lt;/li&gt;
-  &lt;li&gt;Mark an order as “paid”. Once paid, we can then do any extra processing necessary. Perhaps trigger a Cake Event that we can use to handle the actual “shipping” of products.&lt;/li&gt;
-  &lt;li&gt;Ensure that user’s don’t accidentally pay twice. We can do this by making any retrieval of the &lt;code&gt;Order&lt;/code&gt; require that an order be in a &lt;code&gt;pending&lt;/code&gt; state (and make all orders pending by default). You can quite easily write a migration for this.&lt;/li&gt;
-  &lt;li&gt;Add a &lt;em&gt;Successful Payment&lt;/em&gt; page that we redirect to once payment has been made.&lt;/li&gt;
-  &lt;li&gt;Add an Order status page, as well as a page to view all of a user’s orders.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-
-</description>
-        <pubDate>Sun, 14 Dec 2014 17:26:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/14/processing-payments-with-cakephp-3/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>composer</category>
-        
-        <category>payments</category>
-        
-        <category>stripe</category>
         
         
         <category>cakephp</category>

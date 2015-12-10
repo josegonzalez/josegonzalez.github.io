@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Customizing your Application Template",
+    "url": "/2015/12/09/customizing-your-app-template/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["application","applications","cakephp","can","customizing","hacks","silly","template","use"]
+  },
+  {
+    "type": "post",
     "title": "Debugging Data in CakePHP 3",
     "url": "/2015/12/08/debugging-data-in-cakephp-3/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1399,6 +1406,12 @@
     "title": "magic-methods",
     "url": "/tags/magic-methods/",
     "tokens": ["magic","methods"]
+  },
+  {
+    "type": "tag",
+    "title": "create-project",
+    "url": "/tags/create-project/",
+    "tokens": ["create","project"]
   },
   false
 ]
