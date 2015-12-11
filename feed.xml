@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 11 Dec 2015 02:08:51 +0000</pubDate>
-    <lastBuildDate>Fri, 11 Dec 2015 02:08:51 +0000</lastBuildDate>
+    <pubDate>Fri, 11 Dec 2015 16:23:42 +0000</pubDate>
+    <lastBuildDate>Fri, 11 Dec 2015 16:23:42 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -15,7 +15,7 @@
   &lt;p&gt;I posted about this last year, but since it has landed in the official plugin, I figured I may as well cover it again :)&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;For developers coming from other RAD frameworks such as Ruby on Rails, you may be familiar with the ability to create table migrations. In the past, there were multiple migration plugins for CakePHP, and as of the 3.0 release, we finally have an official &lt;a href=&quot;https://github.com/cakephp/migrations&quot;&gt;cakephp/migrations&lt;/a&gt; plugin. Huge shoutout to &lt;a href=&quot;http://www.havokinspiration.fr/en/&quot;&gt;Yves Pikel&lt;/a&gt; (&lt;a href=&quot;https://github.com/HavokInspiration&quot;&gt;@HavokInspiration&lt;/a&gt;) for pushing the plugin forward.&lt;/p&gt;
+&lt;p&gt;For developers coming from other RAD frameworks such as Ruby on Rails, you may be familiar with the ability to create table migrations. In the past, there were multiple migration plugins for CakePHP, and as of the 3.0 release, we finally have an official &lt;a href=&quot;https://github.com/cakephp/migrations&quot;&gt;cakephp/migrations&lt;/a&gt; plugin. Huge shoutout to &lt;a href=&quot;http://www.havokinspiration.fr/en/&quot;&gt;Yves Piquel&lt;/a&gt; (&lt;a href=&quot;https://github.com/HavokInspiration&quot;&gt;@HavokInspiration&lt;/a&gt;) for pushing the plugin forward.&lt;/p&gt;
 
 &lt;p&gt;Here is a simple migration class:&lt;/p&gt;
 
