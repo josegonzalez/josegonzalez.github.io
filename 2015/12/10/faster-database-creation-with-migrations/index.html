@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: Error Handling in CakePHP 3</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/">
+    <title>CakeAdvent-2015: Faster Database Creation with the Migrations Plugin</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
-    <meta name="keywords" content="cakeadvent-2015, cakephp, errors, exceptions" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, table, migrations" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: Error Handling in CakePHP 3" />
+    <meta property="og:title" content="CakeAdvent-2015: Faster Database Creation with the Migrations Plugin" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: Error Handling in CakePHP 3" />
+    <meta name="twitter:title" content="CakeAdvent-2015: Faster Database Creation with the Migrations Plugin" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="Error Handling in CakePHP 3 » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Faster Database Creation with the Migrations Plugin » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,121 +64,85 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Error Handling in CakePHP 3
+        Faster Database Creation with the Migrations Plugin
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Error Handling in CakePHP 3!">
+        <a href="#comments" title="Comment on Faster Database Creation with the Migrations Plugin!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>In CakePHP, you can attach custom error and exception handlers. The default one displays a stack trace in debug mode, and a set of http errors when debug is off. That’s nice and all, but sometimes you need to know when your users are encountering errors, and since you aren’t psychic, we need to store those somewhere. Thankfully, there are quite a few services that allow us to track bugs:</p>
-<ul>
-  <li><a href="https://airbrake.io/">Airbrake</a></li>
-  <li><a href="https://bugsnag.com/">Bugsnag</a></li>
-  <li><a href="https://getsentry.com/welcome/">Sentry</a></li>
-  <li><a href="https://opbeat.com/">Opbeat</a></li>
-  <li>etc.</li>
-</ul>
-<p>One annoying thing about error/exception handling in CakePHP is needing to attach two handlers:</p>
-<pre><code class="language-php">// in your config/bootstrap.php
-$isCli = php_sapi_name() === 'cli';
-if ($isCli) {
-    (new ConsoleErrorHandler(Configure::consume('Error')))-&gt;register();
-} else {
-    (new ErrorHandler(Configure::consume('Error')))-&gt;register();
-}
-</code></pre>
-<ul>
-  <li><code>ConsoleErrorHandler</code>: For cli-based exceptions</li>
-  <li><code>ErrorHandler</code>: For web-based exceptions</li>
-</ul>
-<p>This is necessary as the exception handler needs to render the exception information differently; the web error handler might want to use json for responses, or show an html message with an interactive stacktrace.</p>
-<p>You <em>also</em> have to have two methods in your handlers:</p>
-<ul>
-  <li><code>handleError</code>: For PHP Errors. PHP 7 does some <a href="https://secure.php.net/manual/en/language.errors.php7.php">magic</a> to make these catchable, so perhaps this one will go away someday.</li>
-  <li><code>handleException</code>: For thrown Exception instances.</li>
-</ul>
-<p>Rather than implement all error handling logic twice, we’ll go the trait-based route.</p>
-<h2 id="traits">Traits</h2>
-<p>Traits are composable units of behavior. They are similar to CakePHP Behaviors, though built into the PHP Core. They come in handy for exception handling in CakePHP as it becomes easy to implement the core logic of capturing an exception and just using that in multiple classes.</p>
-<p>Below is a trait for the <code>Bugsnag</code> service:</p>
+    <blockquote>
+  <p>I posted about this last year, but since it has landed in the official plugin, I figured I may as well cover it again :)</p>
+</blockquote>
+<p>For developers coming from other RAD frameworks such as Ruby on Rails, you may be familiar with the ability to create table migrations. In the past, there were multiple migration plugins for CakePHP, and as of the 3.0 release, we finally have an official <a href="https://github.com/cakephp/migrations">cakephp/migrations</a> plugin. Huge shoutout to <a href="http://www.havokinspiration.fr/en/">Yves Pikel</a> (<a href="https://github.com/HavokInspiration">@HavokInspiration</a>) for pushing the plugin forward.</p>
+<p>Here is a simple migration class:</p>
 <pre><code class="language-php">&lt;?php
-namespace App\Error\Bugsnag;
-use Bugsnag_Client;
-use Cake\Core\Configure;
-use Exception;
-trait BugsnagTrait
+use Phinx\Migration\AbstractMigration;
+class CreatePosts extends AbstractMigration
 {
-    public function handleError($code, $description, $file = null, $line = null, $context = null)
+    public function change()
     {
-        $client = $this-&gt;client();
-        if ($client) {
-            $client-&gt;errorHandler($code, $description, $file, $line);
-        }
-        return parent::handleError($code, $description, $file, $line, $context);
-    }
-    public function handleException(Exception $exception)
-    {
-        $client = $this-&gt;client();
-        if ($client) {
-            $client-&gt;notifyException($exception);
-        }
-        return parent::handleException($exception);
-    }
-    protected function client()
-    {
-        $apiKey = Configure::read('Bugsnag.apiKey');
-        if (!$apiKey &amp;&amp; defined('BUGSNAG_API_KEY')) {
-            $apiKey = BUGSNAG_API_KEY;
-        }
-        if (!$apiKey) {
-            return null;
-        }
-        $client = null;
-        if ($apiKey) {
-            $client = new Bugsnag_Client($apiKey);
-            $config = Configure::read('Bugsnag.config');
-            foreach ($config as $key =&gt; $value) {
-                if (method_exists($client, $key)) {
-                    $client-&gt;$key($value);
-                }
-            }
-        }
-        return $client;
+        $table = $this-&gt;table('posts');
+        $table-&gt;addColumn('name', 'string', [
+            'null' =&gt; false,
+            'default' =&gt; null,
+            'limit' =&gt; 255,
+        ]);
+        $table-&gt;addColumn('created', 'datetime', [
+            'null' =&gt; false,
+            'default' =&gt; null,
+        ]);
+        $table-&gt;addColumn('modified', 'datetime', [
+            'null' =&gt; false,
+            'default' =&gt; null,
+        ]);
+        $table-&gt;addIndex(['name'], [
+            'unique' =&gt; false,
+            'name' =&gt; 'BY_NAME',
+        ]);
+        $table-&gt;create();
     }
 }
 ?&gt;
 </code></pre>
-<p>And here is what my <code>ErrorHandler</code> looks like:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\Error\Bugsnag;
-use App\Error\Bugsnag\BugsnagTrait;
-use Cake\Error\ErrorHandler as CoreErrorHandler;
-class ErrorHandler extends CoreErrorHandler
-{
-    use BugsnagTrait;
-}
-?&gt;
+<p>Raise your hand if you would have wanted to create that from scratch.</p>
+<p><img src="https://s3.amazonaws.com/f.cl.ly/items/0I0Z2K1F3K16121h0l0e/Image%202015-12-10%20at%209.08.00%20PM.jpg" alt="http://cl.ly/3W3O0P0N0M0n" /></p>
+<p>I thought as much.</p>
+<p>With the new plugin, we now have the ability to generate those from the command-line. Here is a short example:</p>
+<pre><code class="language-shell">bin/cake bake migration create_posts name:string created modified
 </code></pre>
-<p>Notice how the <code>ErrorHandler</code> class itself is devoid of any “real” logic? I’ve pushed all the heavy-lifting into the trait and then just ensured my <code>ErrorHandler</code> extends the CakePHP core <code>ErrorHandler</code>. Similarly, my <code>ConsoleErrorHandler</code> is quite empty as well:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\Error\Bugsnag;
-use App\Error\Bugsnag\BugsnagTrait;
-use Cake\Console\ConsoleErrorHandler as CoreConsoleErrorHandler;
-class ConsoleErrorHandler extends CoreConsoleErrorHandler
-{
-    use BugsnagTrait;
-}
-?&gt;
+<p>A few things:</p>
+<ul>
+  <li><code>id</code> fields are autocreated. This is a feature of the <a href="https://phinx.org/">Phinx</a> project we lean on for developing PHP migrations. One-clap to <a href="http://robmorgan.id.au/">Rob Morgan</a> for managing this project on behalf of the PHP community at large.</li>
+  <li>Certain fields have automatic types set if left null. You can always override them though.</li>
+  <li>The classname is the UpperCamelCase inflection of the first argument, and means something different depending upon the name:
+    <ul>
+      <li><em>create_table</em> <code>/^(Create)(.*)/</code>: Creates the specified table</li>
+      <li><em>drop_table</em> <code>/^(Drop)(.*)/</code>: Drops the specified table. Ignores specified field arguments.</li>
+      <li><em>add_field</em> <code>/^(Add).*(?:To)(.*)/</code>: Adds fields to the specified table</li>
+      <li><em>remove_field</em> <code>/^(Remove).*(?:From)(.*)/</code>: Removes fields from the specified table</li>
+      <li><em>alter_table</em> <code>/^(Alter)(.*)/</code>: Alters the specified table. The alter_table command can be used as an alias for CreateTable and AddField.</li>
+    </ul>
+  </li>
+</ul>
+<p>This plugin is an absolute must-use for anything prototyping an application which schema changes. No one wants to write the SQL for them, and that goes double for writing actual schema migration files. I recommend <a href="https://github.com/cakephp/migrations#generating-migrations-from-the-cli">reading the docs</a> on this excellent feature to learn more.</p>
+<h2 id="bonus-round">BONUS ROUND</h2>
+<p>I normally deploy my code on platforms such as <a href="https://www.heroku.com/">Heroku</a> or <a href="http://dokku.viewdocs.io/dokku/">Dokku</a> where composer commands are automatically run for me. Here is my <code>scripts</code> field in my <code>composer.json</code>:</p>
+<pre><code class="language-json">"scripts": {
+    "compile": [
+        "bin/cake migrations migrate",
+        "bin/cake migrations migrate --plugin Blog"
+    ],
+    "post-install-cmd": "App\\Console\\Installer::postInstall",
+    "post-autoload-dump": "Cake\\Composer\\Installer\\PluginInstaller::postAutoloadDump"
+},
 </code></pre>
-<h2 id="homework-time">Homework time</h2>
-<p>While the logic I implemented is fairly easy to understand, it may also not give the full picture around the exception. For instance, many error collection services provide the ability to add extra metadata to an error, such as the user that was signed in, or client information such as operating system version. <code>ExceptionRenderer</code> instances can have access to this information using their <code>_getController</code> methods, and it wouldn’t be too much work to copy that logic into your <code>ErrorHandler</code> to add extra metadata to the request.</p>
-<p>I recommend customizing the error handler to fit your needs - adding metadata, or perhaps using a different service - and seeing what helps you find, replicate, and fix bugs your automated testing didn’t catch.</p>
+<p>Other than the normal stuff in there for application installation, you’ll notice I have a <code>scripts.compile</code> key which maps to a list of migration commands to run. I run the migrations for my core application as well as the blog plugin I use in this particular application. Migrations are now fully automatic for this application, and I don’t need to worry about going in and manually altering anything!</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-07 12:00:00 +0000">07 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-10 12:00:00 +0000">10 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -199,7 +163,7 @@ class ConsoleErrorHandler extends CoreConsoleErrorHandler
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 7</strong> of <strong>10</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 10</strong> of <strong>10</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
       <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
@@ -207,10 +171,10 @@ class ConsoleErrorHandler extends CoreConsoleErrorHandler
       <li><a href="/2015/12/04/whats-in-an-entity/">What exactly belongs in an entity?</a></li>
       <li><a href="/2015/12/05/uploading-files-and-images/">Uploading files and images with CakePHP 3</a></li>
       <li><a href="/2015/12/06/invoking-callable-classes/">Invoking Callable Classes</a></li>
-      <li>Error Handling in CakePHP 3</li>
+      <li><a href="/2015/12/07/error-handling-in-cakephp-3/">Error Handling in CakePHP 3</a></li>
       <li><a href="/2015/12/08/debugging-data-in-cakephp-3/">Debugging Data in CakePHP 3</a></li>
       <li><a href="/2015/12/09/customizing-your-app-template/">Customizing your Application Template</a></li>
-      <li><a href="/2015/12/10/faster-database-creation-with-migrations/">Faster Database Creation with the Migrations Plugin</a></li>
+      <li>Faster Database Creation with the Migrations Plugin</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -249,9 +213,9 @@ class ConsoleErrorHandler extends CoreConsoleErrorHandler
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/07/error-handling-in-cakephp-3/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/';
-        var disqus_title      = "CakeAdvent-2015: Error Handling in CakePHP 3";
+        var disqus_identifier = '/2015/12/10/faster-database-creation-with-migrations/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/';
+        var disqus_title      = "CakeAdvent-2015: Faster Database Creation with the Migrations Plugin";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

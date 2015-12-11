@@ -5,9 +5,112 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 10 Dec 2015 02:06:11 +0000</pubDate>
-    <lastBuildDate>Thu, 10 Dec 2015 02:06:11 +0000</lastBuildDate>
+    <pubDate>Fri, 11 Dec 2015 02:08:51 +0000</pubDate>
+    <lastBuildDate>Fri, 11 Dec 2015 02:08:51 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Faster Database Creation with the Migrations Plugin</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;I posted about this last year, but since it has landed in the official plugin, I figured I may as well cover it again :)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;For developers coming from other RAD frameworks such as Ruby on Rails, you may be familiar with the ability to create table migrations. In the past, there were multiple migration plugins for CakePHP, and as of the 3.0 release, we finally have an official &lt;a href=&quot;https://github.com/cakephp/migrations&quot;&gt;cakephp/migrations&lt;/a&gt; plugin. Huge shoutout to &lt;a href=&quot;http://www.havokinspiration.fr/en/&quot;&gt;Yves Pikel&lt;/a&gt; (&lt;a href=&quot;https://github.com/HavokInspiration&quot;&gt;@HavokInspiration&lt;/a&gt;) for pushing the plugin forward.&lt;/p&gt;
+
+&lt;p&gt;Here is a simple migration class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Phinx\Migration\AbstractMigration;
+
+class CreatePosts extends AbstractMigration
+{
+    public function change()
+    {
+        $table = $this-&amp;gt;table(&#39;posts&#39;);
+        $table-&amp;gt;addColumn(&#39;name&#39;, &#39;string&#39;, [
+            &#39;null&#39; =&amp;gt; false,
+            &#39;default&#39; =&amp;gt; null,
+            &#39;limit&#39; =&amp;gt; 255,
+        ]);
+        $table-&amp;gt;addColumn(&#39;created&#39;, &#39;datetime&#39;, [
+            &#39;null&#39; =&amp;gt; false,
+            &#39;default&#39; =&amp;gt; null,
+        ]);
+        $table-&amp;gt;addColumn(&#39;modified&#39;, &#39;datetime&#39;, [
+            &#39;null&#39; =&amp;gt; false,
+            &#39;default&#39; =&amp;gt; null,
+        ]);
+        $table-&amp;gt;addIndex([&#39;name&#39;], [
+            &#39;unique&#39; =&amp;gt; false,
+            &#39;name&#39; =&amp;gt; &#39;BY_NAME&#39;,
+        ]);
+        $table-&amp;gt;create();
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Raise your hand if you would have wanted to create that from scratch.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://s3.amazonaws.com/f.cl.ly/items/0I0Z2K1F3K16121h0l0e/Image%202015-12-10%20at%209.08.00%20PM.jpg&quot; alt=&quot;http://cl.ly/3W3O0P0N0M0n&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I thought as much.&lt;/p&gt;
+
+&lt;p&gt;With the new plugin, we now have the ability to generate those from the command-line. Here is a short example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration create_posts name:string created modified
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few things:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;id&lt;/code&gt; fields are autocreated. This is a feature of the &lt;a href=&quot;https://phinx.org/&quot;&gt;Phinx&lt;/a&gt; project we lean on for developing PHP migrations. One-clap to &lt;a href=&quot;http://robmorgan.id.au/&quot;&gt;Rob Morgan&lt;/a&gt; for managing this project on behalf of the PHP community at large.&lt;/li&gt;
+  &lt;li&gt;Certain fields have automatic types set if left null. You can always override them though.&lt;/li&gt;
+  &lt;li&gt;The classname is the UpperCamelCase inflection of the first argument, and means something different depending upon the name:
+    &lt;ul&gt;
+      &lt;li&gt;&lt;em&gt;create_table&lt;/em&gt; &lt;code&gt;/^(Create)(.*)/&lt;/code&gt;: Creates the specified table&lt;/li&gt;
+      &lt;li&gt;&lt;em&gt;drop_table&lt;/em&gt; &lt;code&gt;/^(Drop)(.*)/&lt;/code&gt;: Drops the specified table. Ignores specified field arguments.&lt;/li&gt;
+      &lt;li&gt;&lt;em&gt;add_field&lt;/em&gt; &lt;code&gt;/^(Add).*(?:To)(.*)/&lt;/code&gt;: Adds fields to the specified table&lt;/li&gt;
+      &lt;li&gt;&lt;em&gt;remove_field&lt;/em&gt; &lt;code&gt;/^(Remove).*(?:From)(.*)/&lt;/code&gt;: Removes fields from the specified table&lt;/li&gt;
+      &lt;li&gt;&lt;em&gt;alter_table&lt;/em&gt; &lt;code&gt;/^(Alter)(.*)/&lt;/code&gt;: Alters the specified table. The alter_table command can be used as an alias for CreateTable and AddField.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This plugin is an absolute must-use for anything prototyping an application which schema changes. No one wants to write the SQL for them, and that goes double for writing actual schema migration files. I recommend &lt;a href=&quot;https://github.com/cakephp/migrations#generating-migrations-from-the-cli&quot;&gt;reading the docs&lt;/a&gt; on this excellent feature to learn more.&lt;/p&gt;
+
+&lt;h2 id=&quot;bonus-round&quot;&gt;BONUS ROUND&lt;/h2&gt;
+
+&lt;p&gt;I normally deploy my code on platforms such as &lt;a href=&quot;https://www.heroku.com/&quot;&gt;Heroku&lt;/a&gt; or &lt;a href=&quot;http://dokku.viewdocs.io/dokku/&quot;&gt;Dokku&lt;/a&gt; where composer commands are automatically run for me. Here is my &lt;code&gt;scripts&lt;/code&gt; field in my &lt;code&gt;composer.json&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-json&quot;&gt;&quot;scripts&quot;: {
+    &quot;compile&quot;: [
+        &quot;bin/cake migrations migrate&quot;,
+        &quot;bin/cake migrations migrate --plugin Blog&quot;
+    ],
+    &quot;post-install-cmd&quot;: &quot;App\\Console\\Installer::postInstall&quot;,
+    &quot;post-autoload-dump&quot;: &quot;Cake\\Composer\\Installer\\PluginInstaller::postAutoloadDump&quot;
+},
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Other than the normal stuff in there for application installation, you’ll notice I have a &lt;code&gt;scripts.compile&lt;/code&gt; key which maps to a list of migration commands to run. I run the migrations for my core application as well as the blog plugin I use in this particular application. Migrations are now fully automatic for this application, and I don’t need to worry about going in and manually altering anything!&lt;/p&gt;
+</description>
+        <pubDate>Thu, 10 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>table</category>
+        
+        <category>migrations</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Customizing your Application Template</title>
@@ -1234,108 +1337,6 @@ class IndexTransformer extends TransformerAbstract
         <category>api</category>
         
         <category>entities</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Sending email invoices to users on payment</title>
-        <description>&lt;p&gt;Once a user has made a purchase, they will likely want some sort of proof that the purchase went through. We can send them an email at every step of the way. We’ll start by sending an email as soon as the purchase was completed.&lt;/p&gt;
-
-&lt;p&gt;CakePHP’s email system allows us to use Templates to send email. We previously briefly covered email sending while building the anonymous issue tracker - though simply using raw messages. CakePHP is capable of sending messages both as plaintext and as html, and is also capable of wrapping emails in layouts. Here is a simple, contrived example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Load the class at the top of your class using the `use` statement
-use Cake\Network\Email\Email;
-// Construct an email object
-$email = new Email();
-// Send the email using the template in `src/Template/Email/TYPE/herp.ctp`
-// and the layout in `src/Template/Layout/Email/TYPE/derp.ctp`
-// Type is the type of the message
-$email-&amp;gt;template(&#39;herp&#39;, &#39;derp&#39;);
-// Send the email as a multi-part type message, both as `text` and `html`.
-// This means that the previous `template` call configures 4 different
-// files for use when sending
-$email-&amp;gt;emailFormat(&#39;both&#39;);
-// Send the email to this user
-$email-&amp;gt;to(&#39;camilla@number1.com&#39;);
-// Specify this user to send as
-$email-&amp;gt;from(&#39;app@domain.com&#39;);
-// Actually send the email!
-$email-&amp;gt;send();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;What we are going to do is send a simple, plain-text email that uses a text template and a text layout. Let’s start by creating a &lt;code&gt;src/Template/Email/text/purchase.ctp&lt;/code&gt; file with the following contents:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Hi!
-We&#39;re messaging you to let you know someone made a purchase for &amp;lt;?= $amount ?&amp;gt; at &amp;lt;?= $purchase_time ?&amp;gt; under the email &amp;lt;?= $user[&#39;email&#39;] ?&amp;gt;. If this seems incorrect, let us know!
-The following items were purchased:
-&amp;lt;?php foreach ($order_items as $order_item) :?&amp;gt;
-- &amp;lt;?= $order_item-&amp;gt;product-&amp;gt;name ?&amp;gt;: $&amp;lt;?= $order_item-&amp;gt;price ?&amp;gt;
-&amp;lt;?php endforeach; ?&amp;gt;
-If you have any questions, feel free to respond to this email!
-- Awesome Store
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;While we won’t modify the default text layout, please note that the default CakePHP layouts contain a message stating that the email was sent from the CakePHP framework. You can remove these if you like&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Now that we have our email set, lets create a new event in our &lt;code&gt;app/config/events.php&lt;/code&gt; that we can use to send the email. We’ll call it &lt;code&gt;Order.postPurchase&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Network\Email\Email;
-EventManager::instance()-&amp;gt;attach(function (Event $event) {
-  $amount = $event-&amp;gt;data[&#39;amount&#39;];
-  $order_items = $event-&amp;gt;data[&#39;order&#39;]-&amp;gt;order_items;
-  $purchase_time = date(&#39;Y-m-d H:i:s&#39;);
-  $user = $event-&amp;gt;data[&#39;user&#39;];
-  $email = new Email();
-  $email-&amp;gt;template(&#39;purchase&#39;, &#39;default&#39;)
-      -&amp;gt;emailFormat(&#39;text&#39;)
-      -&amp;gt;to($user[&#39;email&#39;])
-      -&amp;gt;from(&#39;store@example.com&#39;)
-      -&amp;gt;viewVars(compact(&#39;amount&#39;, &#39;order_items&#39;, &#39;purchase_time&#39;, &#39;user&#39;))
-      -&amp;gt;send();
-}, &#39;Order.postPurchase&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll ensure we actually trigger this event in our &lt;code&gt;checkout&lt;/code&gt; action. Modify the bake &lt;code&gt;checkout.ctp&lt;/code&gt; element to include the following when the &lt;code&gt;$response-&amp;gt;isSuccessful()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$event = new \Cake\Event\Event(&#39;Order.postPurchase&#39;, $this, [
-    &#39;amount&#39; =&amp;gt; $amount,
-    &#39;order&#39; =&amp;gt; $order,
-    &#39;user&#39; =&amp;gt; $this-&amp;gt;Auth-&amp;gt;user(),
-]);
-\Cake\Event\EventManager::instance()-&amp;gt;dispatch($event);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You’ll need configure your email settings in &lt;code&gt;app/config/app.php&lt;/code&gt;, but once you do, we will be sending users email whenever they’ve successfully completed a purchase! Note that now that we are using templates, we can &lt;em&gt;also&lt;/em&gt; use helpers as you would in any other template file, which allows you to build more complex emails and drive campaigns to users.&lt;/p&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework Time&lt;/h2&gt;
-
-&lt;p&gt;You can actually do a few cool things with email - that I’ve done in other CakePHP websites and other frameworks:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Log all emails to CLI and the Database when in Debug mode so that you can view what &lt;em&gt;would&lt;/em&gt; have been sent to a user instead of potentially spamming users. CakePHP allows you to build arbitrary Transport classes to make this possible.&lt;/li&gt;
-  &lt;li&gt;Make a PostPurchaseEmail class that can take all it’s configuration within the constructor. This way you can simply instantiate that particular email class and let it worry about how it should configure the email.&lt;/li&gt;
-  &lt;li&gt;Send both an html and a text representation of the same email. &lt;a href=&quot;http://templates.mailchimp.com/&quot;&gt;Mailchimp provides some templates&lt;/a&gt; you can model your email layouts after to get wider email client support.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;http://josediazgonzalez.com/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2014 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-
-</description>
-        <pubDate>Mon, 15 Dec 2014 13:42:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2014/12/15/sending-email-invoices-to-users-on-payment/</guid>
-        
-        <category>cakeadvent-2014</category>
-        
-        <category>cakephp</category>
-        
-        <category>email</category>
-        
-        <category>templates</category>
         
         
         <category>cakephp</category>

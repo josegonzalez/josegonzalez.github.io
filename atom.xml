@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-10T02:06:11+00:00</updated>
+ <updated>2015-12-11T02:08:51+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Faster Database Creation with the Migrations Plugin]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/"/>
+   <updated>2015-12-10T12:00:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Customizing your Application Template]]></title>
