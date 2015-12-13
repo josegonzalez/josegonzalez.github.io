@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: Customizing your Application Template</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/">
+    <title>CakeAdvent-2015: Using DSNs to simplify connection strings</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/12/using-dns-to-simplify-connection-strings/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
-    <meta name="keywords" content="cakeadvent-2015, cakephp, composer, create-project" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, dsn, config" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: Customizing your Application Template" />
+    <meta property="og:title" content="CakeAdvent-2015: Using DSNs to simplify connection strings" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/12/using-dns-to-simplify-connection-strings/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: Customizing your Application Template" />
+    <meta name="twitter:title" content="CakeAdvent-2015: Using DSNs to simplify connection strings" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="Customizing your Application Template » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Using DSNs to simplify connection strings » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,58 +64,57 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Customizing your Application Template
+        Using DSNs to simplify connection strings
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Customizing your Application Template!">
+        <a href="#comments" title="Comment on Using DSNs to simplify connection strings!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>CakePHP has long had the ability to generate new projects via the <code>bake</code> command:</p>
-<pre><code class="language-shell">// my custom cat project
-cake bake project camila
-</code></pre>
-<p>With the above command, CakePHP would scaffold out all the necessary directories and files for a new project (<code>AppModel</code>, <code>AppController</code>, configuration files, etc.). You could even customize this using a <a href="http://book.cakephp.org/2.0/en/console-and-shells/code-generation-with-bake.html#for-baking-custom-projects">bake skeleton</a>:</p>
-<pre><code class="language-shell">// be sure to copy in my cat project instead
-cake bake project camila --skel Console/Templates/cat
-</code></pre>
-<p>In CakePHP 3, this feature of bake has mostly gone away in favor of using <code>composer</code> to handle scaffolding. When starting a new project, you typically do something like:</p>
-<pre><code class="language-shell">composer create-project --prefer-dist cakephp/app camila
-</code></pre>
-<p>Composer’s <code>create-project</code> command is great for scaffolding out new projects and is used for a variety of things:</p>
+    <p>In CakePHP 3, we consolidated most configuration into a single <code>config/app.php</code>. This superscedes the old method of changing your <code>config/core.php</code> and <code>config/database.php</code> - as well as any other random configuration values you might set. This is good for a lot of reasons - who wants to deal with a <code>DATABASE_CONFIG</code>? - but also means we can simplify how we configure things.</p>
+<p>One thing that always irked me was the inability to specify connection information in a single way. For instance, you might specify the host for a datastore with the following keys:</p>
 <ul>
-  <li>Framework-specific application repos</li>
-  <li>Framework-specific plugin modules</li>
-  <li>Generic composer packages</li>
+  <li><code>host</code>: For databases</li>
+  <li><code>server</code>: For a redis caching server</li>
+  <li><code>servers</code>: For memcached servers</li>
 </ul>
-<p>The great thing about this command is that the “skeletons” are in all actually composer packages. This means it is extremely easy to use your normal distribution methods to release new versions of the package, something the CakePHP project has done with it’s <a href="https://github.com/cakephp/app">cakephp/app</a> repository.</p>
-<p>Now, as a side-effect of this, you can <em>*also*</em> fork any existing composer skeleton and add your own customizations. For instance, lets say we wanted to have a composer skeleton with the following plugins installed automatically:</p>
-<ul>
-  <li><a href="https://github.com/josegonzalez/cakephp-upload">josegonzalez/upload</a></li>
-  <li><a href="https://github.com/friendsofcake/crud">friendsofcake/crud</a></li>
-  <li><a href="https://github.com/friendsofcake/crud-view">friendsofcake/crud-view</a></li>
-  <li><a href="https://github.com/thephpleague/fractal">league/fractal</a></li>
-  <li><a href="https://github.com/usemuffin/trash">usemuffin/trash</a></li>
-</ul>
-<p>We can simply do the following:</p>
-<ol>
-  <li>Fork the <a href="https://github.com/cakephp/app">cakephp/app</a> repository on github.</li>
-  <li>Change the name in the fork’s composer.json to <code>myname/app</code>.</li>
-  <li>Add any custom requirements to the <code>composer.json</code>.</li>
-  <li>Make a new tag/release on github.</li>
-  <li>Add it to <a href="https://packagist.org">packagist.org</a></li>
-</ol>
-<p>Pretty simple. We can now use this project as a baseline for all of our new CakePHP projects:</p>
-<pre><code class="language-shell">composer create-project --prefer-dist myname/app camila
+<p>One of quite a few different ways configuring CakePHP was yuck. A nice improvement in CakePHP 3 is the ability to specify connection information via a Data source name (DSN).</p>
+<p>A DSN is a standard used by many programming communities to encode all the information about a particular configuration. For instance, here is how I might tell you to connect to my local <code>test</code> database:</p>
+<pre><code class="language-php">$dsn = "mysql://root:cakeisali3@localhost:3306/test";
 </code></pre>
-<p>Apart from adding custom plugins, one thing you may want to look is customizing the initial project files. For instance, if you find yourself constantly adding certain helper classes, or modifying how configuration is loaded, this is a good chance to improve the base state of your initial applications.</p>
-<p>As every project is slightly different, please try and keep application-specific enhancements to a minimum, as they may only serve as a hindrance when using your skeleton. No one wants to setup an app and then spend an hour deleting useless code :)</p>
-<p>For those of you who are interested in such a project, <a href="https://github.com/loadsys/CakePHP-Skeleton">here is an advanced skeleton</a> from the good folks at <a href="https://www.loadsys.com/">Loadsys Web Strategies</a>.</p>
+<p>The above encodes the following information:</p>
+<ul>
+  <li><code>scheme</code>: <code>mysql</code></li>
+  <li><code>user</code>: <code>root</code></li>
+  <li><code>password</code>: <code>cakeisali3</code></li>
+  <li><code>host</code>: <code>localhost</code></li>
+  <li><code>port</code>: <code>3306</code></li>
+  <li><code>database</code>: <code>test</code></li>
+</ul>
+<p>You can also specify optional arguments via querystring:</p>
+<pre><code class="language-php">$dsn = "mysql://root:cakeisali3@localhost:3306/test?encoding=utf8";
+</code></pre>
+<p>In 3.x, the following can now use a special <code>url</code> key. This key will be parsed and it’s values will be used to connect to a database. The following classes can be configured via dsn:</p>
+<ul>
+  <li>Database connections</li>
+  <li>Cache connections</li>
+  <li>Log information</li>
+  <li>Email configuration</li>
+</ul>
+<p>You can also take advantage of this magic parsing by including the <code>\Cake\Core\StaticConfigTrait</code> trait in your own classes.</p>
+<p>One thing that might be useful would be to extend the default schemes. In CakePHP, we map the <code>scheme</code> to a particlar namespaced-class in the CakePHP core. You might add a <code>Mongo</code>-based ORM Driver, but if it isn’t mapped, your app will go boom. You can map one easily though!</p>
+<pre><code class="language-php">ConnectionManager::dsnClassMap(['console' =&gt; 'App\Database\Driver\Mongo'])
+// also works on the following classes:
+// - Cache::dsnClassMap()
+// - Email::dsnClassMap()
+// - Log::dsnClassMap()
+</code></pre>
+<p>It’s a nifty trick I think, and one that should prove useful to anyone using cloud-providers such as <a href="https://www.heroku.com/">Heroku</a> or <a href="http://dokku.viewdocs.io/dokku/">Dokku</a> for application deployment.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-09 12:00:00 +0000">09 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/12/using-dns-to-simplify-connection-strings/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-12 12:00:00 +0000">12 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -136,7 +135,7 @@ cake bake project camila --skel Console/Templates/cat
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 9</strong> of <strong>12</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 12</strong> of <strong>12</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
       <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
@@ -146,10 +145,10 @@ cake bake project camila --skel Console/Templates/cat
       <li><a href="/2015/12/06/invoking-callable-classes/">Invoking Callable Classes</a></li>
       <li><a href="/2015/12/07/error-handling-in-cakephp-3/">Error Handling in CakePHP 3</a></li>
       <li><a href="/2015/12/08/debugging-data-in-cakephp-3/">Debugging Data in CakePHP 3</a></li>
-      <li>Customizing your Application Template</li>
+      <li><a href="/2015/12/09/customizing-your-app-template/">Customizing your Application Template</a></li>
       <li><a href="/2015/12/10/faster-database-creation-with-migrations/">Faster Database Creation with the Migrations Plugin</a></li>
       <li><a href="/2015/12/11/softdeletion-in-cakephp-3/">SoftDeleting Entities in CakePHP 3</a></li>
-      <li><a href="/2015/12/12/using-dns-to-simplify-connection-strings/">Using DSNs to simplify connection strings</a></li>
+      <li>Using DSNs to simplify connection strings</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -188,9 +187,9 @@ cake bake project camila --skel Console/Templates/cat
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/09/customizing-your-app-template/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/';
-        var disqus_title      = "CakeAdvent-2015: Customizing your Application Template";
+        var disqus_identifier = '/2015/12/12/using-dns-to-simplify-connection-strings/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/12/using-dns-to-simplify-connection-strings/';
+        var disqus_title      = "CakeAdvent-2015: Using DSNs to simplify connection strings";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

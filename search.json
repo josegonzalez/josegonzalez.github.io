@@ -1,6 +1,20 @@
 [
   {
     "type": "post",
+    "title": "Using DSNs to simplify connection strings",
+    "url": "/2015/12/12/using-dns-to-simplify-connection-strings/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","connection","dsns","hacks","silly","simplify","strings","use","using"]
+  },
+  {
+    "type": "post",
+    "title": "SoftDeleting Entities in CakePHP 3",
+    "url": "/2015/12/11/softdeletion-in-cakephp-3/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","entities","hacks","silly","softdeleting","use"]
+  },
+  {
+    "type": "post",
     "title": "Faster Database Creation with the Migrations Plugin",
     "url": "/2015/12/10/faster-database-creation-with-migrations/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1419,6 +1433,24 @@
     "title": "create-project",
     "url": "/tags/create-project/",
     "tokens": ["create","project"]
+  },
+  {
+    "type": "tag",
+    "title": "softdelete",
+    "url": "/tags/softdelete/",
+    "tokens": ["softdelete"]
+  },
+  {
+    "type": "tag",
+    "title": "dsn",
+    "url": "/tags/dsn/",
+    "tokens": ["dsn"]
+  },
+  {
+    "type": "tag",
+    "title": "config",
+    "url": "/tags/config/",
+    "tokens": ["config"]
   },
   false
 ]

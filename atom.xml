@@ -4,13 +4,29 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-11T16:23:42+00:00</updated>
+ <updated>2015-12-13T02:09:22+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Using DSNs to simplify connection strings]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/12/using-dns-to-simplify-connection-strings/"/>
+   <updated>2015-12-12T12:00:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/12/using-dns-to-simplify-connection-strings/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[SoftDeleting Entities in CakePHP 3]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/11/softdeletion-in-cakephp-3/"/>
+   <updated>2015-12-11T12:00:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/11/softdeletion-in-cakephp-3/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Faster Database Creation with the Migrations Plugin]]></title>
