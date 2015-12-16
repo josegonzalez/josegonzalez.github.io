@@ -1,6 +1,27 @@
 [
   {
     "type": "post",
+    "title": "Stuffing Complex Logic into Model-less Forms",
+    "url": "/2015/12/15/stuffing-complex-logic-into-model-less-forms/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","complex","forms","hacks","less","logic","model","silly","stuffing","use"]
+  },
+  {
+    "type": "post",
+    "title": "Custom Logging Engines and adding Contextual Data",
+    "url": "/2015/12/14/custom-logging-engines-and-adding-contextual-data/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["adding","applications","cakephp","can","contextual","custom","data","engines","hacks","logging","silly","use"]
+  },
+  {
+    "type": "post",
+    "title": "The Collection Class and You",
+    "url": "/2015/12/13/collections-class-and-you/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","class","collection","hacks","silly","use"]
+  },
+  {
+    "type": "post",
     "title": "Using DSNs to simplify connection strings",
     "url": "/2015/12/12/using-dns-to-simplify-connection-strings/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1451,6 +1472,18 @@
     "title": "config",
     "url": "/tags/config/",
     "tokens": ["config"]
+  },
+  {
+    "type": "tag",
+    "title": "collections",
+    "url": "/tags/collections/",
+    "tokens": ["collections"]
+  },
+  {
+    "type": "tag",
+    "title": "forms",
+    "url": "/tags/forms/",
+    "tokens": ["forms"]
   },
   false
 ]

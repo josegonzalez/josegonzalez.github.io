@@ -5,9 +5,393 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 13 Dec 2015 02:09:22 +0000</pubDate>
-    <lastBuildDate>Sun, 13 Dec 2015 02:09:22 +0000</lastBuildDate>
+    <pubDate>Wed, 16 Dec 2015 01:38:18 +0000</pubDate>
+    <lastBuildDate>Wed, 16 Dec 2015 01:38:18 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Stuffing Complex Logic into Model-less Forms</title>
+        <description>&lt;p&gt;One new feature of CakePHP 3 is the ability to have &lt;a href=&quot;http://book.cakephp.org/3.0/en/core-libraries/form.html&quot;&gt;Model-less form classes&lt;/a&gt;. These are typically useful for stuff like contact forms that might send an email:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Form;
+
+use Cake\Form\Form;
+use Cake\Form\Schema;
+use Cake\Mailer\Email;
+use Cake\Validation\Validator;
+
+class ContactForm extends Form
+{
+    // require some data
+    protected function _buildSchema(Schema $schema)
+    {
+        return $schema-&amp;gt;addField(&#39;name&#39;, &#39;string&#39;)
+            -&amp;gt;addField(&#39;email&#39;, [&#39;type&#39; =&amp;gt; &#39;string&#39;])
+            -&amp;gt;addField(&#39;body&#39;, [&#39;type&#39; =&amp;gt; &#39;text&#39;]);
+    }
+
+    // validate the incoming data
+    protected function _buildValidator(Validator $validator)
+    {
+        return $validator-&amp;gt;add(&#39;name&#39;, &#39;length&#39;, [
+                &#39;rule&#39; =&amp;gt; [&#39;minLength&#39;, 10],
+                &#39;message&#39; =&amp;gt; &#39;A name is required&#39;
+            ])-&amp;gt;add(&#39;email&#39;, &#39;format&#39;, [
+                &#39;rule&#39; =&amp;gt; &#39;email&#39;,
+                &#39;message&#39; =&amp;gt; &#39;A valid email address is required&#39;,
+            ]);
+    }
+
+    // actually send an email
+    protected function _execute(array $data)
+    {
+        $email = new Email(&#39;default&#39;);
+        return $email-&amp;gt;from([$data[&#39;email&#39;] =&amp;gt; $data[&#39;name&#39;]])
+            -&amp;gt;to(&#39;mail@example.com&#39;, &#39;Mail Example&#39;)
+            -&amp;gt;subject(&#39;Contact Form&#39;)
+            -&amp;gt;message($data[&#39;body&#39;])
+            -&amp;gt;send();
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Neato burrito. One thing I love about this is the ability to have complex validation rulesets for specific actions. For instance, on a blog, I might have complex edit action that needs to check for editing writes before allowing a user to do anything:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Form;
+
+use Cake\Form\Form;
+
+class PostEditForm
+{
+    protected $_user = null;
+    public function __construct(array $user = [])
+    {
+        $this-&amp;gt;_user = $user;
+        return $this;
+    }
+
+    protected function _buildValidator(Validator $validator)
+    {
+      // use $this-&amp;gt;_user in my validation rules
+      $userId = $this-&amp;gt;_user-&amp;gt;get(&#39;id&#39;);
+      $validator-&amp;gt;add(&#39;id&#39;, &#39;custom&#39;, [
+          &#39;rule&#39; =&amp;gt; function ($value, $context) use ($userId) {
+              // reusing an invokable class
+              return (new OwnedByCurrentUser($userId))-&amp;gt;__invoke($value);
+          },
+          &#39;message&#39; =&amp;gt; &#39;This photo isn\&#39;t yours to battle with&#39;
+      ]);
+    }
+  }
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Nifty, huh? Usually I end up saving new records in my &lt;code&gt;_execute()&lt;/code&gt; method as well. Here is what that looks like in one of my form classes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function _execute(array $data)
+{
+    $battle_id = Hash::get($data, &#39;id&#39;, null);
+    $photo_id = Hash::get($data, &#39;photo_id&#39;, null);
+    $battles = TableRegistry::get(&#39;Battles&#39;);
+    $photos = TableRegistry::get(&#39;Photos&#39;);
+
+    $battle = $battles-&amp;gt;find(&#39;Battle&#39;, [
+        &#39;battle_id&#39; =&amp;gt; $battle_id,
+    ])-&amp;gt;firstOrFail();
+
+    if ($battle-&amp;gt;confirmed != null) {
+        throw new MethodNotAllowedException(&#39;Battle has already been updated&#39;);
+    }
+
+    $photo = $photos-&amp;gt;get($photo_id);
+
+    $battle-&amp;gt;confirmed = true;
+    $battle-&amp;gt;rival-&amp;gt;photo = $photo;
+    if ($battles-&amp;gt;save($battle)) {
+        return $battles-&amp;gt;find(&#39;Battle&#39;, $battle-&amp;gt;toFind())-&amp;gt;firstOrFail();
+    }
+
+    $exception = new ValidationException(&#39;There are errors in the data you submitted&#39;);
+    $exception-&amp;gt;errors($battle-&amp;gt;errors());
+    throw $exception;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Why? Because it turns certain complex actions into the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function edit()
+{
+    $authedUser = $this-&amp;gt;Auth-&amp;gt;user();
+    $post = (new PostEditForm($authedUser))-&amp;gt;execute($this-&amp;gt;request-&amp;gt;data);
+    $this-&amp;gt;set([&#39;post&#39; =&amp;gt; $post]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Instead of litering logic across:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;a custom validation method in my model&lt;/li&gt;
+  &lt;li&gt;a controller action&lt;/li&gt;
+  &lt;li&gt;some other random model method or protected controller method&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I can group it all together into one, logical unit that can be easily unit tested for various types of input. A side-benefit of this is that if I &lt;em&gt;absolutely&lt;/em&gt; need to, I can always re-use a given action’s logic with as few as three lines of code within say, idk, a console shell.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 15 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>forms</category>
+        
+        <category>service</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Custom Logging Engines and adding Contextual Data</title>
+        <description>&lt;p&gt;Logging is incredibly important, and are very useful for debugging misbehaving applications. CakePHP 3 implements the &lt;a href=&quot;https://github.com/php-fig/log&quot;&gt;PSR-3&lt;/a&gt; logging standard - specifically extending the &lt;a href=&quot;https://github.com/php-fig/log/blob/master/Psr/Log/AbstractLogger.php&quot;&gt;AbstractLogger&lt;/a&gt; - so you have all normal logging levels available:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// the `Cake\Log\Log` class holds a log registry,
+// so you don&#39;t need to instantiate new loggers constantly
+Log::info(&#39;Some info level message&#39;);
+Log::error(&#39;uh oh! an error&#39;);
+
+// Swap out to Monolog because you need
+// to ship/store logs a specific way
+// In your bootstrap:
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+// Configure the logger
+Log::config(&#39;default&#39;, function () {
+    $log = new Logger(&#39;app&#39;);
+    $log-&amp;gt;pushHandler(new StreamHandler(&#39;path/to/your/combined.log&#39;));
+    return $log;
+});
+
+// Drop unused loggers
+Log::drop(&#39;debug&#39;);
+Log::drop(&#39;error&#39;);
+// and then use it as normal
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You’ll notice that a few classes have their own &lt;code&gt;log&lt;/code&gt; methods. You can add this to your own classes using the &lt;code&gt;LogTrait&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App;
+
+use Cake\Log\LogTrait;
+class Foo {
+  use LogTrait
+  public function bar()
+  {
+    $this-&amp;gt;log(&#39;baz&#39;);
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One thing I like doing is having &lt;code&gt;Tagged&lt;/code&gt; logs. That is, I will write a log message like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Message is an entity WUT
+// Entities are just bags of data, you can use them however you want
+$message = new Message([
+  &#39;message&#39; =&amp;gt; &#39;User logged in&#39;,
+  &#39;user_id&#39; =&amp;gt; $user-&amp;gt;get(&#39;id&#39;),
+  &#39;via&#39; =&amp;gt; &#39;android&#39;
+]);
+
+// :boom:
+Log::info($message);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;CakePHP’s internal formatter will automatically &lt;code&gt;json_encode&lt;/code&gt; any message that is &lt;code&gt;JsonSerializable&lt;/code&gt;. If you also implement a &lt;code&gt;__toString()&lt;/code&gt; method, that will be used instead.&lt;/p&gt;
+
+&lt;p&gt;This is kinda shoddy though, especially needing to manually pass in information that can be inferred through the request. Another method is to pass in that extra data as part of the context of a log message:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Log::info(&#39;User logged in&#39;, [&#39;request&#39; =&amp;gt; $request, &#39;user&#39; =&amp;gt; $user]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;But this extra data is usually ignored. CakePHP’s internal logging doesn’t have the concept of a formatter - that’s something we’d prefer you use a full logging package like &lt;a href=&quot;https://github.com/Seldaek/monolog&quot;&gt;Monolog&lt;/a&gt; for - but you &lt;em&gt;can&lt;/em&gt; easily implement your own &lt;code&gt;LogEngine&lt;/code&gt; that does what you need. Here is a simple one that simply logs to a file with our extra data:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;?php
+namespace App\Log\Engine;
+use Cake\Log\Engine\FileEngine;
+class ContextFileEngine
+{
+  public function _format($data, $context)
+  {
+    if (is_string($data)) {
+      return $this-&amp;gt;_injectContext($data, $context)
+    }
+
+    $object = is_object($data);
+
+    if ($object &amp;amp;&amp;amp; method_exists($data, &#39;__toString&#39;)) {
+      $data = (string)$data;
+      return $this-&amp;gt;_injectContext($data, $context)
+    }
+
+    if ($object &amp;amp;&amp;amp; $data instanceof JsonSerializable) {
+      $data = json_decode(json_encode($data), true);
+      return $this-&amp;gt;_injectContext($data, $context)
+    }
+
+    return $this-&amp;gt;_injectContext(print_r($data, true), $context);
+  }
+
+  protected function _injectContext($message, $context)
+  {
+    $via = null;
+    $userId = null;
+    if (!empty($context[&#39;request&#39;])) {
+      $via = $context[&#39;request&#39;]-&amp;gt;header(&#39;X-Client&#39;);
+    }
+    if (!empty($context[&#39;user&#39;])) {
+      $userId = $context[&#39;user&#39;]-&amp;gt;get(&#39;id&#39;);
+    }
+
+    $data = compact(&#39;message&#39;, &#39;via&#39;, &#39;userId&#39;);
+    // handle arrays
+    if (is_array($message)) {
+      $data = $message + compact(&#39;via&#39;, &#39;userId&#39;);
+    }
+
+    return parent::_format(json_encode($data), $context);
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above will have output similar to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;2015-12-14 7:55:00 INFO: {&quot;message&quot;: &quot;User logged in&quot;, &quot;userId&quot;: 7, &quot;via&quot;: &quot;android&quot;}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This method of injecting contextual data into your logs is quite useful for later debugging, and doesn’t require too much extra work around how logs are actually written. Of course, if you need more powerful logging features, I wholeheartedly recommend looking into &lt;a href=&quot;https://github.com/Seldaek/monolog&quot;&gt;Monolog&lt;/a&gt;&lt;br /&gt;
+.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 14 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/14/custom-logging-engines-and-adding-contextual-data/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/14/custom-logging-engines-and-adding-contextual-data/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>logging</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>The Collection Class and You</title>
+        <description>&lt;p&gt;Many modern applications work on a set of results, iterating over them, manipulating them, and modifying them to display the output necessary to get a job done. In CakePHP 3, we introduced the helpful &lt;code&gt;Collection&lt;/code&gt; class.&lt;/p&gt;
+
+&lt;p&gt;Here we have an array of cats info:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$cats = [
+  [
+    &#39;name&#39; =&amp;gt; &#39;camila&#39;,
+    &#39;gender&#39; =&amp;gt; &#39;female&#39;,
+    &#39;type&#39; =&amp;gt; &#39;calico&#39;,
+    &#39;size&#39; =&amp;gt; &#39;small&#39;,
+  ],
+  [
+    &#39;name&#39; =&amp;gt; &#39;railroad&#39;,
+    &#39;gender&#39; =&amp;gt; &#39;male&#39;,
+    &#39;color&#39; =&amp;gt; &#39;gray&#39;,
+    &#39;size&#39; =&amp;gt; &#39;massive&#39;,
+  ],
+  [
+    &#39;name&#39; =&amp;gt; &#39;santo&#39;,
+    &#39;gender&#39; =&amp;gt; &#39;male&#39;,
+    &#39;color&#39; =&amp;gt; &#39;black&#39;,
+    &#39;size&#39; =&amp;gt; &#39;massive&#39;,
+  ],
+  [
+    &#39;name&#39; =&amp;gt; &#39;jax&#39;,
+    &#39;gender&#39; =&amp;gt; &#39;male&#39;,
+    &#39;color&#39; =&amp;gt; &#39;black&#39;,
+    &#39;size&#39; =&amp;gt; &#39;small&#39;,
+  ],
+];
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lets filter out all the ~~best~~ female cats:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// filter the data
+$femaleCats = [];
+foreach ($cats as $cat) {
+  if ($cat[&#39;gender&#39;] == &#39;female&#39;) {
+    $femaleCats[] = $cat;
+  }
+}
+// $femaleCats should now contain camila, the cat on your right.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lets see what this looks like with the Collection class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// instantiate a new collection
+$collection = new \Cake\Collection\Collection($cats);
+
+// or use the helper function if you *really* want to
+$collection = collection($cats);
+
+// and now filter the data
+$femaleCats = $collection-&amp;gt;filter(function ($cat) {
+    return $cat[&#39;gender&#39;] == &#39;female;
+});
+
+// $femaleCats is a Collection instance that contains one cat
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Thats quite a bit simpler, though sometimes you want an array of data:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$femaleCats-&amp;gt;toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also chain collection methods:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$collection
+  // get all the small cats
+  -&amp;gt;filter(function ($cat) { return $info[&#39;size&#39;] == &#39;small&#39;; })
+  // if they are black
+  -&amp;gt;filter(function ($cat) { return $info[&#39;color&#39;] == &#39;black&#39;; })
+  // if they are female
+  -&amp;gt;filter(function ($cat) { return $info[&#39;gender&#39;] == &#39;female&#39;; })
+  // and sort alphabetically by name descending
+  -&amp;gt;sortBy(&#39;name&#39;, SORT_DESC);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty neat. Collections can work on any &lt;code&gt;array&lt;/code&gt; or instance that implements the &lt;code&gt;Traversable&lt;/code&gt; interface. In CakePHP, you can use any Collection method on the &lt;code&gt;ResultSet&lt;/code&gt; object returned by a query, which is pretty powerful for making complex find methods.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 13 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/13/collections-class-and-you/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/13/collections-class-and-you/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>collections</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Using DSNs to simplify connection strings</title>
@@ -641,552 +1025,6 @@ class SomeCallable
         <category>callables</category>
         
         <category>events</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Uploading files and images with CakePHP 3</title>
-        <description>&lt;p&gt;I’ve been working for years on upload plugins. CakePHP 1.2 users might remember MeioUpload - such a good plugin, it did &lt;em&gt;all&lt;/em&gt; the things. Which ended up being a bad move for maintainability. Something I took to heart when I worked on other alternatives, and when I finally wrote my &lt;a href=&quot;https://github.com/josegonzalez/cakephp-upload&quot;&gt;CakePHP Upload&lt;/a&gt; plugin. Until recently however, it supported only 2.x, and in this post-3.0 world, this just wouldn’t cut it.&lt;/p&gt;
-
-&lt;p&gt;If you are using CakePHP 3, there have been a &lt;a href=&quot;https://github.com/WyriHaximus/FlyPie&quot;&gt;few&lt;/a&gt; &lt;a href=&quot;https://github.com/josbeir/image&quot;&gt;different&lt;/a&gt; &lt;a href=&quot;https://github.com/davidyell/CakePHP3-Proffer&quot;&gt;upload&lt;/a&gt; &lt;a href=&quot;https://github.com/Xety/Cake3-Upload&quot;&gt;plugins&lt;/a&gt;. In my mind, the &lt;a href=&quot;https://github.com/davidyell/CakePHP3-Proffer&quot;&gt;Proffer&lt;/a&gt; plugin is the spiritual successor to the 2.x Upload plugin. If you need something more or less drop-in, I recommend looking into it. But this post isn’t about the Proffer plugin, but rather the new version of my &lt;a href=&quot;https://github.com/josegonzalez/cakephp-upload&quot;&gt;own upload plugin&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;focus&quot;&gt;Focus&lt;/h2&gt;
-
-&lt;p&gt;One thing I hated about the old plugin version is the fact that I was manually handling image thumbnails. There are plenty &lt;a href=&quot;https://github.com/avalanche123/Imagine&quot;&gt;of&lt;/a&gt; &lt;a href=&quot;https://github.com/Gregwar/Image&quot;&gt;awesome&lt;/a&gt; &lt;a href=&quot;https://github.com/Intervention/image&quot;&gt;packages&lt;/a&gt; to handle this already. Upload did it in a hacky way, with interpolated php logic coming from a regex-parsed string. And only sometimes did it work. And anything advanced, like adding a watermark, was mostly impossible. Sad panda.&lt;/p&gt;
-
-&lt;p&gt;If you wanted to upload a file to S3, that was impossible without further work. Handling local files required a hacky behavior. Quite annoying when really the code changes should have been minimal.&lt;/p&gt;
-
-&lt;p&gt;The other thing is that it was hard to test the code. So many codepaths to handle complex logic that honestly didn’t need to be there.&lt;/p&gt;
-
-&lt;p&gt;So with the 3.x plugin, I’ve resolved to the following:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Only add code with 100% unit test coverage.&lt;/li&gt;
-  &lt;li&gt;Stick to file uploading only.&lt;/li&gt;
-  &lt;li&gt;Use external libraries for handling file storage.&lt;/li&gt;
-  &lt;li&gt;Remove code that wasn’t strictly related to file uploading, like validation or image manipulation.&lt;/li&gt;
-  &lt;li&gt;Provide class-based entry points into the lifecycle of a file upload.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;uploading-a-file&quot;&gt;Uploading a file&lt;/h2&gt;
-
-&lt;p&gt;First install the thing:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require josegonzalez/cakephp-upload
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;and then load it in your &lt;code&gt;config/bootstrap.php&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load(&#39;Josegonzalez/Upload&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is a sample &lt;code&gt;UsersTable&lt;/code&gt; that implements file uploading:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Table;
-
-use App\Model\Entity\User;
-use Cake\ORM\Table;
-
-class UsersTable extends Table
-{
-
-    public function initialize(array $config)
-    {
-        $this-&amp;gt;table(&#39;users&#39;);
-        $this-&amp;gt;displayField(&#39;name&#39;);
-        $this-&amp;gt;primaryKey(&#39;id&#39;);
-        $this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
-            &#39;photo&#39;,
-        ]);
-    }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty basic. It will upload anything to the path &lt;code&gt;webroot/files/Users/photo/ID&lt;/code&gt;, and save metadata about the file to the &lt;code&gt;photo&lt;/code&gt; field. We still have a few of the same config options, with many of the same defaults. For instance, we may wish to change the upload path to be outside of &lt;code&gt;webroot&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
-    &#39;photo&#39; =&amp;gt; [
-        &#39;path&#39; =&amp;gt; &#39;static{DS}{model}{DS}{field}{DS}{primaryKey}&#39;,
-    ],
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We also save metadata about the file upload to three fields, &lt;code&gt;dir&lt;/code&gt;, &lt;code&gt;size&lt;/code&gt;, and &lt;code&gt;type&lt;/code&gt;. We can customize those just as easily:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
-    &#39;photo&#39; =&amp;gt; [
-        &#39;fields&#39; =&amp;gt; [
-            &#39;dir&#39; =&amp;gt; &#39;photo_dir&#39;,
-            &#39;size&#39; =&amp;gt; &#39;size_dir&#39;,
-            &#39;type&#39; =&amp;gt; &#39;type_dir&#39;,
-        ],
-    ],
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can also upload multiple files:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
-    &#39;photo&#39;,
-    &#39;video&#39;
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;customizing-the-file-upload&quot;&gt;Customizing the file upload&lt;/h2&gt;
-
-&lt;p&gt;CakePHP Upload does all the heavy-lifting using a new interface system. You can configure new classes to implement three key areas of file handling:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
-    &#39;photo&#39; =&amp;gt; [
-        // A pathProcessor handles both returning the basepath
-        // as well as what the initial filename should be set to
-        &#39;pathProcessor&#39; =&amp;gt; &#39;Josegonzalez\Upload\File\Path\DefaultProcessor&#39;
-
-        // Allows you to create new files from the original source,
-        // or possibly even modify/remove the original source file
-        // from the upload process
-        &#39;transformer&#39; =&amp;gt; &#39;Josegonzalez\Upload\File\Transformer\DefaultTransformer&#39;
-
-        // Handles writing a file to disk... or S3... or Dropbox... or FTP... or /dev/null
-        &#39;writer&#39; =&amp;gt; &#39;Josegonzalez\Upload\File\Writer\DefaultWriter&#39;,
-    ],
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;For anyone wondering, the above system allows us to do any of the following:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Handle arbitrary naming and pathing schemas&lt;/li&gt;
-  &lt;li&gt;Add or remove original files to the upload&lt;/li&gt;
-  &lt;li&gt;Extract video thumbnails&lt;/li&gt;
-  &lt;li&gt;Add watermarks to files&lt;/li&gt;
-  &lt;li&gt;Sanitize uploaded files&lt;/li&gt;
-  &lt;li&gt;Write those files to anywhere &lt;a href=&quot;http://flysystem.thephpleague.com/&quot;&gt;Flysystem&lt;/a&gt; supports&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Want to create a thumbnail and upload both the original and your new file to S3? Install the AWS S3 Flysystem adapter:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require league/flysystem-aws-s3-v3
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And follow along as we rock your socks off&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$client = \Aws\S3\S3Client::factory([
-    &#39;credentials&#39; =&amp;gt; [
-        &#39;key&#39;    =&amp;gt; &#39;your-key&#39;,
-        &#39;secret&#39; =&amp;gt; &#39;your-secret&#39;,
-    ],
-    &#39;region&#39; =&amp;gt; &#39;your-region&#39;,
-    &#39;version&#39; =&amp;gt; &#39;latest&#39;,
-]);
-$adapter = new \League\Flysystem\AwsS3v3\AwsS3Adapter(
-    $client,
-    &#39;your-bucket-name&#39;,
-    &#39;optional-prefix&#39;
-);
-
-$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
-    &#39;photo&#39; =&amp;gt; [
-        // Ensure the default filesystem writer writes using
-        // our S3 adapter
-        &#39;filesystem&#39; =&amp;gt; [
-            &#39;adapter&#39; =&amp;gt; $adapter,
-        ],
-
-        // This can also be in a class that implements
-        // the TransformerInterface or any callable type.
-        &#39;transformer&#39; =&amp;gt; function (Table $table, Entity $entity, $data, $field, $settings) {
-            // Store the thumbnail in a temporary file
-            $tmp = tmpfile();
-
-            // Use the Imagine library to DO THE THING
-            $size = new \Imagine\Image\Box(40, 40);
-            $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET;
-            $imagine = new \Imagine\Gd\Imagine();
-
-            // Save that modified file to our temp file
-            $imagine-&amp;gt;open($data[&#39;tmp_name&#39;])
-                    -&amp;gt;thumbnail($size, $mode)
-                    -&amp;gt;save($tmp);
-
-            // Now return the original *and* the thumbnail
-            return [
-                $data[&#39;tmp_name&#39;] =&amp;gt; $data[&#39;name&#39;],
-                $tmp =&amp;gt; &#39;thumbnail-&#39; . $data[&#39;name&#39;],
-            ];
-        },
-    ],
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A list of methods needed to implement the proper interfaces &lt;a href=&quot;https://cakephp-upload.readthedocs.org/en/latest/interfaces.html&quot;&gt;are here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;things-yet-to-do&quot;&gt;Things yet to do&lt;/h2&gt;
-
-&lt;p&gt;One thing that is sorely missing is upload file validation. Yes, you’re going to have to write these on your own. The Proffer plugin has these available, though in my mind the validation rules should be in their own plugin so &lt;em&gt;all&lt;/em&gt; upload plugins can benefit by just adding a &lt;code&gt;require&lt;/code&gt; statement to their &lt;code&gt;composer.json&lt;/code&gt;. Also, I’m lazy, and didn’t want to write a custom Validator class.&lt;/p&gt;
-
-&lt;p&gt;Documentation is a bit sparse - the above docs are the first to show exactly how powerful the plugin can be - but that will be ameliorated over time.&lt;/p&gt;
-
-&lt;h2 id=&quot;a-note-of-caution&quot;&gt;A note of caution&lt;/h2&gt;
-
-&lt;p&gt;One thing I’d like to stress is that the less you do during a page request, the faster your response time will be and the more likely your users will use your site. Here’s a &lt;a href=&quot;http://searchengineland.com/googles-push-to-speed-up-your-web-site-42177&quot;&gt;helpful post&lt;/a&gt; on just how important that be to numbers like, idk, user retention and revenue.&lt;/p&gt;
-
-&lt;p&gt;Given that information, I’d caution you against handling image manipulation etc. within a web request. This will work fine for some websites and internal administrative tools, but at some point you’re going to have to bite the bullet and refactor this code (and potentially even move the image uploading to outside of PHP entirely!). If only there was a way of combining file uploading and background processing…&lt;/p&gt;
-
-&lt;p&gt;Until next time!&lt;/p&gt;
-</description>
-        <pubDate>Sat, 05 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/05/uploading-files-and-images/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/05/uploading-files-and-images/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>upload</category>
-        
-        <category>files</category>
-        
-        <category>images</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>What exactly belongs in an entity?</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;Sorry for the lateness, I was at a basketball game. The Nets lost against the Knicks, if anyone was wondering.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I’ve been in a few arguments about what an “entity” is. CakePHP 3 introduced them as a new way of representing a distinct set of data from a collection of “things”. Typically, that means a row in a table.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$post = new Post;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;For a very long time, this was not how CakePHP abstracted information. You had an array, you modified an array, you saved an array, you deleted an array. GRONK WAS HAPPY!&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://www.catster.com/wp-content/uploads/2015/06/RobGronkowski4.png&quot; alt=&quot;My cowork Rick O&#39;Hanlon&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Honestly though, the array stuff was quite annoying, and most (all?) CakePHP are happy we replaced them in CakePHP 3. The ORM changes that came along with it were… weird, but make sense once you think about them. But what exactly do I gain with an entity?&lt;/p&gt;
-
-&lt;h2 id=&quot;custom-entity-data&quot;&gt;Custom Entity Data&lt;/h2&gt;
-
-&lt;p&gt;An entity is a bag of data. It is a data bag. You put some data in it, and you can get that data out.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;breathe&lt;/em&gt; &lt;em&gt;plays anna nalick&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;When you first use an entity, you should treat it as a dumb object. Previously, we would say “Fat Models, Skinny Controllers”. I think the same way about entities. Entities are fairly stupid. They know about themselves and not much else. That is to say, entities don’t and shouldn’t know how to save themselves, what it means to be a valid entity (save the mid-life crisis for a table), or really much of anything.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Entities are for holding data and virtually constructed data.&lt;/em&gt; If you have a &lt;code&gt;Post&lt;/code&gt; entity with information about a post, it may be able to constuct it’s published date, the number of views it has, or whether it is active or not, but it should &lt;em&gt;not&lt;/em&gt; know whether or not it is the latest version of a post, or whether it’s internal state is valid. These things should be left to tables and validators.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;In the case of validators, they may change the state of an entity to add errors etc., but I don’t think of this as the state. The ORM will refuse to save an invalid entity, so really all you have is a bad bag of data that you need to clean up. The validation errors tell you how to do that.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;what-is-in-an-entity&quot;&gt;What is in an Entity?&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://1.bp.blogspot.com/-6d78XHD9qIQ/TsE7oLbG_nI/AAAAAAAAABE/XgB3ci9zv4o/s1600/Baby+names.jpg&quot; alt=&quot;No really, what the hell does an entity stand for?&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;We’ve always had “App” classes in PHP. What is an &lt;code&gt;App&lt;/code&gt; class? It’s literally a parent class that we use to contain some amount of default logic. You can create as many of these as you’d like. The &lt;code&gt;App&lt;/code&gt; prefix is just a standard, I like to call mine &lt;code&gt;Lolipop&lt;/code&gt;  classes when no one is looking.&lt;/p&gt;
-
-&lt;p&gt;Here is my default &lt;code&gt;LolipopEntity&lt;/code&gt; class (hey, we have object oriented programming up in the hizouze!). You can place what you’d like in yours, I recommend seeing what is common and just doing that once:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Entity;
-
-use App\Model\Entity\Traits\JsonApi;
-use Cake\ORM\Entity;
-
-class LolipopEntity extends Entity
-{
-    use JsonApi;
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Okay, that is cheating. You can see I include the &lt;code&gt;JsonApi&lt;/code&gt; trait, and here it is:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Entity\Traits;
-
-use Cake\Routing\Router;
-use Cake\Utility\Inflector;
-
-trait JsonApi
-{
-    public static function className()
-    {
-        $classname = get_called_class();
-        if (preg_match(&#39;@\\\\([\w]+)$@&#39;, $classname, $matches)) {
-            $classname = $matches[1];
-        }
-
-        return $classname;
-    }
-
-    public function _getType()
-    {
-        $classname = static::className();
-        return Inflector::classify($classname);
-    }
-
-    public function _getRoute()
-    {
-        $classname = static::className();
-
-        return [
-            &#39;controller&#39; =&amp;gt; Inflector::pluralize(Inflector::classify($classname)),
-            &#39;action&#39; =&amp;gt; &#39;view&#39;,
-            &#39;_method&#39; =&amp;gt; &#39;GET&#39;,
-            &#39;id&#39; =&amp;gt; $this-&amp;gt;id,
-        ];
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;JsonApi&lt;/code&gt; trait is something I use for building out APIs. My &lt;code&gt;AppEntity&lt;/code&gt; sometimes includes a &lt;code&gt;toArray&lt;/code&gt; that pulls in these false methods, or I include them manually in subclasses. I also have other related methods that build upon the data an entity has to create information &lt;em&gt;about&lt;/em&gt; that entity.&lt;/p&gt;
-
-&lt;p&gt;Entities are bags of data, and while they are supposed to be stupid, in my view they should understand how to reference themselves. This is controversial amongst the core developers, but I take this stance because I like to keep my code DRY.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;DONT REPEAT YOURSELF. Repeat after me (because I won’t!).&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Let’s say you have a database of events. Each event has a url, and you have custom routes for that url (to include seo information etc.). Each time you change the custom route, you may or may not have to change route information included to generate that route.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Html-&amp;gt;link(&#39;Awesome Event with Milkshakes&#39;, [
-  &#39;controller&#39; =&amp;gt; &#39;Events&#39;,
-  &#39;action&#39; =&amp;gt; &#39;view&#39;,
-  &#39;id&#39; =&amp;gt; $entity-&amp;gt;id,
-  &#39;slug&#39; =&amp;gt; $entity-&amp;gt;slug,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;At some point, writing the above out gets annoying. And while the reference to an object happens in the presentation layer and is probably easily done in a helper, isn’t it nice to do something like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Html-&amp;gt;link(&#39;Awesome Event with Milkshakes&#39;, $entity-&amp;gt;getRoute());
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The alternative is a helper to which you pass an entity, or always writing out the array.&lt;/p&gt;
-
-&lt;h2 id=&quot;a-best-practice-or-at-least-a-practice&quot;&gt;A Best Practice, or at least a “Practice”&lt;/h2&gt;
-
-&lt;p&gt;While I may disagree with the core developers on what goes where, we can all agree that at the end of the day, you should strive to write the least amount of code that works which won’t give you a headache at some other time. In my case, it is adding some presentational data to the &lt;code&gt;entity&lt;/code&gt; object. Maybe in your case, that means never using plugins or shirking away from namespaces.&lt;/p&gt;
-
-&lt;p&gt;Remember, there are many ways to skin a cat (please don’t hurt my cat). So long as you aren’t increasing anyone’s cognitive load, choose the method that involves the least code.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Always code as if the person who ends up maintaining your code is a violent psychopath who knows where you live. - &lt;a href=&quot;http://c2.com/cgi/wiki?CodeForTheMaintainer&quot;&gt;Code For The Maintainer&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-</description>
-        <pubDate>Fri, 04 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/04/whats-in-an-entity/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/04/whats-in-an-entity/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>table</category>
-        
-        <category>entity</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Generating Administrative Panels with CrudView</title>
-        <description>&lt;p&gt;Since time immemorial - okay, 2009 - it has been possible to set a custom view for CakePHP applications:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Don&#39;t try this, there isn&#39;t an ExcelView in the core :P
-$this-&amp;gt;viewBuilder()-&amp;gt;className(&#39;ExcelView&#39;)
-$this-&amp;gt;viewClass = &#39;ExcelView&#39;;
-
-// Who remembers this from 1.x?
-$this-&amp;gt;viewClass = &#39;MediaView&#39;;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Since then, the number of view classes has increased dramatically, and we even have ways to map certain types of responses to particular view classes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;RequestHandler-&amp;gt;config(&#39;viewClassMap&#39;, [
-    // troll all your xml users
-    &#39;xml&#39; =&amp;gt; &#39;Json&#39;,
-    // this is from a plugin
-    &#39;xlsx&#39; =&amp;gt; &#39;CakeExcel.Excel&#39;,
-    // so is this!
-    &#39;csv&#39; =&amp;gt; &#39;CsvView.Csv&#39;,
-    // we are really into this plugin thing aren&#39;t we
-    &#39;rss&#39; =&amp;gt; &#39;Feed.Rss&#39;
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;One of the nice things about views is that they completely take over the rendering step, allowing you to create views that automatically generate interactive experiences. Similar to how the Crud plugin allows users to generate api responses, the CrudView plugin allows users to generate administrative panels.&lt;/p&gt;
-
-&lt;h2 id=&quot;crudview&quot;&gt;CrudView&lt;/h2&gt;
-
-&lt;p&gt;The CrudView plugin is actually one of the more difficult plugins to use, owing to the fact that there is basically zero documentation - we’re working on it! It works similar to how the Crud plugin does, using &lt;code&gt;events&lt;/code&gt; and &lt;code&gt;config&lt;/code&gt; options to lay everything out &lt;em&gt;just&lt;/em&gt; right.&lt;/p&gt;
-
-&lt;p&gt;To start, you’ll want to install the bugger:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require friendsofcake/crud-view:dev-master
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The simplest method of using CrudView is to configure the Crud &lt;code&gt;listener&lt;/code&gt; and &lt;code&gt;viewClass&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Controller;
-
-use Cake\Controller\Controller;
-use Crud\Controller;
-use Crud\Controller\ControllerTrait;
-
-class AppController extends Controller
-{
-    use ControllerTrait;
-
-    public function initialize()
-    {
-        parent::initialize();
-
-        $this-&amp;gt;loadComponent(&#39;RequestHandler&#39;);
-        $this-&amp;gt;loadComponent(&#39;Flash&#39;);
-
-        // setup the viewclass
-        $this-&amp;gt;viewBuilder()-&amp;gt;className(&#39;CrudView\View\CrudView&#39;)
-        $this-&amp;gt;loadComponent(&#39;Crud.Crud&#39;, [
-            &#39;actions&#39; =&amp;gt; [
-                &#39;Crud.Index&#39;,
-                &#39;Crud.Add&#39;,
-                &#39;Crud.Edit&#39;,
-                &#39;Crud.View&#39;,
-                &#39;Crud.Delete&#39;,
-            ],
-            &#39;listeners&#39; =&amp;gt; [
-                // and ensure we have the listener configured
-                &#39;CrudView.View&#39;,
-                &#39;Crud.RelatedModels&#39;,
-                &#39;Crud.Redirect&#39;,
-            ],
-        ]);
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That’s it! We now have automatic view scaffolding for every controller that inherits from the &lt;code&gt;AppController&lt;/code&gt;, &lt;em&gt;as well as&lt;/em&gt; all the yummy api stuff the Crud plugin gives us by default.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2015/03/admin.png&quot; alt=&quot;Crud View Admin&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;hiding-sidebar-entries&quot;&gt;Hiding Sidebar Entries&lt;/h3&gt;
-
-&lt;p&gt;CrudView is only as smart as you configure it to be. By default, it will show &lt;em&gt;all&lt;/em&gt; tables in the sidebar and link to their assumed administrative panels. I personally prefer not to show join tables, or anything related to database migrations, and as such my &lt;code&gt;AppController::beforeFilter&lt;/code&gt; looks something like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function beforeFilter(Event $event)
-{
-    $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.tables_blacklist&#39;, [
-        &#39;blog_phinxlog&#39;,
-        &#39;phinxlog&#39;,
-        &#39;posts_tags&#39;,
-    ]);
-
-    return parent::beforeFilter($event);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2015/03/limit-sidebar.png&quot; alt=&quot;Crud View Admin&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;showing-specific-fields-for-specific-actions&quot;&gt;Showing specific fields for specific actions&lt;/h3&gt;
-
-&lt;p&gt;On my index actions for Categories and Tags, I’d like to hide most fields and just show the &lt;code&gt;name&lt;/code&gt; field:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function beforeFilter(Event $event)
-    if ($this-&amp;gt;request-&amp;gt;action == &#39;index&#39;) {
-        $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.fields&#39;, [&#39;name&#39;]);
-    }
-    return parent::beforeFilter($event);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2015/03/show-specific-fields.png&quot; alt=&quot;Showing specific fields&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Of note, you can also set these config options in specific actions, the same as you would to customize the crud plugin, but sometimes you can avoid that with very trivial hacks. I wouldn’t do the above if there was 10 lines of configuration for the IndexAction, for instance.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;exposing-bulk-actions&quot;&gt;Exposing bulk actions&lt;/h3&gt;
-
-&lt;p&gt;Sometimes I’d like to expose bulk post actions to my administrative users in a simple to use interface. CrudView takes a tact similar to wordpress and provides a checkboxes next to each row that can be used to “apply” configured actions:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize()
-{
-    parent::initialize();
-    // map a fiew bulk actions
-    $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;deleteAll&#39;, &#39;Crud.Bulk/Delete&#39;);
-    $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;setStatus&#39;, [
-        &#39;className&#39; =&amp;gt; &#39;Crud.Bulk/SetValue&#39;,
-        &#39;field&#39; =&amp;gt; &#39;status&#39;,
-    ]);
-}
-public function beforeFilter(Event $event)
-{
-    // provide the proper links to the actions
-    $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.bulk_actions&#39;, [
-        Router::url([&#39;action&#39; =&amp;gt; &#39;deleteAll&#39;]) =&amp;gt; __(&#39;Delete selected&#39;),
-        Router::url([&#39;action&#39; =&amp;gt; &#39;setStatus&#39;, &#39;status&#39; =&amp;gt; &#39;published&#39;]) =&amp;gt; __(&#39;Make published&#39;),
-        Router::url([&#39;action&#39; =&amp;gt; &#39;setStatus&#39;, &#39;status&#39; =&amp;gt; &#39;pending-review&#39;]) =&amp;gt; __(&#39;Set to pending&#39;),
-    ]);
-    return parent::beforeFilter($event);
-}
-
-public function setStatus()
-{
-    $this-&amp;gt;_statusOptions = [
-        &#39;published&#39; =&amp;gt; &#39;Published&#39;,
-        &#39;pitch&#39; =&amp;gt; &#39;Pitch&#39;,
-        &#39;assigned&#39; =&amp;gt; &#39;Assigned&#39;,
-        &#39;in-progress&#39; =&amp;gt; &#39;In Progress&#39;,
-        &#39;pending-review&#39; =&amp;gt; &#39;Pending Review&#39;,
-    ];
-
-    $value = $this-&amp;gt;request-&amp;gt;query(&#39;status&#39;);
-    if (!in_array($value, array_keys($this-&amp;gt;_statusOptions))) {
-        throw new BadRequestException(&#39;No valid status specified&#39;);
-    }
-
-    // ZHU LI, DO THE THING!
-    $this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;value&#39;, $value);
-    return $this-&amp;gt;Crud-&amp;gt;execute();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2015/03/bulk-actions.png&quot; alt=&quot;Showing specific fields&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Obviously the logic here can get incredibly complex, and you are welcome to integrate both Crud and CrudView to best express these sorts of experiences for your users.&lt;/p&gt;
-
-&lt;h2 id=&quot;youre-getting-sleepy&quot;&gt;You’re getting sleepy&lt;/h2&gt;
-
-&lt;p&gt;Building administrative interfaces isn’t the most illustrious job out there, but if you ever find yourself in a pinch, the CrudView plugin is there to help. Hopefully the above will give you enough of a primer to find your way through the plugin, and we’ll continue plugging on it until it’s both polished and well-documented. Until tomorrow!&lt;/p&gt;
-</description>
-        <pubDate>Thu, 03 Dec 2015 13:42:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/03/generating-administrative-panels-with-crud-view/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>api</category>
-        
-        <category>crud</category>
         
         
         <category>cakephp</category>

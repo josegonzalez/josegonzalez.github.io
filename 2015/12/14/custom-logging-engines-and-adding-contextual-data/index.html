@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: Customizing your Application Template</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/">
+    <title>CakeAdvent-2015: Custom Logging Engines and adding Contextual Data</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/14/custom-logging-engines-and-adding-contextual-data/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
-    <meta name="keywords" content="cakeadvent-2015, cakephp, composer, create-project" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, logging" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: Customizing your Application Template" />
+    <meta property="og:title" content="CakeAdvent-2015: Custom Logging Engines and adding Contextual Data" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/14/custom-logging-engines-and-adding-contextual-data/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: Customizing your Application Template" />
+    <meta name="twitter:title" content="CakeAdvent-2015: Custom Logging Engines and adding Contextual Data" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="Customizing your Application Template » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Custom Logging Engines and adding Contextual Data » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,58 +64,114 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Customizing your Application Template
+        Custom Logging Engines and adding Contextual Data
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Customizing your Application Template!">
+        <a href="#comments" title="Comment on Custom Logging Engines and adding Contextual Data!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>CakePHP has long had the ability to generate new projects via the <code>bake</code> command:</p>
-<pre><code class="language-shell">// my custom cat project
-cake bake project camila
+    <p>Logging is incredibly important, and are very useful for debugging misbehaving applications. CakePHP 3 implements the <a href="https://github.com/php-fig/log">PSR-3</a> logging standard - specifically extending the <a href="https://github.com/php-fig/log/blob/master/Psr/Log/AbstractLogger.php">AbstractLogger</a> - so you have all normal logging levels available:</p>
+<pre><code class="language-php">// the `Cake\Log\Log` class holds a log registry,
+// so you don't need to instantiate new loggers constantly
+Log::info('Some info level message');
+Log::error('uh oh! an error');
+// Swap out to Monolog because you need
+// to ship/store logs a specific way
+// In your bootstrap:
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+// Configure the logger
+Log::config('default', function () {
+    $log = new Logger('app');
+    $log-&gt;pushHandler(new StreamHandler('path/to/your/combined.log'));
+    return $log;
+});
+// Drop unused loggers
+Log::drop('debug');
+Log::drop('error');
+// and then use it as normal
 </code></pre>
-<p>With the above command, CakePHP would scaffold out all the necessary directories and files for a new project (<code>AppModel</code>, <code>AppController</code>, configuration files, etc.). You could even customize this using a <a href="http://book.cakephp.org/2.0/en/console-and-shells/code-generation-with-bake.html#for-baking-custom-projects">bake skeleton</a>:</p>
-<pre><code class="language-shell">// be sure to copy in my cat project instead
-cake bake project camila --skel Console/Templates/cat
+<p>You’ll notice that a few classes have their own <code>log</code> methods. You can add this to your own classes using the <code>LogTrait</code>:</p>
+<pre><code class="language-php">&lt;?php
+namespace App;
+use Cake\Log\LogTrait;
+class Foo {
+  use LogTrait
+  public function bar()
+  {
+    $this-&gt;log('baz');
+  }
+}
+?&gt;
 </code></pre>
-<p>In CakePHP 3, this feature of bake has mostly gone away in favor of using <code>composer</code> to handle scaffolding. When starting a new project, you typically do something like:</p>
-<pre><code class="language-shell">composer create-project --prefer-dist cakephp/app camila
+<p>One thing I like doing is having <code>Tagged</code> logs. That is, I will write a log message like so:</p>
+<pre><code class="language-php">// Message is an entity WUT
+// Entities are just bags of data, you can use them however you want
+$message = new Message([
+  'message' =&gt; 'User logged in',
+  'user_id' =&gt; $user-&gt;get('id'),
+  'via' =&gt; 'android'
+]);
+// :boom:
+Log::info($message);
 </code></pre>
-<p>Composer’s <code>create-project</code> command is great for scaffolding out new projects and is used for a variety of things:</p>
-<ul>
-  <li>Framework-specific application repos</li>
-  <li>Framework-specific plugin modules</li>
-  <li>Generic composer packages</li>
-</ul>
-<p>The great thing about this command is that the “skeletons” are in all actually composer packages. This means it is extremely easy to use your normal distribution methods to release new versions of the package, something the CakePHP project has done with it’s <a href="https://github.com/cakephp/app">cakephp/app</a> repository.</p>
-<p>Now, as a side-effect of this, you can <em>*also*</em> fork any existing composer skeleton and add your own customizations. For instance, lets say we wanted to have a composer skeleton with the following plugins installed automatically:</p>
-<ul>
-  <li><a href="https://github.com/josegonzalez/cakephp-upload">josegonzalez/upload</a></li>
-  <li><a href="https://github.com/friendsofcake/crud">friendsofcake/crud</a></li>
-  <li><a href="https://github.com/friendsofcake/crud-view">friendsofcake/crud-view</a></li>
-  <li><a href="https://github.com/thephpleague/fractal">league/fractal</a></li>
-  <li><a href="https://github.com/usemuffin/trash">usemuffin/trash</a></li>
-</ul>
-<p>We can simply do the following:</p>
-<ol>
-  <li>Fork the <a href="https://github.com/cakephp/app">cakephp/app</a> repository on github.</li>
-  <li>Change the name in the fork’s composer.json to <code>myname/app</code>.</li>
-  <li>Add any custom requirements to the <code>composer.json</code>.</li>
-  <li>Make a new tag/release on github.</li>
-  <li>Add it to <a href="https://packagist.org">packagist.org</a></li>
-</ol>
-<p>Pretty simple. We can now use this project as a baseline for all of our new CakePHP projects:</p>
-<pre><code class="language-shell">composer create-project --prefer-dist myname/app camila
+<p>CakePHP’s internal formatter will automatically <code>json_encode</code> any message that is <code>JsonSerializable</code>. If you also implement a <code>__toString()</code> method, that will be used instead.</p>
+<p>This is kinda shoddy though, especially needing to manually pass in information that can be inferred through the request. Another method is to pass in that extra data as part of the context of a log message:</p>
+<pre><code class="language-php">Log::info('User logged in', ['request' =&gt; $request, 'user' =&gt; $user]);
 </code></pre>
-<p>Apart from adding custom plugins, one thing you may want to look is customizing the initial project files. For instance, if you find yourself constantly adding certain helper classes, or modifying how configuration is loaded, this is a good chance to improve the base state of your initial applications.</p>
-<p>As every project is slightly different, please try and keep application-specific enhancements to a minimum, as they may only serve as a hindrance when using your skeleton. No one wants to setup an app and then spend an hour deleting useless code :)</p>
-<p>For those of you who are interested in such a project, <a href="https://github.com/loadsys/CakePHP-Skeleton">here is an advanced skeleton</a> from the good folks at <a href="https://www.loadsys.com/">Loadsys Web Strategies</a>.</p>
+<p>But this extra data is usually ignored. CakePHP’s internal logging doesn’t have the concept of a formatter - that’s something we’d prefer you use a full logging package like <a href="https://github.com/Seldaek/monolog">Monolog</a> for - but you <em>can</em> easily implement your own <code>LogEngine</code> that does what you need. Here is a simple one that simply logs to a file with our extra data:</p>
+<pre><code>&lt;?php
+namespace App\Log\Engine;
+use Cake\Log\Engine\FileEngine;
+class ContextFileEngine
+{
+  public function _format($data, $context)
+  {
+    if (is_string($data)) {
+      return $this-&gt;_injectContext($data, $context)
+    }
+    $object = is_object($data);
+    if ($object &amp;&amp; method_exists($data, '__toString')) {
+      $data = (string)$data;
+      return $this-&gt;_injectContext($data, $context)
+    }
+    if ($object &amp;&amp; $data instanceof JsonSerializable) {
+      $data = json_decode(json_encode($data), true);
+      return $this-&gt;_injectContext($data, $context)
+    }
+    return $this-&gt;_injectContext(print_r($data, true), $context);
+  }
+  protected function _injectContext($message, $context)
+  {
+    $via = null;
+    $userId = null;
+    if (!empty($context['request'])) {
+      $via = $context['request']-&gt;header('X-Client');
+    }
+    if (!empty($context['user'])) {
+      $userId = $context['user']-&gt;get('id');
+    }
+    $data = compact('message', 'via', 'userId');
+    // handle arrays
+    if (is_array($message)) {
+      $data = $message + compact('via', 'userId');
+    }
+    return parent::_format(json_encode($data), $context);
+  }
+}
+?&gt;
+</code></pre>
+<p>The above will have output similar to the following:</p>
+<pre><code>2015-12-14 7:55:00 INFO: {"message": "User logged in", "userId": 7, "via": "android"}
+</code></pre>
+<p>This method of injecting contextual data into your logs is quite useful for later debugging, and doesn’t require too much extra work around how logs are actually written. Of course, if you need more powerful logging features, I wholeheartedly recommend looking into <a href="https://github.com/Seldaek/monolog">Monolog</a><br />
+.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-09 12:00:00 +0000">09 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/14/custom-logging-engines-and-adding-contextual-data/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-14 12:00:00 +0000">14 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -136,7 +192,7 @@ cake bake project camila --skel Console/Templates/cat
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 9</strong> of <strong>15</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 14</strong> of <strong>15</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
       <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
@@ -146,12 +202,12 @@ cake bake project camila --skel Console/Templates/cat
       <li><a href="/2015/12/06/invoking-callable-classes/">Invoking Callable Classes</a></li>
       <li><a href="/2015/12/07/error-handling-in-cakephp-3/">Error Handling in CakePHP 3</a></li>
       <li><a href="/2015/12/08/debugging-data-in-cakephp-3/">Debugging Data in CakePHP 3</a></li>
-      <li>Customizing your Application Template</li>
+      <li><a href="/2015/12/09/customizing-your-app-template/">Customizing your Application Template</a></li>
       <li><a href="/2015/12/10/faster-database-creation-with-migrations/">Faster Database Creation with the Migrations Plugin</a></li>
       <li><a href="/2015/12/11/softdeletion-in-cakephp-3/">SoftDeleting Entities in CakePHP 3</a></li>
       <li><a href="/2015/12/12/using-dns-to-simplify-connection-strings/">Using DSNs to simplify connection strings</a></li>
       <li><a href="/2015/12/13/collections-class-and-you/">The Collection Class and You</a></li>
-      <li><a href="/2015/12/14/custom-logging-engines-and-adding-contextual-data/">Custom Logging Engines and adding Contextual Data</a></li>
+      <li>Custom Logging Engines and adding Contextual Data</li>
       <li><a href="/2015/12/15/stuffing-complex-logic-into-model-less-forms/">Stuffing Complex Logic into Model-less Forms</a></li>
     </ol>
 </div>
@@ -191,9 +247,9 @@ cake bake project camila --skel Console/Templates/cat
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/09/customizing-your-app-template/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/';
-        var disqus_title      = "CakeAdvent-2015: Customizing your Application Template";
+        var disqus_identifier = '/2015/12/14/custom-logging-engines-and-adding-contextual-data/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/14/custom-logging-engines-and-adding-contextual-data/';
+        var disqus_title      = "CakeAdvent-2015: Custom Logging Engines and adding Contextual Data";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
