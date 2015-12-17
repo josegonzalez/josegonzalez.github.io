@@ -5,9 +5,194 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 16 Dec 2015 01:38:18 +0000</pubDate>
-    <lastBuildDate>Wed, 16 Dec 2015 01:38:18 +0000</lastBuildDate>
+    <pubDate>Thu, 17 Dec 2015 00:01:04 +0000</pubDate>
+    <lastBuildDate>Thu, 17 Dec 2015 00:01:04 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Custom Validation Rule Classes</title>
+        <description>&lt;p&gt;I was asked yesterday if I could elaborate on my &lt;code&gt;OwnedByCurrentUser&lt;/code&gt; rule class. I’ll post it here, but also post on my process for developing rules.&lt;/p&gt;
+
+&lt;h2 id=&quot;organization&quot;&gt;Organization&lt;/h2&gt;
+
+&lt;p&gt;First off, I &lt;em&gt;hate&lt;/em&gt; having anonymous functions:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;They are harder to test in isolation of the enclosing scope.&lt;/li&gt;
+  &lt;li&gt;They make it more difficult to reason about classes because of the implicit extra scope/binding of the callable.&lt;/li&gt;
+  &lt;li&gt;I think they look silly.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I definitely think they have their place - configuring the CRUD Plugin is one - but normally I try to stay away from them if possible. Instead, I use &lt;a href=&quot;/2015/12/06/invoking-callable-classes/&quot;&gt;invokable callable classes&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For rules, I normally place my callable classes in &lt;code&gt;src/Form/Rule&lt;/code&gt;. Here is what our initial &lt;code&gt;OwnedByCurrentUser&lt;/code&gt; rule looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Form\Rule;
+class OwnedByCurrentUser
+{
+    /**
+     * Performs the check
+     *
+     * @param mixed $value The data to validate
+     * @param array $context A key value list of data that could be used as context
+     * during validation. Recognized keys are:
+     * - newRecord: (boolean) whether or not the data to be validated belongs to a
+     *   new record
+     * - data: The full data that was passed to the validation process
+     * - field: The name of the field that is being processed
+     * - providers: associative array with objects or class names that will
+     *   be passed as the last argument for the validation method
+     * @return bool
+     */
+    public function __invoke($value, array $context = null)
+    {
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;filling-it-in&quot;&gt;Filling it in&lt;/h2&gt;
+
+&lt;p&gt;When I write a rule, I’ll first write it to handle one very specific case. In this particular application, I had to ensure that a particular &lt;code&gt;Battle&lt;/code&gt; was owned by a participant in the battle before allowing them to perform certain actions. My invoke looked like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function __invoke($value, array $context = null)
+{
+    $table = \Cake\ORM\TableRegistry::get(&#39;Battles&#39;);
+    return !!$table-&amp;gt;find()-&amp;gt;where([
+      &#39;id&#39; =&amp;gt; (int)$value,
+      &#39;user_id&#39; =&amp;gt; $userId,
+    ])-&amp;gt;firstOrFail();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above sort of works:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;It actually throws a &lt;code&gt;Cake\Datasource\Exception\RecordNotFoundException&lt;/code&gt; exception, which is incorrect for my use case, since I don’t want validation rules to throw exceptions&lt;/li&gt;
+  &lt;li&gt;I wasn’t sure where I was passing in the &lt;code&gt;$userId&lt;/code&gt;. The &lt;code&gt;$context&lt;/code&gt; maybe?&lt;/li&gt;
+  &lt;li&gt;I’m offloading a lot of logic into the database. What if I don’t have compound index on &lt;code&gt;id/user_id&lt;/code&gt;? That would slow down this part of the app (maybe not a concern).&lt;/li&gt;
+  &lt;li&gt;There was a table where I was thinking of re-using this in the near future that used &lt;code&gt;creator_id&lt;/code&gt; instead of &lt;code&gt;user_id&lt;/code&gt; to denote who owned the record (legacy applications, am I right?). This was hardcoded to the one field, which would mean more copy-pasting. I also couldn’t modify the table that was being checked. Boo.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Once I had a few tests going that brought up the above issues, I knew I had to refactor it.&lt;/p&gt;
+
+&lt;h2 id=&quot;fixing-issues&quot;&gt;Fixing issues&lt;/h2&gt;
+
+&lt;p&gt;I took a step back and realized I wanted to instantiate rules and then invoke them several times. This meant modifying the rule instance state, as well as passing in an initial state. First, lets add a constructor:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected $_alias;
+protected $_userId;
+protected $_fieldName;
+
+/**
+ * Performs the check
+ *
+ * @param string $alias Table alias
+ * @param mixed $userId A string or integer denoting a user&#39;s id
+ * @param string $fieldName A name to use when checking an entity&#39;s association
+ * @return void
+ */
+public function __construct($alias, $userId, $fieldName = &#39;user_id&#39;)
+{
+    $this-&amp;gt;_alias = $alias;
+    $this-&amp;gt;_userId = $userId;
+    $this-&amp;gt;_fieldName = $fieldName;
+}
+
+public function setTable($alias)
+{
+    $this-&amp;gt;_alias = $alias;
+}
+
+public function setUserId($userId)
+{
+    $this-&amp;gt;_userId = $userId;
+}
+
+public function setFieldName($fieldName)
+{
+    $this-&amp;gt;_fieldName = $fieldName;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Each field is a protected field - meaning I can extend this easily by subclassing - and all have setters - meaning I can reuse a rule instance if necessary. Next I needed to modify the &lt;code&gt;__invoke()&lt;/code&gt; method to use my customizations:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function __invoke($value, array $context = null)
+{
+    // handle the case where no userId was
+    // specified or the user is logged out
+    $userId = $this-&amp;gt;_userId;
+    if (empty($userId)) {
+        return false;
+    }
+
+    // use the Table class specified by our configured alias
+    $table = \Cake\ORM\TableRegistry::get($this-&amp;gt;_alias);
+
+    // Don&#39;t make the database do the heavy-lifting
+    $entity = $table-&amp;gt;find()-&amp;gt;where([&#39;id&#39; =&amp;gt; (int)$value])-&amp;gt;first();
+    if (empty($entity)) {
+        return false;
+    }
+
+    // Ensure any customized field matches our userId
+    return $entity-&amp;gt;get($this-&amp;gt;_fieldName) == $userId;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;wrapping-it-up&quot;&gt;Wrapping it up&lt;/h3&gt;
+
+&lt;p&gt;From yesterday’s post, here is how the rule is invoked:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function _buildValidator(Validator $validator)
+{
+    // use $this-&amp;gt;_user in my validation rules
+    $userId = $this-&amp;gt;_user-&amp;gt;get(&#39;id&#39;);
+    $validator-&amp;gt;add(&#39;id&#39;, &#39;custom&#39;, [
+        &#39;rule&#39; =&amp;gt; function ($value, $context) use ($userId) {
+            // reusing an invokable class
+            $rule = new OwnedByCurrentUser(&#39;Battles&#39;, $userId);
+            return $rule($value, $context);
+        },
+        &#39;message&#39; =&amp;gt; &#39;This photo isn\&#39;t yours to battle with&#39;
+    ]);
+
+    // This should also work
+    $validator-&amp;gt;add(&#39;id&#39;, &#39;custom&#39;, [
+        &#39;rule&#39; =&amp;gt; new OwnedByCurrentUser(&#39;Battles&#39;, $userId),
+        &#39;message&#39; =&amp;gt; &#39;This photo isn\&#39;t yours to battle with&#39;
+    ]);
+
+    // As should this (and you can now re-use the rule)
+    $rule = new OwnedByCurrentUser(&#39;Battles&#39;, $userId);
+    $validator-&amp;gt;add(&#39;id&#39;, &#39;custom&#39;, [
+        &#39;rule&#39; =&amp;gt; $rule,
+        &#39;message&#39; =&amp;gt; &#39;This photo isn\&#39;t yours to battle with&#39;
+    ]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;mopping-up&quot;&gt;Mopping up&lt;/h2&gt;
+
+&lt;p&gt;When I first found out I could do this, I was quite delighted by it. Validation rules have always been a pain to test, and this was as good as it got. I now have an easy to understand class that is both easily testable and gives me increased code reuse.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 16 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/16/custom-validation-rule-classes/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/16/custom-validation-rule-classes/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>rules</category>
+        
+        <category>validation</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Stuffing Complex Logic into Model-less Forms</title>
@@ -974,57 +1159,6 @@ class ConsoleErrorHandler extends CoreConsoleErrorHandler
         <category>errors</category>
         
         <category>exceptions</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Invoking Callable Classes</title>
-        <description>&lt;p&gt;CakePHP has offered the use of callables for invoking related logic since 2.x with the event system. They are great for expressing self-contained pieces of logic, but not so much for avoiding spaghetti code.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;eventManager()-&amp;gt;on(&#39;event&#39;, function (\Cake\Event\Event $event) {
-    // complex logic here
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This only gets worse in CakePHP 3, where you now have to deal with formatters, custom rules, and other such niceties that are easier to handle via callbacks.&lt;/p&gt;
-
-&lt;p&gt;One other drawback is that your code is no longer testable in isolation. You need to execute the enclosing block in order to even try to trigger the anonymous function. Thankfully, callables can be classes!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \Cake\Event\Event;
-class SomeCallable
-{
-    public function __invoke(Event $event)
-    {
-        // complex logic here
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Since PHP 5.4, we also have the &lt;code&gt;Callable&lt;/code&gt; typehint, which you can use in your own functions when interacting with either invokable classes or anonymous functions.&lt;/p&gt;
-
-&lt;p&gt;Some notes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;I try and place my callables in a logical namespace. Formatters go in &lt;code&gt;\App\Table\Formatters&lt;/code&gt;. Event handlers go in &lt;code&gt;\App\Event\Handlers&lt;/code&gt;. You get the idea.&lt;/li&gt;
-  &lt;li&gt;You can pass in the callable by sending in an instance of that class. &lt;code&gt;__invoke&lt;/code&gt; will be run automatically.&lt;/li&gt;
-  &lt;li&gt;I like adding a &lt;code&gt;run&lt;/code&gt; or &lt;code&gt;perform&lt;/code&gt; method that calls the &lt;code&gt;__invoke&lt;/code&gt; method. This makes it easy for me to reuse the class in non-callable situations.&lt;/li&gt;
-  &lt;li&gt;You can test these just like any other class, or refactor your long anonymous function into a set of helper methods to simplify readability.&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-        <pubDate>Sun, 06 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/06/invoking-callable-classes/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/06/invoking-callable-classes/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>callables</category>
-        
-        <category>events</category>
         
         
         <category>cakephp</category>

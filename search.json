@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Custom Validation Rule Classes",
+    "url": "/2015/12/16/custom-validation-rule-classes/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","classes","custom","hacks","rule","silly","use","validation"]
+  },
+  {
+    "type": "post",
     "title": "Stuffing Complex Logic into Model-less Forms",
     "url": "/2015/12/15/stuffing-complex-logic-into-model-less-forms/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1484,6 +1491,18 @@
     "title": "forms",
     "url": "/tags/forms/",
     "tokens": ["forms"]
+  },
+  {
+    "type": "tag",
+    "title": "rules",
+    "url": "/tags/rules/",
+    "tokens": ["rules"]
+  },
+  {
+    "type": "tag",
+    "title": "validation",
+    "url": "/tags/validation/",
+    "tokens": ["validation"]
   },
   false
 ]
