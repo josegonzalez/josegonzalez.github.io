@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: The Collection Class and You</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/13/collections-class-and-you/">
+    <title>CakeAdvent-2015: CakePHP Shells I didn't know about</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
-    <meta name="keywords" content="cakeadvent-2015, cakephp, collections" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, shells" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: The Collection Class and You" />
+    <meta property="og:title" content="CakeAdvent-2015: CakePHP Shells I didn't know about" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/13/collections-class-and-you/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: The Collection Class and You" />
+    <meta name="twitter:title" content="CakeAdvent-2015: CakePHP Shells I didn't know about" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="The Collection Class and You » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="CakePHP Shells I didn't know about » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,83 +64,72 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        The Collection Class and You
+        CakePHP Shells I didn't know about
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on The Collection Class and You!">
+        <a href="#comments" title="Comment on CakePHP Shells I didn't know about!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>Many modern applications work on a set of results, iterating over them, manipulating them, and modifying them to display the output necessary to get a job done. In CakePHP 3, we introduced the helpful <code>Collection</code> class.</p>
-<p>Here we have an array of cats info:</p>
-<pre><code class="language-php">$cats = [
-  [
-    'name' =&gt; 'camila',
-    'gender' =&gt; 'female',
-    'type' =&gt; 'calico',
-    'size' =&gt; 'small',
-  ],
-  [
-    'name' =&gt; 'railroad',
-    'gender' =&gt; 'male',
-    'color' =&gt; 'gray',
-    'size' =&gt; 'massive',
-  ],
-  [
-    'name' =&gt; 'santo',
-    'gender' =&gt; 'male',
-    'color' =&gt; 'black',
-    'size' =&gt; 'massive',
-  ],
-  [
-    'name' =&gt; 'jax',
-    'gender' =&gt; 'male',
-    'color' =&gt; 'black',
-    'size' =&gt; 'small',
-  ],
-];
+    <p>Did you know there is a shell that allows you to enable a plugin after installing it via composer?</p>
+<pre><code class="language-shell">bin/cake plugin load Muffin/Trash
 </code></pre>
-<p>Lets filter out all the ~~best~~ female cats:</p>
-<pre><code>// filter the data
-$femaleCats = [];
-foreach ($cats as $cat) {
-  if ($cat['gender'] == 'female') {
-    $femaleCats[] = $cat;
-  }
-}
-// $femaleCats should now contain camila, the cat on your right.
+<p>You can also load the plugin’s bootstrap or routes:</p>
+<pre><code class="language-shell"># I'm not releasing this, so don't try and composer require it
+bin/cake plugin load --bootstrap --routes Josegonzalez/Blog
 </code></pre>
-<p>Lets see what this looks like with the Collection class:</p>
-<pre><code class="language-php">// instantiate a new collection
-$collection = new \Cake\Collection\Collection($cats);
-// or use the helper function if you *really* want to
-$collection = collection($cats);
-// and now filter the data
-$femaleCats = $collection-&gt;filter(function ($cat) {
-    return $cat['gender'] == 'female;
-});
-// $femaleCats is a Collection instance that contains one cat
+<p>Most people installed CakePHP 3 using the <a href="http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/"><code>cakephp/app</code> project template</a>, so you have access to both <code>bake</code> and <code>migrations</code>:</p>
+<pre><code class="language-shell"># migrate all the things!
+bin/cake migrations migrate
+# get a migration status
+bin/cake migrations status
+# bake a migration
+bin/cake bake migration_snapshot Initial
+# bake a form (or really anything else)
+bin/cake bake form AddForm
 </code></pre>
-<p>Thats quite a bit simpler, though sometimes you want an array of data:</p>
-<pre><code class="language-php">$femaleCats-&gt;toArray();
+<p>If you are running migrations, it may be useful to clear the ORM’s cache so that your code is aware of the new fields:</p>
+<pre><code class="language-shell">bin/cake migrations migrate &amp;&amp; bin/cake orm_cache clear
 </code></pre>
-<p>You can also chain collection methods:</p>
-<pre><code class="language-php">$collection
-  // get all the small cats
-  -&gt;filter(function ($cat) { return $info['size'] == 'small'; })
-  // if they are black
-  -&gt;filter(function ($cat) { return $info['color'] == 'black'; })
-  // if they are female
-  -&gt;filter(function ($cat) { return $info['gender'] == 'female'; })
-  // and sort alphabetically by name descending
-  -&gt;sortBy('name', SORT_DESC);
+<p>And if you are deploying code, maybe you want to ensure the cache is set <em>before</em> the first user’s request comes in, speeding up that initial request:</p>
+<pre><code class="language-shell">bin/cake orm_cache build
 </code></pre>
-<p>Pretty neat. Collections can work on any <code>array</code> or instance that implements the <code>Traversable</code> interface. In CakePHP, you can use any Collection method on the <code>ResultSet</code> object returned by a query, which is pretty powerful for making complex find methods.</p>
+<p>I’m a big fan of the <code>server</code> shell. It allows me to quickly test an app locally without needing to setup a virtualhost or a webserver. Very useful for development, and something I recommend everyone learn to place in their arsenal:</p>
+<pre><code class="language-shell"># specify a port I know won't collide with other stuff I run on my machine
+bin/cake server -p 1995
+</code></pre>
+<p>In older versions of CakePHP 3, we introduced a full REPL around <a href="https://github.com/borisrepl/boris">boris</a>, but that has since been replaced with <a href="http://psysh.org/">Psysh</a>. It’s actually quite nice, and lets me test out new code I’ve written in various scenarios.</p>
+<pre><code class="language-shell"># yo dawg, i hurd u liek shells, so I put a shell in your shell so you can shell while you shell!
+bin/cake console
+# Note: it saves your history, just like a regular shell, which is nice :)
+</code></pre>
+<p>And finally, something I missed from my short stint doing Ruby on Rails, being able to list routes in an application.</p>
+<pre><code class="language-shell"># list routes
+bin/cake routes
+# see what a url route maps to internally
+bin/cake routes check /articles
+# generate the url route for a key:pair setup
+bin/cake routes generate controller:Articles action:view 2
+</code></pre>
+<h2 id="bonus">Bonus!</h2>
+<p>A shell I discovered a few weeks back is one by the ever-helpful <a href="https://www.loadsys.com/">Loadsys Web Strategies</a> company. It lets you read into keys were loaded into configure (which is great if you have an app with several <code>Configure::load()</code> statements and don’t know where a key might be):</p>
+<pre><code class="language-shell"># install it
+composer require loadsys/cakephp-config-read:~3.0
+# load it
+bin/cake plugin load ConfigRead
+# use it (on your debug mode)
+bin/cake config_read debug
+# on your application's encoding
+bin/cake config_read App.encoding
+# on the default database configuration
+bin/cake config_read Datasources.default
+</code></pre>
+<p>Is there a CakePHP Shell you’d like to see ported from another framework? Something you find useful or lacking? Leave a note in the comments.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/13/collections-class-and-you/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-13 12:00:00 +0000">13 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-17 12:00:00 +0000">17 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -161,7 +150,7 @@ $femaleCats = $collection-&gt;filter(function ($cat) {
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 13</strong> of <strong>17</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 17</strong> of <strong>17</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
       <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
@@ -175,11 +164,11 @@ $femaleCats = $collection-&gt;filter(function ($cat) {
       <li><a href="/2015/12/10/faster-database-creation-with-migrations/">Faster Database Creation with the Migrations Plugin</a></li>
       <li><a href="/2015/12/11/softdeletion-in-cakephp-3/">SoftDeleting Entities in CakePHP 3</a></li>
       <li><a href="/2015/12/12/using-dns-to-simplify-connection-strings/">Using DSNs to simplify connection strings</a></li>
-      <li>The Collection Class and You</li>
+      <li><a href="/2015/12/13/collections-class-and-you/">The Collection Class and You</a></li>
       <li><a href="/2015/12/14/custom-logging-engines-and-adding-contextual-data/">Custom Logging Engines and adding Contextual Data</a></li>
       <li><a href="/2015/12/15/stuffing-complex-logic-into-model-less-forms/">Stuffing Complex Logic into Model-less Forms</a></li>
       <li><a href="/2015/12/16/custom-validation-rule-classes/">Custom Validation Rule Classes</a></li>
-      <li><a href="/2015/12/17/cakephp-shells-i-didnt-know-about/">CakePHP Shells I didn't know about</a></li>
+      <li>CakePHP Shells I didn't know about</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -218,9 +207,9 @@ $femaleCats = $collection-&gt;filter(function ($cat) {
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/13/collections-class-and-you/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/13/collections-class-and-you/';
-        var disqus_title      = "CakeAdvent-2015: The Collection Class and You";
+        var disqus_identifier = '/2015/12/17/cakephp-shells-i-didnt-know-about/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/';
+        var disqus_title      = "CakeAdvent-2015: CakePHP Shells I didn't know about";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

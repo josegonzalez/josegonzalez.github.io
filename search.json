@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "CakePHP Shells I didn't know about",
+    "url": "/2015/12/17/cakephp-shells-i-didnt-know-about/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","hacks","know","shells","silly","use"]
+  },
+  {
+    "type": "post",
     "title": "Custom Validation Rule Classes",
     "url": "/2015/12/16/custom-validation-rule-classes/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1503,6 +1510,12 @@
     "title": "validation",
     "url": "/tags/validation/",
     "tokens": ["validation"]
+  },
+  {
+    "type": "tag",
+    "title": "shells",
+    "url": "/tags/shells/",
+    "tokens": ["shells"]
   },
   false
 ]

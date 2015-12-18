@@ -5,9 +5,109 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 17 Dec 2015 00:01:04 +0000</pubDate>
-    <lastBuildDate>Thu, 17 Dec 2015 00:01:04 +0000</lastBuildDate>
+    <pubDate>Fri, 18 Dec 2015 00:58:09 +0000</pubDate>
+    <lastBuildDate>Fri, 18 Dec 2015 00:58:09 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>CakePHP Shells I didn&#39;t know about</title>
+        <description>&lt;p&gt;Did you know there is a shell that allows you to enable a plugin after installing it via composer?&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake plugin load Muffin/Trash
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also load the plugin’s bootstrap or routes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# I&#39;m not releasing this, so don&#39;t try and composer require it
+bin/cake plugin load --bootstrap --routes Josegonzalez/Blog
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Most people installed CakePHP 3 using the &lt;a href=&quot;http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/&quot;&gt;&lt;code&gt;cakephp/app&lt;/code&gt; project template&lt;/a&gt;, so you have access to both &lt;code&gt;bake&lt;/code&gt; and &lt;code&gt;migrations&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# migrate all the things!
+bin/cake migrations migrate
+
+# get a migration status
+bin/cake migrations status
+
+# bake a migration
+bin/cake bake migration_snapshot Initial
+
+# bake a form (or really anything else)
+bin/cake bake form AddForm
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you are running migrations, it may be useful to clear the ORM’s cache so that your code is aware of the new fields:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate &amp;amp;&amp;amp; bin/cake orm_cache clear
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And if you are deploying code, maybe you want to ensure the cache is set &lt;em&gt;before&lt;/em&gt; the first user’s request comes in, speeding up that initial request:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake orm_cache build
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’m a big fan of the &lt;code&gt;server&lt;/code&gt; shell. It allows me to quickly test an app locally without needing to setup a virtualhost or a webserver. Very useful for development, and something I recommend everyone learn to place in their arsenal:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# specify a port I know won&#39;t collide with other stuff I run on my machine
+bin/cake server -p 1995
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In older versions of CakePHP 3, we introduced a full REPL around &lt;a href=&quot;https://github.com/borisrepl/boris&quot;&gt;boris&lt;/a&gt;, but that has since been replaced with &lt;a href=&quot;http://psysh.org/&quot;&gt;Psysh&lt;/a&gt;. It’s actually quite nice, and lets me test out new code I’ve written in various scenarios.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# yo dawg, i hurd u liek shells, so I put a shell in your shell so you can shell while you shell!
+bin/cake console
+# Note: it saves your history, just like a regular shell, which is nice :)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And finally, something I missed from my short stint doing Ruby on Rails, being able to list routes in an application.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# list routes
+bin/cake routes
+
+# see what a url route maps to internally
+bin/cake routes check /articles
+
+# generate the url route for a key:pair setup
+bin/cake routes generate controller:Articles action:view 2
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;bonus&quot;&gt;Bonus!&lt;/h2&gt;
+
+&lt;p&gt;A shell I discovered a few weeks back is one by the ever-helpful &lt;a href=&quot;https://www.loadsys.com/&quot;&gt;Loadsys Web Strategies&lt;/a&gt; company. It lets you read into keys were loaded into configure (which is great if you have an app with several &lt;code&gt;Configure::load()&lt;/code&gt; statements and don’t know where a key might be):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# install it
+composer require loadsys/cakephp-config-read:~3.0
+
+# load it
+bin/cake plugin load ConfigRead
+
+# use it (on your debug mode)
+bin/cake config_read debug
+
+# on your application&#39;s encoding
+bin/cake config_read App.encoding
+
+# on the default database configuration
+bin/cake config_read Datasources.default
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Is there a CakePHP Shell you’d like to see ported from another framework? Something you find useful or lacking? Leave a note in the comments.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 17 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>shells</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Custom Validation Rule Classes</title>
@@ -1003,162 +1103,6 @@ object Person#1 (1) {
         <category>cakephp</category>
         
         <category>magic-methods</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Error Handling in CakePHP 3</title>
-        <description>&lt;p&gt;In CakePHP, you can attach custom error and exception handlers. The default one displays a stack trace in debug mode, and a set of http errors when debug is off. That’s nice and all, but sometimes you need to know when your users are encountering errors, and since you aren’t psychic, we need to store those somewhere. Thankfully, there are quite a few services that allow us to track bugs:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://airbrake.io/&quot;&gt;Airbrake&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://bugsnag.com/&quot;&gt;Bugsnag&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://getsentry.com/welcome/&quot;&gt;Sentry&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://opbeat.com/&quot;&gt;Opbeat&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;etc.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;One annoying thing about error/exception handling in CakePHP is needing to attach two handlers:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// in your config/bootstrap.php
-$isCli = php_sapi_name() === &#39;cli&#39;;
-if ($isCli) {
-    (new ConsoleErrorHandler(Configure::consume(&#39;Error&#39;)))-&amp;gt;register();
-} else {
-    (new ErrorHandler(Configure::consume(&#39;Error&#39;)))-&amp;gt;register();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;ConsoleErrorHandler&lt;/code&gt;: For cli-based exceptions&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;ErrorHandler&lt;/code&gt;: For web-based exceptions&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This is necessary as the exception handler needs to render the exception information differently; the web error handler might want to use json for responses, or show an html message with an interactive stacktrace.&lt;/p&gt;
-
-&lt;p&gt;You &lt;em&gt;also&lt;/em&gt; have to have two methods in your handlers:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;handleError&lt;/code&gt;: For PHP Errors. PHP 7 does some &lt;a href=&quot;https://secure.php.net/manual/en/language.errors.php7.php&quot;&gt;magic&lt;/a&gt; to make these catchable, so perhaps this one will go away someday.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;handleException&lt;/code&gt;: For thrown Exception instances.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Rather than implement all error handling logic twice, we’ll go the trait-based route.&lt;/p&gt;
-
-&lt;h2 id=&quot;traits&quot;&gt;Traits&lt;/h2&gt;
-
-&lt;p&gt;Traits are composable units of behavior. They are similar to CakePHP Behaviors, though built into the PHP Core. They come in handy for exception handling in CakePHP as it becomes easy to implement the core logic of capturing an exception and just using that in multiple classes.&lt;/p&gt;
-
-&lt;p&gt;Below is a trait for the &lt;code&gt;Bugsnag&lt;/code&gt; service:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Error\Bugsnag;
-
-use Bugsnag_Client;
-use Cake\Core\Configure;
-use Exception;
-
-trait BugsnagTrait
-{
-
-    public function handleError($code, $description, $file = null, $line = null, $context = null)
-    {
-        $client = $this-&amp;gt;client();
-        if ($client) {
-            $client-&amp;gt;errorHandler($code, $description, $file, $line);
-        }
-
-        return parent::handleError($code, $description, $file, $line, $context);
-    }
-
-    public function handleException(Exception $exception)
-    {
-        $client = $this-&amp;gt;client();
-        if ($client) {
-            $client-&amp;gt;notifyException($exception);
-        }
-
-        return parent::handleException($exception);
-    }
-
-    protected function client()
-    {
-        $apiKey = Configure::read(&#39;Bugsnag.apiKey&#39;);
-        if (!$apiKey &amp;amp;&amp;amp; defined(&#39;BUGSNAG_API_KEY&#39;)) {
-            $apiKey = BUGSNAG_API_KEY;
-        }
-
-        if (!$apiKey) {
-            return null;
-        }
-
-        $client = null;
-        if ($apiKey) {
-            $client = new Bugsnag_Client($apiKey);
-            $config = Configure::read(&#39;Bugsnag.config&#39;);
-            foreach ($config as $key =&amp;gt; $value) {
-                if (method_exists($client, $key)) {
-                    $client-&amp;gt;$key($value);
-                }
-            }
-        }
-
-        return $client;
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here is what my &lt;code&gt;ErrorHandler&lt;/code&gt; looks like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Error\Bugsnag;
-
-use App\Error\Bugsnag\BugsnagTrait;
-use Cake\Error\ErrorHandler as CoreErrorHandler;
-
-class ErrorHandler extends CoreErrorHandler
-{
-    use BugsnagTrait;
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Notice how the &lt;code&gt;ErrorHandler&lt;/code&gt; class itself is devoid of any “real” logic? I’ve pushed all the heavy-lifting into the trait and then just ensured my &lt;code&gt;ErrorHandler&lt;/code&gt; extends the CakePHP core &lt;code&gt;ErrorHandler&lt;/code&gt;. Similarly, my &lt;code&gt;ConsoleErrorHandler&lt;/code&gt; is quite empty as well:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Error\Bugsnag;
-
-use App\Error\Bugsnag\BugsnagTrait;
-use Cake\Console\ConsoleErrorHandler as CoreConsoleErrorHandler;
-
-class ConsoleErrorHandler extends CoreConsoleErrorHandler
-{
-    use BugsnagTrait;
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;homework-time&quot;&gt;Homework time&lt;/h2&gt;
-
-&lt;p&gt;While the logic I implemented is fairly easy to understand, it may also not give the full picture around the exception. For instance, many error collection services provide the ability to add extra metadata to an error, such as the user that was signed in, or client information such as operating system version. &lt;code&gt;ExceptionRenderer&lt;/code&gt; instances can have access to this information using their &lt;code&gt;_getController&lt;/code&gt; methods, and it wouldn’t be too much work to copy that logic into your &lt;code&gt;ErrorHandler&lt;/code&gt; to add extra metadata to the request.&lt;/p&gt;
-
-&lt;p&gt;I recommend customizing the error handler to fit your needs - adding metadata, or perhaps using a different service - and seeing what helps you find, replicate, and fix bugs your automated testing didn’t catch.&lt;/p&gt;
-</description>
-        <pubDate>Mon, 07 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/07/error-handling-in-cakephp-3/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>errors</category>
-        
-        <category>exceptions</category>
         
         
         <category>cakephp</category>

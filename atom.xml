@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-17T00:01:04+00:00</updated>
+ <updated>2015-12-18T00:58:09+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[CakePHP Shells I didn't know about]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/"/>
+   <updated>2015-12-17T12:00:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Custom Validation Rule Classes]]></title>
