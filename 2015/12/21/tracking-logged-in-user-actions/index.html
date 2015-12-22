@@ -73,7 +73,10 @@
       </div>
   </header>
   <div class="entry-content">
-    <p>This is a pretty straightforward post. In CakePHP 3, we’ve removed a lot of the ability to access the session except where there is a <code>Request</code> object. Static access to <code>CakeSession</code> is gone, and it’s not coming back, so please stop asking for it. And stop using <code>$_SESSION</code>, that breaks the cake.</p>
+    <blockquote>
+  <p>Note: for the purposes of this post, I chose an easy to understand plugin, but I recommend using the <a href="https://github.com/usemuffin/footprint">footprint</a> plugin as it supports many more features than the one I cover here.</p>
+</blockquote>
+<p>This is a pretty straightforward post. In CakePHP 3, we’ve removed a lot of the ability to access the session except where there is a <code>Request</code> object. Static access to <code>CakeSession</code> is gone, and it’s not coming back, so please stop asking for it. And stop using <code>$_SESSION</code>, that breaks the cake.</p>
 <p>One thing this affects is the ability to see user session data in the Model layer. Typically you want to track <em>who</em> performed an action <em>when</em> the action happens. It’s quite nice to hide this in your model layer, as opposed to mangling data when it’s going into an entity.</p>
 <p>How do we do this? We can use the <a href="https://github.com/ceeram/blame"><code>ceeram/blame</code> plugin</a>!</p>
 <pre><code class="language-shell"># ugh more things to install

@@ -5,13 +5,17 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 22 Dec 2015 01:47:26 +0000</pubDate>
-    <lastBuildDate>Tue, 22 Dec 2015 01:47:26 +0000</lastBuildDate>
+    <pubDate>Tue, 22 Dec 2015 09:33:52 +0000</pubDate>
+    <lastBuildDate>Tue, 22 Dec 2015 09:33:52 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
         <title>Tracking Logged in User Actions</title>
-        <description>&lt;p&gt;This is a pretty straightforward post. In CakePHP 3, we’ve removed a lot of the ability to access the session except where there is a &lt;code&gt;Request&lt;/code&gt; object. Static access to &lt;code&gt;CakeSession&lt;/code&gt; is gone, and it’s not coming back, so please stop asking for it. And stop using &lt;code&gt;$_SESSION&lt;/code&gt;, that breaks the cake.&lt;/p&gt;
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;Note: for the purposes of this post, I chose an easy to understand plugin, but I recommend using the &lt;a href=&quot;https://github.com/usemuffin/footprint&quot;&gt;footprint&lt;/a&gt; plugin as it supports many more features than the one I cover here.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This is a pretty straightforward post. In CakePHP 3, we’ve removed a lot of the ability to access the session except where there is a &lt;code&gt;Request&lt;/code&gt; object. Static access to &lt;code&gt;CakeSession&lt;/code&gt; is gone, and it’s not coming back, so please stop asking for it. And stop using &lt;code&gt;$_SESSION&lt;/code&gt;, that breaks the cake.&lt;/p&gt;
 
 &lt;p&gt;One thing this affects is the ability to see user session data in the Model layer. Typically you want to track &lt;em&gt;who&lt;/em&gt; performed an action &lt;em&gt;when&lt;/em&gt; the action happens. It’s quite nice to hide this in your model layer, as opposed to mangling data when it’s going into an entity.&lt;/p&gt;
 
