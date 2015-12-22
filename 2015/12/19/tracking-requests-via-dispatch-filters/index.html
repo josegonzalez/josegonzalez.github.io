@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: Custom Validation Rule Classes</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/16/custom-validation-rule-classes/">
+    <title>CakeAdvent-2015: Tracking Requests Via Dispatch Filters</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/19/tracking-requests-via-dispatch-filters/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
-    <meta name="keywords" content="cakeadvent-2015, cakephp, rules, validation" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, dispatch-filters, statsd" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: Custom Validation Rule Classes" />
+    <meta property="og:title" content="CakeAdvent-2015: Tracking Requests Via Dispatch Filters" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/16/custom-validation-rule-classes/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/19/tracking-requests-via-dispatch-filters/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: Custom Validation Rule Classes" />
+    <meta name="twitter:title" content="CakeAdvent-2015: Tracking Requests Via Dispatch Filters" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="Custom Validation Rule Classes » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Tracking Requests Via Dispatch Filters » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,152 +64,84 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Custom Validation Rule Classes
+        Tracking Requests Via Dispatch Filters
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Custom Validation Rule Classes!">
+        <a href="#comments" title="Comment on Tracking Requests Via Dispatch Filters!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>I was asked yesterday if I could elaborate on my <code>OwnedByCurrentUser</code> rule class. I’ll post it here, but also post on my process for developing rules.</p>
-<h2 id="organization">Organization</h2>
-<p>First off, I <em>hate</em> having anonymous functions:</p>
+    <p>CakePHP 2 added dispatch filters. These were cool, but there were a few problems:</p>
 <ul>
-  <li>They are harder to test in isolation of the enclosing scope.</li>
-  <li>They make it more difficult to reason about classes because of the implicit extra scope/binding of the callable.</li>
-  <li>I think they look silly.</li>
+  <li>They were managed to configure, which meant it was harder for dependencies and configuration to be added/removed to middleware as the configuration was managed away from the actual dispatch cycle.</li>
+  <li><code>Configure</code>-based management makes it harder to reason about when a particular dispatch filter will be hit.</li>
+  <li>Because of the above, controller handling had to be outside of the middleware layer. Sometimes you want to do something special, and in our case you basically had to replace the whole Dispatcher to do that. Boo.</li>
 </ul>
-<p>I definitely think they have their place - configuring the CRUD Plugin is one - but normally I try to stay away from them if possible. Instead, I use <a href="/2015/12/06/invoking-callable-classes/">invokable callable classes</a>.</p>
-<p>For rules, I normally place my callable classes in <code>src/Form/Rule</code>. Here is what our initial <code>OwnedByCurrentUser</code> rule looks like:</p>
+<p>In CakePHP 3 we now have a nice stack of middleware you configure in <code>config/bootstrap.php</code> using the <code>DispatcherFactory</code>. Many applications have no need to modify the stack, but they can be quite handy in a pinch. For instance, what if you wanted to track the number of times certain controller/action pairs in your application are requested?</p>
+<h2 id="metrics-tracking-via-statsd">Metrics tracking via StatsD</h2>
+<p>I’m not going to get too much into StatsD, except to say it’s a way to track metrics in a time-series database software called graphite. <a href="https://codeascraft.com/2011/02/15/measure-anything-measure-everything/">Here</a> is a blog post by Etsy covering StatsD and why it’s awesome.</p>
+<p>In our case, we’re going to send a counter to StatsD every time a controller/action pair is hit. Let’s install a library to handle talking to statsd:</p>
+<pre><code class="language-shell">composer require league/statsd
+</code></pre>
+<p>Next, we’ll wire up the simplest of dispatch filters. We will be tracking requests <em>after</em> they happen, in case anything happens during the dispatch cycle that would change what would be requested:</p>
 <pre><code class="language-php">&lt;?php
-namespace App\Form\Rule;
-class OwnedByCurrentUser
+namespace App\Routing\Filter;
+use Cake\Event\Event;
+use Cake\Routing\DispatcherFilter;
+use Cake\Utility\Inflector;
+use League\StatsD\Client;
+class StatsdFilter extends DispatcherFilter
 {
-    /**
-     * Performs the check
-     *
-     * @param mixed $value The data to validate
-     * @param array $context A key value list of data that could be used as context
-     * during validation. Recognized keys are:
-     * - newRecord: (boolean) whether or not the data to be validated belongs to a
-     *   new record
-     * - data: The full data that was passed to the validation process
-     * - field: The name of the field that is being processed
-     * - providers: associative array with objects or class names that will
-     *   be passed as the last argument for the validation method
-     * @return bool
-     */
-    public function __invoke($value, array $context = null)
+    // only create the client once and
+    // keep a reference to it
+    protected $client;
+    // these can be overriden whenever
+    // we add the dispatch filter
+    protected $_defaultConfig = [
+        'host' =&gt; '127.0.0.1',
+        'port' =&gt; 8125,
+        'namespace' =&gt; 'app'
+    ];
+    public function __construct($config = [])
     {
+        // ensure configuration is set
+        parent::__construct($config);
+        $this-&gt;client = new Client();
+        $this-&gt;client-&gt;configure([
+            'host' =&gt; $this-&gt;config('host'),
+            'port' =&gt; $this-&gt;config('port'),
+            'namespace' =&gt; $this-&gt;config('namespace'),
+        ]);
+    }
+    public function afterDispatch(Event $event)
+    {
+        $request = $event-&gt;data['request'];
+        $response = $event-&gt;data['response'];
+        // Graphite uses folders for metrics
+        // We dasherize the names to keep all metrics sane-looking
+        $controller = Inflector::dasherize($response-&gt;params['controller'])
+        $action = Inflector::dasherize($response-&gt;params['action'])
+        $statusCode = $response-&gt;statusCode();
+        // track controller/action pairs
+        $statsd-&gt;increment(sprintf('web.%s.%s.hit', $controller, $action));
+        // track response codes for those pairs as well
+        $statsd-&gt;increment(sprintf('web.%s.%s.%d', $controller, $action, $statusCode));
     }
 }
 ?&gt;
 </code></pre>
-<h2 id="filling-it-in">Filling it in</h2>
-<p>When I write a rule, I’ll first write it to handle one very specific case. In this particular application, I had to ensure that a particular <code>Battle</code> was owned by a participant in the battle before allowing them to perform certain actions. My invoke looked like so:</p>
-<pre><code class="language-php">public function __invoke($value, array $context = null)
-{
-    $table = \Cake\ORM\TableRegistry::get('Battles');
-    return !!$table-&gt;find()-&gt;where([
-      'id' =&gt; (int)$value,
-      'user_id' =&gt; $userId,
-    ])-&gt;firstOrFail();
-}
+<p>And configuring it is easy. Simply add the following to your <code>config/bootstrap.php</code> after the <code>DispatcherFactory:add('ControllerFactory')</code> call:</p>
+<pre><code class="language-php">DispatcherFactory::add('StatsdFilter', [
+    'host' =&gt; '127.0.0.1',
+]);
 </code></pre>
-<p>The above sort of works:</p>
-<ul>
-  <li>It actually throws a <code>Cake\Datasource\Exception\RecordNotFoundException</code> exception, which is incorrect for my use case, since I don’t want validation rules to throw exceptions</li>
-  <li>I wasn’t sure where I was passing in the <code>$userId</code>. The <code>$context</code> maybe?</li>
-  <li>I’m offloading a lot of logic into the database. What if I don’t have compound index on <code>id/user_id</code>? That would slow down this part of the app (maybe not a concern).</li>
-  <li>There was a table where I was thinking of re-using this in the near future that used <code>creator_id</code> instead of <code>user_id</code> to denote who owned the record (legacy applications, am I right?). This was hardcoded to the one field, which would mean more copy-pasting. I also couldn’t modify the table that was being checked. Boo.</li>
-</ul>
-<p>Once I had a few tests going that brought up the above issues, I knew I had to refactor it.</p>
-<h2 id="fixing-issues">Fixing issues</h2>
-<p>I took a step back and realized I wanted to instantiate rules and then invoke them several times. This meant modifying the rule instance state, as well as passing in an initial state. First, lets add a constructor:</p>
-<pre><code class="language-php">protected $_alias;
-protected $_userId;
-protected $_fieldName;
-/**
- * Performs the check
- *
- * @param string $alias Table alias
- * @param mixed $userId A string or integer denoting a user's id
- * @param string $fieldName A name to use when checking an entity's association
- * @return void
- */
-public function __construct($alias, $userId, $fieldName = 'user_id')
-{
-    $this-&gt;_alias = $alias;
-    $this-&gt;_userId = $userId;
-    $this-&gt;_fieldName = $fieldName;
-}
-public function setTable($alias)
-{
-    $this-&gt;_alias = $alias;
-}
-public function setUserId($userId)
-{
-    $this-&gt;_userId = $userId;
-}
-public function setFieldName($fieldName)
-{
-    $this-&gt;_fieldName = $fieldName;
-}
-</code></pre>
-<p>Each field is a protected field - meaning I can extend this easily by subclassing - and all have setters - meaning I can reuse a rule instance if necessary. Next I needed to modify the <code>__invoke()</code> method to use my customizations:</p>
-<pre><code class="language-php">public function __invoke($value, array $context = null)
-{
-    // handle the case where no userId was
-    // specified or the user is logged out
-    $userId = $this-&gt;_userId;
-    if (empty($userId)) {
-        return false;
-    }
-    // use the Table class specified by our configured alias
-    $table = \Cake\ORM\TableRegistry::get($this-&gt;_alias);
-    // Don't make the database do the heavy-lifting
-    $entity = $table-&gt;find()-&gt;where(['id' =&gt; (int)$value])-&gt;first();
-    if (empty($entity)) {
-        return false;
-    }
-    // Ensure any customized field matches our userId
-    return $entity-&gt;get($this-&gt;_fieldName) == $userId;
-}
-</code></pre>
-<h3 id="wrapping-it-up">Wrapping it up</h3>
-<p>From yesterday’s post, here is how the rule is invoked:</p>
-<pre><code class="language-php">protected function _buildValidator(Validator $validator)
-{
-    // use $this-&gt;_user in my validation rules
-    $userId = $this-&gt;_user-&gt;get('id');
-    $validator-&gt;add('id', 'custom', [
-        'rule' =&gt; function ($value, $context) use ($userId) {
-            // reusing an invokable class
-            $rule = new OwnedByCurrentUser('Battles', $userId);
-            return $rule($value, $context);
-        },
-        'message' =&gt; 'This photo isn\'t yours to battle with'
-    ]);
-    // This should also work
-    $validator-&gt;add('id', 'custom', [
-        'rule' =&gt; new OwnedByCurrentUser('Battles', $userId),
-        'message' =&gt; 'This photo isn\'t yours to battle with'
-    ]);
-    // As should this (and you can now re-use the rule)
-    $rule = new OwnedByCurrentUser('Battles', $userId);
-    $validator-&gt;add('id', 'custom', [
-        'rule' =&gt; $rule,
-        'message' =&gt; 'This photo isn\'t yours to battle with'
-    ]);
-}
-</code></pre>
-<h2 id="mopping-up">Mopping up</h2>
-<p>When I first found out I could do this, I was quite delighted by it. Validation rules have always been a pain to test, and this was as good as it got. I now have an easy to understand class that is both easily testable and gives me increased code reuse.</p>
+<p>And now you’ll be tracking metrics in StatsD!</p>
+<p>The <a href="http://book.cakephp.org/3.0/en/development/dispatch-filters.html">docs on dispatch filters</a> have another example - altering cache headers on certain requests - but it should be fairly easy to come up with useful ways of bending dispatch filters to your will!</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/16/custom-validation-rule-classes/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-16 12:00:00 +0000">16 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/19/tracking-requests-via-dispatch-filters/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-19 12:00:00 +0000">19 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -230,7 +162,7 @@ public function setFieldName($fieldName)
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 16</strong> of <strong>21</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 19</strong> of <strong>21</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
       <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
@@ -247,10 +179,10 @@ public function setFieldName($fieldName)
       <li><a href="/2015/12/13/collections-class-and-you/">The Collection Class and You</a></li>
       <li><a href="/2015/12/14/custom-logging-engines-and-adding-contextual-data/">Custom Logging Engines and adding Contextual Data</a></li>
       <li><a href="/2015/12/15/stuffing-complex-logic-into-model-less-forms/">Stuffing Complex Logic into Model-less Forms</a></li>
-      <li>Custom Validation Rule Classes</li>
+      <li><a href="/2015/12/16/custom-validation-rule-classes/">Custom Validation Rule Classes</a></li>
       <li><a href="/2015/12/17/cakephp-shells-i-didnt-know-about/">CakePHP Shells I didn't know about</a></li>
       <li><a href="/2015/12/18/managing-application-configuration/">Managing Application Configuration</a></li>
-      <li><a href="/2015/12/19/tracking-requests-via-dispatch-filters/">Tracking Requests Via Dispatch Filters</a></li>
+      <li>Tracking Requests Via Dispatch Filters</li>
       <li><a href="/2015/12/20/creating-custom-background-shells/">Creating Custom Background Shells</a></li>
       <li><a href="/2015/12/21/tracking-logged-in-user-actions/">Tracking Logged in User Actions</a></li>
     </ol>
@@ -291,9 +223,9 @@ public function setFieldName($fieldName)
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/16/custom-validation-rule-classes/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/16/custom-validation-rule-classes/';
-        var disqus_title      = "CakeAdvent-2015: Custom Validation Rule Classes";
+        var disqus_identifier = '/2015/12/19/tracking-requests-via-dispatch-filters/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/19/tracking-requests-via-dispatch-filters/';
+        var disqus_title      = "CakeAdvent-2015: Tracking Requests Via Dispatch Filters";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

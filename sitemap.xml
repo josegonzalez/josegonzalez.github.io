@@ -15,6 +15,26 @@
 
 
   <url>
+      <loc>http://josediazgonzalez.com/2015/12/21/tracking-logged-in-user-actions/</loc>
+      <lastmod>2015-12-21</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2015/12/20/creating-custom-background-shells/</loc>
+      <lastmod>2015-12-20</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2015/12/19/tracking-requests-via-dispatch-filters/</loc>
+      <lastmod>2015-12-19</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2015/12/18/managing-application-configuration/</loc>
+      <lastmod>2015-12-18</lastmod>
+  </url>
+
+  <url>
       <loc>http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/</loc>
       <lastmod>2015-12-17</lastmod>
   </url>

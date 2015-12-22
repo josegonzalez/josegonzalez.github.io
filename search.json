@@ -1,6 +1,34 @@
 [
   {
     "type": "post",
+    "title": "Tracking Logged in User Actions",
+    "url": "/2015/12/21/tracking-logged-in-user-actions/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["actions","applications","cakephp","can","hacks","logged","silly","tracking","use","user"]
+  },
+  {
+    "type": "post",
+    "title": "Creating Custom Background Shells",
+    "url": "/2015/12/20/creating-custom-background-shells/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","background","cakephp","can","creating","custom","hacks","shells","silly","use"]
+  },
+  {
+    "type": "post",
+    "title": "Tracking Requests Via Dispatch Filters",
+    "url": "/2015/12/19/tracking-requests-via-dispatch-filters/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","dispatch","filters","hacks","requests","silly","tracking","use","via"]
+  },
+  {
+    "type": "post",
+    "title": "Managing Application Configuration",
+    "url": "/2015/12/18/managing-application-configuration/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["application","applications","cakephp","can","configuration","hacks","managing","silly","use"]
+  },
+  {
+    "type": "post",
     "title": "CakePHP Shells I didn't know about",
     "url": "/2015/12/17/cakephp-shells-i-didnt-know-about/",
     "description": "Silly hacks you can use in your cakephp applications",
@@ -1516,6 +1544,42 @@
     "title": "shells",
     "url": "/tags/shells/",
     "tokens": ["shells"]
+  },
+  {
+    "type": "tag",
+    "title": "environment",
+    "url": "/tags/environment/",
+    "tokens": ["environment"]
+  },
+  {
+    "type": "tag",
+    "title": "dispatch-filters",
+    "url": "/tags/dispatch-filters/",
+    "tokens": ["dispatch","filters"]
+  },
+  {
+    "type": "tag",
+    "title": "statsd",
+    "url": "/tags/statsd/",
+    "tokens": ["statsd"]
+  },
+  {
+    "type": "tag",
+    "title": "queueing",
+    "url": "/tags/queueing/",
+    "tokens": ["queueing"]
+  },
+  {
+    "type": "tag",
+    "title": "auth",
+    "url": "/tags/auth/",
+    "tokens": ["auth"]
+  },
+  {
+    "type": "tag",
+    "title": "user-tracking",
+    "url": "/tags/user-tracking/",
+    "tokens": ["tracking","user"]
   },
   false
 ]

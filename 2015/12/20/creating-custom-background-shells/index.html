@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2015: Creating Custom Background Shells</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/20/creating-custom-background-shells/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Silly hacks you can use in your cakephp applications" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, shells, queueing" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2015: Creating Custom Background Shells" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/20/creating-custom-background-shells/" />
+    <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2015: Creating Custom Background Shells" />
+    <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
+    <link rel="alternate" type="application/rss+xml" title="Creating Custom Background Shells » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Creating Custom Background Shells
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Creating Custom Background Shells!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>In a previous post, I mentioned how awesome it would be to have a background queueing system to perform long-running tasks. While there are many queueing systems, today I will re-introduce Queuesadilla, with an aim to explain how CakePHP shells work.</p>
+<h2 id="shell-skeleton">Shell Skeleton</h2>
+<p>Before we being, lets start with understanding what we need:</p>
+<ul>
+  <li>Queuesadilla is a long-running task. It handles it’s own state, so if it crashes, all we really care about is ensuring whatever process manager we are using will restart it. Given that, we don’t need much error handling.</li>
+  <li>We should be able to configure most of the options in Queuesadilla. We might not use them today, but they will come in handy later.</li>
+  <li>Logging should be done using the CakePHP logger.</li>
+  <li>Default configuration should come from the <code>Configure</code> class, same as everything else.</li>
+</ul>
+<p>Now that we know what we are building, let’s bake the shell:</p>
+<pre><code class="language-shell"># install Queuesadilla
+composer require josegonzalez/queuesadilla:dev-master
+# bake the shell
+bin/cake bake shell Queuesadilla
+</code></pre>
+<p>You should now have a <code>src/Shell/QueueShell.php</code> with contents similar to the following:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Shell;
+use Cake\Console\Shell;
+class QueueShell extends Shell
+{
+    public function main()
+    {
+    }
+}
+?&gt;
+</code></pre>
+<p>You can invoke the shell with <code>bin/cake queue</code>, and you will see the following output:</p>
+<pre><code class="language-shell">$ bin/cake queue
+Welcome to CakePHP v5.0.1 Console
+---------------------------------------------------------------
+App : src
+Path: /Users/jose/src/playground/src/
+PHP : 7.0.1
+---------------------------------------------------------------
+</code></pre>
+<blockquote>
+  <p>Yes, that’s CakePHP 5, and yes, it supports MRD (Mind Reading Development)</p>
+</blockquote>
+<h2 id="adding-a-layer">Adding a layer</h2>
+<p>This isn’t very helpful. Lets fill in that <code>main()</code> method with some logic:</p>
+<pre><code class="language-php">public function main()
+{
+    $EngineClass = "josegonzalez\\Queuesadilla\\Engine\\MysqlEngine';
+    $WorkerClass = "josegonzalez\\Queuesadilla\\Worker\\SequentialWorker";
+    $logger = \Cake\Log\Log::engine('default');
+    $engine = new $EngineClass($logger, [
+      'url' =&gt; 'mysql://user:password@localhost:3306/database_name'
+    ]);
+    $worker = new $WorkerClass($engine, $logger);
+    $worker-&gt;work();
+}
+</code></pre>
+<p>Assuming you have that database configured, this will work and output something similar to the following:</p>
+<pre><code>2015-12-22 00:54:39 Info: Starting worker
+2015-12-22 00:54:39 Debug: No job!
+2015-12-22 00:54:40 Debug: No job!
+</code></pre>
+<p>If we queued a job, you could see the job output as well. We don’t care too much about that now, as we still need to ensure this thing can be configured for more than just our test app.</p>
+<h2 id="option-parsing">Option Parsing</h2>
+<p>Every cakephp shell has a method called <code>getOptionParser()</code>. This returns an <code>ArgumentParser</code>.</p>
+<hr />
+<p>Just kidding, it returns an <code>OptionParser</code>. You can add as many options as you’d like to this, and these options can later be accessed within your shell by using the <code>$this-&gt;params</code> array attribute. The following is what ours will look like:</p>
+<pre><code class="language-php">public function getOptionParser()
+{
+    $parser = parent::getOptionParser();
+    $parser-&gt;addOption('engine', [
+        'choices' =&gt; [
+            'Beanstalk',
+            'Iron',
+            'Memory',
+            'Mysql',
+            'Null',
+            'Redis',
+            'Synchronous',
+        ],
+        'default' =&gt; 'Mysql',
+        'help' =&gt; 'Name of engine',
+        'short' =&gt; 'e',
+    ]);
+    $parser-&gt;addOption('queue', [
+        'help' =&gt; 'Name of a queue',
+        'short' =&gt; 'q',
+    ]);
+    $parser-&gt;addOption('logger', [
+        'help' =&gt; 'Name of a configured logger',
+        'default' =&gt; 'stdout',
+        'short' =&gt; 'l',
+    ]);
+    $parser-&gt;addOption('worker', [
+        'choices' =&gt; [
+            'Sequential',
+            'Test',
+        ],
+        'default' =&gt; 'Sequential',
+        'help' =&gt; 'Name of worker class',
+        'short' =&gt; 'w',
+    ]);
+    $parser-&gt;description(__('Runs a Queuesadilla worker'));
+    return $parser;
+}
+</code></pre>
+<p>The <a href="http://book.cakephp.org/3.0/en/console-and-shells.html#configuring-options-and-generating-help">online docs</a> do a good job of explaining these and other ways of manipulating an <code>OptionParser</code>, but the above code should be pretty self-explanatory. With the above code, we’ll have the following output for <code>bin/cake queue -h</code>:</p>
+<pre><code class="language-shell">$ bin/cake queue -h
+Welcome to CakePHP v5.0.1 Console
+---------------------------------------------------------------
+App : src
+Path: /Users/jose/src/playground/src/
+PHP : 7.0.1
+---------------------------------------------------------------
+Runs a Queuesadilla worker.
+Usage:
+cake queuesadilla [options]
+Options:
+--help, -h     Display this help.
+--verbose, -v  Enable verbose output.
+--quiet, -q    Enable quiet output.
+--engine, -e   Name of engine (default: Mysql)
+               (choices:
+               Beanstalk|Iron|Memory|Mysql|Null|Redis|Synchronous)
+--queue, -q    Name of a queue
+--logger, -l   Name of a configured logger (default:
+               stdout)
+--worker, -w   Name of worker class (default:
+               Sequential) (choices:
+               Sequential|Test)
+</code></pre>
+<p>Pretty chawesome. Let’s modify our code to use this:</p>
+<pre><code class="language-php">public function main()
+{
+    $engine = $this-&gt;params['engine'];
+    $worker = $this-&gt;params['worker'];
+    $EngineClass = "josegonzalez\\Queuesadilla\\Engine\\" . $engine . 'Engine';
+    $WorkerClass = "josegonzalez\\Queuesadilla\\Worker\\" . $worker . "Worker";
+    $config = $this-&gt;getEngineConfig();
+    $loggerName = $this-&gt;getLoggerName();
+    $logger = \Cake\Log\Log::engine($loggerName);
+    $engine = new $EngineClass($logger, $config);
+    $worker = new $WorkerClass($engine, $logger);
+    $worker-&gt;work();
+}
+protected function getEngineConfig()
+{
+    $config = \Cake\Core\Configure::read('Queuesadilla.engine');
+    if (empty($config)) {
+        throw new Exception('Invalid Queuesadilla.engine config');
+    }
+    if (!empty($this-&gt;params['queue'])) {
+        $config['queue'] = $this-&gt;params['queue'];
+    }
+    return $config;
+}
+protected function getLoggerName()
+{
+    $loggerName = \Cake\Core\Configure::read('Queuesadilla.logger');
+    if (empty($loggerName)) {
+        $loggerName = $this-&gt;params['logger'];
+    }
+    return $loggerName;
+}
+</code></pre>
+<p>The only thing left to do is add the appropriate config to our <code>config/app.php</code>:</p>
+<pre><code class="language-php">'Queuesadilla' =&gt; [
+    'engine' =&gt; [
+        // yum environment variables
+        'url' =&gt; env('DATABASE_URL'),
+    ],
+],
+</code></pre>
+<p>If you run the worker now, you’ll get the same output as before, only this time it will respect any additional options you give it, as well as application-level changes to the logger or the backing engine.</p>
+<h2 id="testing-the-job-runner">Testing the job runner</h2>
+<p>Now that we have a simple worker going, lets test it with a simple job. Place the following in <code>src/Job/TestJob.php</code>:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Job;
+class TestJob
+{
+    public function perform($job)
+    {
+        debug($job-&gt;data());
+    }
+}
+?&gt;
+</code></pre>
+<p>Next, we can test this using the <code>bin/cake console</code> shell:</p>
+<pre><code class="language-php">// nonsense boilerplate so we can get a logger in the `bin/cake console` shell
+$stdout = new \Cake\Log\Engine\ConsoleLog([
+    'types' =&gt; ['notice', 'info', 'debug'],
+    'stream' =&gt; new \Cake\Console\ConsoleOutput('php://stdout'),
+]);
+\Cake\Log\Log::config('stdout', ['engine' =&gt; $stdout]);
+$logger = \Cake\Log\Log::engine('stdout');
+// create an engine
+$engine = new \josegonzalez\Queuesadilla\Engine\MysqlEngine(
+  $logger,
+  ['url' =&gt; env('DATABASE_URL')]
+);
+// create a queue connection
+$queue = new \josegonzalez\Queuesadilla\Queue($engine);
+// zhu li, queue the thing!
+$queue-&gt;push(['\App\Job\TestJob', 'perform'], ['sleep' =&gt; 3, 'message' =&gt; 'hi', 'raise' =&gt; false]);
+</code></pre>
+<p>If you were running the <code>bin/cake queue</code> shell in another terminal, you should have seen the debug output.</p>
+<hr />
+<p>CakePHP Shells are actually quite powerful. You can use them not only as wrappers of external job running tools, but also as a way to invoke administrative, one-off code as in the <code>bin/cake console</code> shell. You could also write longer, one-off tasks as custom shells, and cron-tasks <em>definitely</em> belong in them.</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/20/creating-custom-background-shells/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-20 12:00:00 +0000">20 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 20</strong> of <strong>21</strong> in the series "CakeAdvent 2015".</p>
+    <ol>
+      <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
+      <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
+      <li><a href="/2015/12/03/generating-administrative-panels-with-crud-view/">Generating Administrative Panels with CrudView</a></li>
+      <li><a href="/2015/12/04/whats-in-an-entity/">What exactly belongs in an entity?</a></li>
+      <li><a href="/2015/12/05/uploading-files-and-images/">Uploading files and images with CakePHP 3</a></li>
+      <li><a href="/2015/12/06/invoking-callable-classes/">Invoking Callable Classes</a></li>
+      <li><a href="/2015/12/07/error-handling-in-cakephp-3/">Error Handling in CakePHP 3</a></li>
+      <li><a href="/2015/12/08/debugging-data-in-cakephp-3/">Debugging Data in CakePHP 3</a></li>
+      <li><a href="/2015/12/09/customizing-your-app-template/">Customizing your Application Template</a></li>
+      <li><a href="/2015/12/10/faster-database-creation-with-migrations/">Faster Database Creation with the Migrations Plugin</a></li>
+      <li><a href="/2015/12/11/softdeletion-in-cakephp-3/">SoftDeleting Entities in CakePHP 3</a></li>
+      <li><a href="/2015/12/12/using-dns-to-simplify-connection-strings/">Using DSNs to simplify connection strings</a></li>
+      <li><a href="/2015/12/13/collections-class-and-you/">The Collection Class and You</a></li>
+      <li><a href="/2015/12/14/custom-logging-engines-and-adding-contextual-data/">Custom Logging Engines and adding Contextual Data</a></li>
+      <li><a href="/2015/12/15/stuffing-complex-logic-into-model-less-forms/">Stuffing Complex Logic into Model-less Forms</a></li>
+      <li><a href="/2015/12/16/custom-validation-rule-classes/">Custom Validation Rule Classes</a></li>
+      <li><a href="/2015/12/17/cakephp-shells-i-didnt-know-about/">CakePHP Shells I didn't know about</a></li>
+      <li><a href="/2015/12/18/managing-application-configuration/">Managing Application Configuration</a></li>
+      <li><a href="/2015/12/19/tracking-requests-via-dispatch-filters/">Tracking Requests Via Dispatch Filters</a></li>
+      <li>Creating Custom Background Shells</li>
+      <li><a href="/2015/12/21/tracking-logged-in-user-actions/">Tracking Logged in User Actions</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2015/12/20/creating-custom-background-shells/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/20/creating-custom-background-shells/';
+        var disqus_title      = "CakeAdvent-2015: Creating Custom Background Shells";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>
