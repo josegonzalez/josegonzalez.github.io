@@ -5,9 +5,143 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 22 Dec 2015 09:33:52 +0000</pubDate>
-    <lastBuildDate>Tue, 22 Dec 2015 09:33:52 +0000</lastBuildDate>
+    <pubDate>Wed, 23 Dec 2015 01:57:56 +0000</pubDate>
+    <lastBuildDate>Wed, 23 Dec 2015 01:57:56 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Using InstanceConfigTrait for object configuration</title>
+        <description>&lt;p&gt;When writing a new class to handle complex logic, you typically have some amount of configuration you need to set. For instance, lets assume we have a cat class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace Animalia\Chordata\Mammalia\Carnivora\Feliformia\Felidae\Felinae\Felis;
+
+class FelisCatus
+{
+  public $attributes = [];
+  public function __construct(array $attributes = [])
+  {
+    $this-&amp;gt;attributes = $attributes;
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above is a simple - other than that namespace yeesh - cat class, where all attributes are set without regard to what is necessary to define a cat. In our case, we want to ensure each cat at least has a color, gender, name, and size:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace Animalia\Chordata\Mammalia\Carnivora\Feliformia\Felidae\Felinae\Felis;
+
+class FelisCatus
+{
+  public $attributes = [];
+  public function __construct(array $attributes = [])
+  {
+    $this-&amp;gt;attributes = array_merge([
+      &#39;name&#39; =&amp;gt; &#39;Cat&#39;,
+      &#39;color&#39; =&amp;gt; &#39;black&#39;,
+      &#39;gender&#39; =&amp;gt; &#39;female&#39;,
+      &#39;size&#39; =&amp;gt; &#39;small&#39;,
+    ], $attributes);
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;How do we access the attributes?&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$cat = new FelisCatus([&#39;name&#39; =&amp;gt; &#39;Camila&#39;]);
+// get the name
+echo $cat-&amp;gt;attributes[&#39;name&#39;];
+
+// get the paw size? Undefined index!
+echo $cat-&amp;gt;attributes[&#39;paw_size&#39;];
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If we were doing this in CakePHP, we could take advantage of the &lt;code&gt;InstanceConfigTrait&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace Animalia\Chordata\Mammalia\Carnivora\Feliformia\Felidae\Felinae\Felis;
+
+use Cake\Core\InstanceConfigTrait;
+
+class FelisCatus
+{
+  use InstanceConfigTrait;
+  protected $_defaultConfig = [
+    &#39;name&#39; =&amp;gt; &#39;Cat&#39;,
+    &#39;color&#39; =&amp;gt; &#39;black&#39;,
+    &#39;gender&#39; =&amp;gt; &#39;female&#39;,
+    &#39;size&#39; =&amp;gt; &#39;small&#39;,
+  ];
+
+  public function __construct(array $attributes = [])
+  {
+    // will automatically merge the attributes with
+    // $this-&amp;gt;_defaultConfig
+    $this-&amp;gt;config($attributes);
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we get to do the following!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$cat = new FelisCatus([&#39;name&#39; =&amp;gt; &#39;Camila&#39;]);
+// get the name
+echo $cat-&amp;gt;config(&#39;name&#39;);
+
+// get the paw size? Returns null
+echo $cat-&amp;gt;config(&#39;paw_size&#39;);
+
+// set the paw size
+$cat-&amp;gt;config(&#39;paw_size&#39;, &#39;small&#39;);
+
+// set nested data
+$cat-&amp;gt;config(&#39;appetite.morning&#39;, null);
+$cat-&amp;gt;config(&#39;appetite.afternoon&#39;, &#39;hangry&#39;);
+
+// get nested data
+echo $cat-&amp;gt;config(&#39;appetite.afternoon&#39;);
+
+// set lots of info at once
+$cat-&amp;gt;config([
+  &#39;size&#39; =&amp;gt; &#39;large&#39;,
+  &#39;pregnant&#39; =&amp;gt; true,
+  &#39;owner&#39; =&amp;gt; &#39;Jose&#39;,
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;InstanceConfigTrait&lt;/code&gt; is a useful trait for hiding instance configuration initializing/setting/getting/deleting from the user. You can simply &lt;code&gt;use&lt;/code&gt; it in your class, ensure you initialze any config in your constructor, and then access it through a simple interface.&lt;/p&gt;
+
+&lt;p&gt;CakePHP actually uses this in quite a few places:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Cache and Log Engines&lt;/li&gt;
+  &lt;li&gt;Authorize and Authenticate classes&lt;/li&gt;
+  &lt;li&gt;Password Hashers&lt;/li&gt;
+  &lt;li&gt;Helpers, Components, Behaviors&lt;/li&gt;
+  &lt;li&gt;Dispatch Filters&lt;/li&gt;
+  &lt;li&gt;Mailers&lt;/li&gt;
+  &lt;li&gt;etc.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So the same interface is available basically everywhere. Its static class analogue is &lt;code&gt;StaticConfigTrait&lt;/code&gt;, which &lt;em&gt;also&lt;/em&gt; parses dsn’s from the &lt;code&gt;url&lt;/code&gt; key, which comes in handy when creating factory-type classes.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 22 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/22/using-instance-config-trait-for-object-configuration/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/22/using-instance-config-trait-for-object-configuration/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>configuration</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Tracking Logged in User Actions</title>
@@ -415,8 +549,8 @@ class StatsdFilter extends DispatcherFilter
 
         // Graphite uses folders for metrics
         // We dasherize the names to keep all metrics sane-looking
-        $controller = Inflector::dasherize($response-&amp;gt;params[&#39;controller&#39;])
-        $action = Inflector::dasherize($response-&amp;gt;params[&#39;action&#39;])
+        $controller = Inflector::dasherize($response-&amp;gt;params[&#39;controller&#39;]);
+        $action = Inflector::dasherize($response-&amp;gt;params[&#39;action&#39;]);
         $statusCode = $response-&amp;gt;statusCode();
 
         // track controller/action pairs
@@ -1217,80 +1351,6 @@ $femaleCats = $collection-&amp;gt;filter(function ($cat) {
         <category>cakephp</category>
         
         <category>collections</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Using DSNs to simplify connection strings</title>
-        <description>&lt;p&gt;In CakePHP 3, we consolidated most configuration into a single &lt;code&gt;config/app.php&lt;/code&gt;. This superscedes the old method of changing your &lt;code&gt;config/core.php&lt;/code&gt; and &lt;code&gt;config/database.php&lt;/code&gt; - as well as any other random configuration values you might set. This is good for a lot of reasons - who wants to deal with a &lt;code&gt;DATABASE_CONFIG&lt;/code&gt;? - but also means we can simplify how we configure things.&lt;/p&gt;
-
-&lt;p&gt;One thing that always irked me was the inability to specify connection information in a single way. For instance, you might specify the host for a datastore with the following keys:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;host&lt;/code&gt;: For databases&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;server&lt;/code&gt;: For a redis caching server&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;servers&lt;/code&gt;: For memcached servers&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;One of quite a few different ways configuring CakePHP was yuck. A nice improvement in CakePHP 3 is the ability to specify connection information via a Data source name (DSN).&lt;/p&gt;
-
-&lt;p&gt;A DSN is a standard used by many programming communities to encode all the information about a particular configuration. For instance, here is how I might tell you to connect to my local &lt;code&gt;test&lt;/code&gt; database:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$dsn = &quot;mysql://root:cakeisali3@localhost:3306/test&quot;;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above encodes the following information:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;scheme&lt;/code&gt;: &lt;code&gt;mysql&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;user&lt;/code&gt;: &lt;code&gt;root&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;password&lt;/code&gt;: &lt;code&gt;cakeisali3&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;host&lt;/code&gt;: &lt;code&gt;localhost&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;port&lt;/code&gt;: &lt;code&gt;3306&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;database&lt;/code&gt;: &lt;code&gt;test&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;You can also specify optional arguments via querystring:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$dsn = &quot;mysql://root:cakeisali3@localhost:3306/test?encoding=utf8&quot;;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In 3.x, the following can now use a special &lt;code&gt;url&lt;/code&gt; key. This key will be parsed and it’s values will be used to connect to a database. The following classes can be configured via dsn:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Database connections&lt;/li&gt;
-  &lt;li&gt;Cache connections&lt;/li&gt;
-  &lt;li&gt;Log information&lt;/li&gt;
-  &lt;li&gt;Email configuration&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;You can also take advantage of this magic parsing by including the &lt;code&gt;\Cake\Core\StaticConfigTrait&lt;/code&gt; trait in your own classes.&lt;/p&gt;
-
-&lt;p&gt;One thing that might be useful would be to extend the default schemes. In CakePHP, we map the &lt;code&gt;scheme&lt;/code&gt; to a particlar namespaced-class in the CakePHP core. You might add a &lt;code&gt;Mongo&lt;/code&gt;-based ORM Driver, but if it isn’t mapped, your app will go boom. You can map one easily though!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;ConnectionManager::dsnClassMap([&#39;console&#39; =&amp;gt; &#39;App\Database\Driver\Mongo&#39;])
-// also works on the following classes:
-// - Cache::dsnClassMap()
-// - Email::dsnClassMap()
-// - Log::dsnClassMap()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It’s a nifty trick I think, and one that should prove useful to anyone using cloud-providers such as &lt;a href=&quot;https://www.heroku.com/&quot;&gt;Heroku&lt;/a&gt; or &lt;a href=&quot;http://dokku.viewdocs.io/dokku/&quot;&gt;Dokku&lt;/a&gt; for application deployment.&lt;/p&gt;
-</description>
-        <pubDate>Sat, 12 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/12/using-dns-to-simplify-connection-strings/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/12/using-dns-to-simplify-connection-strings/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>dsn</category>
-        
-        <category>config</category>
         
         
         <category>cakephp</category>
