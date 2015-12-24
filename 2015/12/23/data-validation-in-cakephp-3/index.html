@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: Stuffing Complex Logic into Model-less Forms</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/">
+    <title>CakeAdvent-2015: Data Validation in CakePHP 3</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/23/data-validation-in-cakephp-3/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
-    <meta name="keywords" content="cakeadvent-2015, cakephp, forms, service" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, validation" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: Stuffing Complex Logic into Model-less Forms" />
+    <meta property="og:title" content="CakeAdvent-2015: Data Validation in CakePHP 3" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/23/data-validation-in-cakephp-3/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: Stuffing Complex Logic into Model-less Forms" />
+    <meta name="twitter:title" content="CakeAdvent-2015: Data Validation in CakePHP 3" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="Stuffing Complex Logic into Model-less Forms » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="Data Validation in CakePHP 3 » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,124 +64,105 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Stuffing Complex Logic into Model-less Forms
+        Data Validation in CakePHP 3
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Stuffing Complex Logic into Model-less Forms!">
+        <a href="#comments" title="Comment on Data Validation in CakePHP 3!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>One new feature of CakePHP 3 is the ability to have <a href="http://book.cakephp.org/3.0/en/core-libraries/form.html">Model-less form classes</a>. These are typically useful for stuff like contact forms that might send an email:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\Form;
-use Cake\Form\Form;
-use Cake\Form\Schema;
-use Cake\Mailer\Email;
+    <p>As mentioned before, CakePHP 3 introduced the concept of a distinct Validation class that can be used against an arbitrary array of data. You could <em>sort of</em> do this in CakePHP 2, but it was annoying, not well-exposed, and not well-documented.</p>
+<p>Assuming you got stuck in an older version of CakePHP - or some other non-CakePHP 3 environment - and want to use the new validation layer, you’ll need to install the cakephp/validation package. Skip this if you are using CakePHP 3 in your app already:</p>
+<pre><code class="language-shell">composer require cakephp/validation
+</code></pre>
+<blockquote>
+  <p>Most CakePHP 3 packages can be installed in a standalone way with minimal external dependencies.</p>
+</blockquote>
+<p>Now, let’s start by creating a validator:</p>
+<pre><code class="language-php"># use the class first of course!
 use Cake\Validation\Validator;
-class ContactForm extends Form
-{
-    // require some data
-    protected function _buildSchema(Schema $schema)
-    {
-        return $schema-&gt;addField('name', 'string')
-            -&gt;addField('email', ['type' =&gt; 'string'])
-            -&gt;addField('body', ['type' =&gt; 'text']);
-    }
-    // validate the incoming data
-    protected function _buildValidator(Validator $validator)
-    {
-        return $validator-&gt;add('name', 'length', [
-                'rule' =&gt; ['minLength', 10],
-                'message' =&gt; 'A name is required'
-            ])-&gt;add('email', 'format', [
-                'rule' =&gt; 'email',
-                'message' =&gt; 'A valid email address is required',
-            ]);
-    }
-    // actually send an email
-    protected function _execute(array $data)
-    {
-        $email = new Email('default');
-        return $email-&gt;from([$data['email'] =&gt; $data['name']])
-            -&gt;to('mail@example.com', 'Mail Example')
-            -&gt;subject('Contact Form')
-            -&gt;message($data['body'])
-            -&gt;send();
-    }
-}
-?&gt;
+$validator = new Validator();
 </code></pre>
-<p>Neato burrito. One thing I love about this is the ability to have complex validation rulesets for specific actions. For instance, on a blog, I might have complex edit action that needs to check for editing writes before allowing a user to do anything:</p>
+<p>Here is a bit of data I want to validate:</p>
+<pre><code class="language-php">$data = [
+  'name' =&gt; 'camila',
+  'age' =&gt; 4,
+  'intelligence' =&gt; 'stupid',
+  'position' =&gt; 'keyboard',
+  'species' =&gt; '',
+];
+</code></pre>
+<p>In the 3.x validator, you can easily require the presence of a field:</p>
+<pre><code class="language-php">$validator-&gt;requirePresence('species');
+// should be an empty array
+$errors = $validator-&gt;errors($data);
+</code></pre>
+<p>Note that this is different from the field being not empty:</p>
+<pre><code class="language-php">$validator-&gt;notEmpty('species', 'we need a species for your pet');
+// will not be an empty array
+$errors = $validator-&gt;errors($data);
+</code></pre>
+<p>However, this is <em>not</em> the same as being an string with just whitespace. For that, you need another rule:</p>
+<pre><code class="language-php">$validator-&gt;add('species', [
+  'notBlank' =&gt; [
+      'rule' =&gt; 'notBlank',
+      'message' =&gt; "Ain't no such thing as a '   ' species"
+    ]
+]);
+// will not be an empty array
+$errors = $validator-&gt;errors($data);
+</code></pre>
+<p>You can also nest validators. Say my <code>$data</code> array has a field called <code>kittens</code>, which is an array of <code>kitten</code> data. You might want to validate some information about those kittens:</p>
+<pre><code class="language-php">// add custom rules here
+$kittenValidator = new Validator();
+// Connect the nested validators.
+$validator-&gt;addNestedMany('kittens', $kittenValidator);
+// includes errors from nested data as well
+$validator-&gt;errors($data);
+</code></pre>
+<p>Some rules - like those surrounding presence of a field - can support multiple modes, <code>create</code> and <code>update</code>. This is useful for cases where you might be using the same <code>$validator</code> against both new and existing recordsets, but want slightly different behavior for one or two rules.</p>
+<pre><code class="language-php">// only require a name on update
+$validator-&gt;notEmpty(
+  'name',
+  'Your cat needs a name, you cannot call it cat forever',
+  'update' // the mode
+);
+// errors works in `create` mode by
+// default. Set the second arg to
+// `false` to use `update` mode
+$errors = $validator-&gt;errors($data, false);
+</code></pre>
+<p>Of course, there are <a href="http://api.cakephp.org/3.0/class-Cake.Validation.Validation.html">quite a few rules at your disposal</a> by default, but you are welcome to create new ones. Maybe your rule validates that a cat is in a breed that exists in a specific database table?</p>
 <pre><code class="language-php">&lt;?php
-namespace App\Form;
-use Cake\Form\Form;
-class PostEditForm
+namespace App\Model\Validation;
+use Cake\ORM\TableRegistry;
+use Cake\Validation\Validation;
+class CatValidation extends Validation
 {
-    protected $_user = null;
-    public function __construct(array $user = [])
-    {
-        $this-&gt;_user = $user;
-        return $this;
-    }
-    protected function _buildValidator(Validator $validator)
-    {
-      // use $this-&gt;_user in my validation rules
-      $userId = $this-&gt;_user-&gt;get('id');
-      $validator-&gt;add('id', 'custom', [
-          'rule' =&gt; function ($value, $context) use ($userId) {
-              // reusing an invokable class
-              return (new OwnedByCurrentUser($userId))-&gt;__invoke($value);
-          },
-          'message' =&gt; 'This photo isn\'t yours to battle with'
-      ]);
-    }
+  public static function validSpecies($check)
+  {
+    $table = TableRegistry::get('Species');
+    $species = $table-&gt;find('list')-&gt;toArray();
+    return in_array((string)$check, array_values($species));
   }
+}
 ?&gt;
 </code></pre>
-<p>Nifty, huh? Usually I end up saving new records in my <code>_execute()</code> method as well. Here is what that looks like in one of my form classes:</p>
-<pre><code class="language-php">protected function _execute(array $data)
-{
-    $battle_id = Hash::get($data, 'id', null);
-    $photo_id = Hash::get($data, 'photo_id', null);
-    $battles = TableRegistry::get('Battles');
-    $photos = TableRegistry::get('Photos');
-    $battle = $battles-&gt;find('Battle', [
-        'battle_id' =&gt; $battle_id,
-    ])-&gt;firstOrFail();
-    if ($battle-&gt;confirmed != null) {
-        throw new MethodNotAllowedException('Battle has already been updated');
-    }
-    $photo = $photos-&gt;get($photo_id);
-    $battle-&gt;confirmed = true;
-    $battle-&gt;rival-&gt;photo = $photo;
-    if ($battles-&gt;save($battle)) {
-        return $battles-&gt;find('Battle', $battle-&gt;toFind())-&gt;firstOrFail();
-    }
-    $exception = new ValidationException('There are errors in the data you submitted');
-    $exception-&gt;errors($battle-&gt;errors());
-    throw $exception;
-}
+<p>Now you can simply add this new class to your validator:</p>
+<pre><code class="language-php">// map it
+// if a class name, the methods *must* be static
+$validator-&gt;provider('cat', 'App\Model\Validation\CatValidation');
+// use it
+$validator-&gt;add('species', 'validSpecies', [
+    'rule' =&gt; 'validSpecies',
+    'provider' =&gt; 'cat'
+]);
 </code></pre>
-<p>Why? Because it turns certain complex actions into the following:</p>
-<pre><code class="language-php">public function edit()
-{
-    $authedUser = $this-&gt;Auth-&gt;user();
-    $post = (new PostEditForm($authedUser))-&gt;execute($this-&gt;request-&gt;data);
-    $this-&gt;set(['post' =&gt; $post]);
-}
-</code></pre>
-<p>Instead of litering logic across:</p>
-<ul>
-  <li>a custom validation method in my model</li>
-  <li>a controller action</li>
-  <li>some other random model method or protected controller method</li>
-</ul>
-<p>I can group it all together into one, logical unit that can be easily unit tested for various types of input. A side-benefit of this is that if I <em>absolutely</em> need to, I can always re-use a given action’s logic with as few as three lines of code within say, idk, a console shell.</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-15 12:00:00 +0000">15 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/23/data-validation-in-cakephp-3/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-23 12:00:00 +0000">23 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -202,7 +183,7 @@ class PostEditForm
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 15</strong> of <strong>23</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 23</strong> of <strong>23</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
       <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
@@ -218,7 +199,7 @@ class PostEditForm
       <li><a href="/2015/12/12/using-dns-to-simplify-connection-strings/">Using DSNs to simplify connection strings</a></li>
       <li><a href="/2015/12/13/collections-class-and-you/">The Collection Class and You</a></li>
       <li><a href="/2015/12/14/custom-logging-engines-and-adding-contextual-data/">Custom Logging Engines and adding Contextual Data</a></li>
-      <li>Stuffing Complex Logic into Model-less Forms</li>
+      <li><a href="/2015/12/15/stuffing-complex-logic-into-model-less-forms/">Stuffing Complex Logic into Model-less Forms</a></li>
       <li><a href="/2015/12/16/custom-validation-rule-classes/">Custom Validation Rule Classes</a></li>
       <li><a href="/2015/12/17/cakephp-shells-i-didnt-know-about/">CakePHP Shells I didn't know about</a></li>
       <li><a href="/2015/12/18/managing-application-configuration/">Managing Application Configuration</a></li>
@@ -226,7 +207,7 @@ class PostEditForm
       <li><a href="/2015/12/20/creating-custom-background-shells/">Creating Custom Background Shells</a></li>
       <li><a href="/2015/12/21/tracking-logged-in-user-actions/">Tracking Logged in User Actions</a></li>
       <li><a href="/2015/12/22/using-instance-config-trait-for-object-configuration/">Using InstanceConfigTrait for object configuration</a></li>
-      <li><a href="/2015/12/23/data-validation-in-cakephp-3/">Data Validation in CakePHP 3</a></li>
+      <li>Data Validation in CakePHP 3</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -265,9 +246,9 @@ class PostEditForm
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/15/stuffing-complex-logic-into-model-less-forms/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/';
-        var disqus_title      = "CakeAdvent-2015: Stuffing Complex Logic into Model-less Forms";
+        var disqus_identifier = '/2015/12/23/data-validation-in-cakephp-3/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/23/data-validation-in-cakephp-3/';
+        var disqus_title      = "CakeAdvent-2015: Data Validation in CakePHP 3";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

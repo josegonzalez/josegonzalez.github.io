@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-23T01:57:56+00:00</updated>
+ <updated>2015-12-24T01:59:29+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Data Validation in CakePHP 3]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/23/data-validation-in-cakephp-3/"/>
+   <updated>2015-12-23T12:00:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/23/data-validation-in-cakephp-3/</id>
+   <content type="html"><![CDATA[Silly hacks you can use in your cakephp applications]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Using InstanceConfigTrait for object configuration]]></title>

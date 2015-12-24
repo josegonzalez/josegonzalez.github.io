@@ -5,9 +5,145 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 23 Dec 2015 01:57:56 +0000</pubDate>
-    <lastBuildDate>Wed, 23 Dec 2015 01:57:56 +0000</lastBuildDate>
+    <pubDate>Thu, 24 Dec 2015 01:59:29 +0000</pubDate>
+    <lastBuildDate>Thu, 24 Dec 2015 01:59:29 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Data Validation in CakePHP 3</title>
+        <description>&lt;p&gt;As mentioned before, CakePHP 3 introduced the concept of a distinct Validation class that can be used against an arbitrary array of data. You could &lt;em&gt;sort of&lt;/em&gt; do this in CakePHP 2, but it was annoying, not well-exposed, and not well-documented.&lt;/p&gt;
+
+&lt;p&gt;Assuming you got stuck in an older version of CakePHP - or some other non-CakePHP 3 environment - and want to use the new validation layer, you’ll need to install the cakephp/validation package. Skip this if you are using CakePHP 3 in your app already:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require cakephp/validation
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Most CakePHP 3 packages can be installed in a standalone way with minimal external dependencies.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Now, let’s start by creating a validator:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;# use the class first of course!
+use Cake\Validation\Validator;
+
+$validator = new Validator();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here is a bit of data I want to validate:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$data = [
+  &#39;name&#39; =&amp;gt; &#39;camila&#39;,
+  &#39;age&#39; =&amp;gt; 4,
+  &#39;intelligence&#39; =&amp;gt; &#39;stupid&#39;,
+  &#39;position&#39; =&amp;gt; &#39;keyboard&#39;,
+  &#39;species&#39; =&amp;gt; &#39;&#39;,
+];
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the 3.x validator, you can easily require the presence of a field:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;requirePresence(&#39;species&#39;);
+
+// should be an empty array
+$errors = $validator-&amp;gt;errors($data);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that this is different from the field being not empty:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;notEmpty(&#39;species&#39;, &#39;we need a species for your pet&#39;);
+
+// will not be an empty array
+$errors = $validator-&amp;gt;errors($data);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;However, this is &lt;em&gt;not&lt;/em&gt; the same as being an string with just whitespace. For that, you need another rule:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add(&#39;species&#39;, [
+  &#39;notBlank&#39; =&amp;gt; [
+      &#39;rule&#39; =&amp;gt; &#39;notBlank&#39;,
+      &#39;message&#39; =&amp;gt; &quot;Ain&#39;t no such thing as a &#39;   &#39; species&quot;
+    ]
+]);
+
+// will not be an empty array
+$errors = $validator-&amp;gt;errors($data);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also nest validators. Say my &lt;code&gt;$data&lt;/code&gt; array has a field called &lt;code&gt;kittens&lt;/code&gt;, which is an array of &lt;code&gt;kitten&lt;/code&gt; data. You might want to validate some information about those kittens:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// add custom rules here
+$kittenValidator = new Validator();
+
+// Connect the nested validators.
+$validator-&amp;gt;addNestedMany(&#39;kittens&#39;, $kittenValidator);
+
+// includes errors from nested data as well
+$validator-&amp;gt;errors($data);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Some rules - like those surrounding presence of a field - can support multiple modes, &lt;code&gt;create&lt;/code&gt; and &lt;code&gt;update&lt;/code&gt;. This is useful for cases where you might be using the same &lt;code&gt;$validator&lt;/code&gt; against both new and existing recordsets, but want slightly different behavior for one or two rules.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// only require a name on update
+$validator-&amp;gt;notEmpty(
+  &#39;name&#39;,
+  &#39;Your cat needs a name, you cannot call it cat forever&#39;,
+  &#39;update&#39; // the mode
+);
+
+// errors works in `create` mode by
+// default. Set the second arg to
+// `false` to use `update` mode
+$errors = $validator-&amp;gt;errors($data, false);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Of course, there are &lt;a href=&quot;http://api.cakephp.org/3.0/class-Cake.Validation.Validation.html&quot;&gt;quite a few rules at your disposal&lt;/a&gt; by default, but you are welcome to create new ones. Maybe your rule validates that a cat is in a breed that exists in a specific database table?&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Validation;
+
+use Cake\ORM\TableRegistry;
+use Cake\Validation\Validation;
+
+class CatValidation extends Validation
+{
+  public static function validSpecies($check)
+  {
+    $table = TableRegistry::get(&#39;Species&#39;);
+    $species = $table-&amp;gt;find(&#39;list&#39;)-&amp;gt;toArray();
+    return in_array((string)$check, array_values($species));
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now you can simply add this new class to your validator:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// map it
+// if a class name, the methods *must* be static
+$validator-&amp;gt;provider(&#39;cat&#39;, &#39;App\Model\Validation\CatValidation&#39;);
+
+// use it
+$validator-&amp;gt;add(&#39;species&#39;, &#39;validSpecies&#39;, [
+    &#39;rule&#39; =&amp;gt; &#39;validSpecies&#39;,
+    &#39;provider&#39; =&amp;gt; &#39;cat&#39;
+]);
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Wed, 23 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/23/data-validation-in-cakephp-3/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/23/data-validation-in-cakephp-3/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>validation</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Using InstanceConfigTrait for object configuration</title>
@@ -1254,103 +1390,6 @@ class ContextFileEngine
         <category>cakephp</category>
         
         <category>logging</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>The Collection Class and You</title>
-        <description>&lt;p&gt;Many modern applications work on a set of results, iterating over them, manipulating them, and modifying them to display the output necessary to get a job done. In CakePHP 3, we introduced the helpful &lt;code&gt;Collection&lt;/code&gt; class.&lt;/p&gt;
-
-&lt;p&gt;Here we have an array of cats info:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$cats = [
-  [
-    &#39;name&#39; =&amp;gt; &#39;camila&#39;,
-    &#39;gender&#39; =&amp;gt; &#39;female&#39;,
-    &#39;type&#39; =&amp;gt; &#39;calico&#39;,
-    &#39;size&#39; =&amp;gt; &#39;small&#39;,
-  ],
-  [
-    &#39;name&#39; =&amp;gt; &#39;railroad&#39;,
-    &#39;gender&#39; =&amp;gt; &#39;male&#39;,
-    &#39;color&#39; =&amp;gt; &#39;gray&#39;,
-    &#39;size&#39; =&amp;gt; &#39;massive&#39;,
-  ],
-  [
-    &#39;name&#39; =&amp;gt; &#39;santo&#39;,
-    &#39;gender&#39; =&amp;gt; &#39;male&#39;,
-    &#39;color&#39; =&amp;gt; &#39;black&#39;,
-    &#39;size&#39; =&amp;gt; &#39;massive&#39;,
-  ],
-  [
-    &#39;name&#39; =&amp;gt; &#39;jax&#39;,
-    &#39;gender&#39; =&amp;gt; &#39;male&#39;,
-    &#39;color&#39; =&amp;gt; &#39;black&#39;,
-    &#39;size&#39; =&amp;gt; &#39;small&#39;,
-  ],
-];
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lets filter out all the ~~best~~ female cats:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// filter the data
-$femaleCats = [];
-foreach ($cats as $cat) {
-  if ($cat[&#39;gender&#39;] == &#39;female&#39;) {
-    $femaleCats[] = $cat;
-  }
-}
-// $femaleCats should now contain camila, the cat on your right.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lets see what this looks like with the Collection class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// instantiate a new collection
-$collection = new \Cake\Collection\Collection($cats);
-
-// or use the helper function if you *really* want to
-$collection = collection($cats);
-
-// and now filter the data
-$femaleCats = $collection-&amp;gt;filter(function ($cat) {
-    return $cat[&#39;gender&#39;] == &#39;female;
-});
-
-// $femaleCats is a Collection instance that contains one cat
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Thats quite a bit simpler, though sometimes you want an array of data:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$femaleCats-&amp;gt;toArray();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can also chain collection methods:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$collection
-  // get all the small cats
-  -&amp;gt;filter(function ($cat) { return $info[&#39;size&#39;] == &#39;small&#39;; })
-  // if they are black
-  -&amp;gt;filter(function ($cat) { return $info[&#39;color&#39;] == &#39;black&#39;; })
-  // if they are female
-  -&amp;gt;filter(function ($cat) { return $info[&#39;gender&#39;] == &#39;female&#39;; })
-  // and sort alphabetically by name descending
-  -&amp;gt;sortBy(&#39;name&#39;, SORT_DESC);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty neat. Collections can work on any &lt;code&gt;array&lt;/code&gt; or instance that implements the &lt;code&gt;Traversable&lt;/code&gt; interface. In CakePHP, you can use any Collection method on the &lt;code&gt;ResultSet&lt;/code&gt; object returned by a query, which is pretty powerful for making complex find methods.&lt;/p&gt;
-</description>
-        <pubDate>Sun, 13 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/13/collections-class-and-you/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/13/collections-class-and-you/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>collections</category>
         
         
         <category>cakephp</category>

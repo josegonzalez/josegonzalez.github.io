@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Data Validation in CakePHP 3",
+    "url": "/2015/12/23/data-validation-in-cakephp-3/",
+    "description": "Silly hacks you can use in your cakephp applications",
+    "tokens": ["applications","cakephp","can","data","hacks","silly","use","validation"]
+  },
+  {
+    "type": "post",
     "title": "Using InstanceConfigTrait for object configuration",
     "url": "/2015/12/22/using-instance-config-trait-for-object-configuration/",
     "description": "Silly hacks you can use in your cakephp applications",
