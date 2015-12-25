@@ -74,7 +74,7 @@
   </header>
   <div class="entry-content">
     <blockquote>
-  <p>This tutorial assumes you are using the FriendsOfCake/app-template project with Composer. Please see <a href="http://josediazgonzalez.com/2013/12/08/composing-your-applications-from-plugins/">this post for more information</a>.</p>
+  <p>This tutorial assumes you are using the FriendsOfCake/app-template project with Composer. Please see <a href="/2013/12/08/composing-your-applications-from-plugins/">this post for more information</a>.</p>
 </blockquote>
 <p>One of the things I find developers doing - CakePHP and otherwise - is performing longer tasks when the user clicks a button. For example, in the application I work on, our main source of income depends upon inserting a record into a database table that is rapidly growing larger and slower. Boo. Our application could otherwise run off of a readonly database, and if we have to migrate our primary database, we are SOL.</p>
 <p>A better way would be to use a queuing system. Instead of inserting into this table, we would chuck a job into our queuing system. This would both allow us to run in a readonly state as well as ensure that database issues don’t affect our ability to make money.</p>

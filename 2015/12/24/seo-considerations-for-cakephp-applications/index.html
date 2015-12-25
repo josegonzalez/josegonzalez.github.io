@@ -11,8 +11,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <title>CakeAdvent-2015: Stuffing Complex Logic into Model-less Forms</title>
-    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/">
+    <title>CakeAdvent-2015: SEO Considerations for CakePHP Applications</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/24/seo-considerations-for-cakephp-applications/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
     <!--[if lt IE 9]>
         <script src="/javascripts/html5.js" type="text/javascript"></script>
@@ -22,18 +22,18 @@
     <meta name="revisit-after" content="7 days" />
     <meta name="version" content="1.0" />
     <meta name="description" content="Silly hacks you can use in your cakephp applications" />
-    <meta name="keywords" content="cakeadvent-2015, cakephp, forms, service" />
+    <meta name="keywords" content="cakeadvent-2015, cakephp, seo, routing, behaviors, annotations" />
     <meta property="fb:app_id" content="775202682501320" />
-    <meta property="og:title" content="CakeAdvent-2015: Stuffing Complex Logic into Model-less Forms" />
+    <meta property="og:title" content="CakeAdvent-2015: SEO Considerations for CakePHP Applications" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/24/seo-considerations-for-cakephp-applications/" />
     <meta property="og:description" content="Silly hacks you can use in your cakephp applications" />
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@savant">
     <meta name="twitter:creator" content="@savant">
-    <meta name="twitter:title" content="CakeAdvent-2015: Stuffing Complex Logic into Model-less Forms" />
+    <meta name="twitter:title" content="CakeAdvent-2015: SEO Considerations for CakePHP Applications" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
-    <link rel="alternate" type="application/rss+xml" title="Stuffing Complex Logic into Model-less Forms » Feed" href="/atom.xml">
+    <link rel="alternate" type="application/rss+xml" title="SEO Considerations for CakePHP Applications » Feed" href="/atom.xml">
     <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
@@ -64,124 +64,146 @@
             <article class="type-post">
   <header class="entry-header">
       <h1 class="entry-title">
-        Stuffing Complex Logic into Model-less Forms
+        SEO Considerations for CakePHP Applications
       </h1>
       <div class="comments-link">
-        <a href="#comments" title="Comment on Stuffing Complex Logic into Model-less Forms!">
+        <a href="#comments" title="Comment on SEO Considerations for CakePHP Applications!">
           Comments
         </a>
       </div>
   </header>
   <div class="entry-content">
-    <p>One new feature of CakePHP 3 is the ability to have <a href="http://book.cakephp.org/3.0/en/core-libraries/form.html">Model-less form classes</a>. These are typically useful for stuff like contact forms that might send an email:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\Form;
-use Cake\Form\Form;
-use Cake\Form\Schema;
-use Cake\Mailer\Email;
-use Cake\Validation\Validator;
-class ContactForm extends Form
+    <blockquote>
+  <p>A lovely post that is an adventure across how you can bend CakePHP to your will.</p>
+</blockquote>
+<p>Everyone loves free traffic, right? It allows us to continue building our applications, hopefully making money as we do so. If you aren’t making money, then why are you working on that app?</p>
+<p>In any case, one thing that you should worry about is duplicate website content. If search engines see any such duplicate content - especially en masse - then the value of your web pages decreases in their eyes, potentially dropping your page views. That would be sucks.</p>
+<p>One way to do this would be to automatically check that a url for a given page is the same as that which we expect. We can do this in a few ways, but the simplest is simply to check it manually!</p>
+<pre><code class="language-php">/**
+ * @param integer $id an id for the current model
+ * @return void|Cake\Network\Request
+ */
+public function view($id)
 {
-    // require some data
-    protected function _buildSchema(Schema $schema)
-    {
-        return $schema-&gt;addField('name', 'string')
-            -&gt;addField('email', ['type' =&gt; 'string'])
-            -&gt;addField('body', ['type' =&gt; 'text']);
-    }
-    // validate the incoming data
-    protected function _buildValidator(Validator $validator)
-    {
-        return $validator-&gt;add('name', 'length', [
-                'rule' =&gt; ['minLength', 10],
-                'message' =&gt; 'A name is required'
-            ])-&gt;add('email', 'format', [
-                'rule' =&gt; 'email',
-                'message' =&gt; 'A valid email address is required',
-            ]);
-    }
-    // actually send an email
-    protected function _execute(array $data)
-    {
-        $email = new Email('default');
-        return $email-&gt;from([$data['email'] =&gt; $data['name']])
-            -&gt;to('mail@example.com', 'Mail Example')
-            -&gt;subject('Contact Form')
-            -&gt;message($data['body'])
-            -&gt;send();
-    }
-}
-?&gt;
-</code></pre>
-<p>Neato burrito. One thing I love about this is the ability to have complex validation rulesets for specific actions. For instance, on a blog, I might have complex edit action that needs to check for editing writes before allowing a user to do anything:</p>
-<pre><code class="language-php">&lt;?php
-namespace App\Form;
-use Cake\Form\Form;
-class PostEditForm
-{
-    protected $_user = null;
-    public function __construct(array $user = [])
-    {
-        $this-&gt;_user = $user;
-        return $this;
-    }
-    protected function _buildValidator(Validator $validator)
-    {
-      // use $this-&gt;_user in my validation rules
-      $userId = $this-&gt;_user-&gt;get('id');
-      $validator-&gt;add('id', 'custom', [
-          'rule' =&gt; function ($value, $context) use ($userId) {
-              // reusing an invokable class
-              return (new OwnedByCurrentUser($userId))-&gt;__invoke($value);
-          },
-          'message' =&gt; 'This photo isn\'t yours to battle with'
-      ]);
-    }
+  $post = $this-&gt;Posts-&gt;get($id);
+  if ($this-&gt;request-&gt;here != $post-&gt;getCanonicalUrl()) {
+    return $this-&gt;redirect($post-&gt;getCanonicalUrl());
   }
+  $this-&gt;set('post', $post);
+}
+</code></pre>
+<p>Not too bad. One thing I like to do is use annotations for stuff, so I wrote an annotation parser for just the above:</p>
+<pre><code>public function initialize()
+{
+  $this-&gt;loadComponent('SeoAnnotation', [
+    // this can be overriden
+    'table' =&gt; 'Posts',
+    // as can this
+    'primaryKey' =&gt; '$id',
+  ]);
+}
+/**
+ * @table Posts
+ * @param integer $id an id for the current model
+ * @return void|Cake\Network\Request
+ */
+public function view($id)
+{
+  $post = $this-&gt;Posts-&gt;get($id);
+  $this-&gt;set('post', $post);
+}
+</code></pre>
+<p>The annotation parser - using the <a href="https://github.com/marcioAlmada/annotations">minime/annotations</a> package - simply retrieves the entity on the specified table by the specified field and then automatically does the following:</p>
+<pre><code class="language-php">protected function getTable()
+{
+  $annotations = $this-&gt;geAnnotations();
+  $tableClass = $annotations-&gt;get('table', $this-&gt;config('table'));
+  return TableRegistry::get($tableClass);
+}
+protected function getPrimaryKey()
+{
+  $annotations = $this-&gt;geAnnotations();
+  $primaryKeyField = $annotations-&gt;get(
+    'primaryKey',
+    $this-&gt;config('primaryKey')
+  );
+  // logic to iterate over other @param
+  // annotations to get the index of the primaryKey
+  // in the current request args
+  return $primaryKey;
+}
+protected function beforeFilter(\Cake\Event\Event $event)
+{
+  $primaryKey = $this-&gt;getPrimaryKey();
+  if (empty($primaryKey)) {
+    return;
+  }
+  $entity = $this-&gt;getTable()-&gt;get($primaryKey);
+  if (!method_exists($entity, 'getCanonicalUrl')) {
+    throw new \RuntimeException('Your entity class must implement getCanonicalUrl');
+  }
+  if ($this-&gt;request-&gt;here != $entity-&gt;getCanonicalUrl()) {
+    return $this-&gt;redirect($entity-&gt;getCanonicalUrl());
+  }
+}
+</code></pre>
+<p>Of course, if the specified field doesn’t exist as an <code>@param</code> docblock, then my component does nothing. It does require a bit more work on the developer’s end, but as a bonus I also get well-documented code.</p>
+<p>Note, you can always get at a controller in your custom components by doing the following:</p>
+<pre><code class="language-php">$controller = $this-&gt;_registry-&gt;getController();
+</code></pre>
+<p>Components are “owned” by a <code>Cake\Controller\ComponentRegistry</code>, which keeps track of both loaded components and the controller upon which they are loaded, amongst other things.</p>
+<blockquote>
+  <p>Semi-related, ComponentRegistry, TableRegistry, etc. are all simply <a href="http://en.wikipedia.org/wiki/Service_locator_pattern">service locators</a>, and all use some form of dependency injection on the objects they build. Yes, CakePHP has those things you thought it didn’t, we’re just very good at hiding them from you :P<br />
+If you’d like to use a similar pattern in your applications, you can extend the <code>Cake\Core\ObjectRegistry</code> class. I personally use this for stuff like custom payment classes, or things where there are multiple implementations and constructing them can be a pita.</p>
+</blockquote>
+<p>Back on topic, once I have an entity, I also like to set the canonical url for a given page. For instance, sometimes my page has querystring values that I’d like search engines to ignore. Maybe they were affiliate parameters, or things that updated filters. In any case, it’s a good idea to set a <code>rel=canonical</code> meta tag:</p>
+<pre><code class="language-php">if (method_exists($entity, 'getCanonicalUrl') {
+  $this-&gt;_controller-&gt;set('metaCanonical', $entity-&gt;getCanonicalUrl());
+}
+</code></pre>
+<p>And then in your view:</p>
+<pre><code class="language-php">// there isn't a special helper for this,
+// so we are just using HtmlHelper::tag()
+echo $this-&gt;Html-&gt;tag('link', null, [
+  'rel' =&gt; 'canonical',
+  // get the full url, since we don't expect `getCanonicalUrl`
+  // to return with the domain etc.
+  'href' =&gt; \Cake\Routing\Router::url($metaCanonical, true),
+]);
+</code></pre>
+<p>When writing an application, we often want memorable names. <code>/posts/view/34523</code> is a boring url, but <code>/2015/12/24/seo-considerations-for-cakephp-applications/</code> tells me a bit more. But how do I do routing off of that?</p>
+<p>One thing that is useful to to <em>still</em> have the “primarykey” to a record in the url. For instance, you might have the following url:</p>
+<pre><code>/34523/seo-considerations-for-cakephp-applications/
+</code></pre>
+<p>That still has an ID I can look for, and also contains some interesting metadata for both the user and a search engine. But how do we generate that slug? Using plugin LIKE A BAWS:</p>
+<pre><code class="language-php"># install the thing!
+composer require muffin/slug
+# enable the thing!
+bin/cake plugin load Muffin/Slug
+</code></pre>
+<p>And now add the behavior to your table:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Model\Table;
+use Cake\ORM\Table;
+class PostsTable extends Table
+{
+  public function initialize(array $config)
+  {
+    // some other crap you think is code goes here
+    $this-&gt;displayField('title');
+    $this-&gt;addBehavior('Muffin/Slug.Slug', [
+      // options! https://github.com/UseMuffin/Slug#configuration
+    ]);
+  }
+}
 ?&gt;
 </code></pre>
-<p>Nifty, huh? Usually I end up saving new records in my <code>_execute()</code> method as well. Here is what that looks like in one of my form classes:</p>
-<pre><code class="language-php">protected function _execute(array $data)
-{
-    $battle_id = Hash::get($data, 'id', null);
-    $photo_id = Hash::get($data, 'photo_id', null);
-    $battles = TableRegistry::get('Battles');
-    $photos = TableRegistry::get('Photos');
-    $battle = $battles-&gt;find('Battle', [
-        'battle_id' =&gt; $battle_id,
-    ])-&gt;firstOrFail();
-    if ($battle-&gt;confirmed != null) {
-        throw new MethodNotAllowedException('Battle has already been updated');
-    }
-    $photo = $photos-&gt;get($photo_id);
-    $battle-&gt;confirmed = true;
-    $battle-&gt;rival-&gt;photo = $photo;
-    if ($battles-&gt;save($battle)) {
-        return $battles-&gt;find('Battle', $battle-&gt;toFind())-&gt;firstOrFail();
-    }
-    $exception = new ValidationException('There are errors in the data you submitted');
-    $exception-&gt;errors($battle-&gt;errors());
-    throw $exception;
-}
-</code></pre>
-<p>Why? Because it turns certain complex actions into the following:</p>
-<pre><code class="language-php">public function edit()
-{
-    $authedUser = $this-&gt;Auth-&gt;user();
-    $post = (new PostEditForm($authedUser))-&gt;execute($this-&gt;request-&gt;data);
-    $this-&gt;set(['post' =&gt; $post]);
-}
-</code></pre>
-<p>Instead of litering logic across:</p>
-<ul>
-  <li>a custom validation method in my model</li>
-  <li>a controller action</li>
-  <li>some other random model method or protected controller method</li>
-</ul>
-<p>I can group it all together into one, logical unit that can be easily unit tested for various types of input. A side-benefit of this is that if I <em>absolutely</em> need to, I can always re-use a given action’s logic with as few as three lines of code within say, idk, a console shell.</p>
+<p>And now, as long as you have a <code>slug</code> field in your <code>posts</code> table and a <code>title</code> field as your displayField, you will be set. You can now use the <code>slug</code> in your <code>getCanonicalUrl</code> method.</p>
+<p>But why stop there? You could also build a simple admin tool to let your marketing team update those canonical urls using the <a href="/2015/12/02/creating-apis-using-the-crud-plugin/">crud</a> and <a href="/2015/12/03/generating-administrative-panels-with-crud-view/">crud-view</a> plugin. Trust me, they’ll love you and sing your praises to your bosses, which will be especially nice when you realize you are programming on Christmas day and your boss is like “slow your roll, you did great work this year, go take a nice long vacation and come back to me fresh next year.”</p>
+<p>And that’s all I have. Come back next year - or whenever I decide to write again - and we’ll see if I can muster up more tips and tricks you can use in writing your CakePHP code. Until then, pet your pets and Happy Holidays!</p>
   </div>
     <footer class="entry-meta">
-      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-15 12:00:00 +0000">15 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/24/seo-considerations-for-cakephp-applications/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-24 12:00:00 +0000">24 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
 </article>
   <div id="comments">
@@ -202,7 +224,7 @@ class PostEditForm
   </div>
 </div>
 <div class="series-note">
-    <p>This entry is <strong>part 15</strong> of <strong>24</strong> in the series "CakeAdvent 2015".</p>
+    <p>This entry is <strong>part 24</strong> of <strong>24</strong> in the series "CakeAdvent 2015".</p>
     <ol>
       <li><a href="/2015/12/01/using-fractal-to-transform-entities-for-custom-api-endpoints/">Using Fractal to transform entities for custom api endpoints</a></li>
       <li><a href="/2015/12/02/creating-apis-using-the-crud-plugin/">Creating APIs using the CRUD Plugin</a></li>
@@ -218,7 +240,7 @@ class PostEditForm
       <li><a href="/2015/12/12/using-dns-to-simplify-connection-strings/">Using DSNs to simplify connection strings</a></li>
       <li><a href="/2015/12/13/collections-class-and-you/">The Collection Class and You</a></li>
       <li><a href="/2015/12/14/custom-logging-engines-and-adding-contextual-data/">Custom Logging Engines and adding Contextual Data</a></li>
-      <li>Stuffing Complex Logic into Model-less Forms</li>
+      <li><a href="/2015/12/15/stuffing-complex-logic-into-model-less-forms/">Stuffing Complex Logic into Model-less Forms</a></li>
       <li><a href="/2015/12/16/custom-validation-rule-classes/">Custom Validation Rule Classes</a></li>
       <li><a href="/2015/12/17/cakephp-shells-i-didnt-know-about/">CakePHP Shells I didn't know about</a></li>
       <li><a href="/2015/12/18/managing-application-configuration/">Managing Application Configuration</a></li>
@@ -227,7 +249,7 @@ class PostEditForm
       <li><a href="/2015/12/21/tracking-logged-in-user-actions/">Tracking Logged in User Actions</a></li>
       <li><a href="/2015/12/22/using-instance-config-trait-for-object-configuration/">Using InstanceConfigTrait for object configuration</a></li>
       <li><a href="/2015/12/23/data-validation-in-cakephp-3/">Data Validation in CakePHP 3</a></li>
-      <li><a href="/2015/12/24/seo-considerations-for-cakephp-applications/">SEO Considerations for CakePHP Applications</a></li>
+      <li>SEO Considerations for CakePHP Applications</li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
@@ -266,9 +288,9 @@ class PostEditForm
 <script type="text/javascript">
     if ($('#disqus_thread').length) {
         var disqus_shortname  = 'josediazgonzalez';
-        var disqus_identifier = '/2015/12/15/stuffing-complex-logic-into-model-less-forms/';
-        var disqus_url        = 'http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/';
-        var disqus_title      = "CakeAdvent-2015: Stuffing Complex Logic into Model-less Forms";
+        var disqus_identifier = '/2015/12/24/seo-considerations-for-cakephp-applications/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/24/seo-considerations-for-cakephp-applications/';
+        var disqus_title      = "CakeAdvent-2015: SEO Considerations for CakePHP Applications";
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';

@@ -5,9 +5,196 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 24 Dec 2015 01:59:29 +0000</pubDate>
-    <lastBuildDate>Thu, 24 Dec 2015 01:59:29 +0000</lastBuildDate>
+    <pubDate>Fri, 25 Dec 2015 00:09:21 +0000</pubDate>
+    <lastBuildDate>Fri, 25 Dec 2015 00:09:21 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>SEO Considerations for CakePHP Applications</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;A lovely post that is an adventure across how you can bend CakePHP to your will.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Everyone loves free traffic, right? It allows us to continue building our applications, hopefully making money as we do so. If you aren’t making money, then why are you working on that app?&lt;/p&gt;
+
+&lt;p&gt;In any case, one thing that you should worry about is duplicate website content. If search engines see any such duplicate content - especially en masse - then the value of your web pages decreases in their eyes, potentially dropping your page views. That would be sucks.&lt;/p&gt;
+
+&lt;p&gt;One way to do this would be to automatically check that a url for a given page is the same as that which we expect. We can do this in a few ways, but the simplest is simply to check it manually!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * @param integer $id an id for the current model
+ * @return void|Cake\Network\Request
+ */
+public function view($id)
+{
+  $post = $this-&amp;gt;Posts-&amp;gt;get($id);
+  if ($this-&amp;gt;request-&amp;gt;here != $post-&amp;gt;getCanonicalUrl()) {
+    return $this-&amp;gt;redirect($post-&amp;gt;getCanonicalUrl());
+  }
+  $this-&amp;gt;set(&#39;post&#39;, $post);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Not too bad. One thing I like to do is use annotations for stuff, so I wrote an annotation parser for just the above:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public function initialize()
+{
+  $this-&amp;gt;loadComponent(&#39;SeoAnnotation&#39;, [
+    // this can be overriden
+    &#39;table&#39; =&amp;gt; &#39;Posts&#39;,
+    // as can this
+    &#39;primaryKey&#39; =&amp;gt; &#39;$id&#39;,
+  ]);
+}
+
+/**
+ * @table Posts
+ * @param integer $id an id for the current model
+ * @return void|Cake\Network\Request
+ */
+public function view($id)
+{
+  $post = $this-&amp;gt;Posts-&amp;gt;get($id);
+  $this-&amp;gt;set(&#39;post&#39;, $post);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The annotation parser - using the &lt;a href=&quot;https://github.com/marcioAlmada/annotations&quot;&gt;minime/annotations&lt;/a&gt; package - simply retrieves the entity on the specified table by the specified field and then automatically does the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function getTable()
+{
+  $annotations = $this-&amp;gt;geAnnotations();
+  $tableClass = $annotations-&amp;gt;get(&#39;table&#39;, $this-&amp;gt;config(&#39;table&#39;));
+  return TableRegistry::get($tableClass);
+}
+
+protected function getPrimaryKey()
+{
+  $annotations = $this-&amp;gt;geAnnotations();
+  $primaryKeyField = $annotations-&amp;gt;get(
+    &#39;primaryKey&#39;,
+    $this-&amp;gt;config(&#39;primaryKey&#39;)
+  );
+  // logic to iterate over other @param
+  // annotations to get the index of the primaryKey
+  // in the current request args
+  return $primaryKey;
+}
+
+protected function beforeFilter(\Cake\Event\Event $event)
+{
+  $primaryKey = $this-&amp;gt;getPrimaryKey();
+  if (empty($primaryKey)) {
+    return;
+  }
+
+  $entity = $this-&amp;gt;getTable()-&amp;gt;get($primaryKey);
+  if (!method_exists($entity, &#39;getCanonicalUrl&#39;)) {
+    throw new \RuntimeException(&#39;Your entity class must implement getCanonicalUrl&#39;);
+  }
+
+  if ($this-&amp;gt;request-&amp;gt;here != $entity-&amp;gt;getCanonicalUrl()) {
+    return $this-&amp;gt;redirect($entity-&amp;gt;getCanonicalUrl());
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Of course, if the specified field doesn’t exist as an &lt;code&gt;@param&lt;/code&gt; docblock, then my component does nothing. It does require a bit more work on the developer’s end, but as a bonus I also get well-documented code.&lt;/p&gt;
+
+&lt;p&gt;Note, you can always get at a controller in your custom components by doing the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$controller = $this-&amp;gt;_registry-&amp;gt;getController();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Components are “owned” by a &lt;code&gt;Cake\Controller\ComponentRegistry&lt;/code&gt;, which keeps track of both loaded components and the controller upon which they are loaded, amongst other things.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Semi-related, ComponentRegistry, TableRegistry, etc. are all simply &lt;a href=&quot;http://en.wikipedia.org/wiki/Service_locator_pattern&quot;&gt;service locators&lt;/a&gt;, and all use some form of dependency injection on the objects they build. Yes, CakePHP has those things you thought it didn’t, we’re just very good at hiding them from you :P&lt;br /&gt;
+If you’d like to use a similar pattern in your applications, you can extend the &lt;code&gt;Cake\Core\ObjectRegistry&lt;/code&gt; class. I personally use this for stuff like custom payment classes, or things where there are multiple implementations and constructing them can be a pita.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Back on topic, once I have an entity, I also like to set the canonical url for a given page. For instance, sometimes my page has querystring values that I’d like search engines to ignore. Maybe they were affiliate parameters, or things that updated filters. In any case, it’s a good idea to set a &lt;code&gt;rel=canonical&lt;/code&gt; meta tag:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if (method_exists($entity, &#39;getCanonicalUrl&#39;) {
+  $this-&amp;gt;_controller-&amp;gt;set(&#39;metaCanonical&#39;, $entity-&amp;gt;getCanonicalUrl());
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And then in your view:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// there isn&#39;t a special helper for this,
+// so we are just using HtmlHelper::tag()
+echo $this-&amp;gt;Html-&amp;gt;tag(&#39;link&#39;, null, [
+  &#39;rel&#39; =&amp;gt; &#39;canonical&#39;,
+  // get the full url, since we don&#39;t expect `getCanonicalUrl`
+  // to return with the domain etc.
+  &#39;href&#39; =&amp;gt; \Cake\Routing\Router::url($metaCanonical, true),
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When writing an application, we often want memorable names. &lt;code&gt;/posts/view/34523&lt;/code&gt; is a boring url, but &lt;code&gt;/2015/12/24/seo-considerations-for-cakephp-applications/&lt;/code&gt; tells me a bit more. But how do I do routing off of that?&lt;/p&gt;
+
+&lt;p&gt;One thing that is useful to to &lt;em&gt;still&lt;/em&gt; have the “primarykey” to a record in the url. For instance, you might have the following url:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/34523/seo-considerations-for-cakephp-applications/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That still has an ID I can look for, and also contains some interesting metadata for both the user and a search engine. But how do we generate that slug? Using plugin LIKE A BAWS:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;# install the thing!
+composer require muffin/slug
+
+# enable the thing!
+bin/cake plugin load Muffin/Slug
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And now add the behavior to your table:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Table;
+
+use Cake\ORM\Table;
+
+class PostsTable extends Table
+{
+  public function initialize(array $config)
+  {
+    // some other crap you think is code goes here
+    $this-&amp;gt;displayField(&#39;title&#39;);
+    $this-&amp;gt;addBehavior(&#39;Muffin/Slug.Slug&#39;, [
+      // options! https://github.com/UseMuffin/Slug#configuration
+    ]);
+  }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And now, as long as you have a &lt;code&gt;slug&lt;/code&gt; field in your &lt;code&gt;posts&lt;/code&gt; table and a &lt;code&gt;title&lt;/code&gt; field as your displayField, you will be set. You can now use the &lt;code&gt;slug&lt;/code&gt; in your &lt;code&gt;getCanonicalUrl&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;But why stop there? You could also build a simple admin tool to let your marketing team update those canonical urls using the &lt;a href=&quot;/2015/12/02/creating-apis-using-the-crud-plugin/&quot;&gt;crud&lt;/a&gt; and &lt;a href=&quot;/2015/12/03/generating-administrative-panels-with-crud-view/&quot;&gt;crud-view&lt;/a&gt; plugin. Trust me, they’ll love you and sing your praises to your bosses, which will be especially nice when you realize you are programming on Christmas day and your boss is like “slow your roll, you did great work this year, go take a nice long vacation and come back to me fresh next year.”&lt;/p&gt;
+
+&lt;p&gt;And that’s all I have. Come back next year - or whenever I decide to write again - and we’ll see if I can muster up more tips and tricks you can use in writing your CakePHP code. Until then, pet your pets and Happy Holidays!&lt;/p&gt;
+</description>
+        <pubDate>Thu, 24 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/24/seo-considerations-for-cakephp-applications/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/24/seo-considerations-for-cakephp-applications/</guid>
+        
+        <category>cakeadvent-2015</category>
+        
+        <category>cakephp</category>
+        
+        <category>seo</category>
+        
+        <category>routing</category>
+        
+        <category>behaviors</category>
+        
+        <category>annotations</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Data Validation in CakePHP 3</title>
@@ -837,7 +1024,7 @@ export DATABASE_URL=&quot;mysql://user:password@localhost/database?encoding=utf8
 bin/cake plugin load --bootstrap --routes Josegonzalez/Blog
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Most people installed CakePHP 3 using the &lt;a href=&quot;http://josediazgonzalez.com/2015/12/09/customizing-your-app-template/&quot;&gt;&lt;code&gt;cakephp/app&lt;/code&gt; project template&lt;/a&gt;, so you have access to both &lt;code&gt;bake&lt;/code&gt; and &lt;code&gt;migrations&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;Most people installed CakePHP 3 using the &lt;a href=&quot;/2015/12/09/customizing-your-app-template/&quot;&gt;&lt;code&gt;cakephp/app&lt;/code&gt; project template&lt;/a&gt;, so you have access to both &lt;code&gt;bake&lt;/code&gt; and &lt;code&gt;migrations&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# migrate all the things!
 bin/cake migrations migrate
@@ -1251,145 +1438,6 @@ class PostEditForm
         <category>forms</category>
         
         <category>service</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Custom Logging Engines and adding Contextual Data</title>
-        <description>&lt;p&gt;Logging is incredibly important, and are very useful for debugging misbehaving applications. CakePHP 3 implements the &lt;a href=&quot;https://github.com/php-fig/log&quot;&gt;PSR-3&lt;/a&gt; logging standard - specifically extending the &lt;a href=&quot;https://github.com/php-fig/log/blob/master/Psr/Log/AbstractLogger.php&quot;&gt;AbstractLogger&lt;/a&gt; - so you have all normal logging levels available:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// the `Cake\Log\Log` class holds a log registry,
-// so you don&#39;t need to instantiate new loggers constantly
-Log::info(&#39;Some info level message&#39;);
-Log::error(&#39;uh oh! an error&#39;);
-
-// Swap out to Monolog because you need
-// to ship/store logs a specific way
-// In your bootstrap:
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
-// Configure the logger
-Log::config(&#39;default&#39;, function () {
-    $log = new Logger(&#39;app&#39;);
-    $log-&amp;gt;pushHandler(new StreamHandler(&#39;path/to/your/combined.log&#39;));
-    return $log;
-});
-
-// Drop unused loggers
-Log::drop(&#39;debug&#39;);
-Log::drop(&#39;error&#39;);
-// and then use it as normal
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You’ll notice that a few classes have their own &lt;code&gt;log&lt;/code&gt; methods. You can add this to your own classes using the &lt;code&gt;LogTrait&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App;
-
-use Cake\Log\LogTrait;
-class Foo {
-  use LogTrait
-  public function bar()
-  {
-    $this-&amp;gt;log(&#39;baz&#39;);
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;One thing I like doing is having &lt;code&gt;Tagged&lt;/code&gt; logs. That is, I will write a log message like so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// Message is an entity WUT
-// Entities are just bags of data, you can use them however you want
-$message = new Message([
-  &#39;message&#39; =&amp;gt; &#39;User logged in&#39;,
-  &#39;user_id&#39; =&amp;gt; $user-&amp;gt;get(&#39;id&#39;),
-  &#39;via&#39; =&amp;gt; &#39;android&#39;
-]);
-
-// :boom:
-Log::info($message);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;CakePHP’s internal formatter will automatically &lt;code&gt;json_encode&lt;/code&gt; any message that is &lt;code&gt;JsonSerializable&lt;/code&gt;. If you also implement a &lt;code&gt;__toString()&lt;/code&gt; method, that will be used instead.&lt;/p&gt;
-
-&lt;p&gt;This is kinda shoddy though, especially needing to manually pass in information that can be inferred through the request. Another method is to pass in that extra data as part of the context of a log message:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Log::info(&#39;User logged in&#39;, [&#39;request&#39; =&amp;gt; $request, &#39;user&#39; =&amp;gt; $user]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;But this extra data is usually ignored. CakePHP’s internal logging doesn’t have the concept of a formatter - that’s something we’d prefer you use a full logging package like &lt;a href=&quot;https://github.com/Seldaek/monolog&quot;&gt;Monolog&lt;/a&gt; for - but you &lt;em&gt;can&lt;/em&gt; easily implement your own &lt;code&gt;LogEngine&lt;/code&gt; that does what you need. Here is a simple one that simply logs to a file with our extra data:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;?php
-namespace App\Log\Engine;
-use Cake\Log\Engine\FileEngine;
-class ContextFileEngine
-{
-  public function _format($data, $context)
-  {
-    if (is_string($data)) {
-      return $this-&amp;gt;_injectContext($data, $context)
-    }
-
-    $object = is_object($data);
-
-    if ($object &amp;amp;&amp;amp; method_exists($data, &#39;__toString&#39;)) {
-      $data = (string)$data;
-      return $this-&amp;gt;_injectContext($data, $context)
-    }
-
-    if ($object &amp;amp;&amp;amp; $data instanceof JsonSerializable) {
-      $data = json_decode(json_encode($data), true);
-      return $this-&amp;gt;_injectContext($data, $context)
-    }
-
-    return $this-&amp;gt;_injectContext(print_r($data, true), $context);
-  }
-
-  protected function _injectContext($message, $context)
-  {
-    $via = null;
-    $userId = null;
-    if (!empty($context[&#39;request&#39;])) {
-      $via = $context[&#39;request&#39;]-&amp;gt;header(&#39;X-Client&#39;);
-    }
-    if (!empty($context[&#39;user&#39;])) {
-      $userId = $context[&#39;user&#39;]-&amp;gt;get(&#39;id&#39;);
-    }
-
-    $data = compact(&#39;message&#39;, &#39;via&#39;, &#39;userId&#39;);
-    // handle arrays
-    if (is_array($message)) {
-      $data = $message + compact(&#39;via&#39;, &#39;userId&#39;);
-    }
-
-    return parent::_format(json_encode($data), $context);
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above will have output similar to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;2015-12-14 7:55:00 INFO: {&quot;message&quot;: &quot;User logged in&quot;, &quot;userId&quot;: 7, &quot;via&quot;: &quot;android&quot;}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This method of injecting contextual data into your logs is quite useful for later debugging, and doesn’t require too much extra work around how logs are actually written. Of course, if you need more powerful logging features, I wholeheartedly recommend looking into &lt;a href=&quot;https://github.com/Seldaek/monolog&quot;&gt;Monolog&lt;/a&gt;&lt;br /&gt;
-.&lt;/p&gt;
-</description>
-        <pubDate>Mon, 14 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/14/custom-logging-engines-and-adding-contextual-data/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/14/custom-logging-engines-and-adding-contextual-data/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>logging</category>
         
         
         <category>cakephp</category>

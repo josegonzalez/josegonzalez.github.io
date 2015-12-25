@@ -82,7 +82,7 @@
   bin/cake orm_cache clear</p>
   <p>I’ve already corrected yesterdays post, so this change may not be necessary for some users.</p>
 </blockquote>
-<p>CakePHP has always had the Bake shell command - you saw it in action <a href="http://josediazgonzalez.com/2014/12/02/designing-a-store-application-in-cakephp/">yesterday</a> - but it’s always been a bit difficult to work with. You would need to escape your actual php code, making it difficult to actually think about the contents of the template. Thanks to some excellent work by <a href="http://ad7six.com/">Andy Dawson</a>, we now have quite a bit of flexibility in writing bake templates.</p>
+<p>CakePHP has always had the Bake shell command - you saw it in action <a href="/2014/12/02/designing-a-store-application-in-cakephp/">yesterday</a> - but it’s always been a bit difficult to work with. You would need to escape your actual php code, making it difficult to actually think about the contents of the template. Thanks to some excellent work by <a href="http://ad7six.com/">Andy Dawson</a>, we now have quite a bit of flexibility in writing bake templates.</p>
 <p>In CakePHP, we can use Helpers and elements in our bake templates. As well, CakePHP uses ASP-style tags - <code>&lt;%</code>, <code>&lt;%=</code>, and <code>%&gt;</code> - to execute php code. This sounds weird, but here is an example:</p>
 <pre><code class="language-php">&lt;?php
 namespace &lt;%= $namespace %&gt;\View\Helper;
