@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 27 Dec 2015 01:20:52 +0000</pubDate>
-    <lastBuildDate>Sun, 27 Dec 2015 01:20:52 +0000</lastBuildDate>
+    <pubDate>Sun, 27 Dec 2015 01:55:30 +0000</pubDate>
+    <lastBuildDate>Sun, 27 Dec 2015 01:55:30 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -15,7 +15,7 @@
 
 &lt;h2 id=&quot;ive-got-a-lot-of-problems-with-you-people&quot;&gt;“I’ve got a lot of problems with you people”&lt;/h2&gt;
 
-&lt;p&gt;A while back &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, I &lt;s&gt;stole&lt;/s&gt; built a &lt;a href=&quot;https://devcenter.heroku.com/articles/paperclip-s3&quot;&gt;simple image upload tool&lt;/a&gt; for our &lt;a href=&quot;https://seatgeek.com/sgteam&quot;&gt;marketing team&lt;/a&gt;. The reason I built this was simple; I wanted to stop the marketing team from uploading large file assets to the main repository &lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;, thereby bloating repository size. It’s worked well enough, but has lately shown it’s age:&lt;/p&gt;
+&lt;p&gt;A while back &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, I &lt;s&gt;stole&lt;/s&gt; built a &lt;a href=&quot;https://devcenter.heroku.com/articles/paperclip-s3&quot;&gt;simple image upload tool&lt;/a&gt; for our &lt;a href=&quot;https://seatgeek.com/sgteam&quot;&gt;marketing team&lt;/a&gt;. The reason I built this was simple; I wanted to stop the marketing team from uploading large file assets to the main repository &lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;, thereby bloating repository size. Plus they get their assets out as soon as they need them, instead of waiting for some silly dev to press the deploy button. It’s worked well enough, but has lately shown it’s age:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;Thumbnails are processed in a web request, slowing down large file uploads. We should &lt;em&gt;always&lt;/em&gt; process any files in the background, to avoid slowing down the user’s interaction with the site.&lt;/li&gt;
@@ -68,7 +68,7 @@
       &lt;p&gt;November 12, 2013 to be precise. &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
     &lt;li id=&quot;fn:2&quot;&gt;
-      &lt;p&gt;Our development staff is no better, the repository is still a lovely 300mb with images, binary blobs, etc. :) &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+      &lt;p&gt;Our development staff is no better - and in fact worse as they should know better. Supid devs. The repository is still a lovely 300mb with images, binary blobs, etc. :) &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
     &lt;li id=&quot;fn:3&quot;&gt;
       &lt;p&gt;By the way, CloudApp is great. Our entire company uses it and I don’t understand why anyone wouldn’t. They even have a free tier, which is great of those times when I totally forget to renew my account… &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;

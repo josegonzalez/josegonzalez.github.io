@@ -75,7 +75,7 @@
   <div class="entry-content">
     <p><img src="/images/2015/12/26/screenshot.png" alt="File Upload Tool" /></p>
 <h2 id="ive-got-a-lot-of-problems-with-you-people">“I’ve got a lot of problems with you people”</h2>
-<p>A while back <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, I <s>stole</s> built a <a href="https://devcenter.heroku.com/articles/paperclip-s3">simple image upload tool</a> for our <a href="https://seatgeek.com/sgteam">marketing team</a>. The reason I built this was simple; I wanted to stop the marketing team from uploading large file assets to the main repository <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>, thereby bloating repository size. It’s worked well enough, but has lately shown it’s age:</p>
+<p>A while back <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, I <s>stole</s> built a <a href="https://devcenter.heroku.com/articles/paperclip-s3">simple image upload tool</a> for our <a href="https://seatgeek.com/sgteam">marketing team</a>. The reason I built this was simple; I wanted to stop the marketing team from uploading large file assets to the main repository <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>, thereby bloating repository size. Plus they get their assets out as soon as they need them, instead of waiting for some silly dev to press the deploy button. It’s worked well enough, but has lately shown it’s age:</p>
 <ul>
   <li>Thumbnails are processed in a web request, slowing down large file uploads. We should <em>always</em> process any files in the background, to avoid slowing down the user’s interaction with the site.</li>
   <li>Thumbnails are created <em>regardless</em> of the file type. Uploading a large gif? Yeah that won’t work.</li>
@@ -115,7 +115,7 @@
       <p>November 12, 2013 to be precise. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
     </li>
     <li id="fn:2">
-      <p>Our development staff is no better, the repository is still a lovely 300mb with images, binary blobs, etc. :) <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+      <p>Our development staff is no better - and in fact worse as they should know better. Supid devs. The repository is still a lovely 300mb with images, binary blobs, etc. :) <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
     </li>
     <li id="fn:3">
       <p>By the way, CloudApp is great. Our entire company uses it and I don’t understand why anyone wouldn’t. They even have a free tier, which is great of those times when I totally forget to renew my account… <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
