@@ -93,7 +93,7 @@ public function view($id)
 }
 </code></pre>
 <p>Not too bad. One thing I like to do is use annotations for stuff, so I wrote an annotation parser for just the above:</p>
-<pre><code>public function initialize()
+<pre><code class="language-php">public function initialize()
 {
   $this-&gt;loadComponent('SeoAnnotation', [
     // this can be overriden

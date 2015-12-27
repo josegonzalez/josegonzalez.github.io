@@ -31,6 +31,9 @@ pre.rainbow-code {
 pre code {
   background: none !important; }
 
+.footnotes {
+  font-size: 80%; }
+
 .site-header {
   padding-bottom: 0; }
   .site-header h2 a {

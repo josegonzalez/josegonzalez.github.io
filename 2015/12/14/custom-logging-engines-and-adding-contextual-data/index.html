@@ -123,7 +123,7 @@ Log::info($message);
 <pre><code class="language-php">Log::info('User logged in', ['request' =&gt; $request, 'user' =&gt; $user]);
 </code></pre>
 <p>But this extra data is usually ignored. CakePHP’s internal logging doesn’t have the concept of a formatter - that’s something we’d prefer you use a full logging package like <a href="https://github.com/Seldaek/monolog">Monolog</a> for - but you <em>can</em> easily implement your own <code>LogEngine</code> that does what you need. Here is a simple one that simply logs to a file with our extra data:</p>
-<pre><code>&lt;?php
+<pre><code class="language-php">&lt;?php
 namespace App\Log\Engine;
 use Cake\Log\Engine\FileEngine;
 class ContextFileEngine

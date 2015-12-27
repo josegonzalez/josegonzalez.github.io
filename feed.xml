@@ -5,9 +5,99 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 25 Dec 2015 00:09:21 +0000</pubDate>
-    <lastBuildDate>Fri, 25 Dec 2015 00:09:21 +0000</lastBuildDate>
+    <pubDate>Sun, 27 Dec 2015 01:20:52 +0000</pubDate>
+    <lastBuildDate>Sun, 27 Dec 2015 01:20:52 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Creating a CakePHP skeleton</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/images/2015/12/26/screenshot.png&quot; alt=&quot;File Upload Tool&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;ive-got-a-lot-of-problems-with-you-people&quot;&gt;“I’ve got a lot of problems with you people”&lt;/h2&gt;
+
+&lt;p&gt;A while back &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, I &lt;s&gt;stole&lt;/s&gt; built a &lt;a href=&quot;https://devcenter.heroku.com/articles/paperclip-s3&quot;&gt;simple image upload tool&lt;/a&gt; for our &lt;a href=&quot;https://seatgeek.com/sgteam&quot;&gt;marketing team&lt;/a&gt;. The reason I built this was simple; I wanted to stop the marketing team from uploading large file assets to the main repository &lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;, thereby bloating repository size. It’s worked well enough, but has lately shown it’s age:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Thumbnails are processed in a web request, slowing down large file uploads. We should &lt;em&gt;always&lt;/em&gt; process any files in the background, to avoid slowing down the user’s interaction with the site.&lt;/li&gt;
+  &lt;li&gt;Thumbnails are created &lt;em&gt;regardless&lt;/em&gt; of the file type. Uploading a large gif? Yeah that won’t work.&lt;/li&gt;
+  &lt;li&gt;Images are uploaded through rails. Since we store assets on S3, we can just as easily upload direct to S3 in javascript.&lt;/li&gt;
+  &lt;li&gt;I never built in any categorization, tagging, or user functionality. There isn’t any way for the marketing team to know who uploaded what file, nor for what purpose.&lt;/li&gt;
+  &lt;li&gt;A “file” can actually be several different assets. For instance, we frequently resize assets manually - on the client-side at the moment - for use in different media, like ads, email, or on-site ads. Having several different “uploads” made it slightly difficult to see which one someone should use for a specific purpose.&lt;/li&gt;
+  &lt;li&gt;It doesn’t have an API, meaning other teams that might want to use it to store information - such as the Android team - can’t easily write an integration like, say, &lt;a href=&quot;https://www.getcloudapp.com/&quot;&gt;CloudApp&lt;/a&gt; &lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;#fn:3&quot; class=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt; but just for our internal tool.&lt;/li&gt;
+  &lt;li&gt;The site is built on an older version of rails &lt;sup id=&quot;fnref:4&quot;&gt;&lt;a href=&quot;#fn:4&quot; class=&quot;footnote&quot;&gt;4&lt;/a&gt;&lt;/sup&gt;, which I have no desire nor intention to upgrade. We also don’t really have a dedicated Rails developer, so it’s not like I can just toss the app at someone else. We &lt;em&gt;do&lt;/em&gt;, however, have two CakePHP Core developers on staff, so at worst I can just tell &lt;a href=&quot;https://github.com/ad7six&quot;&gt;Andy&lt;/a&gt; it’s his problem now.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;lets-try-and-get-past-this&quot;&gt;Let’s try and get past this&lt;/h2&gt;
+
+&lt;p&gt;So I’m building this new app and decided I needed a good base:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Must have all my favorite plugins - &lt;a href=&quot;/2015/12/02/creating-apis-using-the-crud-plugin/&quot;&gt;Crud&lt;/a&gt;, &lt;a href=&quot;/2015/12/03/generating-administrative-panels-with-crud-view/&quot;&gt;Crud View&lt;/a&gt;, &lt;a href=&quot;/2015/12/05/uploading-files-and-images/&quot;&gt;Upload&lt;/a&gt;, etc. - enabled by default.&lt;/li&gt;
+  &lt;li&gt;Should handle &lt;a href=&quot;/2015/12/07/error-handling-in-cakephp-3/&quot;&gt;error tracking&lt;/a&gt; and &lt;a href=&quot;/2015/12/14/custom-logging-engines-and-adding-contextual-data/&quot;&gt;logging&lt;/a&gt; in a sane way.&lt;/li&gt;
+  &lt;li&gt;Must be able to handle being &lt;a href=&quot;/2015/12/12/using-dns-to-simplify-connection-strings/&quot;&gt;deployed&lt;/a&gt; to &lt;a href=&quot;/2015/12/18/managing-application-configuration/&quot;&gt;heroku&lt;/a&gt; by default.&lt;/li&gt;
+  &lt;li&gt;Needs support for &lt;em&gt;some&lt;/em&gt; method of &lt;a href=&quot;/2015/12/20/creating-custom-background-shells/&quot;&gt;background queueing&lt;/a&gt;.&lt;/li&gt;
+  &lt;li&gt;Should be open source &lt;sup id=&quot;fnref:5&quot;&gt;&lt;a href=&quot;#fn:5&quot; class=&quot;footnote&quot;&gt;5&lt;/a&gt;&lt;/sup&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Thankfully, we can use composer to &lt;a href=&quot;/2015/12/09/customizing-your-app-template/&quot;&gt;customize our application skeleton&lt;/a&gt;. This will enable me to scaffold out my application more more quickly than I would be able to if I used the base &lt;a href=&quot;https://github.com/cakephp/app&quot;&gt;cakephp/app&lt;/a&gt; composer project template.&lt;/p&gt;
+
+&lt;p&gt;Here is my first pass, &lt;a href=&quot;https://github.com/josegonzalez/app&quot;&gt;josegonzalez/app&lt;/a&gt;. It’s based upon the original &lt;a href=&quot;https://github.com/cakephp/app&quot;&gt;cakephp/app&lt;/a&gt; project template, with many of my requirements fulfilled. Ideally everything would be done now, but that won’t ever be the case:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Still need to add a custom &lt;code&gt;config/functions.php&lt;/code&gt; for utility functions I tend to use such as &lt;code&gt;diebug()&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;I don’t &lt;em&gt;yet&lt;/em&gt; have a contextual logger in place. I’m considering switching to monolog and having all logging go to &lt;code&gt;stdout&lt;/code&gt; when using the &lt;a href=&quot;/2015/12/17/cakephp-shells-i-didnt-know-about/&quot;&gt;built-in cake server shell&lt;/a&gt;, but I’m not quite sure yet.&lt;/li&gt;
+  &lt;li&gt;I can’t yet &lt;em&gt;seed&lt;/em&gt; an environment in &lt;a href=&quot;/2015/12/18/managing-application-configuration/&quot;&gt;dotenv&lt;/a&gt;, so heroku support isn’t quite complete, but I’m working on it.&lt;/li&gt;
+  &lt;li&gt;There are quite a few plugins that would be useful to have - such as &lt;a href=&quot;https://github.com/usemuffin/footprint&quot;&gt;muffin/footprint&lt;/a&gt; - but they aren’t there yet. I’ll add them as I see general use across my application.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Side note: I wrote &lt;em&gt;way&lt;/em&gt; too many blog posts. Do you see the internal linkage up there? Incredible.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;whats-next&quot;&gt;What’s next?&lt;/h2&gt;
+
+&lt;p&gt;Now that I have a firm base for my application, I’ll need to start actually building the thing. I’m hoping there isn’t too much work, but these things tend to take forever, so we’ll see. Since I have a pretty small set of requirements, actually writing the code should be a straightforward process, but hopefully I can do this in a readable, re-usable way.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the Media Manager series. Until next post, meow!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;November 12, 2013 to be precise. &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:2&quot;&gt;
+      &lt;p&gt;Our development staff is no better, the repository is still a lovely 300mb with images, binary blobs, etc. :) &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:3&quot;&gt;
+      &lt;p&gt;By the way, CloudApp is great. Our entire company uses it and I don’t understand why anyone wouldn’t. They even have a free tier, which is great of those times when I totally forget to renew my account… &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:4&quot;&gt;
+      &lt;p&gt;It’s Rails 3.2.13. I can feel the vulnerabilities pulsating through me. &lt;a href=&quot;#fnref:4&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:5&quot;&gt;
+      &lt;p&gt;Preferably on my own &lt;a href=&quot;https://github.com/josegonzalez&quot;&gt;github profile&lt;/a&gt;, though I can see this being on our company’s profile as well. &lt;em&gt;shrug&lt;/em&gt; as long as it’s out there. &lt;a href=&quot;#fnref:5&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
+</description>
+        <pubDate>Sat, 26 Dec 2015 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2015/12/26/creating-a-generic-cakephp-skeleton/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/26/creating-a-generic-cakephp-skeleton/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>scaffold</category>
+        
+        <category>composer</category>
+        
+        <category>planning</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>SEO Considerations for CakePHP Applications</title>
@@ -37,7 +127,7 @@ public function view($id)
 
 &lt;p&gt;Not too bad. One thing I like to do is use annotations for stuff, so I wrote an annotation parser for just the above:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;public function initialize()
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize()
 {
   $this-&amp;gt;loadComponent(&#39;SeoAnnotation&#39;, [
     // this can be overriden
@@ -1290,154 +1380,6 @@ public function setFieldName($fieldName)
         <category>rules</category>
         
         <category>validation</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Stuffing Complex Logic into Model-less Forms</title>
-        <description>&lt;p&gt;One new feature of CakePHP 3 is the ability to have &lt;a href=&quot;http://book.cakephp.org/3.0/en/core-libraries/form.html&quot;&gt;Model-less form classes&lt;/a&gt;. These are typically useful for stuff like contact forms that might send an email:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Form;
-
-use Cake\Form\Form;
-use Cake\Form\Schema;
-use Cake\Mailer\Email;
-use Cake\Validation\Validator;
-
-class ContactForm extends Form
-{
-    // require some data
-    protected function _buildSchema(Schema $schema)
-    {
-        return $schema-&amp;gt;addField(&#39;name&#39;, &#39;string&#39;)
-            -&amp;gt;addField(&#39;email&#39;, [&#39;type&#39; =&amp;gt; &#39;string&#39;])
-            -&amp;gt;addField(&#39;body&#39;, [&#39;type&#39; =&amp;gt; &#39;text&#39;]);
-    }
-
-    // validate the incoming data
-    protected function _buildValidator(Validator $validator)
-    {
-        return $validator-&amp;gt;add(&#39;name&#39;, &#39;length&#39;, [
-                &#39;rule&#39; =&amp;gt; [&#39;minLength&#39;, 10],
-                &#39;message&#39; =&amp;gt; &#39;A name is required&#39;
-            ])-&amp;gt;add(&#39;email&#39;, &#39;format&#39;, [
-                &#39;rule&#39; =&amp;gt; &#39;email&#39;,
-                &#39;message&#39; =&amp;gt; &#39;A valid email address is required&#39;,
-            ]);
-    }
-
-    // actually send an email
-    protected function _execute(array $data)
-    {
-        $email = new Email(&#39;default&#39;);
-        return $email-&amp;gt;from([$data[&#39;email&#39;] =&amp;gt; $data[&#39;name&#39;]])
-            -&amp;gt;to(&#39;mail@example.com&#39;, &#39;Mail Example&#39;)
-            -&amp;gt;subject(&#39;Contact Form&#39;)
-            -&amp;gt;message($data[&#39;body&#39;])
-            -&amp;gt;send();
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Neato burrito. One thing I love about this is the ability to have complex validation rulesets for specific actions. For instance, on a blog, I might have complex edit action that needs to check for editing writes before allowing a user to do anything:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Form;
-
-use Cake\Form\Form;
-
-class PostEditForm
-{
-    protected $_user = null;
-    public function __construct(array $user = [])
-    {
-        $this-&amp;gt;_user = $user;
-        return $this;
-    }
-
-    protected function _buildValidator(Validator $validator)
-    {
-      // use $this-&amp;gt;_user in my validation rules
-      $userId = $this-&amp;gt;_user-&amp;gt;get(&#39;id&#39;);
-      $validator-&amp;gt;add(&#39;id&#39;, &#39;custom&#39;, [
-          &#39;rule&#39; =&amp;gt; function ($value, $context) use ($userId) {
-              // reusing an invokable class
-              return (new OwnedByCurrentUser($userId))-&amp;gt;__invoke($value);
-          },
-          &#39;message&#39; =&amp;gt; &#39;This photo isn\&#39;t yours to battle with&#39;
-      ]);
-    }
-  }
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Nifty, huh? Usually I end up saving new records in my &lt;code&gt;_execute()&lt;/code&gt; method as well. Here is what that looks like in one of my form classes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function _execute(array $data)
-{
-    $battle_id = Hash::get($data, &#39;id&#39;, null);
-    $photo_id = Hash::get($data, &#39;photo_id&#39;, null);
-    $battles = TableRegistry::get(&#39;Battles&#39;);
-    $photos = TableRegistry::get(&#39;Photos&#39;);
-
-    $battle = $battles-&amp;gt;find(&#39;Battle&#39;, [
-        &#39;battle_id&#39; =&amp;gt; $battle_id,
-    ])-&amp;gt;firstOrFail();
-
-    if ($battle-&amp;gt;confirmed != null) {
-        throw new MethodNotAllowedException(&#39;Battle has already been updated&#39;);
-    }
-
-    $photo = $photos-&amp;gt;get($photo_id);
-
-    $battle-&amp;gt;confirmed = true;
-    $battle-&amp;gt;rival-&amp;gt;photo = $photo;
-    if ($battles-&amp;gt;save($battle)) {
-        return $battles-&amp;gt;find(&#39;Battle&#39;, $battle-&amp;gt;toFind())-&amp;gt;firstOrFail();
-    }
-
-    $exception = new ValidationException(&#39;There are errors in the data you submitted&#39;);
-    $exception-&amp;gt;errors($battle-&amp;gt;errors());
-    throw $exception;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Why? Because it turns certain complex actions into the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function edit()
-{
-    $authedUser = $this-&amp;gt;Auth-&amp;gt;user();
-    $post = (new PostEditForm($authedUser))-&amp;gt;execute($this-&amp;gt;request-&amp;gt;data);
-    $this-&amp;gt;set([&#39;post&#39; =&amp;gt; $post]);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Instead of litering logic across:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;a custom validation method in my model&lt;/li&gt;
-  &lt;li&gt;a controller action&lt;/li&gt;
-  &lt;li&gt;some other random model method or protected controller method&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I can group it all together into one, logical unit that can be easily unit tested for various types of input. A side-benefit of this is that if I &lt;em&gt;absolutely&lt;/em&gt; need to, I can always re-use a given action’s logic with as few as three lines of code within say, idk, a console shell.&lt;/p&gt;
-</description>
-        <pubDate>Tue, 15 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/15/stuffing-complex-logic-into-model-less-forms/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>forms</category>
-        
-        <category>service</category>
         
         
         <category>cakephp</category>
