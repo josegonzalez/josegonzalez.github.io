@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Media Manager: Initial Application Scaffolding</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2015/12/31/initial-application-scaffolding/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Planning an initial CakePHP application schema and generating application code using bake." />
+    <meta name="keywords" content="cakephp, scaffold, migrations, bake" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Media Manager: Initial Application Scaffolding" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2015/12/31/initial-application-scaffolding/" />
+    <meta property="og:description" content="Planning an initial CakePHP application schema and generating application code using bake." />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Media Manager: Initial Application Scaffolding" />
+    <meta name="twitter:description" content="Planning an initial CakePHP application schema and generating application code using bake." />
+    <link rel="alternate" type="application/rss+xml" title="Initial Application Scaffolding » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Initial Application Scaffolding
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Initial Application Scaffolding!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <h2 id="requirements">Requirements</h2>
+<p>Before you continue, you’ll want the following stuff on your computer:</p>
+<ul>
+  <li>PHP 5.4+. I’m using 5.6 locally, though 7.x should also work fine. Most, if not all, libraries and plugins I am using will work through any supported CakePHP version. I’ll let you know if that’s ever not the case.</li>
+  <li>The following PHP extensions:
+    <ul>
+      <li><code>ext-intl</code></li>
+      <li><code>ext-mbstring</code></li>
+      <li><code>ext-pdo_sqlite</code></li>
+      <li><code>ext-pdo_mysql</code></li>
+      <li><code>ext-pdo_pgsql</code></li>
+    </ul>
+  </li>
+  <li>A database! I’m running Postgres locally, but anything supported by the CakePHP Core ORM should do fine. If you use MySQL, I won’t attack you.</li>
+  <li>A browser. I use Chrome, though any modern browser should work fine with the Javascript I’ll be writing.</li>
+  <li><a href="https://getcomposer.org/download/">Composer</a> installed locally. How you get that is up to you.</li>
+</ul>
+<p>We can start once you have the above.</p>
+<h2 id="pre-planning">Pre-planning</h2>
+<blockquote>
+  <p>Start out with a goal for the day before you start work. My goal is to scaffold out a small part of my app. I won’t have authentication or <a href="/2015/12/05/uploading-files-and-images/">file uploading</a>. I just want a solid database design and some crud-like templating.</p>
+</blockquote>
+<p>Before I begin, I want to outline what my application will probably look like from a datastore perspective:</p>
+<p><img src="/images/ditaa/ditaa-a033ba0ffbd3e106e1965c0d39c2a034.png" /></p>
+<blockquote>
+  <p>The above graph was generated with <a href="http://ditaa.sourceforge.net/">ditaa</a> and some simple ascii art.</p>
+</blockquote>
+<p>I’ve separated the notion of an <code>Asset</code> from a <code>File</code>. <code>Assets</code> are the things that my users will click on in the admin dashboard, and contain metadata that will be useful to search. Each asset can have one or more <code>Files</code> associated with it, has and belongs to many <code>Tags</code>, is associated with a single <code>Category</code>, and is owned by a <code>User</code>.</p>
+<p>A <code>File</code> is the actual physical file, which will contain size, the directory on whatever storage device I choose, image metadata, etc. I’m choosing to do this as I <em>think</em> storing multiple versions of a file as different records will be much easier to reason about in the UI than trying to fiddle with it in code. No real reason other than that.</p>
+<p>Note, I <em>do</em> have some legacy files I need to import into the new system, but I won’t worry about those for now, since it will presumably complicate my datastructure. I’ll almost certainly write a script to import the files into my database.</p>
+<h2 id="initializing-our-new-project">Initializing our new project</h2>
+<p>First, lets use composer to generate a project. I’m going to be basing it off of the <code>0.1.9</code> release of my [own app skeleton](/2015/12/26/creating-a-generic-cakephp-skeleton/:</p>
+<pre><code class="language-shell">composer create-project --prefer-dist josegonzalez/app:0.1.9 media-manager
+</code></pre>
+<blockquote>
+  <p>From now on, assume you will be working inside of the media-manager root folder.</p>
+</blockquote>
+<p>Before we begin, we need to at least modify our application to read from the correct database. One thing I’ve done in my new app skeleton is allow configuration via environment variables. Let’s start by copying over the defaults to a new file:</p>
+<pre><code class="language-shell">cp config/.env.default config/.env
+</code></pre>
+<p>The <code>.env</code> file is loaded if it exists, otherwise the <code>config/env.php</code> file will fallback to <code>config/.env.default</code>. We’ll be configuring our app’s private configuration here.</p>
+<p>Two things I’m going to do first:</p>
+<ul>
+  <li>change the <code>APP_NAME</code> export to the value <code>media-manager</code>.</li>
+  <li>Make sure I have a local datastore setup with the credentials <code>my_app:secret</code> authed to the database <code>media-manager</code>. I mentioned I’m using Postgres, but anything should work.</li>
+</ul>
+<p>Once that is set, I can verify that my application works by running the <a href="/2015/12/17/cakephp-shells-i-didnt-know-about/">built-in CakePHP server shell</a>. Run the following and browse to <code>http://localhost:8765</code> to verify that you have everything done:</p>
+<pre><code class="language-shell">bin/cake server
+</code></pre>
+<blockquote>
+  <p>I will be using the built-in CakePHP server shell for testing. You can use whatever you’d like, this is just easier for me since I haven’t setup Vagrant or Docker for my app skeleton yet.</p>
+</blockquote>
+<h2 id="generating-a-database">Generating a database</h2>
+<p>Whenever I am building an application, I usually have some vague idea of what my database will look like once I am done. I say usually because sometimes I’m coming up with requirements as I go, which is to say that today is one of those days.</p>
+<p>We can generate migration files for our database tables using the <code>bake</code> and <a href="/2015/12/10/faster-database-creation-with-migrations/"><code>migrations</code></a> plugins. I’m allowed to get this wrong because the <code>migrations</code> plugin allows me to go back and generate new migrations to fixup any incorrect beliefs about how my application should work.</p>
+<pre><code class="language-shell"># create my assets table
+bin/cake bake migration create_assets category_id:integer:index \
+                                      user_id:integer:index name \
+                                      file_count \
+                                      created \
+                                      modified
+# create the files table. Note that I
+# have included a few useful fields for the upload plugin
+bin/cake bake migration create_files asset_id:integer:index \
+                                     user_id:integer:index \
+                                     name \
+                                     dir \
+                                     size:integer \
+                                     type \
+                                     metadata \
+                                     created \
+                                     modified
+# categories is simple
+bin/cake bake migration create_categories name:string:index \
+                                          slug:string:index \
+                                          created \
+                                          modified
+# tags is also simple, though I do need a join table
+# there is probably a plugin out there for this but I'm too lazy
+bin/cake bake migration create_assets_tags asset_id:integer:unique:ASSET_TAG \
+                                           tag_id:integer:unique:ASSET_TAG
+bin/cake bake migration create_tags name:string:index \
+                                    slug:string:unique \
+                                    color \
+                                    created \
+                                    modified
+# the users table will have an extra field you might not expect
+# im going to eventually add github oauth to the app, so I want to track
+# the user id if possible
+bin/cake bake migration create_users name \
+                                     email:string:index \
+                                     password \
+                                     github_id:integer:index \
+                                     created \
+                                     modified
+</code></pre>
+<p>We can now run our generated migrations:</p>
+<pre><code class="language-shell">bin/cake migrations migrate
+</code></pre>
+<p>This will create all of the above tables and two others:</p>
+<ul>
+  <li><code>jobs</code>: A simple background jobs table that is provided by the <code>josegonzalez/app</code> application skeleton. We’ll get to this later.</li>
+  <li><code>phinxlog</code>: Used to keep track of migrations that have been executed.</li>
+</ul>
+<h2 id="baking-my-cake-as-fast-as-i-can">Baking my cake as fast as I can</h2>
+<p>The last step for today is generating some application defaults. We’ll be using the <a href="/2015/12/03/generating-administrative-panels-with-crud-view/">CrudView</a> plugin - and therefore <a href="https://getbootstrap.com/">Bootstrap 3</a> - for the majority of our UI, and will be baking CrudView-compatible templates for things. Lets start off by baking all of the tables and entities:</p>
+<pre><code class="language-shell">bin/cake bake model all
+</code></pre>
+<p>Next, lets bake some controllers and views for certain things (but not everything!):</p>
+<pre><code class="language-shell">bin/cake bake Controller Assets -t Crud
+bin/cake bake Controller Categories -t Crud
+bin/cake bake Controller Tags -t Crud
+</code></pre>
+<p>And thats it for now. Why didn’t we bake templates or certain tables:</p>
+<ul>
+  <li>We need to add auth for users, and thats outside of what I wanted to accomplish today.</li>
+  <li>We don’t need a controller for join tables, nor for managing individual files (yet).</li>
+  <li>Templating is done via the CrudView plugin. If you browse to <code>http://localhost:8765/categories</code>, you should see a simple crud-interface for categories. Ditto for <code>/assets</code> and <code>/tags</code>.</li>
+</ul>
+<h2 id="whats-next">What’s next?</h2>
+<p>Since tying uploads to specific users and authentication is a bit core to my app, that will be what I tackle in my next post. I’ll also go over that semi-mysterious <code>github_id</code> in a way that is sure to disappoint anyone who thinks I’m writing any OAuth code :)</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the Media Manager series. Until next post, meow!</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/31/initial-application-scaffolding/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-31 12:00:00 +0000">31 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 2</strong> of <strong>2</strong> in the series "Media Manager".</p>
+    <ol>
+      <li><a href="/2015/12/26/creating-a-generic-cakephp-skeleton/">Creating a CakePHP skeleton</a></li>
+      <li>Initial Application Scaffolding</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2015/12/31/initial-application-scaffolding/';
+        var disqus_url        = 'http://josediazgonzalez.com/2015/12/31/initial-application-scaffolding/';
+        var disqus_title      = "Media Manager: Initial Application Scaffolding";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>

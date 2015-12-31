@@ -185,16 +185,7 @@ kill -9 1337
 </blockquote>
 <h2 id="requirements-for-a-service">Requirements for a service</h2>
 <p>Services have, at the base case, a set of language, configuration, and environment requirements, etc. Consider the following:</p>
-<p><code>&lt;pre&gt;
-/-----------------------+     +------------------------------+
-| document_generator.py |&lt;---&gt;| php symfony generate:document|
-+-----------------------+     +-------------+----------------+
-            |                               |
-            v                               v
-     /---------------+                /----------+
-     | Elasticsearch |                | Database |
-     +---------------+                +----------+
-&lt;/pre&gt;</code></p>
+<p><img src="/images/ditaa/ditaa-d6ca04aeedb02e9cc5311ac4cc0536e4.png" /></p>
 <p>Our document generator service requires:</p>
 <ul>
   <li><code>Python</code> for <code>document_generator.py</code></li>

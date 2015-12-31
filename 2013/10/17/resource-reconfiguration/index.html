@@ -111,11 +111,7 @@ EOF
 </blockquote>
 <p>We could then look up the replacement values for these services and attach them as necessary.</p>
 <p>Using a configuration management tool - such as Chef, Puppet, Ansible, etc. - will help you automate the update cycle for this file. A simple workflow could be:</p>
-<p><code>&lt;pre&gt;
-/------------+ etcd /------------+ trigger /-----------+
-| www deploy |-----&gt;| lb watcher |--------&gt;| lb deploy |
-+------------+      +------------+         +-----------+
-&lt;/pre&gt;</code></p>
+<p><img src="/images/ditaa/ditaa-ccef01b7cb6c395efcaa0106f6152225.png" /></p>
 <p>You would depend upon a listener on an external service - perhaps <code>etcd</code>, perhaps <code>rabbitmq</code> - to ensure that resources are reprovisioned in other locations.</p>
 <p>You also want to maintain what resources a specific service <strong>provides</strong>. If you can specify this, then an external service can keep track of the global system state and be used to monitor what is available where. For example, we might provision the <code>www-app</code> service, which could specify its exports thusly:</p>
 <pre><code class="language-json">{

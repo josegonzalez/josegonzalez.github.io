@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Initial Application Scaffolding",
+    "url": "/2015/12/31/initial-application-scaffolding/",
+    "description": "Planning an initial CakePHP application schema and generating application code using bake.",
+    "tokens": ["application","bake","cakephp","code","generating","initial","planning","scaffolding","schema","using"]
+  },
+  {
+    "type": "post",
     "title": "Creating a CakePHP skeleton",
     "url": "/2015/12/26/creating-a-generic-cakephp-skeleton/",
     "description": "A list of things I need in a base application before starting a new cakephp project",

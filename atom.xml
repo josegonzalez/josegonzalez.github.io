@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2015-12-27T01:56:00+00:00</updated>
+ <updated>2015-12-31T08:25:05+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Initial Application Scaffolding]]></title>
+   <link href="http://josediazgonzalez.com/2015/12/31/initial-application-scaffolding/"/>
+   <updated>2015-12-31T12:00:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2015/12/31/initial-application-scaffolding/</id>
+   <content type="html"><![CDATA[Planning an initial CakePHP application schema and generating application code using bake.]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Creating a CakePHP skeleton]]></title>
