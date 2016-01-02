@@ -352,6 +352,18 @@ pre code {
     background-image: -moz-radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px);
     background-image: -o-radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px);
     background-image: radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px); }
+  .open-source-page .project .icon-chef {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #f18b21), color-stop(100%, #783e01));
+    background-image: -webkit-radial-gradient(5% 5%, #f18b21 0%, #783e01 50px);
+    background-image: -moz-radial-gradient(5% 5%, #f18b21 0%, #783e01 50px);
+    background-image: -o-radial-gradient(5% 5%, #f18b21 0%, #783e01 50px);
+    background-image: radial-gradient(5% 5%, #f18b21 0%, #783e01 50px); }
+  .open-source-page .project .icon-dock {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #22b8eb), color-stop(100%, #045570));
+    background-image: -webkit-radial-gradient(5% 5%, #22b8eb 0%, #045570 50px);
+    background-image: -moz-radial-gradient(5% 5%, #22b8eb 0%, #045570 50px);
+    background-image: -o-radial-gradient(5% 5%, #22b8eb 0%, #045570 50px);
+    background-image: radial-gradient(5% 5%, #22b8eb 0%, #045570 50px); }
   .open-source-page .project .icon-java {
     background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #edd243), color-stop(100%, #917b06));
     background-image: -webkit-radial-gradient(5% 5%, #edd243 0%, #917b06 50px);
@@ -364,6 +376,12 @@ pre code {
     background-image: -moz-radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px);
     background-image: -o-radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px);
     background-image: radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px); }
+  .open-source-page .project .icon-homebrew {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #884f1d), color-stop(100%, #0a0602));
+    background-image: -webkit-radial-gradient(5% 5%, #884f1d 0%, #0a0602 50px);
+    background-image: -moz-radial-gradient(5% 5%, #884f1d 0%, #0a0602 50px);
+    background-image: -o-radial-gradient(5% 5%, #884f1d 0%, #0a0602 50px);
+    background-image: radial-gradient(5% 5%, #884f1d 0%, #0a0602 50px); }
   .open-source-page .project .icon-php {
     background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #6a68a7), color-stop(100%, #272650));
     background-image: -webkit-radial-gradient(5% 5%, #6a68a7 0%, #272650 50px);
