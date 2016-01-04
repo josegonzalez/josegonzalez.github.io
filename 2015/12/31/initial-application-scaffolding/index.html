@@ -104,8 +104,8 @@
 <p>A <code>File</code> is the actual physical file, which will contain size, the directory on whatever storage device I choose, image metadata, etc. I’m choosing to do this as I <em>think</em> storing multiple versions of a file as different records will be much easier to reason about in the UI than trying to fiddle with it in code. No real reason other than that.</p>
 <p>Note, I <em>do</em> have some legacy files I need to import into the new system, but I won’t worry about those for now, since it will presumably complicate my datastructure. I’ll almost certainly write a script to import the files into my database.</p>
 <h2 id="initializing-our-new-project">Initializing our new project</h2>
-<p>First, lets use composer to generate a project. I’m going to be basing it off of the <code>0.1.9</code> release of my [own app skeleton](/2015/12/26/creating-a-generic-cakephp-skeleton/:</p>
-<pre><code class="language-shell">composer create-project --prefer-dist josegonzalez/app:0.1.9 media-manager
+<p>First, lets use composer to generate a project. I’m going to be basing it off of the <code>0.1.10</code> release of my [own app skeleton](/2015/12/26/creating-a-generic-cakephp-skeleton/:</p>
+<pre><code class="language-shell">composer create-project --prefer-dist josegonzalez/app:0.1.10 media-manager
 </code></pre>
 <blockquote>
   <p>From now on, assume you will be working inside of the media-manager root folder.</p>
@@ -178,7 +178,8 @@ bin/cake bake migration create_users name \
   <li><code>phinxlog</code>: Used to keep track of migrations that have been executed.</li>
 </ul>
 <h2 id="baking-my-cake-as-fast-as-i-can">Baking my cake as fast as I can</h2>
-<p>The last step for today is generating some application defaults. We’ll be using the <a href="/2015/12/03/generating-administrative-panels-with-crud-view/">CrudView</a> plugin - and therefore <a href="https://getbootstrap.com/">Bootstrap 3</a> - for the majority of our UI, and will be baking CrudView-compatible templates for things. Lets start off by baking all of the tables and entities:</p>
+<p>The last step for today is generating some application defaults. We’ll be using the <a href="/2015/12/03/generating-administrative-panels-with-crud-view/">CrudView</a> plugin - and therefore <a href="https://getbootstrap.com/">Bootstrap 3</a> - for the majority of our UI, and will be baking CrudView-compatible templates for things.</p>
+<p>Lets start off by baking all of the tables and entities:</p>
 <pre><code class="language-shell">bin/cake bake model all
 </code></pre>
 <p>Next, lets bake some controllers and views for certain things (but not everything!):</p>
@@ -186,6 +187,7 @@ bin/cake bake migration create_users name \
 bin/cake bake Controller Categories -t Crud
 bin/cake bake Controller Tags -t Crud
 </code></pre>
+<p>And now we’ll turn on CrudView for the entire application. Simply change the <code>$isAdmin</code> property of <code>src/Controller/AppController.php</code> to <code>true</code>. This can be done on a per-controller basis, but as we are using CrudView everywhere, it doesn’t hurt to turn it on universally.</p>
 <p>And thats it for now. Why didn’t we bake templates or certain tables:</p>
 <ul>
   <li>We need to add auth for users, and thats outside of what I wanted to accomplish today.</li>
