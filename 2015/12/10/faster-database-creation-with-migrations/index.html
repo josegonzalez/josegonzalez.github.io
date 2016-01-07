@@ -133,13 +133,14 @@ class CreatePosts extends AbstractMigration
 <pre><code class="language-json">"scripts": {
     "compile": [
         "bin/cake migrations migrate",
-        "bin/cake migrations migrate --plugin Blog"
+        "bin/cake migrations migrate --plugin Blog",
+        "bin/cake orm_cache build"
     ],
     "post-install-cmd": "App\\Console\\Installer::postInstall",
     "post-autoload-dump": "Cake\\Composer\\Installer\\PluginInstaller::postAutoloadDump"
 },
 </code></pre>
-<p>Other than the normal stuff in there for application installation, you’ll notice I have a <code>scripts.compile</code> key which maps to a list of migration commands to run. I run the migrations for my core application as well as the blog plugin I use in this particular application. Migrations are now fully automatic for this application, and I don’t need to worry about going in and manually altering anything!</p>
+<p>Other than the normal stuff in there for application installation, you’ll notice I have a <code>scripts.compile</code> key which maps to a list of migration commands to run. I run the migrations for my core application as well as the blog plugin I use in this particular application. Of course, don’t forget to rebuild your orm cache, otherwise your app might not be aware of schema changes! Migrations are now fully automatic for this application, and I don’t need to worry about going in and manually altering anything!</p>
   </div>
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/10/faster-database-creation-with-migrations/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-10 12:00:00 +0000">10 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
