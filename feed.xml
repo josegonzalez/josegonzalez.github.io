@@ -5,9 +5,373 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 31 Dec 2015 08:25:05 +0000</pubDate>
-    <lastBuildDate>Thu, 31 Dec 2015 08:25:05 +0000</lastBuildDate>
+    <pubDate>Mon, 11 Jan 2016 11:34:37 +0000</pubDate>
+    <lastBuildDate>Mon, 11 Jan 2016 11:34:37 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Implementing Custom Authentication Classes</title>
+        <description>&lt;p&gt;As with any application, deployment is always something you need to think about. How does your application work with the existing infrastructure?&lt;/p&gt;
+
+&lt;p&gt;One thing that SeatGeek does is we provide a single sign-on solution to all our applications. This allows developers building backend dashboards to ignore the hassles of needing to write any of the following for their application:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Login/Logout pages&lt;/li&gt;
+  &lt;li&gt;Forgot/Reset Password flows&lt;/li&gt;
+  &lt;li&gt;Proper password hashing&lt;/li&gt;
+  &lt;li&gt;User management (adding/deleting users, admin users, etc.)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;When someone at SeatGeek logs into an admin panel, the web server - in our case Nginx - redirects them to a page where they can authenticate against our organization. Once the user authenticates against our organization, the web server sets a few environment parameters with information about that user:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;first/last name&lt;/li&gt;
+  &lt;li&gt;email address&lt;/li&gt;
+  &lt;li&gt;a user id from the single sign-on service&lt;/li&gt;
+  &lt;li&gt;teams that user is attached to&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Over the years, we’ve realized that this is the absolute minimum amount of information necessary to identify a user:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We can now display something sensible in the UI when referring to that logged in user&lt;/li&gt;
+  &lt;li&gt;Email notifications can be sent if necessary (though we try to handle this in the UI itself)&lt;/li&gt;
+  &lt;li&gt;We can associate actions that need to be audited with a specific user in case we need to figure out who did what&lt;/li&gt;
+  &lt;li&gt;We can limit access to certain dashboards or abilities based on what teams a user is associated with&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Since this is an open source project, I still want to let people use the built-in CakePHP Auth code. Thus the challenge becomes “How do I integrate our existing Auth service with CakePHP, while still allowing optional Form-based Authentication?”&lt;/p&gt;
+
+&lt;h2 id=&quot;headerauthenticate&quot;&gt;HeaderAuthenticate&lt;/h2&gt;
+
+&lt;p&gt;Let’s start by building a simple &lt;code&gt;Authenticate&lt;/code&gt; class. Why not an &lt;code&gt;Authorize&lt;/code&gt; class?&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;Authenticate&lt;/code&gt; classes are used by CakePHP to denote whether or not a user is logged into your application&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;Authorize&lt;/code&gt; classes are used by CakePHP to see whether an authenticated user has access to a particular controller/action pair.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Since I am using information set by the webserver in the headers to identify the user, I will call it &lt;code&gt;HeaderAuthenticate&lt;/code&gt; and have it extend &lt;code&gt;BasicAuthenticate&lt;/code&gt; &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;. Here is the class skeleton:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Auth;
+
+use Cake\Auth\BasicAuthenticate;
+use Cake\Network\Request;
+
+class HeaderAuthenticate extends BasicAuthenticate
+{
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Because I extend &lt;code&gt;BasicAuthenticate&lt;/code&gt;, the only method I have to implement is &lt;code&gt;getUser(Request $request)&lt;/code&gt;. Why? Because the &lt;code&gt;authenticate&lt;/code&gt; method calls this automatically, and that is the only method custom &lt;code&gt;Authenticate&lt;/code&gt; classes need to implement. The &lt;code&gt;AuthComponent&lt;/code&gt; will automatically call this method when checking requests, so it seemed to me like a good place to start.&lt;/p&gt;
+
+&lt;p&gt;First, I’ll add a &lt;code&gt;$_defaultConfig&lt;/code&gt; class property to override the one from &lt;code&gt;BasicAuthenticate&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    protected $_defaultConfig = [
+       &#39;fields&#39; =&amp;gt; [
+           &#39;username&#39; =&amp;gt; &#39;username&#39;,
+           &#39;password&#39; =&amp;gt; &#39;password&#39;,
+           &#39;name&#39; =&amp;gt; &#39;name&#39;,
+           &#39;email&#39; =&amp;gt; &#39;email&#39;,
+       ],
+       &#39;headers&#39; =&amp;gt; [
+           &#39;username&#39; =&amp;gt; &#39;AUTH_USERNAME&#39;,
+           &#39;name&#39; =&amp;gt; &#39;AUTH_NAME&#39;,
+           &#39;email&#39; =&amp;gt; &#39;AUTH_EMAIL&#39;,
+       ],
+       &#39;userModel&#39; =&amp;gt; &#39;Users&#39;,
+       &#39;scope&#39; =&amp;gt; [],
+       &#39;finder&#39; =&amp;gt; &#39;all&#39;,
+       &#39;contain&#39; =&amp;gt; null,
+       &#39;passwordHasher&#39; =&amp;gt; &#39;Default&#39;
+    ];
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few things:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Most, if not all, CakePHP core classes that can be instantiated use the &lt;a href=&quot;/2015/12/22/using-instance-config-trait-for-object-configuration/&quot;&gt;&lt;code&gt;InstanceConfigTrait&lt;/code&gt;&lt;/a&gt;. This means that we automatically get access to the configured data when setting a &lt;code&gt;$_defaultConfig&lt;/code&gt; property and using the &lt;code&gt;$this-&amp;gt;config()&lt;/code&gt; method. Check out the linked blog post for more information.&lt;/li&gt;
+  &lt;li&gt;I set a few new custom fields there. These are fields that I will use in my &lt;code&gt;Authenticate&lt;/code&gt; class to denote what data goes where when saving my user entity.&lt;/li&gt;
+  &lt;li&gt;I have a few headers mapped. These headers are used by our single sign-on solution, and mapping them to fields we are using in our entity makes sense to me.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Next comes the &lt;code&gt;getUser(Request $request)&lt;/code&gt; method. The basic gist of this class will be to see if the incoming data maps to a specific user. If it does not, then we will create a user and return that data. I’m going to split this logic out into two methods, one of which (&lt;code&gt;_getUser&lt;/code&gt;) will handle creating a user if necessary, and the other (&lt;code&gt;getUser&lt;/code&gt;) will wrap this method to ensure we properly handle responses. Here are the two methods:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;
+    /**
+     * Authenticate a user using custom headers.
+     *
+     * If the user does not exist in the database but
+     * the correct header was passed, simply create the
+     * user using the provided header data
+     *
+     * @param \Cake\Network\Request $request Request object.
+     * @return mixed Either false or an array of user information
+     */
+    public function getUser(Request $request)
+    {
+        // The same as doing the following but with less overhead:
+        //   $config = $this-&amp;gt;config();
+        $config = $this-&amp;gt;_config;
+
+        // Bail out if the username header doesn&#39;t exist
+        $username = $request-&amp;gt;header($config[&#39;headers&#39;][&#39;username&#39;]);
+        if (empty($username)) {
+            return false;
+        }
+
+        // Actually get the user mapping to the current request
+        $result = $this-&amp;gt;_getUser($request);
+        if (empty($result)) {
+            return false;
+        }
+
+        // *Never* let the password field be set in the session
+        $result-&amp;gt;unsetProperty($config[&#39;fields&#39;][&#39;password&#39;]);
+
+        // Return the array of data (entities aren&#39;t stored in the session)
+        return $result-&amp;gt;toArray();
+    }
+
+
+    /**
+     * Retrieves or creates a user based on header data
+     *
+     * @param \Cake\Network\Request $request Request object.
+     * @return mixed Either false or an array of user information
+     */
+    protected function _getUser(Request $request)
+    {
+        // The same as doing the following but with less overhead:
+        //   $config = $this-&amp;gt;config();
+        $config = $this-&amp;gt;_config;
+
+        // We don&#39;t need to check if this is empty because we assume
+        // this method will only be called if there is a value
+        $username = $request-&amp;gt;header($config[&#39;headers&#39;][&#39;username&#39;]);
+
+        // This `_query()` method comes from BaseAuthenticate, and more or less
+        // just sets up the find query. The `$username` var here will be mapped
+        // to `fields.username` from our config.
+        $result = $this-&amp;gt;_query($username)-&amp;gt;first();
+        if (!empty($result)) {
+            return $result;
+        }
+
+        // Construct the saved data for the new entity
+        // The password field is empty because this user
+        // has no password
+        $data = [
+            $config[&#39;fields&#39;][&#39;username&#39;] =&amp;gt; $username,
+            $config[&#39;fields&#39;][&#39;password&#39;] =&amp;gt; &#39;&#39;,
+            $config[&#39;fields&#39;][&#39;name&#39;] =&amp;gt; $request-&amp;gt;header($config[&#39;headers&#39;][&#39;name&#39;]),
+            $config[&#39;fields&#39;][&#39;email&#39;] =&amp;gt; $request-&amp;gt;header($config[&#39;headers&#39;][&#39;email&#39;]),
+        ];
+
+        // Save the new entity, and return the result if possible
+        $table = TableRegistry::get($config[&#39;userModel&#39;]);
+        $result = $table-&amp;gt;newEntity($data);
+        if (!$table-&amp;gt;save($result)) {
+            return false;
+        }
+        return $result;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note that rather than explaining the above in paragraphs, I’ve commented the code inline. I don’t normally do that in actual production code, as to me it makes it apparently that I need to refactor the methods into smaller, more manageable chunks.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;loginlogout-actions&quot;&gt;Login/Logout actions&lt;/h2&gt;
+
+&lt;p&gt;Now, how do we setup authentication in our application? I hate writing custom actions for each app, so if possible I use a CrudAction. Let’s do that by installing FriendsOfCake/crud-users:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# install the thing!
+composer require friendsofcake/crud-users
+
+# enable the thing!
+bin/cake plugin load CrudUsers
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This plugin is under heavy development, but provides two actions I’d rather not write code for, login and logout.&lt;/p&gt;
+
+&lt;p&gt;Next, we can create an extremely simple &lt;code&gt;UsersController&lt;/code&gt; using &lt;code&gt;bake&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake controller Users -t Crud
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, lets ensure we configure it properly to handle the new login/logout actions. Add the following to the &lt;code&gt;UsersController&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    public function initialize()
+    {
+        parent::initialize();
+        $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;login&#39;, &#39;CrudUsers.Login&#39;);
+        $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;logout&#39;, &#39;CrudUsers.Logout&#39;);
+    }
+
+    // Remember to add the proper use statement at
+    // the top of the class for this:
+    //
+    //   use Cake\Event\Event;
+    public function beforeFilter(Event $event)
+    {
+        parent::beforeFilter($event);
+        // Allow users to register and logout.
+        // You should not add the &quot;login&quot; action to allow list. Doing so would
+        // cause problems with normal functioning of AuthComponent.
+        $this-&amp;gt;Auth-&amp;gt;allow([&#39;logout&#39;]);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that we’ve configured the login/logout actions, we need to configure the rest of our Authentication setup. I had to add the following to my &lt;code&gt;AppController::initialize()&lt;/code&gt; to handle both my custom &lt;code&gt;HeaderAuthenticate&lt;/code&gt; setup and &lt;code&gt;FormAuthenticate&lt;/code&gt; installs.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;loadComponent(&#39;Auth&#39;, [
+    &#39;authenticate&#39; =&amp;gt; [
+        &#39;Header&#39; =&amp;gt; [
+            &#39;fields&#39; =&amp;gt; [
+                // this is where my github_id field comes into play
+                &#39;username&#39; =&amp;gt; &#39;github_id&#39;,
+            ],
+        ],
+        &#39;Form&#39; =&amp;gt; [
+            &#39;fields&#39; =&amp;gt; [
+                // we don&#39;t have a username field, and users login with email
+                &#39;username&#39; =&amp;gt; &#39;email&#39;,
+                &#39;password&#39; =&amp;gt; &#39;password&#39;,
+            ]
+        ]
+    ],
+    &#39;authorize&#39; =&amp;gt; [&#39;Controller&#39;],
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I also added the following to my &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; to allow access to the &lt;code&gt;PagesController::display&lt;/code&gt; action. You &lt;em&gt;could&lt;/em&gt; move it to that controller, I just prefer adding it here:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Auth-&amp;gt;allow([&#39;display&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The last thing to place in your &lt;code&gt;AppController&lt;/code&gt; is an &lt;code&gt;isAuthorized&lt;/code&gt; method. What is this used for? When you configure the &lt;code&gt;AuthComponent&lt;/code&gt; to use &lt;code&gt;Controller&lt;/code&gt; for the &lt;code&gt;authorize&lt;/code&gt; method, the &lt;code&gt;AuthComponent&lt;/code&gt; asks the &lt;code&gt;Controller::isAuthorized()&lt;/code&gt; method whether a specific &lt;code&gt;$user&lt;/code&gt; has access to the given request. Here is what that method looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Check if the provided user is authorized for the request.
+ *
+ * @param array|null $user The user to check the authorization of.
+ *   If empty the user fetched from storage will be used.
+ * @return bool True if $user is authorized, otherwise false
+ */
+public function isAuthorized($user)
+{
+    if (!empty($user)) {
+        return true;
+    }
+
+    // Default deny
+    return false;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here are the contents of my &lt;code&gt;src/Template/Users/login.ctp&lt;/code&gt; template file. It is pretty boring.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form&quot;&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render(&#39;auth&#39;) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
+        &amp;lt;fieldset&amp;gt;
+            &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Please enter your username and password&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
+            &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;email&#39;) ?&amp;gt;
+            &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;) ?&amp;gt;
+        &amp;lt;/fieldset&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Login&#39;)); ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’re close!&lt;/p&gt;
+
+&lt;h2 id=&quot;data-model-changes&quot;&gt;Data-model changes&lt;/h2&gt;
+
+&lt;p&gt;When you setup authentication, you need to ensure you are automatically hashing passwords properly. In our case, we’ll need a single new method in our &lt;code&gt;src/Model/Entity/User.php&lt;/code&gt; entity:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Setter for password field.
+     * Automatically hashes incoming passwords
+     *
+     * @param string $password the password to hash
+     * @return string
+     */
+    protected function _setPassword($password)
+    {
+        return (new \Cake\Auth\DefaultPasswordHasher)-&amp;gt;hash($password);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;I’ve taken the liberty of using the fully-namespaced function instead of a &lt;code&gt;use&lt;/code&gt; statement at the top of the class. This seems to be one of the top things new CakePHP developers don’t understand. CakePHP 3 has fully embraced all the modern PHP stuff, which includes namespaces. Read this &lt;a href=&quot;https://secure.php.net/manual/en/language.namespaces.faq.php&quot;&gt;PHP.net FAQ&lt;/a&gt; on them when you get a chance.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In CakePHP 3, the &lt;code&gt;_set*&lt;/code&gt; and &lt;code&gt;_get*&lt;/code&gt; methods are used for setting data on entities, and ensuring they go in/out in the right formats. In our case, whenever we set a new password, we need to ensure it’s been hashed properly. Note that when you populate data into an entity, you can turn off the use of the setter methods with the &lt;code&gt;useSetters&lt;/code&gt; option. This is turned off when hydrating entities from the database.&lt;/p&gt;
+
+&lt;p&gt;One thing I need to do is allow my &lt;code&gt;github_id&lt;/code&gt; to be null. Users authenticating with an email/password will otherwise be unable to access my application. Boo. Here is how I generated the initial migration file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration allow_nullable_github_ids_on_users
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is what I shoved into the file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Migrations\AbstractMigration;
+
+class AllowNullableGithubIdOnUsers extends AbstractMigration
+{
+    public function change()
+    {
+        $table = $this-&amp;gt;table(&#39;users&#39;);
+        $table-&amp;gt;changeColumn(&#39;github_id&#39;, &#39;integer&#39;, [
+            &#39;default&#39; =&amp;gt; null,
+            &#39;limit&#39; =&amp;gt; 11,
+            &#39;null&#39; =&amp;gt; true,
+        ]);
+        $table-&amp;gt;update();
+    }
+}
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One other thing I noticed when testing was that the &lt;code&gt;github_id&lt;/code&gt; field added a specific rule to my &lt;code&gt;UsersTable&lt;/code&gt;, wherein it expects the &lt;code&gt;UsersTable&lt;/code&gt; to be related to a &lt;code&gt;GithubsTable&lt;/code&gt;. I don’t have that, so I needed to remove both the relation in my &lt;code&gt;UsersTable::initialize()&lt;/code&gt; and the associated rule in &lt;code&gt;UsersTable::buildRules()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;testing-it-out&quot;&gt;Testing it out&lt;/h2&gt;
+
+&lt;p&gt;Well now that everything is set, if you deploy the app to the SeatGeek infrastructure, you can login and see the backend pages!&lt;/p&gt;
+
+&lt;p&gt;That doesn’t help anyone else though. We never created a user, nor do we have a method of registration. My next post will cover creating a test user from the command-line, cleaning up our views a bit, and the first part of asset uploading.&lt;/p&gt;
+
+&lt;p&gt;Until then, you can see the results of today’s work at &lt;a href=&quot;https://github.com/josegonzalez/media-manager/commit/5b605243dbff7f272cdc2940bdab4f5f023c4b32&quot;&gt;this github url&lt;/a&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;The &lt;code&gt;BasicAuthenticate&lt;/code&gt; core Authenticate class handles authenticate based on Basic Auth, so I figured a lot of the plumbing would be similar. If it’s not, we can always switch it up. &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
+</description>
+        <pubDate>Sun, 10 Jan 2016 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/01/10/implementing-custom-authentication-classes/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/01/10/implementing-custom-authentication-classes/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>scaffold</category>
+        
+        <category>authentication</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Initial Application Scaffolding</title>
@@ -55,9 +419,9 @@
 
 &lt;h2 id=&quot;initializing-our-new-project&quot;&gt;Initializing our new project&lt;/h2&gt;
 
-&lt;p&gt;First, lets use composer to generate a project. I’m going to be basing it off of the &lt;code&gt;0.1.9&lt;/code&gt; release of my [own app skeleton](/2015/12/26/creating-a-generic-cakephp-skeleton/:&lt;/p&gt;
+&lt;p&gt;First, lets use composer to generate a project. I’m going to be basing it off of the &lt;code&gt;0.1.10&lt;/code&gt; release of my [own app skeleton](/2015/12/26/creating-a-generic-cakephp-skeleton/:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --prefer-dist josegonzalez/app:0.1.9 media-manager
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --prefer-dist josegonzalez/app:0.1.10 media-manager
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;blockquote&gt;
@@ -153,7 +517,9 @@ bin/cake bake migration create_users name \
 
 &lt;h2 id=&quot;baking-my-cake-as-fast-as-i-can&quot;&gt;Baking my cake as fast as I can&lt;/h2&gt;
 
-&lt;p&gt;The last step for today is generating some application defaults. We’ll be using the &lt;a href=&quot;/2015/12/03/generating-administrative-panels-with-crud-view/&quot;&gt;CrudView&lt;/a&gt; plugin - and therefore &lt;a href=&quot;https://getbootstrap.com/&quot;&gt;Bootstrap 3&lt;/a&gt; - for the majority of our UI, and will be baking CrudView-compatible templates for things. Lets start off by baking all of the tables and entities:&lt;/p&gt;
+&lt;p&gt;The last step for today is generating some application defaults. We’ll be using the &lt;a href=&quot;/2015/12/03/generating-administrative-panels-with-crud-view/&quot;&gt;CrudView&lt;/a&gt; plugin - and therefore &lt;a href=&quot;https://getbootstrap.com/&quot;&gt;Bootstrap 3&lt;/a&gt; - for the majority of our UI, and will be baking CrudView-compatible templates for things.&lt;/p&gt;
+
+&lt;p&gt;Lets start off by baking all of the tables and entities:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake model all
 &lt;/code&gt;&lt;/pre&gt;
@@ -164,6 +530,8 @@ bin/cake bake migration create_users name \
 bin/cake bake Controller Categories -t Crud
 bin/cake bake Controller Tags -t Crud
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And now we’ll turn on CrudView for the entire application. Simply change the &lt;code&gt;$isAdmin&lt;/code&gt; property of &lt;code&gt;src/Controller/AppController.php&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt;. This can be done on a per-controller basis, but as we are using CrudView everywhere, it doesn’t hurt to turn it on universally.&lt;/p&gt;
 
 &lt;p&gt;And thats it for now. Why didn’t we bake templates or certain tables:&lt;/p&gt;
 
@@ -1282,106 +1650,6 @@ export DATABASE_URL=&quot;mysql://user:password@localhost/database?encoding=utf8
         <category>configuration</category>
         
         <category>environment</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>CakePHP Shells I didn&#39;t know about</title>
-        <description>&lt;p&gt;Did you know there is a shell that allows you to enable a plugin after installing it via composer?&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake plugin load Muffin/Trash
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can also load the plugin’s bootstrap or routes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# I&#39;m not releasing this, so don&#39;t try and composer require it
-bin/cake plugin load --bootstrap --routes Josegonzalez/Blog
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Most people installed CakePHP 3 using the &lt;a href=&quot;/2015/12/09/customizing-your-app-template/&quot;&gt;&lt;code&gt;cakephp/app&lt;/code&gt; project template&lt;/a&gt;, so you have access to both &lt;code&gt;bake&lt;/code&gt; and &lt;code&gt;migrations&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# migrate all the things!
-bin/cake migrations migrate
-
-# get a migration status
-bin/cake migrations status
-
-# bake a migration
-bin/cake bake migration_snapshot Initial
-
-# bake a form (or really anything else)
-bin/cake bake form AddForm
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you are running migrations, it may be useful to clear the ORM’s cache so that your code is aware of the new fields:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate &amp;amp;&amp;amp; bin/cake orm_cache clear
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And if you are deploying code, maybe you want to ensure the cache is set &lt;em&gt;before&lt;/em&gt; the first user’s request comes in, speeding up that initial request:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake orm_cache build
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’m a big fan of the &lt;code&gt;server&lt;/code&gt; shell. It allows me to quickly test an app locally without needing to setup a virtualhost or a webserver. Very useful for development, and something I recommend everyone learn to place in their arsenal:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# specify a port I know won&#39;t collide with other stuff I run on my machine
-bin/cake server -p 1995
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In older versions of CakePHP 3, we introduced a full REPL around &lt;a href=&quot;https://github.com/borisrepl/boris&quot;&gt;boris&lt;/a&gt;, but that has since been replaced with &lt;a href=&quot;http://psysh.org/&quot;&gt;Psysh&lt;/a&gt;. It’s actually quite nice, and lets me test out new code I’ve written in various scenarios.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# yo dawg, i hurd u liek shells, so I put a shell in your shell so you can shell while you shell!
-bin/cake console
-# Note: it saves your history, just like a regular shell, which is nice :)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And finally, something I missed from my short stint doing Ruby on Rails, being able to list routes in an application.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# list routes
-bin/cake routes
-
-# see what a url route maps to internally
-bin/cake routes check /articles
-
-# generate the url route for a key:pair setup
-bin/cake routes generate controller:Articles action:view 2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;bonus&quot;&gt;Bonus!&lt;/h2&gt;
-
-&lt;p&gt;A shell I discovered a few weeks back is one by the ever-helpful &lt;a href=&quot;https://www.loadsys.com/&quot;&gt;Loadsys Web Strategies&lt;/a&gt; company. It lets you read into keys were loaded into configure (which is great if you have an app with several &lt;code&gt;Configure::load()&lt;/code&gt; statements and don’t know where a key might be):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# install it
-composer require loadsys/cakephp-config-read:~3.0
-
-# load it
-bin/cake plugin load ConfigRead
-
-# use it (on your debug mode)
-bin/cake config_read debug
-
-# on your application&#39;s encoding
-bin/cake config_read App.encoding
-
-# on the default database configuration
-bin/cake config_read Datasources.default
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Is there a CakePHP Shell you’d like to see ported from another framework? Something you find useful or lacking? Leave a note in the comments.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 17 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/17/cakephp-shells-i-didnt-know-about/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>shells</category>
         
         
         <category>cakephp</category>

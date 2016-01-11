@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Media Manager: Implementing Custom Authentication Classes</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/01/10/implementing-custom-authentication-classes/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Implementing both Form Authentication and a custom Authentication class in CakePHP" />
+    <meta name="keywords" content="cakephp, scaffold, authentication" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Media Manager: Implementing Custom Authentication Classes" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/01/10/implementing-custom-authentication-classes/" />
+    <meta property="og:description" content="Implementing both Form Authentication and a custom Authentication class in CakePHP" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Media Manager: Implementing Custom Authentication Classes" />
+    <meta name="twitter:description" content="Implementing both Form Authentication and a custom Authentication class in CakePHP" />
+    <link rel="alternate" type="application/rss+xml" title="Implementing Custom Authentication Classes » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Implementing Custom Authentication Classes
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Implementing Custom Authentication Classes!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>As with any application, deployment is always something you need to think about. How does your application work with the existing infrastructure?</p>
+<p>One thing that SeatGeek does is we provide a single sign-on solution to all our applications. This allows developers building backend dashboards to ignore the hassles of needing to write any of the following for their application:</p>
+<ul>
+  <li>Login/Logout pages</li>
+  <li>Forgot/Reset Password flows</li>
+  <li>Proper password hashing</li>
+  <li>User management (adding/deleting users, admin users, etc.)</li>
+</ul>
+<p>When someone at SeatGeek logs into an admin panel, the web server - in our case Nginx - redirects them to a page where they can authenticate against our organization. Once the user authenticates against our organization, the web server sets a few environment parameters with information about that user:</p>
+<ul>
+  <li>first/last name</li>
+  <li>email address</li>
+  <li>a user id from the single sign-on service</li>
+  <li>teams that user is attached to</li>
+</ul>
+<p>Over the years, we’ve realized that this is the absolute minimum amount of information necessary to identify a user:</p>
+<ul>
+  <li>We can now display something sensible in the UI when referring to that logged in user</li>
+  <li>Email notifications can be sent if necessary (though we try to handle this in the UI itself)</li>
+  <li>We can associate actions that need to be audited with a specific user in case we need to figure out who did what</li>
+  <li>We can limit access to certain dashboards or abilities based on what teams a user is associated with</li>
+</ul>
+<p>Since this is an open source project, I still want to let people use the built-in CakePHP Auth code. Thus the challenge becomes “How do I integrate our existing Auth service with CakePHP, while still allowing optional Form-based Authentication?”</p>
+<h2 id="headerauthenticate">HeaderAuthenticate</h2>
+<p>Let’s start by building a simple <code>Authenticate</code> class. Why not an <code>Authorize</code> class?</p>
+<ul>
+  <li><code>Authenticate</code> classes are used by CakePHP to denote whether or not a user is logged into your application</li>
+  <li><code>Authorize</code> classes are used by CakePHP to see whether an authenticated user has access to a particular controller/action pair.</li>
+</ul>
+<p>Since I am using information set by the webserver in the headers to identify the user, I will call it <code>HeaderAuthenticate</code> and have it extend <code>BasicAuthenticate</code> <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>. Here is the class skeleton:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Auth;
+use Cake\Auth\BasicAuthenticate;
+use Cake\Network\Request;
+class HeaderAuthenticate extends BasicAuthenticate
+{
+}
+?&gt;
+</code></pre>
+<p>Because I extend <code>BasicAuthenticate</code>, the only method I have to implement is <code>getUser(Request $request)</code>. Why? Because the <code>authenticate</code> method calls this automatically, and that is the only method custom <code>Authenticate</code> classes need to implement. The <code>AuthComponent</code> will automatically call this method when checking requests, so it seemed to me like a good place to start.</p>
+<p>First, I’ll add a <code>$_defaultConfig</code> class property to override the one from <code>BasicAuthenticate</code>:</p>
+<pre><code class="language-php">    protected $_defaultConfig = [
+       'fields' =&gt; [
+           'username' =&gt; 'username',
+           'password' =&gt; 'password',
+           'name' =&gt; 'name',
+           'email' =&gt; 'email',
+       ],
+       'headers' =&gt; [
+           'username' =&gt; 'AUTH_USERNAME',
+           'name' =&gt; 'AUTH_NAME',
+           'email' =&gt; 'AUTH_EMAIL',
+       ],
+       'userModel' =&gt; 'Users',
+       'scope' =&gt; [],
+       'finder' =&gt; 'all',
+       'contain' =&gt; null,
+       'passwordHasher' =&gt; 'Default'
+    ];
+</code></pre>
+<p>A few things:</p>
+<ul>
+  <li>Most, if not all, CakePHP core classes that can be instantiated use the <a href="/2015/12/22/using-instance-config-trait-for-object-configuration/"><code>InstanceConfigTrait</code></a>. This means that we automatically get access to the configured data when setting a <code>$_defaultConfig</code> property and using the <code>$this-&gt;config()</code> method. Check out the linked blog post for more information.</li>
+  <li>I set a few new custom fields there. These are fields that I will use in my <code>Authenticate</code> class to denote what data goes where when saving my user entity.</li>
+  <li>I have a few headers mapped. These headers are used by our single sign-on solution, and mapping them to fields we are using in our entity makes sense to me.</li>
+</ul>
+<p>Next comes the <code>getUser(Request $request)</code> method. The basic gist of this class will be to see if the incoming data maps to a specific user. If it does not, then we will create a user and return that data. I’m going to split this logic out into two methods, one of which (<code>_getUser</code>) will handle creating a user if necessary, and the other (<code>getUser</code>) will wrap this method to ensure we properly handle responses. Here are the two methods:</p>
+<pre><code class="language-php">
+    /**
+     * Authenticate a user using custom headers.
+     *
+     * If the user does not exist in the database but
+     * the correct header was passed, simply create the
+     * user using the provided header data
+     *
+     * @param \Cake\Network\Request $request Request object.
+     * @return mixed Either false or an array of user information
+     */
+    public function getUser(Request $request)
+    {
+        // The same as doing the following but with less overhead:
+        //   $config = $this-&gt;config();
+        $config = $this-&gt;_config;
+        // Bail out if the username header doesn't exist
+        $username = $request-&gt;header($config['headers']['username']);
+        if (empty($username)) {
+            return false;
+        }
+        // Actually get the user mapping to the current request
+        $result = $this-&gt;_getUser($request);
+        if (empty($result)) {
+            return false;
+        }
+        // *Never* let the password field be set in the session
+        $result-&gt;unsetProperty($config['fields']['password']);
+        // Return the array of data (entities aren't stored in the session)
+        return $result-&gt;toArray();
+    }
+    /**
+     * Retrieves or creates a user based on header data
+     *
+     * @param \Cake\Network\Request $request Request object.
+     * @return mixed Either false or an array of user information
+     */
+    protected function _getUser(Request $request)
+    {
+        // The same as doing the following but with less overhead:
+        //   $config = $this-&gt;config();
+        $config = $this-&gt;_config;
+        // We don't need to check if this is empty because we assume
+        // this method will only be called if there is a value
+        $username = $request-&gt;header($config['headers']['username']);
+        // This `_query()` method comes from BaseAuthenticate, and more or less
+        // just sets up the find query. The `$username` var here will be mapped
+        // to `fields.username` from our config.
+        $result = $this-&gt;_query($username)-&gt;first();
+        if (!empty($result)) {
+            return $result;
+        }
+        // Construct the saved data for the new entity
+        // The password field is empty because this user
+        // has no password
+        $data = [
+            $config['fields']['username'] =&gt; $username,
+            $config['fields']['password'] =&gt; '',
+            $config['fields']['name'] =&gt; $request-&gt;header($config['headers']['name']),
+            $config['fields']['email'] =&gt; $request-&gt;header($config['headers']['email']),
+        ];
+        // Save the new entity, and return the result if possible
+        $table = TableRegistry::get($config['userModel']);
+        $result = $table-&gt;newEntity($data);
+        if (!$table-&gt;save($result)) {
+            return false;
+        }
+        return $result;
+    }
+</code></pre>
+<blockquote>
+  <p>Note that rather than explaining the above in paragraphs, I’ve commented the code inline. I don’t normally do that in actual production code, as to me it makes it apparently that I need to refactor the methods into smaller, more manageable chunks.</p>
+</blockquote>
+<h2 id="loginlogout-actions">Login/Logout actions</h2>
+<p>Now, how do we setup authentication in our application? I hate writing custom actions for each app, so if possible I use a CrudAction. Let’s do that by installing FriendsOfCake/crud-users:</p>
+<pre><code class="language-shell"># install the thing!
+composer require friendsofcake/crud-users
+# enable the thing!
+bin/cake plugin load CrudUsers
+</code></pre>
+<p>This plugin is under heavy development, but provides two actions I’d rather not write code for, login and logout.</p>
+<p>Next, we can create an extremely simple <code>UsersController</code> using <code>bake</code>:</p>
+<pre><code class="language-shell">bin/cake bake controller Users -t Crud
+</code></pre>
+<p>Next, lets ensure we configure it properly to handle the new login/logout actions. Add the following to the <code>UsersController</code>:</p>
+<pre><code class="language-php">    public function initialize()
+    {
+        parent::initialize();
+        $this-&gt;Crud-&gt;mapAction('login', 'CrudUsers.Login');
+        $this-&gt;Crud-&gt;mapAction('logout', 'CrudUsers.Logout');
+    }
+    // Remember to add the proper use statement at
+    // the top of the class for this:
+    //
+    //   use Cake\Event\Event;
+    public function beforeFilter(Event $event)
+    {
+        parent::beforeFilter($event);
+        // Allow users to register and logout.
+        // You should not add the "login" action to allow list. Doing so would
+        // cause problems with normal functioning of AuthComponent.
+        $this-&gt;Auth-&gt;allow(['logout']);
+    }
+</code></pre>
+<p>Now that we’ve configured the login/logout actions, we need to configure the rest of our Authentication setup. I had to add the following to my <code>AppController::initialize()</code> to handle both my custom <code>HeaderAuthenticate</code> setup and <code>FormAuthenticate</code> installs.</p>
+<pre><code class="language-php">$this-&gt;loadComponent('Auth', [
+    'authenticate' =&gt; [
+        'Header' =&gt; [
+            'fields' =&gt; [
+                // this is where my github_id field comes into play
+                'username' =&gt; 'github_id',
+            ],
+        ],
+        'Form' =&gt; [
+            'fields' =&gt; [
+                // we don't have a username field, and users login with email
+                'username' =&gt; 'email',
+                'password' =&gt; 'password',
+            ]
+        ]
+    ],
+    'authorize' =&gt; ['Controller'],
+]);
+</code></pre>
+<p>I also added the following to my <code>AppController::beforeFilter()</code> to allow access to the <code>PagesController::display</code> action. You <em>could</em> move it to that controller, I just prefer adding it here:</p>
+<pre><code class="language-php">$this-&gt;Auth-&gt;allow(['display']);
+</code></pre>
+<p>The last thing to place in your <code>AppController</code> is an <code>isAuthorized</code> method. What is this used for? When you configure the <code>AuthComponent</code> to use <code>Controller</code> for the <code>authorize</code> method, the <code>AuthComponent</code> asks the <code>Controller::isAuthorized()</code> method whether a specific <code>$user</code> has access to the given request. Here is what that method looks like:</p>
+<pre><code class="language-php">/**
+ * Check if the provided user is authorized for the request.
+ *
+ * @param array|null $user The user to check the authorization of.
+ *   If empty the user fetched from storage will be used.
+ * @return bool True if $user is authorized, otherwise false
+ */
+public function isAuthorized($user)
+{
+    if (!empty($user)) {
+        return true;
+    }
+    // Default deny
+    return false;
+}
+</code></pre>
+<p>Here are the contents of my <code>src/Template/Users/login.ctp</code> template file. It is pretty boring.</p>
+<pre><code class="language-php">&lt;div class="users form"&gt;
+    &lt;?= $this-&gt;Flash-&gt;render('auth') ?&gt;
+    &lt;?= $this-&gt;Form-&gt;create() ?&gt;
+        &lt;fieldset&gt;
+            &lt;legend&gt;&lt;?= __('Please enter your username and password') ?&gt;&lt;/legend&gt;
+            &lt;?= $this-&gt;Form-&gt;input('email') ?&gt;
+            &lt;?= $this-&gt;Form-&gt;input('password') ?&gt;
+        &lt;/fieldset&gt;
+    &lt;?= $this-&gt;Form-&gt;button(__('Login')); ?&gt;
+    &lt;?= $this-&gt;Form-&gt;end() ?&gt;
+&lt;/div&gt;
+</code></pre>
+<p>We’re close!</p>
+<h2 id="data-model-changes">Data-model changes</h2>
+<p>When you setup authentication, you need to ensure you are automatically hashing passwords properly. In our case, we’ll need a single new method in our <code>src/Model/Entity/User.php</code> entity:</p>
+<pre><code class="language-php">    /**
+     * Setter for password field.
+     * Automatically hashes incoming passwords
+     *
+     * @param string $password the password to hash
+     * @return string
+     */
+    protected function _setPassword($password)
+    {
+        return (new \Cake\Auth\DefaultPasswordHasher)-&gt;hash($password);
+    }
+</code></pre>
+<blockquote>
+  <p>I’ve taken the liberty of using the fully-namespaced function instead of a <code>use</code> statement at the top of the class. This seems to be one of the top things new CakePHP developers don’t understand. CakePHP 3 has fully embraced all the modern PHP stuff, which includes namespaces. Read this <a href="https://secure.php.net/manual/en/language.namespaces.faq.php">PHP.net FAQ</a> on them when you get a chance.</p>
+</blockquote>
+<p>In CakePHP 3, the <code>_set*</code> and <code>_get*</code> methods are used for setting data on entities, and ensuring they go in/out in the right formats. In our case, whenever we set a new password, we need to ensure it’s been hashed properly. Note that when you populate data into an entity, you can turn off the use of the setter methods with the <code>useSetters</code> option. This is turned off when hydrating entities from the database.</p>
+<p>One thing I need to do is allow my <code>github_id</code> to be null. Users authenticating with an email/password will otherwise be unable to access my application. Boo. Here is how I generated the initial migration file:</p>
+<pre><code class="language-shell">bin/cake bake migration allow_nullable_github_ids_on_users
+</code></pre>
+<p>And here is what I shoved into the file:</p>
+<pre><code class="language-php">&lt;?php
+use Migrations\AbstractMigration;
+class AllowNullableGithubIdOnUsers extends AbstractMigration
+{
+    public function change()
+    {
+        $table = $this-&gt;table('users');
+        $table-&gt;changeColumn('github_id', 'integer', [
+            'default' =&gt; null,
+            'limit' =&gt; 11,
+            'null' =&gt; true,
+        ]);
+        $table-&gt;update();
+    }
+}
+?&gt;
+</code></pre>
+<p>One other thing I noticed when testing was that the <code>github_id</code> field added a specific rule to my <code>UsersTable</code>, wherein it expects the <code>UsersTable</code> to be related to a <code>GithubsTable</code>. I don’t have that, so I needed to remove both the relation in my <code>UsersTable::initialize()</code> and the associated rule in <code>UsersTable::buildRules()</code>.</p>
+<h2 id="testing-it-out">Testing it out</h2>
+<p>Well now that everything is set, if you deploy the app to the SeatGeek infrastructure, you can login and see the backend pages!</p>
+<p>That doesn’t help anyone else though. We never created a user, nor do we have a method of registration. My next post will cover creating a test user from the command-line, cleaning up our views a bit, and the first part of asset uploading.</p>
+<p>Until then, you can see the results of today’s work at <a href="https://github.com/josegonzalez/media-manager/commit/5b605243dbff7f272cdc2940bdab4f5f023c4b32">this github url</a>.</p>
+<hr />
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>The <code>BasicAuthenticate</code> core Authenticate class handles authenticate based on Basic Auth, so I figured a lot of the plumbing would be similar. If it’s not, we can always switch it up. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/01/10/implementing-custom-authentication-classes/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-01-10 12:00:00 +0000">10 Jan 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<div class="series-note">
+    <p>This entry is <strong>part 3</strong> of <strong>3</strong> in the series "Media Manager".</p>
+    <ol>
+      <li><a href="/2015/12/26/creating-a-generic-cakephp-skeleton/">Creating a CakePHP skeleton</a></li>
+      <li><a href="/2015/12/31/initial-application-scaffolding/">Initial Application Scaffolding</a></li>
+      <li>Implementing Custom Authentication Classes</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/01/10/implementing-custom-authentication-classes/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/01/10/implementing-custom-authentication-classes/';
+        var disqus_title      = "Media Manager: Implementing Custom Authentication Classes";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>

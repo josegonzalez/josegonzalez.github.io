@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Implementing Custom Authentication Classes",
+    "url": "/2016/01/10/implementing-custom-authentication-classes/",
+    "description": "Implementing both Form Authentication and a custom Authentication class in CakePHP",
+    "tokens": ["authentication","cakephp","class","classes","custom","form","implementing"]
+  },
+  {
+    "type": "post",
     "title": "Initial Application Scaffolding",
     "url": "/2015/12/31/initial-application-scaffolding/",
     "description": "Planning an initial CakePHP application schema and generating application code using bake.",
