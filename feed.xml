@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 26 Jan 2016 06:03:30 +0000</pubDate>
-    <lastBuildDate>Tue, 26 Jan 2016 06:03:30 +0000</lastBuildDate>
+    <pubDate>Tue, 26 Jan 2016 06:06:25 +0000</pubDate>
+    <lastBuildDate>Tue, 26 Jan 2016 06:06:25 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -32,7 +32,7 @@
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 /**
  * The MIT License (MIT)
- * Copyright (c) &amp;lt;year&amp;gt; &amp;lt;copyright holders&amp;gt;
+ * Copyright (c) 2015 Jose Diaz-Gonzalez
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the &quot;Software&quot;),
