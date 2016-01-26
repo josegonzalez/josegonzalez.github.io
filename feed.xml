@@ -5,9 +5,186 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 11 Jan 2016 11:34:37 +0000</pubDate>
-    <lastBuildDate>Mon, 11 Jan 2016 11:34:37 +0000</lastBuildDate>
+    <pubDate>Tue, 26 Jan 2016 06:03:30 +0000</pubDate>
+    <lastBuildDate>Tue, 26 Jan 2016 06:03:30 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Open Source is Hard</title>
+        <description>&lt;p&gt;Writing code isn’t very difficult. Usually you write something, it mostly does what it needs to do, and you carry on with your day. If you writing code for work, it might go through some review, or you may just ship it out to whoever your users happen to be. If you are writing code for open source, that’s where it gets tricky.&lt;/p&gt;
+
+&lt;h2 id=&quot;what-is-open-source-software&quot;&gt;What is open source software?&lt;/h2&gt;
+
+&lt;p&gt;I’ll loosely define open source software as any piece of software wherein the author(s) provides a copy of the source code to run a piece of software, as well as a license stating that others are able to use it for any purpose.&lt;/p&gt;
+
+&lt;p&gt;Sometimes that source code might result in a binary - for instance, if you are compiling a game application, or a console executable. In many cases, web developers end up using the source code directly, such as in non-compiled rubygems, or npm packages for nodejs. Backend developers might use compiled versions of software for datastores such as MySQL or Elasticsearch. &lt;em&gt;Usually&lt;/em&gt; there is an easy way to transform the provided source code into a finished product.&lt;/p&gt;
+
+&lt;p&gt;The license might have some limitations - you might not be able to sue me, for instance, or I might require that you release any modifications as open source as well. There are a myriad of licenses, each with caveats or reasons why you might favor it as an individual but be opposed to it as a company.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;There are an equal number of explanations as to why a particular license is suitable for your next open-source project, so investigating them is an easy way to waste a weekend. &lt;a href=&quot;https://tldrlegal.com/&quot;&gt;tldrlegal&lt;/a&gt; seems to be a legitimate website that explains commonly used licenses.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;what-is-an-open-source-project&quot;&gt;What is an open source project?&lt;/h2&gt;
+
+&lt;p&gt;An open source project differs in a way from open source software. For instance, I might have the following bit of MIT-Licensed PHP code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+/**
+ * The MIT License (MIT)
+ * Copyright (c) &amp;lt;year&amp;gt; &amp;lt;copyright holders&amp;gt;
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the &quot;Software&quot;),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+echo &quot;lolipop\n&quot;;
+?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above software, when executed, prints &lt;code&gt;lolipop&lt;/code&gt; with a newline to the screen. You can run it locally under your version of PHP and it will probably work fine. YMMV and all that jazz.&lt;/p&gt;
+
+&lt;p&gt;An open-source &lt;em&gt;project&lt;/em&gt; typically also has the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The above code is in a repository somewhere.&lt;/li&gt;
+  &lt;li&gt;There is an issue tracker where users can report bugs.&lt;/li&gt;
+  &lt;li&gt;There is documentation concerning the installation and usage of the software.&lt;/li&gt;
+  &lt;li&gt;There might be test cases for this software.&lt;/li&gt;
+  &lt;li&gt;The project has actual maintainers, instead of authors, who steward the project for it’s “lifetime”.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;An open-source project requires more effort on the part of maintainers to ensure that the project is kept up to date, continues to evolve as necessary, and issues are responded to where required.&lt;/p&gt;
+
+&lt;h2 id=&quot;things-a-good-open-source-project-does&quot;&gt;Things a good open-source project does&lt;/h2&gt;
+
+&lt;p&gt;A good open-source project does the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Writes well-written, ever-evolving documentation.&lt;/li&gt;
+  &lt;li&gt;Keeps a roadmap for users to understand how and where the project is changing.&lt;/li&gt;
+  &lt;li&gt;Responds to issues that are reported by users, and:
+    &lt;ul&gt;
+      &lt;li&gt;Fixes bugs as they arise.&lt;/li&gt;
+      &lt;li&gt;Limits the scope of the project when enhancements are requested.&lt;/li&gt;
+      &lt;li&gt;Implements feature requests where possible.&lt;/li&gt;
+      &lt;li&gt;Points users the right piece of documentation for their issue.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Provides multiple methods of providing live support. This can be any of the following:
+    &lt;ul&gt;
+      &lt;li&gt;Forums&lt;/li&gt;
+      &lt;li&gt;IRC/Some form of live chat&lt;/li&gt;
+      &lt;li&gt;Mailing list&lt;/li&gt;
+      &lt;li&gt;Stackoverflow&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Proactively deals with issues that were brought up via social media.&lt;/li&gt;
+  &lt;li&gt;Has detailed onboarding information for new members of the core team, and revises them as necessary.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;A good open-source project is run like a business, because that is what they are. All the things a company does to survive are things successful open-source do on a daily basis. These things matter because the perception of an open-source project is based upon all of these items, and - other than personal need - that perception is oftentimes the only thing keeping the project alive. No one wants to work on an unused piece of software.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-to-crush-the-soul-of-an-open-source-project-maintainer&quot;&gt;How to crush the soul of an open-source project maintainer&lt;/h2&gt;
+
+&lt;p&gt;I personally have a very large backlog of projects I’d like to work on for a myriad of reasons:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;personal gain&lt;/li&gt;
+  &lt;li&gt;beneficial to a specific community&lt;/li&gt;
+  &lt;li&gt;requirement for an upcoming work project&lt;/li&gt;
+  &lt;li&gt;it is something that I find interesting&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Given that, I tend to start projects, work on them until they fit my needs, and then move on. I’ll also attempt to provide usage documentation and a way to reach out to me. And that is when the problems start.&lt;/p&gt;
+
+&lt;p&gt;A user will happen across my project, see that it appears to be well-maintained and easy to use, and start using it. At some point it might not fit their requirements, so they file an issue with bugs or enhancement requests. Responding isn’t so bad when you have a few small projects, or when you have a large project that has a few users. The issue is magnified when you start having multiple projects with many distinct users who each &lt;em&gt;expect&lt;/em&gt; changes to occur. For free.&lt;/p&gt;
+
+&lt;p&gt;Open-source projects tend to be unfunded.&lt;/p&gt;
+
+&lt;p&gt;People say any of the following things:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Don’t offer it for free if you cannot support it.
+    &lt;ul&gt;
+      &lt;li&gt;I open-source projects so I can get a new set of eyes on something, which is beneficial for both myself and the community that ends up using it.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Ask for donations.
+    &lt;ul&gt;
+      &lt;li&gt;Developers do not donate money for code as their companies do not normally provide stipends for this.&lt;/li&gt;
+      &lt;li&gt;Companies usually only ever “pay” for open-source in order to receive a license that they can use without being sued. When was the last time your company sent a donation to Debian or the Apache folks?&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Require payment for support.
+    &lt;ul&gt;
+      &lt;li&gt;Now you are some greedy douchebag and you will receive hate-mail.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Add more users as co-maintainers.
+    &lt;ul&gt;
+      &lt;li&gt;&lt;em&gt;Sometimes&lt;/em&gt; this works, but honestly now you have to manage both an internal community and an external community. Try doing this for a half-dozen projects, it doesn’t scale.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It’s quite common to see open-source developers quit their communities for a while once they see a barage of issues coming their way with little to no benefit for them.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note that your work &lt;em&gt;may&lt;/em&gt; be generous and allow you to work on OSS during work hours - 20% time anyone?. Mine at least does not complain if I spend a few minutes responding to something on Github. Some people are not so lucky, and might even find that their work wants to keep the IP of your outside projects, even if it wasn’t made on company hardware, etc. YMMV.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;lazygreedy-developers&quot;&gt;Lazy/Greedy Developers&lt;/h3&gt;
+
+&lt;p&gt;A good developer is lazy. They will go online, find some code that mostly does what they need it to do, hack at it until it does the rest, and move on.&lt;/p&gt;
+
+&lt;p&gt;A small percentage of users that have issues will file an issue asking for an enhancement or a bug fix. An even smaller percentage will provide a fix for that issue, or a patch that includes their enhancement. And the odds that the code provided is up to the standards of the project &lt;em&gt;and&lt;/em&gt; is in the scope of the project is pretty-well close to zero.&lt;/p&gt;
+
+&lt;p&gt;Of those that don’t provide a fix, there is a very large number of people that &lt;em&gt;expect&lt;/em&gt; the code to be written for them. Sometimes this is a case where there is a language barrier, but oftentimes developers just assume that what they want will come for free and it will be implemented quickly. Their project is way more important than yours, and they are &lt;a href=&quot;https://github.com/JuliaLang/IJulia.jl/issues/398&quot;&gt;providing you an unpaid service by giving you feedback&lt;/a&gt;. And they are &lt;a href=&quot;https://github.com/plataformatec/devise/issues/3834&quot;&gt;actively hostile&lt;/a&gt; when you &lt;a href=&quot;https://github.com/plataformatec/devise/issues/3832&quot;&gt;attempt to provide answers&lt;/a&gt; to their questions. The number of entitled developers online is outrageous.&lt;/p&gt;
+
+&lt;p&gt;And people continue to be surprised that demand for free labor outstrips supply.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;This is a common pattern I’ve seen in many organizations, where people don’t complain loudly when things are broken because they expect no movement from people that can help. So they trudge along with semi-broken experiences, because they are under some deadline and in many cases don’t feel like fixing an issue themselves.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;how-do-we-fix-it&quot;&gt;How do we fix it?&lt;/h2&gt;
+
+&lt;p&gt;We don’t. You could try being a bit nicer to your open-source maintainer, perhaps send them a few bucks if they really saved your bacon, but honestly if a project like OpenSSL &lt;a href=&quot;http://arstechnica.com/information-technology/2014/04/tech-giants-chastened-by-heartbleed-finally-agree-to-fund-openssl/&quot;&gt;cannot get more than a couple thousand&lt;/a&gt; in funding a year, it’s highly unlikely that a project maintainer will see any sort of monetary gain from their projects.&lt;/p&gt;
+
+&lt;p&gt;There are ways you can support developers. For instance, I might one day make a whole $10 dollars from &lt;a href=&quot;https://gratipay.com/~josegonzalez/&quot;&gt;Gratipay donations&lt;/a&gt;, which is enough to buy two of the three venti mocha fraps I drink a day. There is also &lt;a href=&quot;https://flattr.com/&quot;&gt;flattr&lt;/a&gt;, but I honestly have no idea how to use it. Definitely some room to improve, here, though if the OpenSSL people can’t get the money they &lt;em&gt;actually&lt;/em&gt; need, I don’t have a snowball’s chance in hell of receiving a meaningful amount of donations to feed my cat.&lt;/p&gt;
+
+&lt;p&gt;The only thing I can think of is, well, going back to charging for software. Having a paid software ecosystem around your projects seems to work nicely for those that can manage it. Certainly possible for some larger open-source projects - &lt;a href=&quot;https://www.elastic.co/&quot;&gt;there&lt;/a&gt; &lt;a href=&quot;https://www.mongodb.org/&quot;&gt;are&lt;/a&gt; &lt;a href=&quot;https://www.sugarcrm.com/&quot;&gt;many&lt;/a&gt; &lt;a href=&quot;https://convox.com/&quot;&gt;startups&lt;/a&gt; &lt;a href=&quot;https://www.docker.com/&quot;&gt;focused&lt;/a&gt; &lt;a href=&quot;https://www.joyent.com/&quot;&gt;around&lt;/a&gt; &lt;a href=&quot;https://about.gitlab.com/&quot;&gt;this&lt;/a&gt; &lt;a href=&quot;https://www.nginx.com/&quot;&gt;model&lt;/a&gt; - though I wonder how easy it would be for the every-day developer to start off.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Providing software support packages could also work, but now you are just consulting. I write open source code because it’s fun, not because I want to do work.&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        <pubDate>Tue, 26 Jan 2016 12:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/01/26/open-source-is-hard/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/01/26/open-source-is-hard/</guid>
+        
+        <category>rant</category>
+        
+        
+        <category>rant</category>
+        
+      </item>
     
       <item>
         <title>Implementing Custom Authentication Classes</title>
@@ -1553,103 +1730,6 @@ class StatsdFilter extends DispatcherFilter
         <category>dispatch-filters</category>
         
         <category>statsd</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Managing Application Configuration</title>
-        <description>&lt;p&gt;Most applications have a few custom bits of configuration. For instance, you might configure your error handler, or add some special facebook authentication key. Generally, these fall into two categories:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;configuration specific to the application (how errors are handled)&lt;/li&gt;
-  &lt;li&gt;configuration specific to the environment (which key to use for a service in staging/prod)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;For the former, I like creating a directory structure similar to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ ls config/
-app.php
-bootstrap.php
-bootstrap_cli.php
-bootstrap/environment.php
-bootstrap/functions.php
-bootstrap/functions_cli.php
-bootstrap/keys.php
-bootstrap/services.php
-paths.php
-routes.php
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Generally speaking, I have a &lt;code&gt;bootstrap&lt;/code&gt; folder which contains multiple php files I require from my &lt;code&gt;bootstrap.php&lt;/code&gt;. I use the &lt;code&gt;_cli&lt;/code&gt; suffix on the filename to denote cli-based configuration. I also separate the config by the type of thing I am configuring, e.g. &lt;code&gt;keys.php&lt;/code&gt; contains keys for stuff like an S3 bucket, while &lt;code&gt;services.php&lt;/code&gt; contains a list of services mapping to their &lt;code&gt;tcp&lt;/code&gt; or &lt;code&gt;udp&lt;/code&gt; urls.&lt;/p&gt;
-
-&lt;p&gt;Sometimes I don’t &lt;em&gt;want&lt;/em&gt; to store this information in the repository. For instance, I might have a specific bit of authentication information for the Facebook application my app is communicating with, or credentials to some SFTP bucket where important documents are stored. Maybe the database credentials are sacred and I don’t want everyone on the dev team to connect directly to production. Generally speaking, I have alternatives I would use in this case so that the functionality works both locally and in production, albeit with slightly different data.&lt;/p&gt;
-
-&lt;p&gt;In this case, I use &lt;code&gt;php-dotenv&lt;/code&gt; to configure &lt;a href=&quot;http://12factor.net/config&quot;&gt;environment variables&lt;/a&gt; for use in my application. Let’s install it in our application first:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require josegonzalez/dotenv
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Normally I add the following bit of code &lt;em&gt;right&lt;/em&gt; after the composer &lt;code&gt;vendor/autoload.php&lt;/code&gt; is required in my &lt;code&gt;config/bootstrap.php&lt;/code&gt;. This will affect both cli and web requests, so there isn’t a need to do it twice:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if (!env(&#39;APP_NAME&#39;)) {
-    josegonzalez\Dotenv\Loader::load([
-        &#39;filepaths&#39; =&amp;gt; [
-            __DIR__ . DS . &#39;.env&#39;,
-            __DIR__ . DS . &#39;.env.default&#39;,
-        ],
-        &#39;toServer&#39; =&amp;gt; false,
-        &#39;skipExisting&#39; =&amp;gt; [&#39;toServer&#39;],
-        &#39;raiseExceptions&#39; =&amp;gt; false
-    ]);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A few things:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The &lt;a href=&quot;https://github.com/josegonzalez/php-dotenv&quot;&gt;php-dotenv&lt;/a&gt; project supports being called in a &lt;a href=&quot;https://github.com/josegonzalez/php-dotenv#usage&quot;&gt;non-static way&lt;/a&gt; if you hate statics.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;.env&lt;/code&gt; files are simply a list of &lt;code&gt;export KEY=VALUE&lt;/code&gt; statements. If you know bash, you know how to use &lt;code&gt;.env&lt;/code&gt; files. There is a &lt;a href=&quot;https://github.com/josegonzalez/php-dotenv#usage&quot;&gt;primer&lt;/a&gt; in the readme.&lt;/li&gt;
-  &lt;li&gt;You can load multiple &lt;code&gt;.env&lt;/code&gt; files. The first one that exists on disk will be used. This is useful if you have &lt;code&gt;gitignored&lt;/code&gt; one like I do but wish to provide a default &lt;code&gt;.env&lt;/code&gt; file&lt;/li&gt;
-  &lt;li&gt;You can tell &lt;code&gt;php-dotenv&lt;/code&gt; to populate a number of variables. In this case, I am populating &lt;code&gt;$_SERVER&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;By default, exceptions are raised whenever there is an issue loading or parsing a &lt;code&gt;.env&lt;/code&gt; file. Rather than raise an expection at the bootstrap level, I just turn them off and assume the application has sane defaults. YMMV.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Now, when is this useful? Say I have a default database config, and I store this in my &lt;code&gt;config/.env.default&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# cakephp can read DSNs, remember?
-export DATABASE_URL=&quot;mysql://user:password@localhost/database?encoding=utf8&amp;amp;timezone=UTC&amp;amp;cacheMetadata=true&amp;amp;quoteIdentifiers=false&amp;amp;persistent=false&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And I read it into my &lt;code&gt;config/app.php&lt;/code&gt; like so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Datasources&#39; =&amp;gt; [
-    &#39;default&#39; =&amp;gt; [
-        &#39;url&#39; =&amp;gt; env(&#39;DATABASE_URL&#39;),
-    ],
-],
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In production, my &lt;code&gt;nginx.conf&lt;/code&gt; sets &lt;code&gt;APP_NAME&lt;/code&gt; and &lt;code&gt;DATABASE_URL&lt;/code&gt;, and therefore I don’t load the default mysql configuration. But what if I didn’t? I could create a &lt;code&gt;config/.env&lt;/code&gt; file on my server with the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;export DATABASE_URL=&quot;mysql://app:pass@some-host/app-database?encoding=utf8&amp;amp;timezone=UTC&amp;amp;cacheMetadata=true&amp;amp;quoteIdentifiers=false&amp;amp;persistent=true&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And my application would be none the wiser. What’s even &lt;em&gt;more&lt;/em&gt; awesome is that I can &lt;em&gt;also&lt;/em&gt; use this same trick to provide custom environments locally. If I have a developer who has slightly different config than the defaults, they can simply create a &lt;code&gt;config/.env&lt;/code&gt; file with their own customizations and they are off to the races!&lt;/p&gt;
-</description>
-        <pubDate>Fri, 18 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/18/managing-application-configuration/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/18/managing-application-configuration/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>configuration</category>
-        
-        <category>environment</category>
         
         
         <category>cakephp</category>

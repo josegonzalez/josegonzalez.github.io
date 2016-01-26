@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Open Source is Hard</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/01/26/open-source-is-hard/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Why I find writing and maintaining open source to be extremely difficult" />
+    <meta name="keywords" content="rant" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Open Source is Hard" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/01/26/open-source-is-hard/" />
+    <meta property="og:description" content="Why I find writing and maintaining open source to be extremely difficult" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Open Source is Hard" />
+    <meta name="twitter:description" content="Why I find writing and maintaining open source to be extremely difficult" />
+    <link rel="alternate" type="application/rss+xml" title="Open Source is Hard » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Open Source is Hard
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Open Source is Hard!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>Writing code isn’t very difficult. Usually you write something, it mostly does what it needs to do, and you carry on with your day. If you writing code for work, it might go through some review, or you may just ship it out to whoever your users happen to be. If you are writing code for open source, that’s where it gets tricky.</p>
+<h2 id="what-is-open-source-software">What is open source software?</h2>
+<p>I’ll loosely define open source software as any piece of software wherein the author(s) provides a copy of the source code to run a piece of software, as well as a license stating that others are able to use it for any purpose.</p>
+<p>Sometimes that source code might result in a binary - for instance, if you are compiling a game application, or a console executable. In many cases, web developers end up using the source code directly, such as in non-compiled rubygems, or npm packages for nodejs. Backend developers might use compiled versions of software for datastores such as MySQL or Elasticsearch. <em>Usually</em> there is an easy way to transform the provided source code into a finished product.</p>
+<p>The license might have some limitations - you might not be able to sue me, for instance, or I might require that you release any modifications as open source as well. There are a myriad of licenses, each with caveats or reasons why you might favor it as an individual but be opposed to it as a company.</p>
+<blockquote>
+  <p>There are an equal number of explanations as to why a particular license is suitable for your next open-source project, so investigating them is an easy way to waste a weekend. <a href="https://tldrlegal.com/">tldrlegal</a> seems to be a legitimate website that explains commonly used licenses.</p>
+</blockquote>
+<h2 id="what-is-an-open-source-project">What is an open source project?</h2>
+<p>An open source project differs in a way from open source software. For instance, I might have the following bit of MIT-Licensed PHP code:</p>
+<pre><code class="language-php">&lt;?php
+/**
+ * The MIT License (MIT)
+ * Copyright (c) &lt;year&gt; &lt;copyright holders&gt;
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+echo "lolipop\n";
+?&gt;
+</code></pre>
+<p>The above software, when executed, prints <code>lolipop</code> with a newline to the screen. You can run it locally under your version of PHP and it will probably work fine. YMMV and all that jazz.</p>
+<p>An open-source <em>project</em> typically also has the following:</p>
+<ul>
+  <li>The above code is in a repository somewhere.</li>
+  <li>There is an issue tracker where users can report bugs.</li>
+  <li>There is documentation concerning the installation and usage of the software.</li>
+  <li>There might be test cases for this software.</li>
+  <li>The project has actual maintainers, instead of authors, who steward the project for it’s “lifetime”.</li>
+</ul>
+<p>An open-source project requires more effort on the part of maintainers to ensure that the project is kept up to date, continues to evolve as necessary, and issues are responded to where required.</p>
+<h2 id="things-a-good-open-source-project-does">Things a good open-source project does</h2>
+<p>A good open-source project does the following:</p>
+<ul>
+  <li>Writes well-written, ever-evolving documentation.</li>
+  <li>Keeps a roadmap for users to understand how and where the project is changing.</li>
+  <li>Responds to issues that are reported by users, and:
+    <ul>
+      <li>Fixes bugs as they arise.</li>
+      <li>Limits the scope of the project when enhancements are requested.</li>
+      <li>Implements feature requests where possible.</li>
+      <li>Points users the right piece of documentation for their issue.</li>
+    </ul>
+  </li>
+  <li>Provides multiple methods of providing live support. This can be any of the following:
+    <ul>
+      <li>Forums</li>
+      <li>IRC/Some form of live chat</li>
+      <li>Mailing list</li>
+      <li>Stackoverflow</li>
+    </ul>
+  </li>
+  <li>Proactively deals with issues that were brought up via social media.</li>
+  <li>Has detailed onboarding information for new members of the core team, and revises them as necessary.</li>
+</ul>
+<p>A good open-source project is run like a business, because that is what they are. All the things a company does to survive are things successful open-source do on a daily basis. These things matter because the perception of an open-source project is based upon all of these items, and - other than personal need - that perception is oftentimes the only thing keeping the project alive. No one wants to work on an unused piece of software.</p>
+<h2 id="how-to-crush-the-soul-of-an-open-source-project-maintainer">How to crush the soul of an open-source project maintainer</h2>
+<p>I personally have a very large backlog of projects I’d like to work on for a myriad of reasons:</p>
+<ul>
+  <li>personal gain</li>
+  <li>beneficial to a specific community</li>
+  <li>requirement for an upcoming work project</li>
+  <li>it is something that I find interesting</li>
+</ul>
+<p>Given that, I tend to start projects, work on them until they fit my needs, and then move on. I’ll also attempt to provide usage documentation and a way to reach out to me. And that is when the problems start.</p>
+<p>A user will happen across my project, see that it appears to be well-maintained and easy to use, and start using it. At some point it might not fit their requirements, so they file an issue with bugs or enhancement requests. Responding isn’t so bad when you have a few small projects, or when you have a large project that has a few users. The issue is magnified when you start having multiple projects with many distinct users who each <em>expect</em> changes to occur. For free.</p>
+<p>Open-source projects tend to be unfunded.</p>
+<p>People say any of the following things:</p>
+<ul>
+  <li>Don’t offer it for free if you cannot support it.
+    <ul>
+      <li>I open-source projects so I can get a new set of eyes on something, which is beneficial for both myself and the community that ends up using it.</li>
+    </ul>
+  </li>
+  <li>Ask for donations.
+    <ul>
+      <li>Developers do not donate money for code as their companies do not normally provide stipends for this.</li>
+      <li>Companies usually only ever “pay” for open-source in order to receive a license that they can use without being sued. When was the last time your company sent a donation to Debian or the Apache folks?</li>
+    </ul>
+  </li>
+  <li>Require payment for support.
+    <ul>
+      <li>Now you are some greedy douchebag and you will receive hate-mail.</li>
+    </ul>
+  </li>
+  <li>Add more users as co-maintainers.
+    <ul>
+      <li><em>Sometimes</em> this works, but honestly now you have to manage both an internal community and an external community. Try doing this for a half-dozen projects, it doesn’t scale.</li>
+    </ul>
+  </li>
+</ul>
+<p>It’s quite common to see open-source developers quit their communities for a while once they see a barage of issues coming their way with little to no benefit for them.</p>
+<blockquote>
+  <p>Note that your work <em>may</em> be generous and allow you to work on OSS during work hours - 20% time anyone?. Mine at least does not complain if I spend a few minutes responding to something on Github. Some people are not so lucky, and might even find that their work wants to keep the IP of your outside projects, even if it wasn’t made on company hardware, etc. YMMV.</p>
+</blockquote>
+<h3 id="lazygreedy-developers">Lazy/Greedy Developers</h3>
+<p>A good developer is lazy. They will go online, find some code that mostly does what they need it to do, hack at it until it does the rest, and move on.</p>
+<p>A small percentage of users that have issues will file an issue asking for an enhancement or a bug fix. An even smaller percentage will provide a fix for that issue, or a patch that includes their enhancement. And the odds that the code provided is up to the standards of the project <em>and</em> is in the scope of the project is pretty-well close to zero.</p>
+<p>Of those that don’t provide a fix, there is a very large number of people that <em>expect</em> the code to be written for them. Sometimes this is a case where there is a language barrier, but oftentimes developers just assume that what they want will come for free and it will be implemented quickly. Their project is way more important than yours, and they are <a href="https://github.com/JuliaLang/IJulia.jl/issues/398">providing you an unpaid service by giving you feedback</a>. And they are <a href="https://github.com/plataformatec/devise/issues/3834">actively hostile</a> when you <a href="https://github.com/plataformatec/devise/issues/3832">attempt to provide answers</a> to their questions. The number of entitled developers online is outrageous.</p>
+<p>And people continue to be surprised that demand for free labor outstrips supply.</p>
+<blockquote>
+  <p>This is a common pattern I’ve seen in many organizations, where people don’t complain loudly when things are broken because they expect no movement from people that can help. So they trudge along with semi-broken experiences, because they are under some deadline and in many cases don’t feel like fixing an issue themselves.</p>
+</blockquote>
+<h2 id="how-do-we-fix-it">How do we fix it?</h2>
+<p>We don’t. You could try being a bit nicer to your open-source maintainer, perhaps send them a few bucks if they really saved your bacon, but honestly if a project like OpenSSL <a href="http://arstechnica.com/information-technology/2014/04/tech-giants-chastened-by-heartbleed-finally-agree-to-fund-openssl/">cannot get more than a couple thousand</a> in funding a year, it’s highly unlikely that a project maintainer will see any sort of monetary gain from their projects.</p>
+<p>There are ways you can support developers. For instance, I might one day make a whole $10 dollars from <a href="https://gratipay.com/~josegonzalez/">Gratipay donations</a>, which is enough to buy two of the three venti mocha fraps I drink a day. There is also <a href="https://flattr.com/">flattr</a>, but I honestly have no idea how to use it. Definitely some room to improve, here, though if the OpenSSL people can’t get the money they <em>actually</em> need, I don’t have a snowball’s chance in hell of receiving a meaningful amount of donations to feed my cat.</p>
+<p>The only thing I can think of is, well, going back to charging for software. Having a paid software ecosystem around your projects seems to work nicely for those that can manage it. Certainly possible for some larger open-source projects - <a href="https://www.elastic.co/">there</a> <a href="https://www.mongodb.org/">are</a> <a href="https://www.sugarcrm.com/">many</a> <a href="https://convox.com/">startups</a> <a href="https://www.docker.com/">focused</a> <a href="https://www.joyent.com/">around</a> <a href="https://about.gitlab.com/">this</a> <a href="https://www.nginx.com/">model</a> - though I wonder how easy it would be for the every-day developer to start off.</p>
+<blockquote>
+  <p>Providing software support packages could also work, but now you are just consulting. I write open source code because it’s fun, not because I want to do work.</p>
+</blockquote>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/rant" title="View all posts in rant" rel="category">rant</a> on <a href="http://josediazgonzalez.com/2016/01/26/open-source-is-hard/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-01-26 12:00:00 +0000">26 Jan 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/01/26/open-source-is-hard/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/01/26/open-source-is-hard/';
+        var disqus_title      = "Open Source is Hard";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>

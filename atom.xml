@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-01-11T11:34:37+00:00</updated>
+ <updated>2016-01-26T06:03:30+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Open Source is Hard]]></title>
+   <link href="http://josediazgonzalez.com/2016/01/26/open-source-is-hard/"/>
+   <updated>2016-01-26T12:00:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/01/26/open-source-is-hard/</id>
+   <content type="html"><![CDATA[Why I find writing and maintaining open source to be extremely difficult]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Implementing Custom Authentication Classes]]></title>

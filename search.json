@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Open Source is Hard",
+    "url": "/2016/01/26/open-source-is-hard/",
+    "description": "Why I find writing and maintaining open source to be extremely difficult",
+    "tokens": ["difficult","extremely","find","hard","maintaining","open","source","writing"]
+  },
+  {
+    "type": "post",
     "title": "Implementing Custom Authentication Classes",
     "url": "/2016/01/10/implementing-custom-authentication-classes/",
     "description": "Implementing both Form Authentication and a custom Authentication class in CakePHP",
@@ -770,6 +777,12 @@
     "title": "opschops",
     "url": "/categories/opschops/",
     "tokens": ["opschops"]
+  },
+  {
+    "type": "category",
+    "title": "rant",
+    "url": "/categories/rant/",
+    "tokens": ["rant"]
   },
   {
     "type": "tag",
@@ -1646,6 +1659,12 @@
     "title": "planning",
     "url": "/tags/planning/",
     "tokens": ["planning"]
+  },
+  {
+    "type": "tag",
+    "title": "rant",
+    "url": "/tags/rant/",
+    "tokens": ["rant"]
   },
   false
 ]
