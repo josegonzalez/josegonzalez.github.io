@@ -92,9 +92,15 @@
 <pre><code class="language-shell">composer require josegonzalez/cakephp-upload
 </code></pre>
 <p>and then load it in your <code>config/bootstrap.php</code></p>
-<pre><code class="language-php">Plugin::load('Josegonzalez/Upload');
+<pre><code class="language-php">bin/cake plugin load Josegonzalez/Upload
 </code></pre>
-<p>Here is the database schema I am using in this example.</p>
+<p>Here is the database migration I am using in this example (more on migrations in a separate post).</p>
+<pre><code class="language-shell"># create the migration
+bin/cake bake migration CreateUsers name username password role photo dir created modified
+# apply it
+bin/cake migrations migrate
+</code></pre>
+<p>Or use the following schema file directly:</p>
 <pre><code class="language-sql">CREATE TABLE `users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
@@ -119,12 +125,26 @@ class UsersTable extends Table
         $this-&gt;table('users');
         $this-&gt;displayField('name');
         $this-&gt;primaryKey('id');
+        // START: IMPORTANT PART HERE
         $this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
             'photo',
         ]);
+        // END: IMPORTANT PART ABOVE
     }
 ?&gt;
 </code></pre>
+<p>Lastly, any forms where you will upload files will need to be modified with the following changes:</p>
+<ul>
+  <li><code>Form::create</code> must be of type file:<br />
+  <code>
+  &lt;?= $this-&gt;Form-&gt;create($user, ['type' =&gt; file]) ?&gt;
+ </code></li>
+  <li><code>Form::input</code> for the field must be of type file:<br />
+  <code>
+  &lt;?= echo $this-&gt;Form-&gt;input('photo', ['type' =&gt; 'file']); ?&gt;
+ </code></li>
+  <li>You should hide/remove the extra fields. In particular, the plugin is automatically configured to use the <code>dir</code>, <code>type</code>, and <code>size</code> fields. These are configurable, but keep this in mind.</li>
+</ul>
 <p>Pretty basic. It will upload anything to the path <code>webroot/files/Users/photo/ID</code>, and save metadata about the file to the <code>photo</code> field. We still have a few of the same config options, with many of the same defaults. For instance, we may wish to change the upload path to be outside of <code>webroot</code>:</p>
 <pre><code class="language-php">$this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
     'photo' =&gt; [
@@ -203,9 +223,13 @@ $this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
         ],
         // This can also be in a class that implements
         // the TransformerInterface or any callable type.
-        'transformer' =&gt; function (Table $table, Entity $entity, $data, $field, $settings) {
+        'transformer' =&gt; function (\Cake\Datasource\RepositoryInterface $table, \Cake\Datasource\EntityInterface $entity, $data, $field, $settings) {
+            // get the extension from the file
+            // there could be better ways to do this, and it will fail
+            // if the file has no extension
+            $extension = pathinfo($data['name'], PATHINFO_EXTENSION);
             // Store the thumbnail in a temporary file
-            $tmp = tmpfile();
+            $tmp = tempnam(sys_get_temp_dir(), 'upload') . '.' . $extension;
             // Use the Imagine library to DO THE THING
             $size = new \Imagine\Image\Box(40, 40);
             $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET;
