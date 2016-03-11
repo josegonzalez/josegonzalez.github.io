@@ -5,9 +5,116 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 26 Jan 2016 06:06:25 +0000</pubDate>
-    <lastBuildDate>Tue, 26 Jan 2016 06:06:25 +0000</lastBuildDate>
+    <pubDate>Fri, 11 Mar 2016 01:51:10 +0000</pubDate>
+    <lastBuildDate>Fri, 11 Mar 2016 01:51:10 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Paginating one table while sorting by a field from another table</title>
+        <description>&lt;p&gt;There was a user on irc who asked the question, “How do I sort pagination of one table by another table’s field?”. I actually had to dig a little but to do this. Let’s layout how pagination works first.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note: all of this will assume Users belongsTo Cities. YMMV for anything else, I definitely didn’t test it.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;You can paginate by specifying a Table object:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$users = $this-&amp;gt;paginate($this-&amp;gt;Users);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also specify the string name:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$users = $this-&amp;gt;paginate(&#39;Users&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, you can pass in a query object (which can be retrieved from a &lt;code&gt;find()&lt;/code&gt; call):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$query = $this-&amp;gt;Users-&amp;gt;find();
+$users = $this-&amp;gt;paginate($query);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Of course, if you wanted to include related data, you would need to contain that data, which is where the &lt;code&gt;query&lt;/code&gt; method shines, as you can easily modify it:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$query = $this-&amp;gt;Users-&amp;gt;find()
+                     -&amp;gt;contain(&#39;Cities&#39;);
+$users = $this-&amp;gt;paginate($query);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One thing of note is that you can also specify the query info in a controller’s &lt;code&gt;$this-&amp;gt;paginate&lt;/code&gt; attribute:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;contain&#39;] = [&#39;Cities&#39;];
+$users = $this-&amp;gt;paginate(&#39;Users&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you wanted to sort the output by a related field, you can add it to the query:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$query = $this-&amp;gt;Users-&amp;gt;find()
+                     -&amp;gt;contain(&#39;Cities&#39;)
+                     -&amp;gt;order([&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;]);
+$users = $this-&amp;gt;paginate($query);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above works fine, but this won’t:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;contain&#39;] = [&#39;Cities&#39;];
+$this-&amp;gt;paginate[&#39;order&#39;] = [&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;];
+$users = $this-&amp;gt;paginate(&#39;Users&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Why? Because in the former, we are passing in the order via a query object explicitly. In the later, CakePHP will strip it out because the related field is &lt;strong&gt;not&lt;/strong&gt; whitelisted for pagination sorting. The scope of this is limited to the paginated model by default. This is to avoid people futzing with your querystring parameters and taking down your site because of an un-indexed sort…&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;ALWAYS ADD INDEXES FOR FIELDS YOU ARE SORTING ON&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;What if you wanted to use the &lt;code&gt;$this-&amp;gt;paginate&lt;/code&gt; method? You can do this by adding to the &lt;code&gt;sortWhitelist&lt;/code&gt; option:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;contain&#39;] = [&#39;Cities&#39;];
+$this-&amp;gt;paginate[&#39;order&#39;] = [&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;];
+$this-&amp;gt;paginate[&#39;sortWhitelist&#39;] = $this-&amp;gt;Users-&amp;gt;schema()-&amp;gt;columns() + [&#39;Cities.name&#39;];
+$users = $this-&amp;gt;paginate(&#39;Users&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yay! You might notice that I added &lt;code&gt;$this-&amp;gt;Users-&amp;gt;schema()-&amp;gt;columns()&lt;/code&gt; to the &lt;code&gt;sortWhitelist&lt;/code&gt; as well. Since it is a whitelist, if I don’t whitelist the primary tables fields, I won’t be able to sort via those fields. You can of course restrict the fields:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;contain&#39;] = [&#39;Cities&#39;];
+$this-&amp;gt;paginate[&#39;order&#39;] = [&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;];
+// id and created will be fields in the Users table
+$this-&amp;gt;paginate[&#39;sortWhitelist&#39;] = [&#39;id&#39;, &#39;created&#39;, &#39;Cities.name&#39;];
+$users = $this-&amp;gt;paginate(&#39;Users&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that if you want to be able to sort by other fields than the one passed explicitly in a query object, you’ll need to mix the two methods:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;sortWhitelist&#39;] = $this-&amp;gt;Users-&amp;gt;schema()-&amp;gt;columns() + [&#39;Cities.id&#39;, &#39;Cities.name&#39;];
+$query = $this-&amp;gt;Users-&amp;gt;find()
+                     -&amp;gt;contain(&#39;Cities&#39;)
+                     -&amp;gt;order([&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;]);
+$users = $this-&amp;gt;paginate($query);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;what-method-should-i-use&quot;&gt;What method should I use?&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;$this-&amp;gt;paginate&lt;/code&gt; method is pretty simple to use in a pinch. Doesn’t require much change from 2.x. I would use it for a one-off pagination setup.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;$query&lt;/code&gt; method is useful if you have a complex find or want to reuse that find in another method, as you can abstract the query object behind a cakephp custom find.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 10 Mar 2016 20:51:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/</guid>
+        
+        <category>cakephp</category>
+        
+        <category>table</category>
+        
+        <category>model</category>
+        
+        <category>pagination</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Open Source is Hard</title>
@@ -1624,112 +1731,6 @@ $queue-&amp;gt;push([&#39;\App\Job\TestJob&#39;, &#39;perform&#39;], [&#39;sleep
         <category>shells</category>
         
         <category>queueing</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Tracking Requests Via Dispatch Filters</title>
-        <description>&lt;p&gt;CakePHP 2 added dispatch filters. These were cool, but there were a few problems:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;They were managed to configure, which meant it was harder for dependencies and configuration to be added/removed to middleware as the configuration was managed away from the actual dispatch cycle.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;Configure&lt;/code&gt;-based management makes it harder to reason about when a particular dispatch filter will be hit.&lt;/li&gt;
-  &lt;li&gt;Because of the above, controller handling had to be outside of the middleware layer. Sometimes you want to do something special, and in our case you basically had to replace the whole Dispatcher to do that. Boo.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;In CakePHP 3 we now have a nice stack of middleware you configure in &lt;code&gt;config/bootstrap.php&lt;/code&gt; using the &lt;code&gt;DispatcherFactory&lt;/code&gt;. Many applications have no need to modify the stack, but they can be quite handy in a pinch. For instance, what if you wanted to track the number of times certain controller/action pairs in your application are requested?&lt;/p&gt;
-
-&lt;h2 id=&quot;metrics-tracking-via-statsd&quot;&gt;Metrics tracking via StatsD&lt;/h2&gt;
-
-&lt;p&gt;I’m not going to get too much into StatsD, except to say it’s a way to track metrics in a time-series database software called graphite. &lt;a href=&quot;https://codeascraft.com/2011/02/15/measure-anything-measure-everything/&quot;&gt;Here&lt;/a&gt; is a blog post by Etsy covering StatsD and why it’s awesome.&lt;/p&gt;
-
-&lt;p&gt;In our case, we’re going to send a counter to StatsD every time a controller/action pair is hit. Let’s install a library to handle talking to statsd:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require league/statsd
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll wire up the simplest of dispatch filters. We will be tracking requests &lt;em&gt;after&lt;/em&gt; they happen, in case anything happens during the dispatch cycle that would change what would be requested:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Routing\Filter;
-
-use Cake\Event\Event;
-use Cake\Routing\DispatcherFilter;
-use Cake\Utility\Inflector;
-use League\StatsD\Client;
-
-class StatsdFilter extends DispatcherFilter
-{
-    // only create the client once and
-    // keep a reference to it
-    protected $client;
-
-    // these can be overriden whenever
-    // we add the dispatch filter
-    protected $_defaultConfig = [
-        &#39;host&#39; =&amp;gt; &#39;127.0.0.1&#39;,
-        &#39;port&#39; =&amp;gt; 8125,
-        &#39;namespace&#39; =&amp;gt; &#39;app&#39;
-    ];
-    public function __construct($config = [])
-    {
-        // ensure configuration is set
-        parent::__construct($config);
-
-        $this-&amp;gt;client = new Client();
-        $this-&amp;gt;client-&amp;gt;configure([
-            &#39;host&#39; =&amp;gt; $this-&amp;gt;config(&#39;host&#39;),
-            &#39;port&#39; =&amp;gt; $this-&amp;gt;config(&#39;port&#39;),
-            &#39;namespace&#39; =&amp;gt; $this-&amp;gt;config(&#39;namespace&#39;),
-        ]);
-    }
-
-    public function afterDispatch(Event $event)
-    {
-        $request = $event-&amp;gt;data[&#39;request&#39;];
-        $response = $event-&amp;gt;data[&#39;response&#39;];
-
-        // Graphite uses folders for metrics
-        // We dasherize the names to keep all metrics sane-looking
-        $controller = Inflector::dasherize($response-&amp;gt;params[&#39;controller&#39;]);
-        $action = Inflector::dasherize($response-&amp;gt;params[&#39;action&#39;]);
-        $statusCode = $response-&amp;gt;statusCode();
-
-        // track controller/action pairs
-        $statsd-&amp;gt;increment(sprintf(&#39;web.%s.%s.hit&#39;, $controller, $action));
-
-        // track response codes for those pairs as well
-        $statsd-&amp;gt;increment(sprintf(&#39;web.%s.%s.%d&#39;, $controller, $action, $statusCode));
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And configuring it is easy. Simply add the following to your &lt;code&gt;config/bootstrap.php&lt;/code&gt; after the &lt;code&gt;DispatcherFactory:add(&#39;ControllerFactory&#39;)&lt;/code&gt; call:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;DispatcherFactory::add(&#39;StatsdFilter&#39;, [
-    &#39;host&#39; =&amp;gt; &#39;127.0.0.1&#39;,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now you’ll be tracking metrics in StatsD!&lt;/p&gt;
-
-&lt;p&gt;The &lt;a href=&quot;http://book.cakephp.org/3.0/en/development/dispatch-filters.html&quot;&gt;docs on dispatch filters&lt;/a&gt; have another example - altering cache headers on certain requests - but it should be fairly easy to come up with useful ways of bending dispatch filters to your will!&lt;/p&gt;
-</description>
-        <pubDate>Sat, 19 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/19/tracking-requests-via-dispatch-filters/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/19/tracking-requests-via-dispatch-filters/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>dispatch-filters</category>
-        
-        <category>statsd</category>
         
         
         <category>cakephp</category>

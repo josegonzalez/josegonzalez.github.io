@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-01-26T06:06:25+00:00</updated>
+ <updated>2016-03-11T01:51:10+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Paginating one table while sorting by a field from another table]]></title>
+   <link href="http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/"/>
+   <updated>2016-03-10T20:51:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/</id>
+   <content type="html"><![CDATA[How do I sort paginated data in cakephp 3 by a field from a different table]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Open Source is Hard]]></title>

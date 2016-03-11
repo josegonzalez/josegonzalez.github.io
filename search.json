@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Paginating one table while sorting by a field from another table",
+    "url": "/2016/03/10/pagination-sorting-by-related-tables/",
+    "description": "How do I sort paginated data in cakephp 3 by a field from a different table",
+    "tokens": ["another","cakephp","data","different","field","one","paginated","paginating","sort","sorting","table"]
+  },
+  {
+    "type": "post",
     "title": "Open Source is Hard",
     "url": "/2016/01/26/open-source-is-hard/",
     "description": "Why I find writing and maintaining open source to be extremely difficult",
@@ -1428,12 +1435,6 @@
   },
   {
     "type": "tag",
-    "title": "models",
-    "url": "/tags/models/",
-    "tokens": ["models"]
-  },
-  {
-    "type": "tag",
     "title": "custom find",
     "url": "/tags/custom-find/",
     "tokens": ["custom","find"]
@@ -1665,6 +1666,12 @@
     "title": "rant",
     "url": "/tags/rant/",
     "tokens": ["rant"]
+  },
+  {
+    "type": "tag",
+    "title": "pagination",
+    "url": "/tags/pagination/",
+    "tokens": ["pagination"]
   },
   false
 ]

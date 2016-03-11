@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Paginating one table while sorting by a field from another table</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <!--[if lt IE 9]>
+        <script src="/javascripts/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="How do I sort paginated data in cakephp 3 by a field from a different table" />
+    <meta name="keywords" content="cakephp, table, model, pagination" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Paginating one table while sorting by a field from another table" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/" />
+    <meta property="og:description" content="How do I sort paginated data in cakephp 3 by a field from a different table" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Paginating one table while sorting by a field from another table" />
+    <meta name="twitter:description" content="How do I sort paginated data in cakephp 3 by a field from a different table" />
+    <link rel="alternate" type="application/rss+xml" title="Paginating one table while sorting by a field from another table » Feed" href="/atom.xml">
+    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
+    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
+    <!--[if lt IE 9]>
+        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
+    <![endif]-->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="site">
+      <header class="site-header" role="banner">
+    <hgroup>
+        <h1 class="site-title">
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
+    </hgroup>
+</header>
+      <div class="wrapper">
+        <div class="site-content">
+          <div role="main">
+            <article class="type-post">
+  <header class="entry-header">
+      <h1 class="entry-title">
+        Paginating one table while sorting by a field from another table
+      </h1>
+      <div class="comments-link">
+        <a href="#comments" title="Comment on Paginating one table while sorting by a field from another table!">
+          Comments
+        </a>
+      </div>
+  </header>
+  <div class="entry-content">
+    <p>There was a user on irc who asked the question, “How do I sort pagination of one table by another table’s field?”. I actually had to dig a little but to do this. Let’s layout how pagination works first.</p>
+<blockquote>
+  <p>Note: all of this will assume Users belongsTo Cities. YMMV for anything else, I definitely didn’t test it.</p>
+</blockquote>
+<p>You can paginate by specifying a Table object:</p>
+<pre><code class="language-php">$users = $this-&gt;paginate($this-&gt;Users);
+</code></pre>
+<p>You can also specify the string name:</p>
+<pre><code class="language-php">$users = $this-&gt;paginate('Users');
+</code></pre>
+<p>Finally, you can pass in a query object (which can be retrieved from a <code>find()</code> call):</p>
+<pre><code class="language-php">$query = $this-&gt;Users-&gt;find();
+$users = $this-&gt;paginate($query);
+</code></pre>
+<p>Of course, if you wanted to include related data, you would need to contain that data, which is where the <code>query</code> method shines, as you can easily modify it:</p>
+<pre><code class="language-php">$query = $this-&gt;Users-&gt;find()
+                     -&gt;contain('Cities');
+$users = $this-&gt;paginate($query);
+</code></pre>
+<p>One thing of note is that you can also specify the query info in a controller’s <code>$this-&gt;paginate</code> attribute:</p>
+<pre><code class="language-php">$this-&gt;paginate['contain'] = ['Cities'];
+$users = $this-&gt;paginate('Users');
+</code></pre>
+<p>If you wanted to sort the output by a related field, you can add it to the query:</p>
+<pre><code class="language-php">$query = $this-&gt;Users-&gt;find()
+                     -&gt;contain('Cities')
+                     -&gt;order(['Cities.name' =&gt; 'DESC']);
+$users = $this-&gt;paginate($query);
+</code></pre>
+<p>The above works fine, but this won’t:</p>
+<pre><code class="language-php">$this-&gt;paginate['contain'] = ['Cities'];
+$this-&gt;paginate['order'] = ['Cities.name' =&gt; 'DESC'];
+$users = $this-&gt;paginate('Users');
+</code></pre>
+<p>Why? Because in the former, we are passing in the order via a query object explicitly. In the later, CakePHP will strip it out because the related field is <strong>not</strong> whitelisted for pagination sorting. The scope of this is limited to the paginated model by default. This is to avoid people futzing with your querystring parameters and taking down your site because of an un-indexed sort…</p>
+<blockquote>
+  <p>ALWAYS ADD INDEXES FOR FIELDS YOU ARE SORTING ON</p>
+</blockquote>
+<p>What if you wanted to use the <code>$this-&gt;paginate</code> method? You can do this by adding to the <code>sortWhitelist</code> option:</p>
+<pre><code class="language-php">$this-&gt;paginate['contain'] = ['Cities'];
+$this-&gt;paginate['order'] = ['Cities.name' =&gt; 'DESC'];
+$this-&gt;paginate['sortWhitelist'] = $this-&gt;Users-&gt;schema()-&gt;columns() + ['Cities.name'];
+$users = $this-&gt;paginate('Users');
+</code></pre>
+<p>Yay! You might notice that I added <code>$this-&gt;Users-&gt;schema()-&gt;columns()</code> to the <code>sortWhitelist</code> as well. Since it is a whitelist, if I don’t whitelist the primary tables fields, I won’t be able to sort via those fields. You can of course restrict the fields:</p>
+<pre><code class="language-php">$this-&gt;paginate['contain'] = ['Cities'];
+$this-&gt;paginate['order'] = ['Cities.name' =&gt; 'DESC'];
+// id and created will be fields in the Users table
+$this-&gt;paginate['sortWhitelist'] = ['id', 'created', 'Cities.name'];
+$users = $this-&gt;paginate('Users');
+</code></pre>
+<p>Note that if you want to be able to sort by other fields than the one passed explicitly in a query object, you’ll need to mix the two methods:</p>
+<pre><code class="language-php">$this-&gt;paginate['sortWhitelist'] = $this-&gt;Users-&gt;schema()-&gt;columns() + ['Cities.id', 'Cities.name'];
+$query = $this-&gt;Users-&gt;find()
+                     -&gt;contain('Cities')
+                     -&gt;order(['Cities.name' =&gt; 'DESC']);
+$users = $this-&gt;paginate($query);
+</code></pre>
+<h3 id="what-method-should-i-use">What method should I use?</h3>
+<p>The <code>$this-&gt;paginate</code> method is pretty simple to use in a pinch. Doesn’t require much change from 2.x. I would use it for a one-off pagination setup.</p>
+<p>The <code>$query</code> method is useful if you have a complex find or want to reuse that find in another method, as you can abstract the query object behind a cakephp custom find.</p>
+  </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-03-10 20:51:00 +0000">10 Mar 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+          </div>
+        </div>
+        <div class="widget-area" role="complementary">
+    <aside class="widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook-outer">
+  <div class="ebook-inner">
+    <h3>Write better CakePHP Code Today</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
+  </div>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+      </div>
+      <footer class="colophon" role="contentinfo">
+    <div class="site-info">
+        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
+    </div>
+</footer>
+    </div>
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+<script type="text/javascript" src="/javascripts/navigation.js"></script>
+<script type="text/javascript" src="/javascripts/hogan.js"></script>
+<script type="text/javascript" src="/javascripts/typeahead.js"></script>
+<script type="text/javascript" src="/javascripts/affix.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/rainbow.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/c.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/css.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/generic.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/html.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/javascript.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/php.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/python.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/ruby.js"></script>
+<script type="text/javascript" src="/javascripts/rainbow/languages/shell.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/03/10/pagination-sorting-by-related-tables/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/';
+        var disqus_title      = "Paginating one table while sorting by a field from another table";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+  </body>
+</html>
