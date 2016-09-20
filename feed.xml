@@ -5,8 +5,8 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 11 Mar 2016 01:51:10 +0000</pubDate>
-    <lastBuildDate>Fri, 11 Mar 2016 01:51:10 +0000</lastBuildDate>
+    <pubDate>Tue, 20 Sep 2016 06:33:08 +0000</pubDate>
+    <lastBuildDate>Tue, 20 Sep 2016 06:33:08 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -1459,7 +1459,11 @@ bin/cake plugin load Ceeram/Blame
     
       <item>
         <title>Creating Custom Background Shells</title>
-        <description>&lt;p&gt;In a previous post, I mentioned how awesome it would be to have a background queueing system to perform long-running tasks. While there are many queueing systems, today I will re-introduce Queuesadilla, with an aim to explain how CakePHP shells work.&lt;/p&gt;
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;The code in this blog post is available on &lt;a href=&quot;https://github.com/josegonzalez/cakephp-queuesadilla&quot;&gt;GitHub&lt;/a&gt; as a &lt;a href=&quot;https://packagist.org/packages/josegonzalez/cakephp-queuesadilla&quot;&gt;composer package&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In a previous post, I mentioned how awesome it would be to have a background queueing system to perform long-running tasks. While there are many queueing systems, today I will re-introduce Queuesadilla, with an aim to explain how CakePHP shells work.&lt;/p&gt;
 
 &lt;h2 id=&quot;shell-skeleton&quot;&gt;Shell Skeleton&lt;/h2&gt;
 
