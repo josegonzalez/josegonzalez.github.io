@@ -5,9 +5,239 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 20 Sep 2016 06:33:08 +0000</pubDate>
-    <lastBuildDate>Tue, 20 Sep 2016 06:33:08 +0000</lastBuildDate>
+    <pubDate>Mon, 21 Nov 2016 08:24:50 +0000</pubDate>
+    <lastBuildDate>Mon, 21 Nov 2016 08:24:50 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Serverless Distributed Cron System</title>
+        <description>&lt;p&gt;I’ve implemented the following in a &lt;em&gt;very&lt;/em&gt; untested project I have decided not to release, but the mental exercise of going through the system is worth doing.&lt;/p&gt;
+
+&lt;h2 id=&quot;what-is-cron-baby-dont-hurt-me&quot;&gt;What is Cron? (baby don’t hurt me)&lt;/h2&gt;
+
+&lt;p&gt;Cron is a generic name for various schedulers that run commands at a specific interval. Many developers encounter it via a &lt;code&gt;crontab&lt;/code&gt; file or similar that they have to edit. Here is an example (with a neat graph from wikipedia):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cron&quot;&gt; ┌───────────── min (0 - 59)
+ │ ┌────────────── hour (0 - 23)
+ │ │ ┌─────────────── day of month (1 - 31)
+ │ │ │ ┌──────────────── month (1 - 12)
+ │ │ │ │ ┌───────────────── day of week (0 - 6) (Sunday to Saturday;
+ │ │ │ │ │                                         7 is also Sunday)
+ │ │ │ │ │ ┌────────────the command you are going to run (should be executable)
+ │ │ │ │ │ │
+ 5 2 * * 6 /var/lib/scripts/awesome-script.sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It’s pretty nifty, and fairly easy to automate. Lots of developers seem to want to write versions in their own languages (because why not!), and here is a list of awful implementations in various languages. If you aren’t listed here, don’t worry, your version is almost certainly also awful.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Java: &lt;a href=&quot;http://www.sauronsoftware.it/projects/cron4j/&quot;&gt;cron4j&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Node.JS: &lt;a href=&quot;https://bunkat.github.io/later/&quot;&gt;later&lt;/a&gt; and &lt;a href=&quot;https://github.com/kelektiv/node-cron&quot;&gt;node-cron&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;PHP: this &lt;a href=&quot;https://packagist.org/packages/cron/cron&quot;&gt;cron&lt;/a&gt; library and &lt;a href=&quot;https://laravel.com/docs/5.3/scheduling&quot;&gt;laravel’s sceheduler&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Python: &lt;a href=&quot;https://github.com/fengsp/plan&quot;&gt;plan&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Ruby: &lt;a href=&quot;https://github.com/jmettraux/rufus-scheduler&quot;&gt;rufus-scheduler&lt;/a&gt; and &lt;a href=&quot;https://github.com/javan/whenever&quot;&gt;whenever&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;There are certainly others, these are just the ones I knew off the top of my head or googled really quickly. They are probably fine projects, just that re-implementing cron for the hell of it seems like a waste of time.&lt;/p&gt;
+
+&lt;p&gt;For the record, here are the components of a reasonable cron scheduler:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A scheduler (cron)&lt;/li&gt;
+  &lt;li&gt;A process to retrieve logs and process results (cron/syslog)&lt;/li&gt;
+  &lt;li&gt;A mechanism for storing the tasks (your cron file)&lt;/li&gt;
+  &lt;li&gt;A ui for editing cron tasks (your text editor of choice)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;distributed-cron&quot;&gt;Distributed Cron&lt;/h2&gt;
+
+&lt;p&gt;This is a pretty nasty problem. It turns out that building distributed systems is hard, and the semantics around running cron tasks don’t necessarily work for every problem.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;You may want to ensure only one version of a command is running at a time.&lt;/li&gt;
+  &lt;li&gt;You may want to ensure every invocation of a command is handled.&lt;/li&gt;
+  &lt;li&gt;You may want to ensure every task completes successfully.&lt;/li&gt;
+  &lt;li&gt;You may want to log all output somewhere for later investigation.&lt;/li&gt;
+  &lt;li&gt;You may want to be able to pause a command from being scheduled.&lt;/li&gt;
+  &lt;li&gt;You may want to stop a run that is &lt;em&gt;currently&lt;/em&gt; executing.&lt;/li&gt;
+  &lt;li&gt;You may want to place commands in maintenance mode.&lt;/li&gt;
+  &lt;li&gt;You may want to group commands for easy perusal in large installations.&lt;/li&gt;
+  &lt;li&gt;You may want to lock down commands to certain groups of users.&lt;/li&gt;
+  &lt;li&gt;You may want to be able to schedule commands via both an api and web ui.&lt;/li&gt;
+  &lt;li&gt;You may want to notify on errors.&lt;/li&gt;
+  &lt;li&gt;You may be dealing with commands that have an exit code of &lt;code&gt;0&lt;/code&gt; but actually failed.&lt;/li&gt;
+  &lt;li&gt;You may hope that you won’t need to learn entirely knew ways of thinking in order to manage this system.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;There aren’t really too many ways to “properly” do distributed cron. You can hack it pretty easily using a MySQL based system for scheduling jobs, as noted by Quora in &lt;a href=&quot;https://engineering.quora.com/Quoras-Distributed-Cron-Architecture&quot;&gt;this blog post&lt;/a&gt;. It works, but isn’t the greatest thing in the world, as you are probably also using MySQL for your queuing system (lulz).&lt;/p&gt;
+
+&lt;p&gt;At work, a hackathon project turned into &lt;a href=&quot;https://github.com/seatgeek/cronq&quot;&gt;CronQ&lt;/a&gt;, our distributed cron solution using MySQL and RabbitMQ. Now we have THREE systems to keep highly-available! Turns out it works - using like 4 processes, one to inject jobs, one for running jobs, one for gathering results, and one for an ok ui - but certainly doesn’t have all of the above things built-in. Also, as a by-product of using MySQL, the developer interface is this terrible ISO 8601 Interval format. Even I have trouble explaining how it works to developers, and I maintain the thing.&lt;/p&gt;
+
+&lt;p&gt;At the webscale end of this problem, you have &lt;a href=&quot;https://mesos.github.io/chronos/&quot;&gt;Chronos&lt;/a&gt;. It’s pretty awesome, is built on &lt;a href=&quot;https://mesos.apache.org/&quot;&gt;Mesos&lt;/a&gt;, and is webscale af. But you probably don’t want to run all that just so your rinky-dink cron task doesn’t not execute when the only host it is on goes down. If you have Mesos, awesome, try it out. I don’t, and I also don’t think it’s a good use of my time to maintain.&lt;/p&gt;
+
+&lt;p&gt;You could also:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;wrap every command with your favorite locking mechanism of choice - consul is distributed and you might have it up, but I’ve seen a ton of Redis or Postgres usage here&lt;/li&gt;
+  &lt;li&gt;place the same crontab on every file&lt;/li&gt;
+  &lt;li&gt;hope for no network partitions&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Good luck? Hope you’re using a service like &lt;a href=&quot;https://cronitor.io/&quot;&gt;cronitor.io&lt;/a&gt; to monitor your jobs.&lt;/p&gt;
+
+&lt;h2 id=&quot;serverless-cron&quot;&gt;Serverless Cron&lt;/h2&gt;
+
+&lt;p&gt;Heroku has a pretty nice scheduler. Here is a screenshot!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/11/21/heroku-dashboard-scheduler.png&quot; alt=&quot;dashboard scheduler confessional&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It’s also very barebones. You can add a command, set one of three frequencies, and more or less hope for the best. Still, pretty useful for developers. They don’t really need to think about much except for the command itself.&lt;/p&gt;
+
+&lt;p&gt;AWS Lambda has a similar feature. You can schedule based on one of two syntaxes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;rate&lt;/code&gt;: Think &lt;code&gt;yearly&lt;/code&gt; or &lt;code&gt;hourly&lt;/code&gt;. Rates are pretty useful if you want to not need to decipher when your cron syntax says something will run. The heroku dashboard gets this right I think, and I believe rate will continue to be pretty powerful.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;cron&lt;/code&gt;: This is the syntax we all know and love to lookup every time we write it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Lambda, however, has a few limitations:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;You can only execute code in lambda. You cannot execute code on other servers, at least not directly (webcron? lol).&lt;/li&gt;
+  &lt;li&gt;By default, you can only execute 100 functions at a time. You can have this raised, but you probably don’t want to break other uses of lambda in your system.&lt;/li&gt;
+  &lt;li&gt;The deployment environment is pretty limited - Java, Node.JS, Python - unless you use a shim, which is less than ideal.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Still, it’s a pretty useful primitive for building on top of.&lt;/p&gt;
+
+&lt;h2 id=&quot;distributed-serverless-mostly-cron&quot;&gt;Distributed Serverless (mostly) Cron&lt;/h2&gt;
+
+&lt;p&gt;Components?&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Lambda Scheduler Function&lt;/li&gt;
+  &lt;li&gt;Lambda Results Retriever Function&lt;/li&gt;
+  &lt;li&gt;Lambda DynamoDB Pruning Function&lt;/li&gt;
+  &lt;li&gt;Cloudwatch&lt;/li&gt;
+  &lt;li&gt;DynamoDB&lt;/li&gt;
+  &lt;li&gt;SQS&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Jobs are stored in a DynamoDB table. This table can be hand-edited in the AWS Console for now, but in the future, you’d probably build some sort of Web UI (and API) on top of it. Here is what you would store:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Group identifier for the command&lt;/li&gt;
+  &lt;li&gt;Name of the command&lt;/li&gt;
+  &lt;li&gt;Command&lt;/li&gt;
+  &lt;li&gt;Cron syntax specifying the interval at which to run&lt;/li&gt;
+  &lt;li&gt;Whether the command is enabled or not&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Execution events are &lt;em&gt;also&lt;/em&gt; stored in DynamoDB. Whenever a task is:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Scheduled&lt;/li&gt;
+  &lt;li&gt;Started&lt;/li&gt;
+  &lt;li&gt;Completed (fail or success)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;An entry is stored in the execution table. The entry has a reference to the original job, the current timestamp, position in the workflow, and any metadata (such as the executor and the exit code). This can be used at a later date to construct a history of runs for the job.&lt;/p&gt;
+
+&lt;p&gt;There is a Lambda function that is executed which prunes the executed events DynamoDB table. You probably don’t care about whether the command executed three months ago, so storing only relevant recent data here is important.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Aside MongoDB’s capped collection functionality would be pretty useful in this situation, as then its somewhat fire and forget.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Lambda can execute a function every minute. Even with a 10 second start-time overhead, that gives us roughly 50 seconds to schedule tasks for that minute interval. Each iteration will:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Retrieve all tasks from DynamoDB&lt;/li&gt;
+  &lt;li&gt;Throw away any tasks that do not need to be executed in that minute interval&lt;/li&gt;
+  &lt;li&gt;Enqeue a message (with a unique identifer for the job run!) into a group-specific SQS queue&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Next, you have the actual task runner. This can be any old daemon that lives on your server. It simply listens for jobs on SQS and executes them. You can have a few different running modes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;One at a time: Each task runner can execute one job at a time. If another job appears on it’s queue, it’ll ignore it until it’s current job is fulfilled.&lt;/li&gt;
+  &lt;li&gt;Resource-based: You could probably associated each job with an amount of resources it needs in order to be executed. With a bit of work, the task-runner can be made aware of what resources are left on the server, and appropriately retrieve a job to execute next. Users of plain-old-cron probably don’t care about this, but those living in highly available worlds might want to build this into their task runners (lol you’re also probably building something akin to Mesos at this point, so just use Chronos).&lt;/li&gt;
+  &lt;li&gt;Free-for-all task runners: Each task runner in a group will just continue trying to get a job from the queue. If it gets a job, it just starts it, OOM-killers be damned. Most developers sort of expect this behavior, though I believe the “One at a time” behavior is a bit easier to predict.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Why do we have task runners on actual servers? Personally, I like being able to execute the full range of code in my repositories. At work, we deploy the following languages in production:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;C#&lt;/li&gt;
+  &lt;li&gt;Golang&lt;/li&gt;
+  &lt;li&gt;Node.JS&lt;/li&gt;
+  &lt;li&gt;Ruby&lt;/li&gt;
+  &lt;li&gt;PHP&lt;/li&gt;
+  &lt;li&gt;Python&lt;/li&gt;
+  &lt;li&gt;Ruby&lt;/li&gt;
+  &lt;li&gt;Scala&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Hell, there’s even a bit of Perl and Lua running around (don’t ask). Each system has it’s own tasks we want to run on a schedule, and usually on “actual” hardware. For traditional, non-container based systems, the tasks should run on the servers where a codebase is deployed, so it makes sense to have a task runner.&lt;/p&gt;
+
+&lt;p&gt;The task runner is responsible for the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Executing a task: A subprocess will likely work here. You can get fancy and orphan a process, then poll for it’s file descriptor if you wish.&lt;/li&gt;
+  &lt;li&gt;Collecting logs: You can ship logs to cloudwatch if that is all you have handy, which gives you a shitty web ui for looking at logs. You may also want to integrate with your syslog solution of choice, such as the ELK stack or Graylog.&lt;/li&gt;
+  &lt;li&gt;Sending execution event notifications: Starts, Stops, Exit Codes, Host information etc. All of this should be recorded for later inspection.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Finally, you’ll have your Lambda function that retrieves results from a results queue and stores them in your execution events DynamoDB table.&lt;/p&gt;
+
+&lt;h2 id=&quot;implementation-notes&quot;&gt;Implementation Notes&lt;/h2&gt;
+
+&lt;p&gt;The simplest solution here is to use python as your Lambda deploy target. It is supported, has a wide range of libraries, and is easy enough to deploy. Here are a few libraries you can use for your implementation:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/boto/boto3&quot;&gt;boto3&lt;/a&gt;: Because you’ll need something to both read and write to SQS.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/taichino/croniter/&quot;&gt;croniter&lt;/a&gt;: For parsing cron syntax in python. It’s the best library I found.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/myusuf3/delorean&quot;&gt;delorean&lt;/a&gt;: You’ll need this to properly parse datetimes in the correct timezone (use UTC please).&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/kennethreitz/envoy&quot;&gt;envoy&lt;/a&gt;: For dealing with python subprocesses. It’s honestly not so bad to do directly, but you really need to know what you’re doing or you’ll do something silly with log messages or file descriptors.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/stevearc/flywheel&quot;&gt;flywheel&lt;/a&gt;: Works well for interacting with DynamoDB in an ORM-like interface.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/amoffat/sh&quot;&gt;sh&lt;/a&gt;: In case you hate envoy for subprocesses.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you wish to go the Golang route - which I would probably prefer, given that you can ship a binary for the task runner - you should look into the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/eawsy/aws-lambda-go&quot;&gt;aws-lambda-go&lt;/a&gt;: You need a wrapper to deploy golang to Lambda, and this was the nicest thing I found.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/gorhill/cronexpr&quot;&gt;cronexpr&lt;/a&gt;: Well-tested cron parsing&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/underarmour/dynago&quot;&gt;dynago&lt;/a&gt;: A surprisingly good way to interface with DynamoDB&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/goamz/goamz/tree/master/sqs&quot;&gt;goamz&lt;/a&gt;: SQS&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;closing-thoughts&quot;&gt;Closing Thoughts&lt;/h2&gt;
+
+&lt;p&gt;At the end of the day, this is a system you are now maintaining. I &lt;em&gt;highly&lt;/em&gt; suggest open sourcing it and being as loud as possible about how it works and how awesome it is (or isn’t) so that you’re not the only one looking at the code.&lt;/p&gt;
+
+&lt;p&gt;This system also doesn’t track dependencies and the like. It’s a straight reimplementation of cron, but for “the cloud”. If you need more, you’ll need to either write that other bit, or simply go to a system like &lt;a href=&quot;https://github.com/mesos/chronos&quot;&gt;Chronos&lt;/a&gt; or &lt;a href=&quot;https://github.com/spotify/luigi&quot;&gt;Luigi&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The above system did not describe any sort of reasonable web ui for tackling the developer experience problems. Bring in someone from your frontend team to work on that part, and be nice to them when they want to build an asset-pipeline for it. You reimplemented cron and your implementation is awful, you have no right to complain.&lt;/p&gt;
+
+&lt;p&gt;The task runners are going to be a bit of work. Things like waiting on new jobs to appear on the queue, properly handling subprocesses, and managing where logs go after they are collected will be a bit painful. Be sure to test any “performance” enhancements you implement first on a “toy” system before rolling it out into production and killing the distributed cron.&lt;/p&gt;
+
+&lt;p&gt;One last thing: Give credit where credit is due. The folks who have written the underlying libraries, frameworks, and infrastructure primitives have put you in a good position to succeed. If you’re filing a bug, try and also come up with a patch. OSS is a two-way street.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 21 Nov 2016 00:08:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/11/21/serverless-distributed-cron-system/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/11/21/serverless-distributed-cron-system/</guid>
+        
+        <category>cron</category>
+        
+        <category>infrastructure</category>
+        
+        <category>serverless</category>
+        
+        
+        <category>opschops</category>
+        
+      </item>
     
       <item>
         <title>Paginating one table while sorting by a field from another table</title>
@@ -1451,290 +1681,6 @@ bin/cake plugin load Ceeram/Blame
         <category>auth</category>
         
         <category>user-tracking</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Creating Custom Background Shells</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;The code in this blog post is available on &lt;a href=&quot;https://github.com/josegonzalez/cakephp-queuesadilla&quot;&gt;GitHub&lt;/a&gt; as a &lt;a href=&quot;https://packagist.org/packages/josegonzalez/cakephp-queuesadilla&quot;&gt;composer package&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;In a previous post, I mentioned how awesome it would be to have a background queueing system to perform long-running tasks. While there are many queueing systems, today I will re-introduce Queuesadilla, with an aim to explain how CakePHP shells work.&lt;/p&gt;
-
-&lt;h2 id=&quot;shell-skeleton&quot;&gt;Shell Skeleton&lt;/h2&gt;
-
-&lt;p&gt;Before we being, lets start with understanding what we need:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Queuesadilla is a long-running task. It handles it’s own state, so if it crashes, all we really care about is ensuring whatever process manager we are using will restart it. Given that, we don’t need much error handling.&lt;/li&gt;
-  &lt;li&gt;We should be able to configure most of the options in Queuesadilla. We might not use them today, but they will come in handy later.&lt;/li&gt;
-  &lt;li&gt;Logging should be done using the CakePHP logger.&lt;/li&gt;
-  &lt;li&gt;Default configuration should come from the &lt;code&gt;Configure&lt;/code&gt; class, same as everything else.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Now that we know what we are building, let’s bake the shell:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# install Queuesadilla
-composer require josegonzalez/queuesadilla:dev-master
-
-# bake the shell
-bin/cake bake shell Queuesadilla
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You should now have a &lt;code&gt;src/Shell/QueueShell.php&lt;/code&gt; with contents similar to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Shell;
-
-use Cake\Console\Shell;
-
-class QueueShell extends Shell
-{
-    public function main()
-    {
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can invoke the shell with &lt;code&gt;bin/cake queue&lt;/code&gt;, and you will see the following output:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ bin/cake queue
-
-Welcome to CakePHP v5.0.1 Console
----------------------------------------------------------------
-App : src
-Path: /Users/jose/src/playground/src/
-PHP : 7.0.1
----------------------------------------------------------------
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Yes, that’s CakePHP 5, and yes, it supports MRD (Mind Reading Development)&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;adding-a-layer&quot;&gt;Adding a layer&lt;/h2&gt;
-
-&lt;p&gt;This isn’t very helpful. Lets fill in that &lt;code&gt;main()&lt;/code&gt; method with some logic:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function main()
-{
-    $EngineClass = &quot;josegonzalez\\Queuesadilla\\Engine\\MysqlEngine&#39;;
-    $WorkerClass = &quot;josegonzalez\\Queuesadilla\\Worker\\SequentialWorker&quot;;
-
-    $logger = \Cake\Log\Log::engine(&#39;default&#39;);
-    $engine = new $EngineClass($logger, [
-      &#39;url&#39; =&amp;gt; &#39;mysql://user:password@localhost:3306/database_name&#39;
-    ]);
-
-    $worker = new $WorkerClass($engine, $logger);
-    $worker-&amp;gt;work();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Assuming you have that database configured, this will work and output something similar to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;2015-12-22 00:54:39 Info: Starting worker
-2015-12-22 00:54:39 Debug: No job!
-2015-12-22 00:54:40 Debug: No job!
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If we queued a job, you could see the job output as well. We don’t care too much about that now, as we still need to ensure this thing can be configured for more than just our test app.&lt;/p&gt;
-
-&lt;h2 id=&quot;option-parsing&quot;&gt;Option Parsing&lt;/h2&gt;
-
-&lt;p&gt;Every cakephp shell has a method called &lt;code&gt;getOptionParser()&lt;/code&gt;. This returns an &lt;code&gt;ArgumentParser&lt;/code&gt;.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Just kidding, it returns an &lt;code&gt;OptionParser&lt;/code&gt;. You can add as many options as you’d like to this, and these options can later be accessed within your shell by using the &lt;code&gt;$this-&amp;gt;params&lt;/code&gt; array attribute. The following is what ours will look like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function getOptionParser()
-{
-    $parser = parent::getOptionParser();
-    $parser-&amp;gt;addOption(&#39;engine&#39;, [
-        &#39;choices&#39; =&amp;gt; [
-            &#39;Beanstalk&#39;,
-            &#39;Iron&#39;,
-            &#39;Memory&#39;,
-            &#39;Mysql&#39;,
-            &#39;Null&#39;,
-            &#39;Redis&#39;,
-            &#39;Synchronous&#39;,
-        ],
-        &#39;default&#39; =&amp;gt; &#39;Mysql&#39;,
-        &#39;help&#39; =&amp;gt; &#39;Name of engine&#39;,
-        &#39;short&#39; =&amp;gt; &#39;e&#39;,
-    ]);
-    $parser-&amp;gt;addOption(&#39;queue&#39;, [
-        &#39;help&#39; =&amp;gt; &#39;Name of a queue&#39;,
-        &#39;short&#39; =&amp;gt; &#39;q&#39;,
-    ]);
-    $parser-&amp;gt;addOption(&#39;logger&#39;, [
-        &#39;help&#39; =&amp;gt; &#39;Name of a configured logger&#39;,
-        &#39;default&#39; =&amp;gt; &#39;stdout&#39;,
-        &#39;short&#39; =&amp;gt; &#39;l&#39;,
-    ]);
-    $parser-&amp;gt;addOption(&#39;worker&#39;, [
-        &#39;choices&#39; =&amp;gt; [
-            &#39;Sequential&#39;,
-            &#39;Test&#39;,
-        ],
-        &#39;default&#39; =&amp;gt; &#39;Sequential&#39;,
-        &#39;help&#39; =&amp;gt; &#39;Name of worker class&#39;,
-        &#39;short&#39; =&amp;gt; &#39;w&#39;,
-    ]);
-    $parser-&amp;gt;description(__(&#39;Runs a Queuesadilla worker&#39;));
-    return $parser;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;a href=&quot;http://book.cakephp.org/3.0/en/console-and-shells.html#configuring-options-and-generating-help&quot;&gt;online docs&lt;/a&gt; do a good job of explaining these and other ways of manipulating an &lt;code&gt;OptionParser&lt;/code&gt;, but the above code should be pretty self-explanatory. With the above code, we’ll have the following output for &lt;code&gt;bin/cake queue -h&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ bin/cake queue -h
-
-Welcome to CakePHP v5.0.1 Console
----------------------------------------------------------------
-App : src
-Path: /Users/jose/src/playground/src/
-PHP : 7.0.1
----------------------------------------------------------------
-Runs a Queuesadilla worker.
-
-Usage:
-cake queuesadilla [options]
-
-Options:
-
---help, -h     Display this help.
---verbose, -v  Enable verbose output.
---quiet, -q    Enable quiet output.
---engine, -e   Name of engine (default: Mysql)
-               (choices:
-               Beanstalk|Iron|Memory|Mysql|Null|Redis|Synchronous)
---queue, -q    Name of a queue
---logger, -l   Name of a configured logger (default:
-               stdout)
---worker, -w   Name of worker class (default:
-               Sequential) (choices:
-               Sequential|Test)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty chawesome. Let’s modify our code to use this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function main()
-{
-    $engine = $this-&amp;gt;params[&#39;engine&#39;];
-    $worker = $this-&amp;gt;params[&#39;worker&#39;];
-    $EngineClass = &quot;josegonzalez\\Queuesadilla\\Engine\\&quot; . $engine . &#39;Engine&#39;;
-    $WorkerClass = &quot;josegonzalez\\Queuesadilla\\Worker\\&quot; . $worker . &quot;Worker&quot;;
-
-    $config = $this-&amp;gt;getEngineConfig();
-    $loggerName = $this-&amp;gt;getLoggerName();
-
-    $logger = \Cake\Log\Log::engine($loggerName);
-    $engine = new $EngineClass($logger, $config);
-
-    $worker = new $WorkerClass($engine, $logger);
-    $worker-&amp;gt;work();
-}
-
-protected function getEngineConfig()
-{
-    $config = \Cake\Core\Configure::read(&#39;Queuesadilla.engine&#39;);
-    if (empty($config)) {
-        throw new Exception(&#39;Invalid Queuesadilla.engine config&#39;);
-    }
-
-    if (!empty($this-&amp;gt;params[&#39;queue&#39;])) {
-        $config[&#39;queue&#39;] = $this-&amp;gt;params[&#39;queue&#39;];
-    }
-    return $config;
-}
-
-protected function getLoggerName()
-{
-    $loggerName = \Cake\Core\Configure::read(&#39;Queuesadilla.logger&#39;);
-    if (empty($loggerName)) {
-        $loggerName = $this-&amp;gt;params[&#39;logger&#39;];
-    }
-    return $loggerName;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The only thing left to do is add the appropriate config to our &lt;code&gt;config/app.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Queuesadilla&#39; =&amp;gt; [
-    &#39;engine&#39; =&amp;gt; [
-        // yum environment variables
-        &#39;url&#39; =&amp;gt; env(&#39;DATABASE_URL&#39;),
-    ],
-],
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you run the worker now, you’ll get the same output as before, only this time it will respect any additional options you give it, as well as application-level changes to the logger or the backing engine.&lt;/p&gt;
-
-&lt;h2 id=&quot;testing-the-job-runner&quot;&gt;Testing the job runner&lt;/h2&gt;
-
-&lt;p&gt;Now that we have a simple worker going, lets test it with a simple job. Place the following in &lt;code&gt;src/Job/TestJob.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Job;
-
-class TestJob
-{
-    public function perform($job)
-    {
-        debug($job-&amp;gt;data());
-    }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we can test this using the &lt;code&gt;bin/cake console&lt;/code&gt; shell:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// nonsense boilerplate so we can get a logger in the `bin/cake console` shell
-$stdout = new \Cake\Log\Engine\ConsoleLog([
-    &#39;types&#39; =&amp;gt; [&#39;notice&#39;, &#39;info&#39;, &#39;debug&#39;],
-    &#39;stream&#39; =&amp;gt; new \Cake\Console\ConsoleOutput(&#39;php://stdout&#39;),
-]);
-\Cake\Log\Log::config(&#39;stdout&#39;, [&#39;engine&#39; =&amp;gt; $stdout]);
-$logger = \Cake\Log\Log::engine(&#39;stdout&#39;);
-
-// create an engine
-$engine = new \josegonzalez\Queuesadilla\Engine\MysqlEngine(
-  $logger,
-  [&#39;url&#39; =&amp;gt; env(&#39;DATABASE_URL&#39;)]
-);
-
-// create a queue connection
-$queue = new \josegonzalez\Queuesadilla\Queue($engine);
-
-// zhu li, queue the thing!
-$queue-&amp;gt;push([&#39;\App\Job\TestJob&#39;, &#39;perform&#39;], [&#39;sleep&#39; =&amp;gt; 3, &#39;message&#39; =&amp;gt; &#39;hi&#39;, &#39;raise&#39; =&amp;gt; false]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you were running the &lt;code&gt;bin/cake queue&lt;/code&gt; shell in another terminal, you should have seen the debug output.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;CakePHP Shells are actually quite powerful. You can use them not only as wrappers of external job running tools, but also as a way to invoke administrative, one-off code as in the &lt;code&gt;bin/cake console&lt;/code&gt; shell. You could also write longer, one-off tasks as custom shells, and cron-tasks &lt;em&gt;definitely&lt;/em&gt; belong in them.&lt;/p&gt;
-</description>
-        <pubDate>Sun, 20 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/20/creating-custom-background-shells/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/20/creating-custom-background-shells/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>shells</category>
-        
-        <category>queueing</category>
         
         
         <category>cakephp</category>
