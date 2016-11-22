@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "A Lambda PaaS",
+    "url": "/2016/11/21/push-to-deploy-lambda-applications/",
+    "description": "",
+    "tokens": ["lambda","paas"]
+  },
+  {
+    "type": "post",
     "title": "Serverless Distributed Cron System",
     "url": "/2016/11/21/serverless-distributed-cron-system/",
     "description": "",
@@ -1367,12 +1374,6 @@
     "title": "bash",
     "url": "/tags/bash/",
     "tokens": ["bash"]
-  },
-  {
-    "type": "tag",
-    "title": "deploy",
-    "url": "/tags/deploy/",
-    "tokens": ["deploy"]
   },
   {
     "type": "tag",

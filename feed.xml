@@ -5,9 +5,255 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 21 Nov 2016 08:24:50 +0000</pubDate>
-    <lastBuildDate>Mon, 21 Nov 2016 08:24:50 +0000</lastBuildDate>
+    <pubDate>Tue, 22 Nov 2016 04:59:47 +0000</pubDate>
+    <lastBuildDate>Tue, 22 Nov 2016 04:59:47 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>A Lambda PaaS</title>
+        <description>&lt;p&gt;Infrastructure is a confusing beast to developers. Here are things you would have to learn about and manage:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Proper Logging (and storage thereof)&lt;/li&gt;
+  &lt;li&gt;Application Configuration&lt;/li&gt;
+  &lt;li&gt;Deployment Pipelines&lt;/li&gt;
+  &lt;li&gt;Metric Collection&lt;/li&gt;
+  &lt;li&gt;Automatic Scaling&lt;/li&gt;
+  &lt;li&gt;Database Maintenance&lt;/li&gt;
+  &lt;li&gt;Environment Management (dev/staging/prod)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Unless you are using a PaaS, you are probably in a bad spot in one or more ways. If you’re not, it is likely that you can go to the software company down the block and they would be doing all of these things &lt;em&gt;quite&lt;/em&gt; differently than you are.&lt;/p&gt;
+
+&lt;p&gt;I’m not all-in on serverless application development, but some platforms get it right. Heroku certainly does, and AWS has nice pieces that can be used to implement the above - albeit in a jank ui. I was playing with a few bits of tech this weekend to make the experience a bit nicer, and here is a description of what I came up with.&lt;/p&gt;
+
+&lt;h2 id=&quot;pushing-code-and-executing-a-pipeline&quot;&gt;Pushing Code and Executing a Pipeline&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You’ll need to be running a build server for this. Install docker on the instance, as we’ll be using that. Also, install the &lt;code&gt;zip&lt;/code&gt; utility.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This is probably the most boring part to me. I’ve already worked on a few systems that have this sort of functionality - Dokku being the biggest - but for this purpose, lets just use &lt;a href=&quot;https://github.com/coreos/go-gitreceive&quot;&gt;go-gitreceive&lt;/a&gt;. You’ll need to install it and initialize the &lt;code&gt;git&lt;/code&gt; user, but once that is done, here is our stub &lt;code&gt;receiver&lt;/code&gt; script that goes in &lt;code&gt;/home/git/receiver&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;#!/bin/bash
+main() {
+  local TMP_WORK_DIR=$(mktemp -d &quot;/tmp/laambda.XXXX&quot;)
+  trap &#39;rm -rf &quot;$TMP_WORK_DIR&quot; &amp;gt; /dev/null&#39; RETURN INT TERM EXIT
+
+  mkdir -p &quot;$TMP_WORK_DIR&quot; &amp;amp;&amp;amp; cat | tar -x -C &quot;$TMP_WORK_DIR&quot;
+
+  if [[ ! -f &quot;$TMP_WORK_DIR/requirements.txt&quot;]]; then
+    echo &quot;Invalid python application detected, bailing&quot;
+  fi
+
+  # the rest of the script goes here
+}
+
+main &quot;$@&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For my dummy implementation, I didn’t keep the repository around, though you are welcome to do so using &lt;code&gt;git-upload-pack&lt;/code&gt; if you have it installed on your server.&lt;/p&gt;
+
+&lt;p&gt;Note that you’ll also need to add your ssh key to the server via &lt;code&gt;go-gitreceive upload-key git&lt;/code&gt; or similar. Please read the docs for the referenced project.&lt;/p&gt;
+
+&lt;h2 id=&quot;laambda-two-as-because-its-a-paas&quot;&gt;laambda (two As because its a PaaS)&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;This system only supported Python because I don’t believe in Node.JS. It doesn’t exist, sorry. I also don’t drink coffee, so Java is out.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;One thing I hate about the current lambda deploy model is that it is annoying to build assets locally and then push that into the cloud. My Macbook isn’t CentOS 7 with a bunch of funny bits changed, so I can’t be sure my code will work &lt;em&gt;exactly&lt;/em&gt; as I expect it to. The hack that a few people use is to build in a VM or an EC2 instance, but I’d like something slightly closer to Lambda’s infrastructure. For that, I turned to the &lt;a href=&quot;https://github.com/lambci/docker-lambda&quot;&gt;docker-lambda&lt;/a&gt; project.&lt;/p&gt;
+
+&lt;p&gt;The docker-lambda project is more or less a replica of the Lambda container used on AWS. It does have a few changes - notably task runners are changed in order to be able to run outside of the AWS infrastructure - but overall is an easy to use replica of the Lambda environment. You can use it to build an application locally&lt;/p&gt;
+
+&lt;p&gt;Here is a quick test of how it might work for a given python application:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# make this configurable somehow ;)
+APP_NAME=api
+
+# cd into the app you want to build for lambda
+cd &quot;$TMP_WORK_DIR&quot;
+
+# in a docker container, do the following:
+# - create a virtualenv
+# - activate it
+# - install your dependencies
+# be sure to load up a volume for caching, or you&#39;re gonna have a bad time
+docker run --rm \
+    -v &quot;$TMP_WORK_DIR&quot;:/var/task \
+    -v /tmp/.cache:/root/.cache \
+    lambci/lambda:build-python2.7 \
+    bash -c &#39;virtualenv .virtualenv &amp;amp;&amp;amp; source .virtualenv/bin/activate &amp;amp;&amp;amp; pip install -r requirements.txt&#39;
+
+# move the built virtualenv out of the way for now
+mv .virtualenv /tmp/.virtualenv
+VIRTUAL_ENV=/tmp/.virtualenv
+
+# create your initial zip file
+zip -9 &quot;/tmp/${APP_NAME}.zip&quot;
+
+# now zip up the site-packages for lib
+cd $VIRTUAL_ENV/lib/python2.7/site-packages
+zip -r9 &quot;/tmp/${APP_NAME}.zip&quot; *
+
+# and also the site-packages for lib64
+cd $VIRTUAL_ENV/lib64/python2.7/site-packages
+zip -r9 &quot;/tmp/${APP_NAME}.zip&quot; *
+
+# and now add all of your app code
+cd &quot;$TMP_WORK_DIR&quot;
+zip -g &quot;/tmp/${APP_NAME}.zip&quot; *
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty nifty I think. We’ve still got a bit of work to do.&lt;/p&gt;
+
+&lt;h2 id=&quot;specifying-multiple-functions&quot;&gt;Specifying multiple functions&lt;/h2&gt;
+
+&lt;p&gt;At this point in the game, while I do believe that it’s a bit inflexible, the &lt;code&gt;Procfile&lt;/code&gt; fits right into how we might specify commands. Lets say my codebase has two python files:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;CreateThumbnail&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;ResizeThumbnail&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Each one has a function called &lt;code&gt;handler&lt;/code&gt;, which does all the work for our api. We could spend time coming up with yet another yaml format - oh joy, our developers will &lt;em&gt;love&lt;/em&gt; learning a new format - or we could just use the following Procfile:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-yaml&quot;&gt;create: CreateThumbnail.handler
+resize: ResizeThumbnail.handler
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Seems pretty reasonable to me. No, it doesn’t specify any extra info, like memory, timeout, iam profile, etc., but all those can have “sane” defaults within our &lt;code&gt;laambda&lt;/code&gt; PaaS. We’ll get into that later. Lets assume the following are the defaults:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;region&lt;/code&gt;: &lt;code&gt;us-east-1&lt;/code&gt;, the best region&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;function-name&lt;/code&gt;: The name of the codebase (&lt;code&gt;api&lt;/code&gt; in this case), suffixed with the entry in the Procfile (&lt;code&gt;create&lt;/code&gt; or &lt;code&gt;resize&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;runtime&lt;/code&gt;: &lt;code&gt;python2.7&lt;/code&gt;. No other runtimes exist, remember?&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;timeout&lt;/code&gt;: &lt;code&gt;10&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;memory-size&lt;/code&gt;: &lt;code&gt;1024&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The following will need to be specified on app creation:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;role&lt;/code&gt;: An arn role for your function&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Since you have the zip file, you can just run your &lt;code&gt;aws&lt;/code&gt; command for each function to upload the codebase like normal:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;aws lambda create-function \
+  --region &quot;$REGION&quot; \
+  --function-name &quot;$FUNCTION_MAME&quot; \
+  --zip-file &quot;fileb://tmp/${APP_NAME}.zip&quot; \
+  --role &quot;$ROLE_ARN&quot; \
+  --handler &quot;$FUNCTION_HANDLER&quot; \
+  --runtime &quot;$RUNTIME&quot; \
+  --timeout &quot;$TIMEOUT&quot; \
+  --memory-size &quot;$MEMORY_SIZE&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty good, I think.&lt;/p&gt;
+
+&lt;h2 id=&quot;managing-the-lambda-functions&quot;&gt;Managing the Lambda functions&lt;/h2&gt;
+
+&lt;p&gt;No one wants to remember the &lt;code&gt;aws lambda&lt;/code&gt; cli, so provide your developers with the tooling to manage that sort of thing. For my test, I configured the event sources on the web ui, but you might want to have a cli like the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# manage event sources
+laambda event-sources        FUNCTION
+laambda event-sources:add    FUNCTION SOURCE_HERE
+laambda event-sources:remove FUNCTION SOURCE_HERE
+laambda event-sources:clear  FUNCTION SOURCE_HERE
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Similarly, any bit that can be managed by the &lt;code&gt;aws lambda&lt;/code&gt; cli should be handled by your tooling. I implemented the following handlers for my own purposes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# manage configuration
+# all functions in an app have access to the same env in my model
+laambda config
+laambda config:get KEY
+laambda config:set KEY=VALUE
+laambda config:unset KEY
+laambda config:clear
+
+# manage resources
+laambda resource:memory FUNCTION VALUE
+laambda resource:timeout FUNCTION VALUE
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’d imagine it would be a good idea to also handle VPC configuration, KMS encryption keys, roles associated with your function, and anything else either not version controlled or that AWS exposes in the future.&lt;/p&gt;
+
+&lt;h2 id=&quot;rollbacks&quot;&gt;Rollbacks&lt;/h2&gt;
+
+&lt;p&gt;One nice thing about Heroku is that you can rollback in time to basically any state of your application. Like it or not, a developer (and the ops folks!) will screw things up eventually, so turning back the clock is almost assuredly necessary.&lt;/p&gt;
+
+&lt;p&gt;Ideally, you are storing your app configuration in a distributed, encrypted k/v, &lt;em&gt;outside&lt;/em&gt; of Lambda. This will allow you to maintain some notion of state. I have no real recommendations here, other than to keep the following for each changeset:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A reference to the built zip file (likely as a hash of the codebase) which you may want to store on S3&lt;/li&gt;
+  &lt;li&gt;An encrypted bag of the current configuration for every function within an APP.&lt;/li&gt;
+  &lt;li&gt;A description of the changes (config change, deploy, etc.)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You should also be able to list these changesets so that you actually know what went down. I’d build the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;laambda releases
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And give it some sort of &lt;code&gt;git changelog&lt;/code&gt; style output.&lt;/p&gt;
+
+&lt;h2 id=&quot;further-considerations&quot;&gt;Further considerations&lt;/h2&gt;
+
+&lt;p&gt;Some questions you’ll want to answer:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Where are you storing logs?
+    &lt;ul&gt;
+      &lt;li&gt;The easiest is Cloudwatch, though honestly the UI kinda blows. You can probably get away with shipping them elsewhere, like an external service - Honeycomb.io, Logentries, Papertrail all would work - or you can ship them to whatever centralized logging system you have - the ELK stack and Graylog are popular ones. Just also expose the logs via the same cli tooling you built to manage this thing.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;How are you collecting metrics?
+    &lt;ul&gt;
+      &lt;li&gt;The same applies here as does for logging. The big issue with either is DNS, as Lambda functions aren’t necessarily listening to your custom DNS server. I’d likely setup a simple Grafana/Graphite/StatsD setup and go from there.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;How do you test functions?
+    &lt;ul&gt;
+      &lt;li&gt;Be sure to setup multiple environments. Your tooling could take a &lt;code&gt;--env&lt;/code&gt; flag to specify a VPC, for instance, and you’d simply partition environments based on the VPC.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Other enhancements you may want to consider:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The system above has no authentication, so anyone with ssh access can push to any application.&lt;/li&gt;
+  &lt;li&gt;While developers are fine with a CLI, they’ll also be hurting for a web ui. Having a web ui will also allow you to personally audit what is going on, without needing to depend upon the developer to paste the output. If you have a web ui, build an API that does all the coordination for your CLI tool, instead of having that CLI tool be a crappy wrapper around &lt;code&gt;awscli&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Your system &lt;em&gt;is&lt;/em&gt; capable of continuous deployment, and I highly encourage that model.&lt;/li&gt;
+  &lt;li&gt;You could add support for each AWS Lambda runtime by detecting the language in use on deploy. We added a small amount of python detection to our &lt;code&gt;go-gitreceive&lt;/code&gt; handler, though you can expand on that quite easily. I would suggest looking into the heroku buildpack model for figuring out how to properly detect and install each “runtime”.&lt;/li&gt;
+  &lt;li&gt;None of this handles the local development cycle of a Laambda function.&lt;/li&gt;
+  &lt;li&gt;Autoscale your build servers. You’ll have some issues around having the same dependency cache - get around that by uploading/downloading it from S3 - but it will allow you to weather an outage of your build servers. Route53 can be set to round-robbin DNS requests with healthchecks, making it easy to perform maintenance on your build environment.&lt;/li&gt;
+  &lt;li&gt;Promoting apps from environment to environment, or even allowing “pull request” apps to be deployed in a specific environment, would allow developers to gain confidence in what they are deploying. Heroku has PR apps, so why shouldn’t you?&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I do think that services like Lambda provide an excellent framework for building applications, but we should start thinking about how we’d like to interact with these services, instead of how these services force us to interact with them.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Why isn’t this &lt;em&gt;also&lt;/em&gt; a thing for EMR? Or really any similar kind of service?&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+        <pubDate>Mon, 21 Nov 2016 19:51:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/11/21/push-to-deploy-lambda-applications/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/11/21/push-to-deploy-lambda-applications/</guid>
+        
+        <category>deployment</category>
+        
+        <category>infrastructure</category>
+        
+        <category>serverless</category>
+        
+        
+        <category>opschops</category>
+        
+      </item>
     
       <item>
         <title>Serverless Distributed Cron System</title>
@@ -146,7 +392,7 @@
 &lt;p&gt;There is a Lambda function that is executed which prunes the executed events DynamoDB table. You probably don’t care about whether the command executed three months ago, so storing only relevant recent data here is important.&lt;/p&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;Aside MongoDB’s capped collection functionality would be pretty useful in this situation, as then its somewhat fire and forget.&lt;/p&gt;
+  &lt;p&gt;Aside: MongoDB’s capped collection functionality would be pretty useful in this situation, as then its somewhat fire and forget.&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;Lambda can execute a function every minute. Even with a 10 second start-time overhead, that gives us roughly 50 seconds to schedule tasks for that minute interval. Each iteration will:&lt;/p&gt;
@@ -1619,68 +1865,6 @@ $cat-&amp;gt;config([
         <category>cakephp</category>
         
         <category>configuration</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Tracking Logged in User Actions</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;Note: for the purposes of this post, I chose an easy to understand plugin, but I recommend using the &lt;a href=&quot;https://github.com/usemuffin/footprint&quot;&gt;footprint&lt;/a&gt; plugin as it supports many more features than the one I cover here.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This is a pretty straightforward post. In CakePHP 3, we’ve removed a lot of the ability to access the session except where there is a &lt;code&gt;Request&lt;/code&gt; object. Static access to &lt;code&gt;CakeSession&lt;/code&gt; is gone, and it’s not coming back, so please stop asking for it. And stop using &lt;code&gt;$_SESSION&lt;/code&gt;, that breaks the cake.&lt;/p&gt;
-
-&lt;p&gt;One thing this affects is the ability to see user session data in the Model layer. Typically you want to track &lt;em&gt;who&lt;/em&gt; performed an action &lt;em&gt;when&lt;/em&gt; the action happens. It’s quite nice to hide this in your model layer, as opposed to mangling data when it’s going into an entity.&lt;/p&gt;
-
-&lt;p&gt;How do we do this? We can use the &lt;a href=&quot;https://github.com/ceeram/blame&quot;&gt;&lt;code&gt;ceeram/blame&lt;/code&gt; plugin&lt;/a&gt;!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# ugh more things to install
-composer require ceeram/cakephp-blame
-
-# load it
-bin/cake plugin load Ceeram/Blame
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we add the following &lt;code&gt;use&lt;/code&gt; call to the inside of our &lt;code&gt;src/Controller/AppController.php&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;class AppController extends Controller
-{
-  use \Ceeram\Blame\Controller\BlameTrait;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And finally add the behavior to our table:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize(array $config)
-{
-    $this-&amp;gt;addBehavior(&#39;Ceeram/Blame.Blame&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now whenever a new record is saved, the &lt;code&gt;created_by&lt;/code&gt; field is set to the logged in user’s &lt;code&gt;id&lt;/code&gt;. When records are modified, the &lt;code&gt;modified_by&lt;/code&gt; field will be set.&lt;/p&gt;
-
-&lt;h2 id=&quot;how-does-it-work&quot;&gt;How does it work?&lt;/h2&gt;
-
-&lt;p&gt;The &lt;code&gt;BlameTrait&lt;/code&gt; we added to our &lt;code&gt;AppController&lt;/code&gt; actually does all the heavy lifting. It adds a &lt;a href=&quot;https://github.com/ceeram/blame/blob/master/src/Event/LoggedInUserListener.php&quot;&gt;listener&lt;/a&gt; that will add the appropriate data to our Table instances whenever they are saved through the magic of &lt;a href=&quot;https://github.com/ceeram/blame/blob/master/src/Controller/BlameTrait.php#L18&quot;&gt;&lt;code&gt;Controller::loadModel()&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;It’s actually quite clever, and I’m a bit upset I hadn’t previously thought of it. The same trick probably works in 2.x.&lt;/p&gt;
-
-&lt;p&gt;For users that find this plugin limiting in some way, I definitely recommend reading the code over, extending it, or applying the clever usage of the event system to your own application.&lt;/p&gt;
-</description>
-        <pubDate>Mon, 21 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/21/tracking-logged-in-user-actions/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/21/tracking-logged-in-user-actions/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>auth</category>
-        
-        <category>user-tracking</category>
         
         
         <category>cakephp</category>
