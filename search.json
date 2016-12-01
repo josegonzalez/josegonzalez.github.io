@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Creating a microblogging platform",
+    "url": "/2016/12/01/creating-a-microblogging-platform/",
+    "description": "Part 1 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","creating","help","microblogging","part","personal","platform","posts","series","will"]
+  },
+  {
+    "type": "post",
     "title": "A Lambda PaaS",
     "url": "/2016/11/21/push-to-deploy-lambda-applications/",
     "description": "",
@@ -1698,6 +1705,12 @@
     "title": "serverless",
     "url": "/tags/serverless/",
     "tokens": ["serverless"]
+  },
+  {
+    "type": "tag",
+    "title": "cakeadvent-2016",
+    "url": "/tags/cakeadvent-2016/",
+    "tokens": ["cakeadvent"]
   },
   false
 ]

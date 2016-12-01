@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-11-22T04:59:47+00:00</updated>
+ <updated>2016-12-01T06:54:43+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Creating a microblogging platform]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/01/creating-a-microblogging-platform/"/>
+   <updated>2016-12-01T01:56:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/01/creating-a-microblogging-platform/</id>
+   <content type="html"><![CDATA[Part 1 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[A Lambda PaaS]]></title>

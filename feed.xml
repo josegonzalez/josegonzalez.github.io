@@ -5,9 +5,206 @@
     <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 22 Nov 2016 04:59:47 +0000</pubDate>
-    <lastBuildDate>Tue, 22 Nov 2016 04:59:47 +0000</lastBuildDate>
+    <pubDate>Thu, 01 Dec 2016 06:54:43 +0000</pubDate>
+    <lastBuildDate>Thu, 01 Dec 2016 06:54:43 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Creating a microblogging platform</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle their needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;setup&quot;&gt;Setup&lt;/h2&gt;
+
+&lt;p&gt;To follow this series of tutorials, you’ll need at least the following setup:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;PHP 5.5.9+: I am running PHP 7.0.12 locally&lt;/li&gt;
+  &lt;li&gt;Composer: I’ve installed this via &lt;code&gt;homebrew&lt;/code&gt; on my mac.&lt;/li&gt;
+  &lt;li&gt;A supported CakePHP SQL Database: I am testing against both Postgres and MySQL. YMMV.&lt;/li&gt;
+  &lt;li&gt;git: I’ve installed this via &lt;code&gt;homebrew&lt;/code&gt; on my mac.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you have none of these, you’ll want to use the &lt;a href=&quot;https://github.com/friendsofcake/vagrant-chef&quot;&gt;friendsofcake/vagrant-chef&lt;/a&gt; setup. It has support for multiple PHP applications, as well as various datastores/utilities, and is probably the easiest setup to get going. Follow the instructions in the readme if you have any further questions.&lt;/p&gt;
+
+&lt;h2 id=&quot;baking-the-app&quot;&gt;Baking the App&lt;/h2&gt;
+
+&lt;p&gt;Lets start by baking the app! Most CakePHP projects start out by using the official cakephp/app going to use my own &lt;a href=&quot;https://github.com/josegonzalez/app&quot;&gt;josegonzalez/app&lt;/a&gt; composer project skeleton. It has a few goodies I’ll be using in the application.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --no-interaction --prefer-dist josegonzalez/app calico
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few things!&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I’ve named my blog platform &lt;code&gt;calico&lt;/code&gt;. You can name yours lollipop if you’d like. Calico suits me pretty well.&lt;/li&gt;
+  &lt;li&gt;I’m using the &lt;code&gt;--no-interaction&lt;/code&gt; flag to create the new project. If you omit this, the &lt;code&gt;composer&lt;/code&gt; command may ask you questions. For now, I am assuming that the defaults are fine.&lt;/li&gt;
+  &lt;li&gt;I’ve customized the project skeleton by specifying &lt;code&gt;josegonzalez/app&lt;/code&gt;. Changing this will change your skeleton base.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Lets save our new application in a git repository.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cd calico
+git init
+git add .
+git commit -m &quot;Initial commit&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;All further shell commands are assumed to be running within the application folder. In this case, that will be &lt;code&gt;calico&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;configuring-our-app&quot;&gt;Configuring our app&lt;/h2&gt;
+
+&lt;p&gt;In my application skeleton, all configuration is done via environment variables. This allows us to change any config value at runtime without necessitating a full application deploy. It will also allow us to specify different environments both locally, as well as once the application has been deployed to a server. All config is stored in the &lt;code&gt;config/.env.default&lt;/code&gt; file, though it is highly recommended that you customize it in a &lt;code&gt;config/.env&lt;/code&gt; file. Lets do that:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cp config/.env.default config/.env
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The &lt;code&gt;config/.env&lt;/code&gt; file is git-ignored, meaning it will not be tracked by git and cannot be committed. To see what else is git-ignored, check out the &lt;code&gt;.gitignore&lt;/code&gt; file in your repository base.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I’m going to change one thing in my &lt;code&gt;config/.env&lt;/code&gt;, and that is the &lt;code&gt;APP_NAME&lt;/code&gt; variable. I’ve changed mine to &lt;code&gt;calico&lt;/code&gt;, because that is what my application is called. The other environment variables can be changed at will, and - through a few small modifications to the base app project - are automatically picked up by CakePHP.&lt;/p&gt;
+
+&lt;h2 id=&quot;creating-our-initial-database-tables&quot;&gt;Creating our initial database tables&lt;/h2&gt;
+
+&lt;p&gt;Before we continue, you’ll want to create a database for your application. By default, the app skeleton will name the database after your &lt;code&gt;APP_NAME&lt;/code&gt; variable. For my application, the following databases were created:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;calico&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;calico_test&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can configure the &lt;code&gt;DATABASE_URL&lt;/code&gt; environment variable in the &lt;code&gt;config/.env&lt;/code&gt; file to change this default.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The default username and password are also set here to the normal CakePHP defaults. I created both of these on my server, though you can modify these - and the other sections of that environment variable - to suit your needs.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Now that you have a database setup, we’ll want a few tables. After speaking with my friend, I’ve decided upon the following initial schema.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Users hasMany Posts&lt;/li&gt;
+  &lt;li&gt;Posts belongsTo Users&lt;/li&gt;
+  &lt;li&gt;Posts hasMany PostAttributes&lt;/li&gt;
+  &lt;li&gt;PostAttributes belongsTo Posts&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Why am I going for an extra table to store post attributes?&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;CakePHP does not support native JSON values in the ORM. It is totally possible to use JSON, but I don’t get any native database enhancements (yet)&lt;/li&gt;
+  &lt;li&gt;The CMS is a bit of a tumblog, and I don’t completely know what post types I’ll be creating. I can optimize this later if need be, but I doubt it will be a problem.&lt;/li&gt;
+  &lt;li&gt;It lets me play with the ORM a bit more.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll be generating migration files using the &lt;code&gt;cake bake&lt;/code&gt; cli tool. Migrations can be used to version our database locally in PHP files, allowing us to apply them as necessary:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration create_posts user_id:integer:index type:string:index url:string:index status:index created modified
+sleep 1
+bin/cake bake migration create_post_attributes post_id:integer:index name:string[100] value:text
+sleep 1
+bin/cake bake migration create_users email:string:index password:string avatar:string avatar_dir:string created modified
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Why Sleep? We sleep because each migration uses the current timestamp as the unique identifier. This is a limitation of phinx, the library in use for migrations. By adding a sleep in between each command, we simulate running each command at a different timestamp, and therefore give them unique identifiers.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Seems legit. Once you run those commands, you’ll have three migration files in &lt;code&gt;config/Migrations&lt;/code&gt;. We can execute these against our database using the following &lt;code&gt;cake&lt;/code&gt; cli command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you open up your database, you’ll see our three tables were created by the above command, as well as a fourth &lt;code&gt;phinx&lt;/code&gt; table. This table is used to figure out which migrations were already run.&lt;/p&gt;
+
+&lt;p&gt;Lets commit these changes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/Migrations
+git commit -m &quot;Added migrations for posts, post_attributes, and users&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;baking-the-app-1&quot;&gt;Baking the app&lt;/h2&gt;
+
+&lt;p&gt;This bit is pretty trivial. CakePHP has long offered a &lt;code&gt;bake&lt;/code&gt; tool that can be used to autogenerate files for your application. CakePHP includes it’s own bake templates that have quite a bit of functionality “baked” in, but we’ll be using the &lt;code&gt;Crud&lt;/code&gt; templates.&lt;/p&gt;
+
+&lt;p&gt;What is &lt;code&gt;Crud&lt;/code&gt;? Think of Crud as a programmatic bake. It allows us to provide the same defaults as &lt;code&gt;bake&lt;/code&gt; would, but &lt;em&gt;also&lt;/em&gt; provides a programmable interface to editing those defaults. In the past, rebaking a file would have ended up destroying most of your customizations. Crud allows you to reuse the default actions in your controllers and views with all the power of an actual programming language. It’s a bit hard to explain, so just assume I know what I’m talking about and we’ll hopefully get through this.&lt;/p&gt;
+
+&lt;p&gt;To bake using crud templates, we’ll run the following commands:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake all posts --theme Crud
+bin/cake bake all post_attributes --theme Crud
+bin/cake bake all users --theme Crud
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you run &lt;code&gt;git status&lt;/code&gt; at this point, the following files and directories will show up:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;src/Controller/PostAttributesController.php
+src/Controller/PostsController.php
+src/Controller/UsersController.php
+src/Model/Entity/Post.php
+src/Model/Entity/PostAttribute.php
+src/Model/Entity/User.php
+src/Model/Table/PostAttributesTable.php
+src/Model/Table/PostsTable.php
+src/Model/Table/UsersTable.php
+src/Template/PostAttributes/
+src/Template/Posts/
+src/Template/Users/
+tests/Fixture/PostAttributesFixture.php
+tests/Fixture/PostsFixture.php
+tests/Fixture/UsersFixture.php
+tests/TestCase/Controller/PostAttributesControllerTest.php
+tests/TestCase/Controller/PostsControllerTest.php
+tests/TestCase/Controller/UsersControllerTest.php
+tests/TestCase/Model/Table/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lots of gunk here. Lets explain them all before continuing:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;src/Controller&lt;/code&gt;: These files are where you’ll be adding most entrypoints to the application. If you open any of these up, they’ll be largely empty, as they will be inheriting from the &lt;code&gt;AppController&lt;/code&gt; located in &lt;code&gt;src/Controller/AppController.php&lt;/code&gt;. Don’t worry too much about these, we’ll dig into them further in a bit.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;src/Model/Entity&lt;/code&gt;: Handles some minimal logic concerning individual records in your database. I usually put “helper” code in here - date-time formatting, pretty-printed titles - in these classes.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;src/Model/Table&lt;/code&gt;: Business logic &lt;em&gt;can&lt;/em&gt; go here. I generally place complex find queries (select statements) here. You can also place validation rules here, as well as configure the Table to have the correct behaviors (decorator classes that change/enhance functionality).&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;src/Template&lt;/code&gt;: In CakePHP 2, we placed &lt;code&gt;.ctp&lt;/code&gt; (cake templates) files in the View directory. In CakePHP 3, the View folder is reserved for Helpers and View classes, while cake template files go in &lt;code&gt;src/Template&lt;/code&gt;. It’s a bit cleaner, and also lets you use &lt;code&gt;View&lt;/code&gt; and &lt;code&gt;Helper&lt;/code&gt; as table names.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;tests/Fixture&lt;/code&gt;: The classes here contain sample data that can be inserted into our test database during testing.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;tests/TestCase&lt;/code&gt;: Test classes! They are mostly stubs, because we haven’t written any real code yet.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I’m going to add all these files and call it a night. My friend said they have a few weeks before they need their site, so taking it slow works for me :)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller src/Model/Entity src/Model/Table src/Template tests/Fixture tests/TestCase
+git commit -m &quot;Add baked files for initial application&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yay!&lt;/p&gt;
+
+&lt;p&gt;–&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.1&quot;&gt;0.0.1&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;What is next? While you can certainly go in and create any records you’d like at this time, we’re going to want to lock down our database. Thus, our next target will be general user management, including a forgot password flow and modifying their personal details. We’ll be covering the above topic in the next installment of CakeAdvent 2016.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 01 Dec 2016 01:56:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/01/creating-a-microblogging-platform/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/01/creating-a-microblogging-platform/</guid>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>A Lambda PaaS</title>
@@ -1731,140 +1928,6 @@ $validator-&amp;gt;add(&#39;species&#39;, &#39;validSpecies&#39;, [
         <category>cakephp</category>
         
         <category>validation</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Using InstanceConfigTrait for object configuration</title>
-        <description>&lt;p&gt;When writing a new class to handle complex logic, you typically have some amount of configuration you need to set. For instance, lets assume we have a cat class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace Animalia\Chordata\Mammalia\Carnivora\Feliformia\Felidae\Felinae\Felis;
-
-class FelisCatus
-{
-  public $attributes = [];
-  public function __construct(array $attributes = [])
-  {
-    $this-&amp;gt;attributes = $attributes;
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above is a simple - other than that namespace yeesh - cat class, where all attributes are set without regard to what is necessary to define a cat. In our case, we want to ensure each cat at least has a color, gender, name, and size:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace Animalia\Chordata\Mammalia\Carnivora\Feliformia\Felidae\Felinae\Felis;
-
-class FelisCatus
-{
-  public $attributes = [];
-  public function __construct(array $attributes = [])
-  {
-    $this-&amp;gt;attributes = array_merge([
-      &#39;name&#39; =&amp;gt; &#39;Cat&#39;,
-      &#39;color&#39; =&amp;gt; &#39;black&#39;,
-      &#39;gender&#39; =&amp;gt; &#39;female&#39;,
-      &#39;size&#39; =&amp;gt; &#39;small&#39;,
-    ], $attributes);
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;How do we access the attributes?&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$cat = new FelisCatus([&#39;name&#39; =&amp;gt; &#39;Camila&#39;]);
-// get the name
-echo $cat-&amp;gt;attributes[&#39;name&#39;];
-
-// get the paw size? Undefined index!
-echo $cat-&amp;gt;attributes[&#39;paw_size&#39;];
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If we were doing this in CakePHP, we could take advantage of the &lt;code&gt;InstanceConfigTrait&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace Animalia\Chordata\Mammalia\Carnivora\Feliformia\Felidae\Felinae\Felis;
-
-use Cake\Core\InstanceConfigTrait;
-
-class FelisCatus
-{
-  use InstanceConfigTrait;
-  protected $_defaultConfig = [
-    &#39;name&#39; =&amp;gt; &#39;Cat&#39;,
-    &#39;color&#39; =&amp;gt; &#39;black&#39;,
-    &#39;gender&#39; =&amp;gt; &#39;female&#39;,
-    &#39;size&#39; =&amp;gt; &#39;small&#39;,
-  ];
-
-  public function __construct(array $attributes = [])
-  {
-    // will automatically merge the attributes with
-    // $this-&amp;gt;_defaultConfig
-    $this-&amp;gt;config($attributes);
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we get to do the following!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$cat = new FelisCatus([&#39;name&#39; =&amp;gt; &#39;Camila&#39;]);
-// get the name
-echo $cat-&amp;gt;config(&#39;name&#39;);
-
-// get the paw size? Returns null
-echo $cat-&amp;gt;config(&#39;paw_size&#39;);
-
-// set the paw size
-$cat-&amp;gt;config(&#39;paw_size&#39;, &#39;small&#39;);
-
-// set nested data
-$cat-&amp;gt;config(&#39;appetite.morning&#39;, null);
-$cat-&amp;gt;config(&#39;appetite.afternoon&#39;, &#39;hangry&#39;);
-
-// get nested data
-echo $cat-&amp;gt;config(&#39;appetite.afternoon&#39;);
-
-// set lots of info at once
-$cat-&amp;gt;config([
-  &#39;size&#39; =&amp;gt; &#39;large&#39;,
-  &#39;pregnant&#39; =&amp;gt; true,
-  &#39;owner&#39; =&amp;gt; &#39;Jose&#39;,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;InstanceConfigTrait&lt;/code&gt; is a useful trait for hiding instance configuration initializing/setting/getting/deleting from the user. You can simply &lt;code&gt;use&lt;/code&gt; it in your class, ensure you initialze any config in your constructor, and then access it through a simple interface.&lt;/p&gt;
-
-&lt;p&gt;CakePHP actually uses this in quite a few places:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Cache and Log Engines&lt;/li&gt;
-  &lt;li&gt;Authorize and Authenticate classes&lt;/li&gt;
-  &lt;li&gt;Password Hashers&lt;/li&gt;
-  &lt;li&gt;Helpers, Components, Behaviors&lt;/li&gt;
-  &lt;li&gt;Dispatch Filters&lt;/li&gt;
-  &lt;li&gt;Mailers&lt;/li&gt;
-  &lt;li&gt;etc.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;So the same interface is available basically everywhere. Its static class analogue is &lt;code&gt;StaticConfigTrait&lt;/code&gt;, which &lt;em&gt;also&lt;/em&gt; parses dsn’s from the &lt;code&gt;url&lt;/code&gt; key, which comes in handy when creating factory-type classes.&lt;/p&gt;
-</description>
-        <pubDate>Tue, 22 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/22/using-instance-config-trait-for-object-configuration/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/22/using-instance-config-trait-for-object-configuration/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>configuration</category>
         
         
         <category>cakephp</category>
