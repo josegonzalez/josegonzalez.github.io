@@ -1688,6 +1688,11 @@
     "url": "/tags/cakeadvent-2016/",
     "tokens": ["cakeadvent"]
   },
-  false
+  {
+    "type": "null",
+    "title": "",
+    "url": "/",
+    "tokens": []
+  }
 ]
 
