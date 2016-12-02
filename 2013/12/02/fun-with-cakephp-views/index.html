@@ -1,22 +1,11 @@
 <!DOCTYPE html>
-<!--[if IE 7]>
-<html class="ie ie7" lang="en-US">
-<![endif]-->
-<!--[if IE 8]>
-<html class="ie ie8" lang="en-US">
-<![endif]-->
-<!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
-<!--<![endif]-->
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
     <title>CakeAdvent-2013: Fun with CakePHP Views</title>
     <link rel="canonical" href="http://josediazgonzalez.com/2013/12/02/fun-with-cakephp-views/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
-    <!--[if lt IE 9]>
-        <script src="/javascripts/html5.js" type="text/javascript"></script>
-    <![endif]-->
     <meta name="robots" content="all" />
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
@@ -34,14 +23,10 @@
     <meta name="twitter:title" content="CakeAdvent-2013: Fun with CakePHP Views" />
     <meta name="twitter:description" content="A guide to creating a custom CakePHP view that generates identicon png images for users" />
     <link rel="alternate" type="application/rss+xml" title="Fun with CakePHP Views » Feed" href="/atom.xml">
-    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
-    <!--[if lt IE 9]>
-        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-    <![endif]-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="/css/normalize.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
         <script type="text/javascript">
             var _gaq = _gaq || [];
             _gaq.push(['_setAccount', 'UA-8668344-3']);
@@ -49,31 +34,19 @@
         </script>
 </head>
   <body class="home  ">
-    <div class="site">
-      <header class="site-header" role="banner">
-    <hgroup>
-        <h1 class="site-title">
+    <div class="container">
+      <header class="site-header">
+        <h1>
             <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
         </h1>
-        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-    </hgroup>
-</header>
-      <div class="wrapper">
-        <div class="site-content">
-          <div role="main">
-            <article class="type-post">
-  <header class="entry-header">
-      <h1 class="entry-title">
-        Fun with CakePHP Views
-      </h1>
-      <div class="comments-link">
-        <a href="#comments" title="Comment on Fun with CakePHP Views!">
-          Comments
-        </a>
-      </div>
-  </header>
-  <div class="entry-content">
-    <p>One of the least used features of CakePHP are custom view classes. Custom view classes allow a developer to specify a set of data for the view and have the output automatically formatted. While this automation comes at a price in terms of application speed, it can have great affect on rapid application development. Server resources are cheap, while development time is not.</p>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Fun with CakePHP Views</h2>
+    <div class="post-content">
+        <p>One of the least used features of CakePHP are custom view classes. Custom view classes allow a developer to specify a set of data for the view and have the output automatically formatted. While this automation comes at a price in terms of application speed, it can have great affect on rapid application development. Server resources are cheap, while development time is not.</p>
 <p>CakePHP has a few, built-in view classes:</p>
 <ul>
   <li><a href="http://book.cakephp.org/2.0/en/views/json-and-xml-views.html">Json/Xml View Classes</a>: useful for building apis.</li>
@@ -201,7 +174,7 @@ class IdenticonView extends View {
 <h2 id="what-now">What now?</h2>
 <p>This was a toy view class, but can be used as a model for future view classes. For instance, we might create a View class that generates gamer tags for embedding on your site, or generate SKU images for printing. A <em>cool</em> use might be to build a status badge for a particular application - maintenance, up, down, etc. - in some sort of application monitoring system.</p>
 <p>View classes are a powerful way to speed up your application development. If you’re building something other than HTML output for your application, I suggest looking into how view classes might replace duplicative knowledge.</p>
-  </div>
+    </div>
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2013/12/02/fun-with-cakephp-views/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-12-02 00:00:00 +0000">02 Dec 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
@@ -211,17 +184,15 @@ class IdenticonView extends View {
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-          </div>
-        </div>
-        <div class="widget-area" role="complementary">
-    <aside class="widget widget_categories widget_search">
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-        <div class="ebook-outer">
-  <div class="ebook-inner">
-    <h3>Write better CakePHP Code Today</h3>
+        <div class="ebook">
+    <h3>Write better CakePHP code today!</h3>
     <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
-    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
-  </div>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button">Buy now</a></div>
 </div>
 <div class="series-note">
     <p>This entry is <strong>part 2</strong> of <strong>25</strong> in the series "CakeAdvent 2013".</p>
@@ -264,15 +235,9 @@ class IdenticonView extends View {
         </ul>
     </aside>
 </div>
-      </div>
-      <footer class="colophon" role="contentinfo">
-    <div class="site-info">
-        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
-    </div>
-</footer>
-    </div>
-    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
-<script type="text/javascript" src="/javascripts/navigation.js"></script>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
 <script type="text/javascript" src="/javascripts/hogan.js"></script>
 <script type="text/javascript" src="/javascripts/typeahead.js"></script>
 <script type="text/javascript" src="/javascripts/affix.js"></script>
@@ -305,5 +270,6 @@ class IdenticonView extends View {
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
 </script>
+    </div>
   </body>
 </html>

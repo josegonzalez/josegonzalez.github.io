@@ -1,22 +1,11 @@
 <!DOCTYPE html>
-<!--[if IE 7]>
-<html class="ie ie7" lang="en-US">
-<![endif]-->
-<!--[if IE 8]>
-<html class="ie ie8" lang="en-US">
-<![endif]-->
-<!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
-<!--<![endif]-->
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
     <title>Insane Server Management: Deploying your infrastructure to AWS</title>
     <link rel="canonical" href="http://josediazgonzalez.com/2013/10/17/deploying-your-infrastructure-to-aws/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
-    <!--[if lt IE 9]>
-        <script src="/javascripts/html5.js" type="text/javascript"></script>
-    <![endif]-->
     <meta name="robots" content="all" />
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
@@ -34,14 +23,10 @@
     <meta name="twitter:title" content="Insane Server Management: Deploying your infrastructure to AWS" />
     <meta name="twitter:description" content="Deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores" />
     <link rel="alternate" type="application/rss+xml" title="Deploying your infrastructure to AWS » Feed" href="/atom.xml">
-    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
-    <!--[if lt IE 9]>
-        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-    <![endif]-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="/css/normalize.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
         <script type="text/javascript">
             var _gaq = _gaq || [];
             _gaq.push(['_setAccount', 'UA-8668344-3']);
@@ -49,31 +34,19 @@
         </script>
 </head>
   <body class="home  ">
-    <div class="site">
-      <header class="site-header" role="banner">
-    <hgroup>
-        <h1 class="site-title">
+    <div class="container">
+      <header class="site-header">
+        <h1>
             <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
         </h1>
-        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-    </hgroup>
-</header>
-      <div class="wrapper">
-        <div class="site-content">
-          <div role="main">
-            <article class="type-post">
-  <header class="entry-header">
-      <h1 class="entry-title">
-        Deploying your infrastructure to AWS
-      </h1>
-      <div class="comments-link">
-        <a href="#comments" title="Comment on Deploying your infrastructure to AWS!">
-          Comments
-        </a>
-      </div>
-  </header>
-  <div class="entry-content">
-    <p>This document refers to the deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores.</p>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Deploying your infrastructure to AWS</h2>
+    <div class="post-content">
+        <p>This document refers to the deployment of servers to the AWS EC2 service, with particular care taken to ameliorate some issues with deploying applications over datastores.</p>
 <blockquote>
   <p>This is the result of about 6 hours of rambling thought and a few diagrams, as well as 2+ years of fiddling with servers and seeing what definitely does not work. That is to say, there is no guarantee any of the following is <code>[truthful, working, awesome]</code>.</p>
 </blockquote>
@@ -440,7 +413,7 @@ git commit -m "added user processing to 12_04-bee machines"
 <p>Scaling up resources using the above workflow would be a challenge, as would moving services around. It could work well if everything was on it’s own server, but that’s unlikely to be economically feasible. That’s essentially how Heroku works - you pay per dyno, though they probably have large instances hosting said dynos - so you can see some of the economics in action there.</p>
 <p>This setup does not currently advocate immutable servers, though it does not preclude their usage. It actually <em>should</em> work, provided network traffic could be migrated from live nodes to dead nodes easily. The way to do that would be to remove a service from a node, which would trigger a deploy event across your infrastructure.</p>
 <p>Testing deploys would be difficult. What if you deployed a bad configuration, bringing that node into production? Ideally you deploy to a testing/staging environment to shake out any cobwebs, but this might not be feasible depending upon your size. It could also be possible to test everything out locally through the use of Vagrant, but stuff like datastores and ebs volumes might be more difficult to fake out.</p>
-  </div>
+    </div>
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/opschops" title="View all posts in opschops" rel="category">opschops</a> on <a href="http://josediazgonzalez.com/2013/10/17/deploying-your-infrastructure-to-aws/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2013-10-17 00:29:00 +0000">17 Oct 2013</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
@@ -450,17 +423,15 @@ git commit -m "added user processing to 12_04-bee machines"
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-          </div>
-        </div>
-        <div class="widget-area" role="complementary">
-    <aside class="widget widget_categories widget_search">
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-        <div class="ebook-outer">
-  <div class="ebook-inner">
-    <h3>Write better CakePHP Code Today</h3>
+        <div class="ebook">
+    <h3>Write better CakePHP code today!</h3>
     <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
-    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
-  </div>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button">Buy now</a></div>
 </div>
 <div class="series-note">
     <p>This entry is <strong>part 1</strong> of <strong>3</strong> in the series "Insane Server Management".</p>
@@ -481,15 +452,9 @@ git commit -m "added user processing to 12_04-bee machines"
         </ul>
     </aside>
 </div>
-      </div>
-      <footer class="colophon" role="contentinfo">
-    <div class="site-info">
-        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
-    </div>
-</footer>
-    </div>
-    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
-<script type="text/javascript" src="/javascripts/navigation.js"></script>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
 <script type="text/javascript" src="/javascripts/hogan.js"></script>
 <script type="text/javascript" src="/javascripts/typeahead.js"></script>
 <script type="text/javascript" src="/javascripts/affix.js"></script>
@@ -522,5 +487,6 @@ git commit -m "added user processing to 12_04-bee machines"
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
 </script>
+    </div>
   </body>
 </html>

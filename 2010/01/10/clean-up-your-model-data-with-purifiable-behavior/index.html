@@ -1,22 +1,11 @@
 <!DOCTYPE html>
-<!--[if IE 7]>
-<html class="ie ie7" lang="en-US">
-<![endif]-->
-<!--[if IE 8]>
-<html class="ie ie8" lang="en-US">
-<![endif]-->
-<!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
-<!--<![endif]-->
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
     <title>Clean up your Model data with Purifiable Behavior</title>
     <link rel="canonical" href="http://josediazgonzalez.com/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
-    <!--[if lt IE 9]>
-        <script src="/javascripts/html5.js" type="text/javascript"></script>
-    <![endif]-->
     <meta name="robots" content="all" />
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
@@ -34,14 +23,10 @@
     <meta name="twitter:title" content="Clean up your Model data with Purifiable Behavior" />
     <meta name="twitter:description" content="Sanitizing saved data when rendering the view is stupid, and it should be done when creating/updating records." />
     <link rel="alternate" type="application/rss+xml" title="Clean up your Model data with Purifiable Behavior » Feed" href="/atom.xml">
-    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
-    <!--[if lt IE 9]>
-        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-    <![endif]-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="/css/normalize.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
         <script type="text/javascript">
             var _gaq = _gaq || [];
             _gaq.push(['_setAccount', 'UA-8668344-3']);
@@ -49,31 +34,19 @@
         </script>
 </head>
   <body class="home  ">
-    <div class="site">
-      <header class="site-header" role="banner">
-    <hgroup>
-        <h1 class="site-title">
+    <div class="container">
+      <header class="site-header">
+        <h1>
             <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
         </h1>
-        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-    </hgroup>
-</header>
-      <div class="wrapper">
-        <div class="site-content">
-          <div role="main">
-            <article class="type-post">
-  <header class="entry-header">
-      <h1 class="entry-title">
-        Clean up your Model data with Purifiable Behavior
-      </h1>
-      <div class="comments-link">
-        <a href="#comments" title="Comment on Clean up your Model data with Purifiable Behavior!">
-          Comments
-        </a>
-      </div>
-  </header>
-  <div class="entry-content">
-    <p>Someone on #cakephp had an issue with PHP timing out. Normally, I’d say it was just bad coding, but it’s probably just a bad practice on their part. The issue they had is with HTML Purifier.</p>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Clean up your Model data with Purifiable Behavior</h2>
+    <div class="post-content">
+        <p>Someone on #cakephp had an issue with PHP timing out. Normally, I’d say it was just bad coding, but it’s probably just a bad practice on their part. The issue they had is with HTML Purifier.</p>
 <p>Now the library itself is pretty good. I’ve used it a few times, works great. The problem that arose was that they were sanitizing the data on the output instead of the input. That’s a no-no. You’ll run out of memory quick when you have lots of data to sanitize on the output, and you are duplicating the sanitization process on each page-view. That is really silly, as unless you have a sanitization scheme that changes all the time, your app is doing way more work than it needs to. So sanitize on the input.</p>
 <p>Why sanitize on input? Facebook does it. Yes, I said it. When you have a mass of user-contributed material, you are bound to have some trouble-makers, especially on social networks. So you sanitize the hell out of your data.</p>
 <p>So how do we do it? Well, we can either overwrite the original data before saving it, or save it to an extra field specially setup for cleaned data. In a CMS, it is trivial to save the extra data - you probably won’t get that many comments anyways, to be honest - and web applications can use the original data to crawl for unusual activity or malevolent users. Hell, <a href="http://snook.ca">Jonathan Snook</a> even used it to build a <a href="http://snook.ca/archives/other/effective_blog_comment_spam_blocker">comment spam blocker</a>. So saving the cleaned data in another field has it’s benefits.</p>
@@ -96,7 +69,7 @@
 <p>There are other options in the behavior which I have built in but don’t want to elaborate upon at 5 in the morning, so feel free to muck about with it. I may add new features, but at the very least I should be able to add documentation soon.</p>
 <p><em>I hate people with LGPL. I want to release great code that people can depend on to work in a particular setup, but your stupid license contaminates everything it touches. Please only release works in MIT, BSD or other similar FOSS licenses (creative commons works too sometimes!)</em></p>
 <p><a href="http://github.com/josegonzalez/purifiable">The code is available on github, so fork away!</a></p>
-  </div>
+    </div>
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2010/01/10/clean-up-your-model-data-with-purifiable-behavior/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2010-01-10 00:00:00 +0000">10 Jan 2010</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
@@ -106,17 +79,15 @@
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-          </div>
-        </div>
-        <div class="widget-area" role="complementary">
-    <aside class="widget widget_categories widget_search">
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-        <div class="ebook-outer">
-  <div class="ebook-inner">
-    <h3>Write better CakePHP Code Today</h3>
+        <div class="ebook">
+    <h3>Write better CakePHP code today!</h3>
     <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
-    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
-  </div>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button">Buy now</a></div>
 </div>
 <h3 class="widget-title">Categories</h3>
         <ul>
@@ -129,15 +100,9 @@
         </ul>
     </aside>
 </div>
-      </div>
-      <footer class="colophon" role="contentinfo">
-    <div class="site-info">
-        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
-    </div>
-</footer>
-    </div>
-    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
-<script type="text/javascript" src="/javascripts/navigation.js"></script>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
 <script type="text/javascript" src="/javascripts/hogan.js"></script>
 <script type="text/javascript" src="/javascripts/typeahead.js"></script>
 <script type="text/javascript" src="/javascripts/affix.js"></script>
@@ -170,5 +135,6 @@
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
 </script>
+    </div>
   </body>
 </html>

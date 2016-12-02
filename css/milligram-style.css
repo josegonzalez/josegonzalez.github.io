@@ -1,0 +1,319 @@
+.container {
+  max-width: 132.0rem
+}
+
+.site-header h1 {
+  margin-bottom: 0;
+}
+.content h1 {
+  font-size: 3.0rem;
+  line-height: 1.3;
+}
+
+.content h2 {
+  font-size: 2.4rem;
+  letter-spacing: -.08rem;
+  line-height: 1.35;
+}
+
+.content h3 {
+  font-size: 1.8rem;
+  letter-spacing: -.05rem;
+  line-height: 1.5;
+}
+
+.content h4 {
+  font-size: 1.6rem;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+
+.content h5 {
+  font-size: 1.4rem;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.content h6 {
+  font-size: 1.2rem;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+a {
+  color: #9b4dca;
+}
+
+a:focus, a:hover {
+  color: #606c76;
+}
+ol, ul {
+  list-style: circle;
+  padding-left: 30px;
+}
+blockquote {
+  border-left-color: #D13E48;
+}
+
+.tt-suggestion {
+  padding: 8px 20px;
+}
+.tt-suggestion + .tt-suggestion {
+  border-top: 1px solid #ccc;
+}
+
+.sidebar p {
+  margin-bottom: 0; }
+  p.result-type {
+    float: right;
+    font-size: 10px;
+    font-style: italic;
+    line-height: 1.6em; }
+  p.result-name {
+    font-style: .8em;
+    font-weight: bold;
+    line-height: 1.4em; }
+  p.result-description {
+    font-size: 10px;
+    line-height: 16px; }
+
+.twitter-typeahead {
+  background: #fff url(/images/search-icon.png) 5px -16px no-repeat;
+  background-size: 41px 44px;
+  margin-bottom: 28px;
+  width: 90%; }
+  .twitter-typeahead .tt-hint {
+    color: #999;
+    display: none; }
+  .twitter-typeahead .tt-query {
+    padding-left: 32px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075); }
+  .twitter-typeahead .typeahead, .twitter-typeahead .tt-query, .twitter-typeahead .tt-hint {
+    border: 1px solid #ccc;
+    outline: none; }
+  .twitter-typeahead .typeahead {
+    background-color: #fff; }
+    .twitter-typeahead .typeahead:focus {
+      border: 1px solid #0097cf; }
+  .twitter-typeahead .tt-dropdown-menu {
+    width: 100%;
+    margin-top: 12px;
+    padding: 2px 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); }
+  .twitter-typeahead .tt-suggestion {
+    padding: 3px 20px;
+    line-height: 24px; }
+    .twitter-typeahead .tt-suggestion p {
+      margin: 0; }
+    .twitter-typeahead .tt-suggestion.tt-is-under-cursor {
+      color: #fff;
+      background-color: #0097cf; }
+
+
+.ebook {
+  padding: 0 15px;
+  margin-bottom: 20px;
+}
+.ebook h3 {
+  font-size: 2rem;
+  text-align: center;
+}
+.ebook img {
+  width: 100px;
+  float: left;
+  margin-right: 10px;
+}
+.ebook p {
+  font-size: 1.3rem;
+}
+.ebook .ebook-link {
+  text-align: center;
+}
+
+.series-note ol {
+  background: #FCFCFC;
+  border: 1px solid #E0E0E0;
+  color: #575757;
+  font-size: 0.8em;
+  line-height: 2.0em;
+  list-style-type: decimal;
+  padding: 20px 25px 20px 35px;
+}
+.series-note li {
+  margin: 0;
+}
+.series-note p {
+  font-style: italic;
+  margin: 0 0 20px 0;
+  padding: 4px 15px;
+}
+
+.archives article {
+  padding: 1em 0 1em;
+  position: relative;
+  background: url() bottom left repeat-x; }
+  .archives article .post-title {
+    font-size: 2em;
+    margin: 0.67em 0 .3em 0; }
+    .archives article .post-title a {
+      color: #222;
+      text-decoration: none;
+      font-weight: normal;
+      display: inline-block; }
+      .archives article .post-title a:hover {
+        text-decoration: underline; }
+  .archives article .tags,
+  .archives article .tags a {
+    line-height: 1.1em; }
+  .archives article time {
+    line-height: 1.2em;
+    top: 1.3em; }
+    .archives article time .month {
+      text-transform: uppercase; }
+    .archives article time .month,
+    .archives article time .day {
+      display: inline-block; }
+.archives h2 {
+  top: -3px; }
+
+@media only screen and (min-width: 550px) {
+  .archives article {
+    margin-left: 8em; }
+    .archives article time {
+      position: absolute;
+      text-align: right;
+      left: 0em;
+      top: 0.95em; }
+    .archives article .year {
+      display: none; }
+  .archives h2 {
+    margin-bottom: .3em;
+    font-weight: normal;
+    display: inline-block;
+    padding-top: .3em;
+    position: relative;
+    float: left; } }
+
+.open-source-page h3 {
+  margin-bottom: 2em;
+  padding-top: 0.8em; }
+.open-source-page .project {
+  position: relative;
+  margin-bottom: 1em; }
+.open-source-page .project {
+  padding-left: 70px; }
+  .open-source-page .project h5 {
+    font-size: 2.2rem;
+    padding-bottom: .5em;
+    padding-top: .5em; }
+    .open-source-page .project h5.has-external-link {
+      padding: 0;
+      margin: 0; }
+  .open-source-page .project p {
+    margin: 0;
+  }
+  .open-source-page .project .external-project-link {
+    color: #555555;
+    white-space: nowrap;
+    display: block;
+    font-weight: bold;
+    padding-bottom: .35em;
+    text-decoration: none; }
+  .open-source-page .project .icon {
+    color: #fff;
+    height: 60px;
+    left: 0;
+    line-height: 60px;
+    margin-right: .75em;
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    -webkit-font-smoothing: antialiased; }
+  .open-source-page .project .icon-cakephp {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #92b2b5), color-stop(100%, #3e6c70));
+    background-image: -webkit-radial-gradient(5% 5%, #92b2b5 0%, #3e6c70 50px);
+    background-image: -moz-radial-gradient(5% 5%, #92b2b5 0%, #3e6c70 50px);
+    background-image: -o-radial-gradient(5% 5%, #92b2b5 0%, #3e6c70 50px);
+    background-image: radial-gradient(5% 5%, #92b2b5 0%, #3e6c70 50px); }
+  .open-source-page .project .icon-cakephp2 {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #5ca0a5), color-stop(100%, #204548));
+    background-image: -webkit-radial-gradient(5% 5%, #5ca0a5 0%, #204548 50px);
+    background-image: -moz-radial-gradient(5% 5%, #5ca0a5 0%, #204548 50px);
+    background-image: -o-radial-gradient(5% 5%, #5ca0a5 0%, #204548 50px);
+    background-image: radial-gradient(5% 5%, #5ca0a5 0%, #204548 50px); }
+  .open-source-page .project .icon-cakephp3 {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #1ca0a5), color-stop(100%, #042324));
+    background-image: -webkit-radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px);
+    background-image: -moz-radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px);
+    background-image: -o-radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px);
+    background-image: radial-gradient(5% 5%, #1ca0a5 0%, #042324 50px); }
+  .open-source-page .project .icon-chef {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #f18b21), color-stop(100%, #783e01));
+    background-image: -webkit-radial-gradient(5% 5%, #f18b21 0%, #783e01 50px);
+    background-image: -moz-radial-gradient(5% 5%, #f18b21 0%, #783e01 50px);
+    background-image: -o-radial-gradient(5% 5%, #f18b21 0%, #783e01 50px);
+    background-image: radial-gradient(5% 5%, #f18b21 0%, #783e01 50px); }
+  .open-source-page .project .icon-dock {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #22b8eb), color-stop(100%, #045570));
+    background-image: -webkit-radial-gradient(5% 5%, #22b8eb 0%, #045570 50px);
+    background-image: -moz-radial-gradient(5% 5%, #22b8eb 0%, #045570 50px);
+    background-image: -o-radial-gradient(5% 5%, #22b8eb 0%, #045570 50px);
+    background-image: radial-gradient(5% 5%, #22b8eb 0%, #045570 50px); }
+  .open-source-page .project .icon-dokku {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #4ea5ff), color-stop(100%, #0058b4));
+    background-image: -webkit-radial-gradient(5% 5%, #4ea5ff 0%, #0058b4 50px);
+    background-image: -moz-radial-gradient(5% 5%, #4ea5ff 0%, #0058b4 50px);
+    background-image: -o-radial-gradient(5% 5%, #4ea5ff 0%, #0058b4 50px);
+    background-image: radial-gradient(5% 5%, #4ea5ff 0%, #0058b4 50px); }
+  .open-source-page .project .icon-java {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #edd243), color-stop(100%, #917b06));
+    background-image: -webkit-radial-gradient(5% 5%, #edd243 0%, #917b06 50px);
+    background-image: -moz-radial-gradient(5% 5%, #edd243 0%, #917b06 50px);
+    background-image: -o-radial-gradient(5% 5%, #edd243 0%, #917b06 50px);
+    background-image: radial-gradient(5% 5%, #edd243 0%, #917b06 50px); }
+  .open-source-page .project .icon-go {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #63a1d9), color-stop(100%, #18548b));
+    background-image: -webkit-radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px);
+    background-image: -moz-radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px);
+    background-image: -o-radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px);
+    background-image: radial-gradient(5% 5%, #63a1d9 0%, #18548b 50px); }
+  .open-source-page .project .icon-homebrew {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #884f1d), color-stop(100%, #0a0602));
+    background-image: -webkit-radial-gradient(5% 5%, #884f1d 0%, #0a0602 50px);
+    background-image: -moz-radial-gradient(5% 5%, #884f1d 0%, #0a0602 50px);
+    background-image: -o-radial-gradient(5% 5%, #884f1d 0%, #0a0602 50px);
+    background-image: radial-gradient(5% 5%, #884f1d 0%, #0a0602 50px); }
+  .open-source-page .project .icon-php {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #6a68a7), color-stop(100%, #272650));
+    background-image: -webkit-radial-gradient(5% 5%, #6a68a7 0%, #272650 50px);
+    background-image: -moz-radial-gradient(5% 5%, #6a68a7 0%, #272650 50px);
+    background-image: -o-radial-gradient(5% 5%, #6a68a7 0%, #272650 50px);
+    background-image: radial-gradient(5% 5%, #6a68a7 0%, #272650 50px); }
+  .open-source-page .project .icon-python {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #528947), color-stop(100%, #142710));
+    background-image: -webkit-radial-gradient(5% 5%, #528947 0%, #142710 50px);
+    background-image: -moz-radial-gradient(5% 5%, #528947 0%, #142710 50px);
+    background-image: -o-radial-gradient(5% 5%, #528947 0%, #142710 50px);
+    background-image: radial-gradient(5% 5%, #528947 0%, #142710 50px); }
+  .open-source-page .project .icon-ruby {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #cc3333), color-stop(100%, #570f0f));
+    background-image: -webkit-radial-gradient(5% 5%, #cc3333 0%, #570f0f 50px);
+    background-image: -moz-radial-gradient(5% 5%, #cc3333 0%, #570f0f 50px);
+    background-image: -o-radial-gradient(5% 5%, #cc3333 0%, #570f0f 50px);
+    background-image: radial-gradient(5% 5%, #cc3333 0%, #570f0f 50px); }
+  .open-source-page .project .icon-shell {
+    background-image: -webkit-gradient(radial, 5% 5%, 0, 5% 5%, 50, color-stop(0%, #3273a9), color-stop(100%, #0c2336));
+    background-image: -webkit-radial-gradient(5% 5%, #3273a9 0%, #0c2336 50px);
+    background-image: -moz-radial-gradient(5% 5%, #3273a9 0%, #0c2336 50px);
+    background-image: -o-radial-gradient(5% 5%, #3273a9 0%, #0c2336 50px);
+    background-image: radial-gradient(5% 5%, #3273a9 0%, #0c2336 50px); }

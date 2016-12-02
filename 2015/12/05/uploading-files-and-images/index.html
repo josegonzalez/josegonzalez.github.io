@@ -1,22 +1,11 @@
 <!DOCTYPE html>
-<!--[if IE 7]>
-<html class="ie ie7" lang="en-US">
-<![endif]-->
-<!--[if IE 8]>
-<html class="ie ie8" lang="en-US">
-<![endif]-->
-<!--[if !(IE 7) | !(IE 8)  ]><!-->
 <html lang="en-US">
-<!--<![endif]-->
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
     <title>CakeAdvent-2015: Uploading files and images with CakePHP 3</title>
     <link rel="canonical" href="http://josediazgonzalez.com/2015/12/05/uploading-files-and-images/">
     <link rel="profile" href="http://gmpg.org/xfn/11">
-    <!--[if lt IE 9]>
-        <script src="/javascripts/html5.js" type="text/javascript"></script>
-    <![endif]-->
     <meta name="robots" content="all" />
     <meta name="robots" content="index, follow" />
     <meta name="revisit-after" content="7 days" />
@@ -34,14 +23,10 @@
     <meta name="twitter:title" content="CakeAdvent-2015: Uploading files and images with CakePHP 3" />
     <meta name="twitter:description" content="Silly hacks you can use in your cakephp applications" />
     <link rel="alternate" type="application/rss+xml" title="Uploading files and images with CakePHP 3 » Feed" href="/atom.xml">
-    <link rel="stylesheet" id="twentytwelve-fonts-css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&amp;subset=latin,latin-ext" type="text/css" media="all">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300,600|Bree+Serif' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/style.css" type="text/css" media="all">
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/github.css" type="text/css" media="all">
-    <link rel="stylesheet" id="twentytwelve-style-css" href="/css/overrides.css" type="text/css" media="all">
-    <!--[if lt IE 9]>
-        <link rel='stylesheet' id='twentytwelve-ie-css'  href='/stylesheets/ie.css' type='text/css' media='all' />
-    <![endif]-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="/css/normalize.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
         <script type="text/javascript">
             var _gaq = _gaq || [];
             _gaq.push(['_setAccount', 'UA-8668344-3']);
@@ -49,31 +34,19 @@
         </script>
 </head>
   <body class="home  ">
-    <div class="site">
-      <header class="site-header" role="banner">
-    <hgroup>
-        <h1 class="site-title">
+    <div class="container">
+      <header class="site-header">
+        <h1>
             <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
         </h1>
-        <h2 class="site-description"><a href="/about/" title="About me">Developer, Accidental Ops Guy, and CakePHP Core Developer</a></h2>
-    </hgroup>
-</header>
-      <div class="wrapper">
-        <div class="site-content">
-          <div role="main">
-            <article class="type-post">
-  <header class="entry-header">
-      <h1 class="entry-title">
-        Uploading files and images with CakePHP 3
-      </h1>
-      <div class="comments-link">
-        <a href="#comments" title="Comment on Uploading files and images with CakePHP 3!">
-          Comments
-        </a>
-      </div>
-  </header>
-  <div class="entry-content">
-    <p>I’ve been working for years on upload plugins. CakePHP 1.2 users might remember MeioUpload - such a good plugin, it did <em>all</em> the things. Which ended up being a bad move for maintainability. Something I took to heart when I worked on other alternatives, and when I finally wrote my <a href="https://github.com/josegonzalez/cakephp-upload">CakePHP Upload</a> plugin. Until recently however, it supported only 2.x, and in this post-3.0 world, this just wouldn’t cut it.</p>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Uploading files and images with CakePHP 3</h2>
+    <div class="post-content">
+        <p>I’ve been working for years on upload plugins. CakePHP 1.2 users might remember MeioUpload - such a good plugin, it did <em>all</em> the things. Which ended up being a bad move for maintainability. Something I took to heart when I worked on other alternatives, and when I finally wrote my <a href="https://github.com/josegonzalez/cakephp-upload">CakePHP Upload</a> plugin. Until recently however, it supported only 2.x, and in this post-3.0 world, this just wouldn’t cut it.</p>
 <p>If you are using CakePHP 3, there have been a <a href="https://github.com/WyriHaximus/FlyPie">few</a> <a href="https://github.com/josbeir/image">different</a> <a href="https://github.com/davidyell/CakePHP3-Proffer">upload</a> <a href="https://github.com/Xety/Cake3-Upload">plugins</a>. In my mind, the <a href="https://github.com/davidyell/CakePHP3-Proffer">Proffer</a> plugin is the spiritual successor to the 2.x Upload plugin. If you need something more or less drop-in, I recommend looking into it. But this post isn’t about the Proffer plugin, but rather the new version of my <a href="https://github.com/josegonzalez/cakephp-upload">own upload plugin</a>.</p>
 <h2 id="focus">Focus</h2>
 <p>One thing I hated about the old plugin version is the fact that I was manually handling image thumbnails. There are plenty <a href="https://github.com/avalanche123/Imagine">of</a> <a href="https://github.com/Gregwar/Image">awesome</a> <a href="https://github.com/Intervention/image">packages</a> to handle this already. Upload did it in a hacky way, with interpolated php logic coming from a regex-parsed string. And only sometimes did it work. And anything advanced, like adding a watermark, was mostly impossible. Sad panda.</p>
@@ -255,7 +228,7 @@ $this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
 <p>One thing I’d like to stress is that the less you do during a page request, the faster your response time will be and the more likely your users will use your site. Here’s a <a href="http://searchengineland.com/googles-push-to-speed-up-your-web-site-42177">helpful post</a> on just how important that be to numbers like, idk, user retention and revenue.</p>
 <p>Given that information, I’d caution you against handling image manipulation etc. within a web request. This will work fine for some websites and internal administrative tools, but at some point you’re going to have to bite the bullet and refactor this code (and potentially even move the image uploading to outside of PHP entirely!). If only there was a way of combining file uploading and background processing…</p>
 <p>Until next time!</p>
-  </div>
+    </div>
     <footer class="entry-meta">
       This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2015/12/05/uploading-files-and-images/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2015-12-05 12:00:00 +0000">05 Dec 2015</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
     </footer>
@@ -265,17 +238,15 @@ $this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
   </div>
-          </div>
-        </div>
-        <div class="widget-area" role="complementary">
-    <aside class="widget widget_categories widget_search">
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
-        <div class="ebook-outer">
-  <div class="ebook-inner">
-    <h3>Write better CakePHP Code Today</h3>
+        <div class="ebook">
+    <h3>Write better CakePHP code today!</h3>
     <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
-    <div class="ebook-link"><a href="/cakephp-book/" class="button_buy_table gradient">Buy now</a></div>
-  </div>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button">Buy now</a></div>
 </div>
 <div class="series-note">
     <p>This entry is <strong>part 5</strong> of <strong>24</strong> in the series "CakeAdvent 2015".</p>
@@ -317,15 +288,9 @@ $this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
         </ul>
     </aside>
 </div>
-      </div>
-      <footer class="colophon" role="contentinfo">
-    <div class="site-info">
-        <a href="http://jekyllrb.com" title="Static Site Generator">Powered by Jekyll</a>
-    </div>
-</footer>
-    </div>
-    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
-<script type="text/javascript" src="/javascripts/navigation.js"></script>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
 <script type="text/javascript" src="/javascripts/hogan.js"></script>
 <script type="text/javascript" src="/javascripts/typeahead.js"></script>
 <script type="text/javascript" src="/javascripts/affix.js"></script>
@@ -358,5 +323,6 @@ $this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
 </script>
+    </div>
   </body>
 </html>

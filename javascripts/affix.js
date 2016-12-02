@@ -11,7 +11,7 @@ $(function() {
   var isTouchDevice = 'ontouchstart' in document.documentElement;
   if (isTouchDevice) return;
 
-  var $container = $(".template-front-page .site-content .archives");
+  var $container = $(".archives");
   if (!$container.length) return;
 
   var $headers = $container.find("h2");

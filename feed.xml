@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Jose Diaz-Gonzalez</title>
-    <description>Developer, Accidental Ops Guy, and CakePHP Core Developer</description>
+    <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
     <pubDate>Thu, 01 Dec 2016 06:54:43 +0000</pubDate>
