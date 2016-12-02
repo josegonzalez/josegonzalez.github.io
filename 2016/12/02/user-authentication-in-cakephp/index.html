@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: User Authentication in CakePHP</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/02/user-authentication-in-cakephp/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 2 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="authentication, authorization, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: User Authentication in CakePHP" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/02/user-authentication-in-cakephp/" />
+    <meta property="og:description" content="Part 2 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: User Authentication in CakePHP" />
+    <meta name="twitter:description" content="Part 2 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="User Authentication in CakePHP » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>User Authentication in CakePHP</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="requiring-user-authentication">Requiring User Authentication</h2>
+<p>First, we’ll start by locking everything down. I’m going to centralize all my auth-related loading code in <code>AppController::loadAuthComponent()</code> method:</p>
+<pre><code class="language-php">    /**
+     * Configures the AuthComponent
+     *
+     * @return void
+     */
+    protected function loadAuthComponent()
+    {
+        $this-&gt;loadComponent('Auth', [
+            'authorize' =&gt; ['Controller'],
+            'loginAction' =&gt; [
+                'plugin' =&gt; null,
+                'admin' =&gt; false,
+                'controller' =&gt; 'Users',
+                'action' =&gt; 'login'
+            ],
+            'loginRedirect' =&gt; '/',
+            'logoutRedirect' =&gt; '/',
+            'authenticate' =&gt; [
+                'all' =&gt; [
+                    'fields' =&gt; ['username' =&gt; 'email', 'password' =&gt; 'password'],
+                ],
+                'Form',
+            ]
+        ]);
+   }
+</code></pre>
+<p>We’ll walk through this a bit at a time:</p>
+<ul>
+  <li>Components are behavioral modifiers for Controllers. They are useful for adding logic around the request/dispatch cycle. The alternative is to use PSR-7 middleware, but as the migration to PSR-7 is currently underway, we’ll be using this method for now.</li>
+  <li>You can load a component using <code>Controller::loadComponent()</code>. The first argument is the component alias, and the second is an array of options for that component. This class loading pattern is pretty much the same all over CakePHP. You can also alias a component if you wish, by setting the <code>className</code> option to your specific class.</li>
+  <li>Authentication in CakePHP is controlled via the <code>AuthComponent</code>.</li>
+  <li>We’ve set a few options that should be pretty straightforward.
+    <ul>
+      <li>The <code>authorize</code> key is used to specify the authorization method. This will allow us to approve or deny access to a particular plugin/controller/action set. The <code>Controller</code> method lets us use a special <code>isAuthorized(array $user)</code> method to check if a user has access to an action.</li>
+      <li>One thing that may need explanation is the <code>authenticate</code> option. It allows us to specify <code>Authenticate</code> classes that can be used to, well, “authenticate” a user. The most common class in use is the <code>Form</code> class, which enables form-based authorization. You must specify a class in order to enable that authorization method. I’ve also specified an <code>all</code> key whose options are inherited by the other classes.</li>
+    </ul>
+  </li>
+</ul>
+<p>I’m going to call this method from my <code>AppController::initialize()</code>, right before loading any other components. As we’ve setup <code>Controller</code>-based authorization, our <code>AppController</code> will need an <code>isAuthorized(array $user)</code> method. Here is mine (I’m blocking access to everything):</p>
+<pre><code class="language-php">    /**
+     * Check if the provided user is authorized for the request.
+     *
+     * @param array|\ArrayAccess|null $user The user to check the authorization of.
+     *   If empty the user fetched from storage will be used.
+     * @return bool True if $user is authorized, otherwise false
+     */
+    public function isAuthorized(array $user = null)
+    {
+        return false;
+    }
+</code></pre>
+<p>We also need to make a <em>very</em> small addition to our <code>User</code> Entity class, located in <code>src/Model/Entity/User.php</code>. The <code>User</code> entity needs to have a custom password setter that will automatically hash a password on save. This is important for when we create users in our database. Why? Because it would be a real shame to store passwords in plain-text in the database. Lets create a Trait to hold this logic. Add the following to <code>src/Model/Entity/PasswordHashingTrait.php</code>:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Model\Entity;
+use Cake\Auth\DefaultPasswordHasher;
+trait PasswordHashingTrait
+{
+    protected function _setPassword($password)
+    {
+        return (new DefaultPasswordHasher)-&gt;hash($password);
+    }
+}
+</code></pre>
+<blockquote>
+  <p>What is a Trait? Traits are little snippets of code that allow you to reuse logic across classes. Think of them as little mix-ins that you can use to make a Cat quack like a Duck. See the <a href="https://secure.php.net/manual/en/language.oop5.traits.php">PHP documentation</a> for more details.</p>
+</blockquote>
+<p>Now add this trait to your <code>User</code> Entity class. To do so, add the following <em>inside</em> the class:</p>
+<pre><code class="language-php">use \App\Model\Entity\PasswordHashingTrait;
+</code></pre>
+<p>This will tell PHP to include the <code>PasswordHashingTrait</code> inside of our User Entity, giving it the ability to automatically hash passwords. Neat.</p>
+<p>Once that’s done, we’ll need the actual login/logout methods, but for now, lets commit these changes:</p>
+<pre><code class="language-shell">git add src/Controller/AppController.php src/Model/Entity/PasswordHashingTrait.php src/Model/Entity/User.php
+git commit -m "Configure the AuthComponent and automatically hash passwords"
+</code></pre>
+<h2 id="creating-a-user">Creating a User</h2>
+<p>We’ll need to create a user in our database. This is pretty boring, so I just created a shell to do it. Here is my shell (it goes in <code>src/Shell/UserShell.php</code>):</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Shell;
+use Cake\Console\Shell;
+use Cake\ORM\TableRegistry;
+use Cake\Utility\Inflector;
+/**
+ * User shell command.
+ */
+class UserShell extends Shell
+{
+    /**
+     * main() method.
+     *
+     * @return bool|int Success or error code.
+     */
+    public function main()
+    {
+        $data = [];
+        $fields = [
+            $this-&gt;params['username-field'],
+            $this-&gt;params['password-field']
+        ];
+        foreach ($fields as $field) {
+            $value = null;
+            $fieldName = Inflector::humanize($field);
+            while (empty($value)) {
+                $value = $this-&gt;in(sprintf('%s?', $fieldName));
+            }
+            $data[$field] = $value;
+        }
+        $this-&gt;out('');
+        $continue = $this-&gt;in('Continue?', ['y', 'n'], 'n');
+        if ($continue !== 'y') {
+            return $this-&gt;error('User not saved.');
+        }
+        $this-&gt;out('');
+        $this-&gt;hr();
+        $table = TableRegistry::get($this-&gt;params['table']);
+        $entity = $table-&gt;newEntity($data, ['validate' =&gt; false]);
+        if (!$table-&gt;save($entity)) {
+            return $this-&gt;error(sprintf('User could not be inserted: %s', print_r($entity-&gt;errors(), true)));
+        }
+        $this-&gt;out(sprintf('User inserted! ID: %d, Data: %s', $entity-&gt;id, print_r($entity-&gt;toArray(), true)));
+    }
+    /**
+     * UserShell
+     *
+     * @return ConsoleOptionParser
+     */
+    public function getOptionParser()
+    {
+        $parser = parent::getOptionParser();
+        $parser-&gt;description('The User shell can create a user on the fly for local development.');
+        $parser-&gt;addOption('table', [
+            'short' =&gt; 't',
+            'help' =&gt; 'Name of Table class (with plugin prefix) to use to create a user',
+            'default' =&gt; 'Users',
+        ]);
+        $parser-&gt;addOption('username-field', [
+            'short' =&gt; 'u',
+            'help' =&gt; 'Name of username field',
+            'default' =&gt; 'username',
+        ]);
+        $parser-&gt;addOption('password-field', [
+            'short' =&gt; 'p',
+            'help' =&gt; 'Name of password field',
+            'default' =&gt; 'password',
+        ]);
+        return $parser;
+    }
+}
+</code></pre>
+<p>LOTS OF CODE! A few notes:</p>
+<ul>
+  <li>This might be familiar to anyone who has seen any of my other blog posts.</li>
+  <li>This is an interactive shell that will ask you two questions - Username/Password - and create the User for you.</li>
+  <li>We’ve exposed a few ways of customizing the shell usage, including modifying the table, username-field, and password-field. You might even wish to further customize it to give automatic values for these fields.</li>
+  <li>I’m not validating the data, and will assume it’s good.</li>
+</ul>
+<p>You can run this shell - and answer the questions - via the following command:</p>
+<pre><code class="language-shell">bin/cake user --username-field emails
+</code></pre>
+<p>And you’ll get an error. Why? Because you cannot save <code>null</code> to the <code>avatar</code> and <code>avatar_dir</code> fields. Poo. Lets fix that by creating a migration. First, lets generate a scaffold for the migration:</p>
+<pre><code class="language-shell">bin/cake bake migration alter_users avatar:string? avatar_dir:string?
+</code></pre>
+<p>We’ll need to change the migration slightly to accommodate for the fact that the fields already exist. You can do this by changing <code>addColumn</code> to <code>changeColumn</code> in the generated migration file. Once thats done, lets run the migration:</p>
+<pre><code class="language-shell">bin/cake migrations migrate
+</code></pre>
+<p>Now run the <code>users</code> shell:</p>
+<pre><code class="language-shell">bin/cake user --username-field emails
+</code></pre>
+<p>If you run it again with the same options, you’ll see it happily inserts the same email address <em>again</em>. Boo. Delete that record however you wish, but lets create a migration to ensure that doesn’t happen again:</p>
+<pre><code class="language-shell">bin/cake bake migration unique_users
+</code></pre>
+<p>The contents of the <code>change</code> method should be as follows:</p>
+<pre><code class="language-php">    /**
+     * Change Method.
+     *
+     * More information on this method is available here:
+     * http://docs.phinx.org/en/latest/migrations.html#the-change-method
+     * @return void
+     */
+    public function change()
+    {
+        $table = $this-&gt;table('users');
+        $table-&gt;removeIndex([
+            'email',
+        ], [
+            'name' =&gt; 'BY_EMAIL',
+            'unique' =&gt; false,
+        ]);
+        $table-&gt;addIndex([
+            'email',
+        ], [
+            'name' =&gt; 'UNIQUE_EMAIL',
+            'unique' =&gt; true,
+        ]);
+        $table-&gt;update();
+    }
+</code></pre>
+<p>Now run the migration:</p>
+<pre><code class="language-shell">bin/cake migrations migrate
+</code></pre>
+<p>And our <code>users</code> table should be set. Lets commit our changes before we get lost:</p>
+<pre><code class="language-shell">git add config/Migrations/* src/Shell/UserShell.php
+git commit -m "Allow user creation via shell and fix our users table"
+</code></pre>
+<h2 id="login-and-logout">Login and Logout</h2>
+<p>A given controller is made up of a collection of actions. Normally, you’d add the following to your controller to enable login/logout functionality in your app:</p>
+<pre><code class="language-php">    public function login()
+    {
+        if ($this-&gt;request-&gt;is('post')) {
+            $user = $this-&gt;Auth-&gt;identify();
+            if ($user) {
+                $this-&gt;Auth-&gt;setUser($user);
+                return $this-&gt;redirect($this-&gt;Auth-&gt;redirectUrl());
+            }
+            $this-&gt;Flash-&gt;error(__('Invalid username or password, try again'));
+        }
+    }
+    public function logout()
+    {
+        return $this-&gt;redirect($this-&gt;Auth-&gt;logout());
+    }
+</code></pre>
+<blockquote>
+  <p>The above is copied verbatim from the <a href="http://book.cakephp.org/">CakePHP book</a>, an excellent source for all things CakePHP.</p>
+</blockquote>
+<p>You’re totally welcome to do that, but I’m not going to because I’m even lazier than that and cannot be arsed to copy the code. Remember how I said Crud has “action” classes that we can reuse across your application? Lets lean on it here and install the <code>CrudUsers</code> plugin.</p>
+<pre><code class="language-shell">composer require friendsofcake/crud-users
+</code></pre>
+<p>The <code>CrudUsers</code> plugin has action classes for various user-related functionality, including a <code>LoginAction</code> and  <code>LogoutAction</code>. These can be “mapped” to action names using <code>CrudComponent::mapAction()</code>. Add the following code to your - mostly empty - <code>UsersController</code>, located in <code>src/Controller/UsersController.php</code>:</p>
+<pre><code class="language-php">    /**
+     * Initialization hook method.
+     *
+     * Use this method to add common initialization code like loading components.
+     *
+     * e.g. `$this-&gt;loadComponent('Security');`
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this-&gt;Crud-&gt;mapAction('login', 'CrudUsers.Login');
+        $this-&gt;Crud-&gt;mapAction('logout', 'CrudUsers.Logout');
+    }
+</code></pre>
+<p>If you browse to any part of your site in a browser, you should be redirected to a page like the following:</p>
+<p><img src="/images/2016/12/02/users-login-missing-template.png" alt="missing users::login template" /></p>
+<blockquote>
+  <p>If you don’t have CakePHP installed under a web server, you can start up the built-in PHP server by running <code>bin/cake server</code>. Your application will be accessible at <a href="http://localhost:8765">http://localhost:8765</a>.</p>
+</blockquote>
+<p>While the CrudUsers plugin <em>does</em> have an action class for login, we’ll still need the relevant cake template file. Thankfully, we can just create it using the <code>Bake</code> plugin, which has a sample <code>login.ctp</code> for use with our apps:</p>
+<pre><code class="language-shell">bin/cake bake template Users login
+</code></pre>
+<p>We’ll need to make one <em>very small</em> change to the generated <code>src/Template/Users/login.ctp</code>. It currently references a <code>username</code> field when it should instead reference the <code>email</code> field. Once this is done, browse to <code>/users/login</code>, and attempt to login with the credentials you created before. You should get a page like the following:</p>
+<p><img src="/images/2016/12/02/users-login-success.png" alt="users::login success kid" /></p>
+<p>To allow logging out, we’ll need to explicitely whitelist it for authenticated users. Add the following to your <code>UsersController</code> to do so:</p>
+<pre><code class="language-php">    /**
+     * Check if the provided user is authorized for the request.
+     *
+     * @param array|\ArrayAccess|null $user The user to check the authorization of.
+     *   If empty the user fetched from storage will be used.
+     * @return bool True if $user is authorized, otherwise false
+     */
+    public function isAuthorized(array $user = null)
+    {
+        if ($this-&gt;request-&gt;params['action'] == 'logout') {
+            return true;
+        }
+        return parent::isAuthorized($user);
+    }
+</code></pre>
+<p>And now browse to <code>/users/logout</code>. You’ll be redirected back to the login with potentially confusing flash messages. You <em>are</em> in fact logged out. The error messages are because we haven’t allowed access to <code>/</code> in our app. We can fix that later, but for now, lets save our progress:</p>
+<pre><code class="language-shell">git add composer.json composer.lock src/Controller/UsersController.php src/Template/Users/login.ctp
+git commit -m "Working login flow"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.2">0.0.2</a>.</p>
+</blockquote>
+<p>Yep, we’re stopping here. We did say we’d get the whole forgot-password flow working, but it’s about quittin’ time for the day and we’ve covered quite a bit of ground. We’ll save that task for tomorrow, and also create a viewable landing page for our app.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/02/user-authentication-in-cakephp/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-02 02:20:00 +0000">02 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 2</strong> of <strong>2</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li>User Authentication in CakePHP</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/02/user-authentication-in-cakephp/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/02/user-authentication-in-cakephp/';
+        var disqus_title      = "CakeAdvent-2016: User Authentication in CakePHP";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

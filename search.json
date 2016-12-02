@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "User Authentication in CakePHP",
+    "url": "/2016/12/02/user-authentication-in-cakephp/",
+    "description": "Part 2 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["authentication","build","cakephp","cms","help","part","personal","posts","series","user","will"]
+  },
+  {
+    "type": "post",
     "title": "Creating a microblogging platform",
     "url": "/2016/12/01/creating-a-microblogging-platform/",
     "description": "Part 1 of a series of posts that will help you build out a personal CMS",
