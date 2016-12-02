@@ -173,7 +173,7 @@ pre.rainbow-code {
     .archives article .post-title a {
       color: #222;
       text-decoration: none;
-      font-weight: normal;
+      font-weight: 200;
       display: inline-block; }
       .archives article .post-title a:hover {
         text-decoration: underline; }
