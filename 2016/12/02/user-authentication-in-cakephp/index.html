@@ -63,7 +63,7 @@
             'authorize' =&gt; ['Controller'],
             'loginAction' =&gt; [
                 'plugin' =&gt; null,
-                'admin' =&gt; false,
+                'prefix' =&gt; false,
                 'controller' =&gt; 'Users',
                 'action' =&gt; 'login'
             ],
@@ -98,7 +98,7 @@
      *   If empty the user fetched from storage will be used.
      * @return bool True if $user is authorized, otherwise false
      */
-    public function isAuthorized(array $user = null)
+    public function isAuthorized($user = null)
     {
         return false;
     }
@@ -208,7 +208,7 @@ class UserShell extends Shell
   <li>I’m not validating the data, and will assume it’s good.</li>
 </ul>
 <p>You can run this shell - and answer the questions - via the following command:</p>
-<pre><code class="language-shell">bin/cake user --username-field emails
+<pre><code class="language-shell">bin/cake user --username-field email
 </code></pre>
 <p>And you’ll get an error. Why? Because you cannot save <code>null</code> to the <code>avatar</code> and <code>avatar_dir</code> fields. Poo. Lets fix that by creating a migration. First, lets generate a scaffold for the migration:</p>
 <pre><code class="language-shell">bin/cake bake migration alter_users avatar:string? avatar_dir:string?
@@ -217,7 +217,7 @@ class UserShell extends Shell
 <pre><code class="language-shell">bin/cake migrations migrate
 </code></pre>
 <p>Now run the <code>users</code> shell:</p>
-<pre><code class="language-shell">bin/cake user --username-field emails
+<pre><code class="language-shell">bin/cake user --username-field email
 </code></pre>
 <p>If you run it again with the same options, you’ll see it happily inserts the same email address <em>again</em>. Boo. Delete that record however you wish, but lets create a migration to ensure that doesn’t happen again:</p>
 <pre><code class="language-shell">bin/cake bake migration unique_users
@@ -314,9 +314,9 @@ git commit -m "Allow user creation via shell and fix our users table"
      *   If empty the user fetched from storage will be used.
      * @return bool True if $user is authorized, otherwise false
      */
-    public function isAuthorized(array $user = null)
+    public function isAuthorized($user = null)
     {
-        if ($this-&gt;request-&gt;params['action'] == 'logout') {
+        if ($this-&gt;request-&gt;param('action') == 'logout') {
             return true;
         }
         return parent::isAuthorized($user);
@@ -348,10 +348,11 @@ git commit -m "Working login flow"
     <aside class="sidebar widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
 <div class="series-note">
-    <p>This entry is <strong>part 2</strong> of <strong>2</strong> in the series "CakeAdvent 2016".</p>
+    <p>This entry is <strong>part 2</strong> of <strong>3</strong> in the series "CakeAdvent 2016".</p>
     <ol>
       <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
       <li>User Authentication in CakePHP</li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>

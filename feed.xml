@@ -5,9 +5,517 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 02 Dec 2016 07:22:57 +0000</pubDate>
-    <lastBuildDate>Fri, 02 Dec 2016 07:22:57 +0000</lastBuildDate>
+    <pubDate>Sat, 03 Dec 2016 10:27:47 +0000</pubDate>
+    <lastBuildDate>Sat, 03 Dec 2016 10:27:47 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Password Resets and Email</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;errata-from-last-post&quot;&gt;Errata from last post&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I fixed a few typos in executing the &lt;code&gt;users&lt;/code&gt; shell. Specifically, the &lt;code&gt;username-field&lt;/code&gt; flag should have a value of &lt;code&gt;email&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;In CakePHP 3.x, you no longer specify &lt;code&gt;admin =&amp;gt; true|false&lt;/code&gt; when configuring the &lt;code&gt;AuthComponent&lt;/code&gt;. It should be &lt;code&gt;prefix =&amp;gt; false|PREFIX_NAME&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;The preferred method of retrieving values from the request object is not &lt;code&gt;ArrayAccess&lt;/code&gt;, but via a method. You should use &lt;code&gt;$this-&amp;gt;request-&amp;gt;param(&#39;field&#39;)&lt;/code&gt; instead of the array-method.&lt;/li&gt;
+  &lt;li&gt;I’ve removed the type-hint on &lt;code&gt;AppController::isAuthorized()&lt;/code&gt; and &lt;code&gt;UsersController::isAuthorized()&lt;/code&gt;. The docblock states that they can also accept &lt;code&gt;ArrayAccess&lt;/code&gt;, so &lt;code&gt;array&lt;/code&gt; as a type-hint was inappropriate. In the recently released PHP 7.1, you can instead use &lt;code&gt;iterable&lt;/code&gt; as a type-hint.&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;The &lt;code&gt;config/bootstrap.php&lt;/code&gt; file is missing the &lt;code&gt;Plugin::load(&#39;CrudUsers&#39;);&lt;/code&gt; statement. You can add it manually or using the cli tool as follows:&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake plugin load CrudUsers
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
+
+&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
+
+&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;composer update
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
+
+&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
+git commit -m &quot;Update patch-level for all plugins&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;reset-password-flow&quot;&gt;Reset Password Flow&lt;/h2&gt;
+
+&lt;p&gt;First, we need a reset password flow.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;This workflow is vulnerable to email enumeration. Keep this in mind when implementing this in your application. You might want to look into some sort of rate-limiting for the &lt;code&gt;/users/forgot-password&lt;/code&gt; endpoint…&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/ditaa/ditaa-923bcc9bcd42f601ba22a85fc9f3d7ea.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Seems pretty reasonable. We will start be hooking up the appropriate crud actions for this.&lt;/p&gt;
+
+&lt;h2 id=&quot;enabling-the-crud-actions&quot;&gt;Enabling the Crud Actions&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Using Crud actions is going to become more or less second nature in this app. Get used to it?&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Add the following three lines to your &lt;code&gt;UsersController::initialize()&lt;/code&gt; method. This will map the &lt;code&gt;forgotPassword&lt;/code&gt;, &lt;code&gt;resetPassword&lt;/code&gt;, and &lt;code&gt;verify&lt;/code&gt; actions, as well as allow anonymous access to each.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;mapAction(&#39;forgotPassword&#39;, &#39;CrudUsers.ForgotPassword&#39;);
+$this-&amp;gt;Crud-&amp;gt;mapAction(&#39;resetPassword&#39;, [
+    &#39;className&#39; =&amp;gt; &#39;CrudUsers.ResetPassword&#39;,
+    &#39;findMethod&#39; =&amp;gt; &#39;token&#39;,
+]);
+$this-&amp;gt;Crud-&amp;gt;mapAction(&#39;verify&#39;, [
+    &#39;className&#39; =&amp;gt; &#39;CrudUsers.Verify&#39;,
+    &#39;findMethod&#39; =&amp;gt; &#39;token&#39;,
+]);
+$this-&amp;gt;Auth-&amp;gt;allow([&#39;forgotPassword&#39;, &#39;resetPassword&#39;, &#39;verify&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These three actions require the following fields for usage:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;token&lt;/code&gt;: A string field storing a reset token.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;verified&lt;/code&gt;: A boolean database field.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;adding-the-verified-field&quot;&gt;Adding the &lt;code&gt;verified&lt;/code&gt; field&lt;/h3&gt;
+
+&lt;p&gt;To get the verified field, we’ll create a migration:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration add_verified_field_to_users verified:boolean
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Once generated, you’ll want to set the &lt;code&gt;verified&lt;/code&gt; field default to either &lt;code&gt;true&lt;/code&gt; or &lt;code&gt;false&lt;/code&gt;. I set mine to &lt;code&gt;true&lt;/code&gt;, because we’ll only ever have a single verified user in this blog.&lt;/p&gt;
+
+&lt;p&gt;And now we can run it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;adding-the-token-field&quot;&gt;Adding the &lt;code&gt;token&lt;/code&gt; field&lt;/h3&gt;
+
+&lt;p&gt;To add the token field, we &lt;em&gt;could&lt;/em&gt; generate a migration and run it, but then we’d have to worry about generating tokens themselves. The &lt;code&gt;CrudUsers.ForgotPassword&lt;/code&gt; action class &lt;em&gt;does not generate tokens&lt;/em&gt;. I’d rather not have to deal with that logic, so we’ll lean on &lt;em&gt;yet another plugin&lt;/em&gt;, the &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Doesn’t it seem like I love plugins? In truth, I just am very lazy, so I lean on them heavily. Write once, use forever.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Lets install it first:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require muffin/tokenize
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll need to enable it and run it’s migrations:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# enable the plugin (with routes and bootstrapping)
+bin/cake plugin load Muffin/Tokenize --bootstrap --routes
+
+# run migrations
+bin/cake migrations migrate --plugin Muffin/Tokenize
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin doesn’t actually store tokens in the &lt;code&gt;users&lt;/code&gt; table. It creates a separate table and stores them there. For our next act, we’ll be actually sending the email and properly verifying that the user exists. Let’s save our progress for now.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json composer.lock config/Migrations/* config/bootstrap.php src/Controller/UsersController.php
+git commit -m &quot;Initial setup for password reset flow&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;event-listeners-and-mailers&quot;&gt;Event Listeners and Mailers&lt;/h2&gt;
+
+&lt;p&gt;In order to actually trigger email sending, we’re going to create a few classes and traits. Specifically, we need to:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Be able to properly retrieve tokens from our related table&lt;/li&gt;
+  &lt;li&gt;Ensure we send emails&lt;/li&gt;
+  &lt;li&gt;Verify tokens correctly&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;finding-muffin-tokens&quot;&gt;Finding muffin tokens&lt;/h3&gt;
+
+&lt;p&gt;First things first, we’ll need to be able to lookup a token. To do so, we’ll need to add the &lt;code&gt;Muffin/Tokenize.Tokenize&lt;/code&gt; behavior to our &lt;code&gt;UsersTable::initialize()&lt;/code&gt; method, located in &lt;code&gt;src/Model/Table/UsersTable.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Muffin/Tokenize.Tokenize&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that the behavior is loaded, we have setup a relation from the &lt;code&gt;UsersTable&lt;/code&gt; to the &lt;code&gt;TokensTable&lt;/code&gt; from the &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin. We’ll also need a custom &lt;code&gt;find&lt;/code&gt; method to bind that in.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Find methods are functions that describe how to query a table for entities. You can chain multiple find methods together to create new, more powerful finds. The built-in finds are &lt;code&gt;all&lt;/code&gt;, &lt;code&gt;list&lt;/code&gt;, and &lt;code&gt;threaded&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I personally like placing finds in traits, so that on the off-chance I need to use them elsewhere, I can. It also allows me to test the finds in isolation of any customizations performed in &lt;code&gt;Table&lt;/code&gt; classes. The following should go in &lt;code&gt;src/Table/Traits/TokenFinderTrait.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Table\Traits;
+
+trait TokenFinderTrait
+{
+    /**
+     * Find user based on token
+     *
+     * @param \Cake\ORM\Query $query The query to find with
+     * @param array $options The options to find with
+     * @return \Cake\ORM\Query The query builder
+     */
+    public function findToken($query, $options)
+    {
+        return $this-&amp;gt;find()-&amp;gt;matching(&#39;Tokens&#39;, function ($q) use ($options) {
+            return $q-&amp;gt;where([&#39;Tokens.token&#39; =&amp;gt; $options[&#39;token&#39;]]);
+        });
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will retrieve a user that is associated with a given token. In order to use this trait, you’ll need to add the following &lt;em&gt;inside&lt;/em&gt; the &lt;code&gt;UsersTable&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Table\Traits\TokenFinderTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can commit this small change now:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Table/UsersTable.php src/Model/Table/Traits/TokenFinderTrait.php
+git commit -m &quot;Enable finding reset tokens&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;event-listeners&quot;&gt;Event Listeners&lt;/h3&gt;
+
+&lt;p&gt;Halfway there. The &lt;code&gt;CrudUsers.ForgotPassword&lt;/code&gt; action class uses the &lt;code&gt;afterForgotPassword&lt;/code&gt; event to do the heavy lifting of notifying users of a password reset. We’ll need to handle it in our own event listener. You can do this via either a callable class - boo, hiss, hard to test - or via a nice Listener class. I’m going to do the latter, because it is cleaner. Add the following to &lt;code&gt;src/Listener/UsersListener.php&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Listener;
+
+use Cake\Event\Event;
+use Cake\Mailer\MailerAwareTrait;
+use Cake\ORM\TableRegistry;
+use Crud\Listener\BaseListener;
+
+/**
+ * Users Listener
+ */
+class UsersListener extends BaseListener
+{
+    use MailerAwareTrait;
+
+    /**
+     * Default config for this object.
+     *
+     * @var array
+     */
+    protected $_defaultConfig = [
+        &#39;mailer&#39; =&amp;gt; &#39;Users.User&#39;,
+    ];
+
+    /**
+     * Callbacks definition
+     *
+     * @return array
+     */
+    public function implementedEvents()
+    {
+        return [
+            &#39;Crud.afterForgotPassword&#39; =&amp;gt; &#39;afterForgotPassword&#39;,
+        ];
+    }
+
+    /**
+     * After Forgot Password
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function afterForgotPassword(Event $event)
+    {
+        if (!$event-&amp;gt;subject-&amp;gt;success) {
+            return;
+        }
+
+        $table = TableRegistry::get($this-&amp;gt;_controller()-&amp;gt;modelClass);
+        $token = $table-&amp;gt;tokenize($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;id);
+
+        if ($this-&amp;gt;config(&#39;mailer&#39;)) {
+            $this-&amp;gt;getMailer($this-&amp;gt;config(&#39;mailer&#39;))-&amp;gt;send(&#39;forgotPassword&#39;, [
+                $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;toArray(),
+                $token,
+            ]);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is a basic &lt;a href=&quot;http://book.cakephp.org/3.0/en/core-libraries/events.html#registering-listeners&quot;&gt;event listener&lt;/a&gt;. We define a list of &lt;code&gt;implementedEvents&lt;/code&gt;, map them to functions, and have our event logic in those functions. In this case, we’re using Crud internals to automatically get stuff like:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The current controller’s model&lt;/li&gt;
+  &lt;li&gt;Ensure we implement a listener in the form that Crud wants (which is merely a bit of sugar on top of a regular CakePHP event listener)&lt;/li&gt;
+  &lt;li&gt;Get and set custom configuration.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One thing you’ll notice is that we’ve added the &lt;code&gt;MailerAwareTrait&lt;/code&gt;. This trait is used to enable usage of CakePHP &lt;code&gt;Mailers&lt;/code&gt;, which are classes that store reusable email configuration. They are new in CakePHP 3.1, and while it’s certainly not how I used to write emails, I’ve come to appreciate them.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;It’s classes and traits all the way down! How do I keep track of all of these things? It’s mostly practice, as you can certainly do without most of this, but the separation allows us to cleanly refactor bits and pieces of code, as well as test individual pieces of logic.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In our listener, we’ve specified the &lt;code&gt;UserMailer&lt;/code&gt;, which lives in &lt;code&gt;src/Mailer/UserMailer.php&lt;/code&gt;. We are using &lt;code&gt;forgotPassword&lt;/code&gt; method of that mailer to send our email. If you’ve ever sent an email in CakePHP, you’ll be right at home. If not, it’s a pretty easy read. Below is the contents of that class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Mailer;
+
+use Cake\Mailer\Mailer;
+
+class UserMailer extends Mailer
+{
+    /**
+     * Email sent on password recovery requests
+     *
+     * @param array $user User information, must includer email and username
+     * @param string $token Token used for validation
+     * @return \Cake\Mailer\Mailer
+     */
+    public function forgotPassword($user, $token)
+    {
+        return $this-&amp;gt;to($user[&#39;email&#39;])
+            -&amp;gt;subject(&#39;Reset your password&#39;)
+            -&amp;gt;template(&#39;forgot_password&#39;)
+            -&amp;gt;layout(false)
+            -&amp;gt;set([
+                &#39;token&#39; =&amp;gt; $token,
+            ])
+            -&amp;gt;emailFormat(&#39;html&#39;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We have our listener and mailer setup, so now all we have to do is attach it to Crud and test it out. To begin, add the following line to your &lt;code&gt;UsersController&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;addListener(&#39;Users&#39;, &#39;App\Listener\UsersListener&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll need &lt;code&gt;html&lt;/code&gt; and &lt;code&gt;text&lt;/code&gt; templates for sending out these emails. The following are what I use in &lt;code&gt;src/Template/Email/html/forgot_password.ctp&lt;/code&gt; and &lt;code&gt;src/Template/Email/text/forgot_password.ctp&lt;/code&gt; (in that order):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Routing\Router;
+$url = Router::url(
+    [
+        &#39;controller&#39; =&amp;gt; &#39;users&#39;,
+        &#39;action&#39; =&amp;gt; &#39;verify&#39;,
+        $token
+    ],
+    true
+);
+?&amp;gt;
+&amp;lt;html&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;title&amp;gt;&amp;lt;?= $this-&amp;gt;fetch(&#39;title&#39;) ?&amp;gt;&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+    &amp;lt;?= $this-&amp;gt;fetch(&#39;content&#39;) ?&amp;gt;
+    &amp;lt;h1&amp;gt;Set your password...&amp;lt;/h1&amp;gt;
+    &amp;lt;p&amp;gt;
+        A password recovery link has been requested for your account. If you
+        haven&#39;t requested this, please ignore this email.
+    &amp;lt;/p&amp;gt;
+    &amp;lt;p&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(&#39;Click here to reset your password&#39;, $url) ?&amp;gt;
+    &amp;lt;/p&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Routing\Router;
+$url = Router::url(
+    [
+        &#39;controller&#39; =&amp;gt; &#39;users&#39;,
+        &#39;action&#39; =&amp;gt; &#39;verify&#39;,
+        $token
+    ],
+    true
+);
+?&amp;gt;
+
+A password recovery link has been requested for your account. If you haven&#39;t requested this, please ignore this email.
+
+Click here to reset your password: &amp;lt;?= $url ?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, we’ll need a &lt;code&gt;forgotPassword&lt;/code&gt; template, which should go in &lt;code&gt;src/Template/Users/forgot_password.ctp&lt;/code&gt;. This will be used to present the forgot password form to our users.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form&quot;&amp;gt;
+&amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render(&#39;auth&#39;) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
+    &amp;lt;fieldset&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Please enter your email to send a reset email&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;email&#39;) ?&amp;gt;
+    &amp;lt;/fieldset&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Reset password&#39;)); ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since we’re in a good place regarding the “forgot password” step, lets save our progress.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/UsersController.php src/Listener/UsersListener.php src/Mailer/UserMailer.php src/Template/Email/html/forgot_password.ctp src/Template/Email/text/forgot_password.ctp src/Template/Users/forgot_password.ctp
+git commit -m &quot;Implement forgot-password phase&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;verifying-tokens&quot;&gt;Verifying Tokens&lt;/h3&gt;
+
+&lt;p&gt;Once we are capable of sending emails, we’ll want to verify that the token being sent in the email is both a token we know about and is valid. The &lt;code&gt;ResetPassword&lt;/code&gt; action class does this by emitting a &lt;code&gt;verifyToken&lt;/code&gt; event, which we can listen to in our &lt;code&gt;UsersListener&lt;/code&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Tokens are a one-time use deal, and the &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin expires them in three days (configurable!).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We’ll need to first tell the listener that we have an implementation of the event handler by adding the following entry to the array our &lt;code&gt;UsersListener::implementedEvents()&lt;/code&gt; returns:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.verifyToken&#39; =&amp;gt; &#39;verifyToken&#39;,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And now for the implementation, we’ll want to call into the &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin and just call &lt;code&gt;verify()&lt;/code&gt; on the token like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Before Verify
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function verifyToken(Event $event)
+    {
+        $event-&amp;gt;subject-&amp;gt;verified = TableRegistry::get(&#39;Muffin/Tokenize.Tokens&#39;)
+            -&amp;gt;verify($event-&amp;gt;subject-&amp;gt;token);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We also need the &lt;code&gt;reset_password&lt;/code&gt; template. Place the following in &lt;code&gt;src/Template/Users/reset_password.ctp&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form&quot;&amp;gt;
+&amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render(&#39;auth&#39;) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
+    &amp;lt;fieldset&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Enter a new password to reset your account&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;) ?&amp;gt;
+    &amp;lt;/fieldset&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Signin&#39;)) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That’s it, that’s all! Lets commit it!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/UsersListener.php src/Template/Users/reset_password.ctp
+git commit -m &quot;Verify user tokens&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;testing-the-whole-flow&quot;&gt;Testing the Whole Flow&lt;/h3&gt;
+
+&lt;p&gt;In order to send email, we’ll need to configure a transport properly. You can do this in your &lt;code&gt;config/.env&lt;/code&gt; file, by changing the &lt;code&gt;EMAIL_TRANSPORT_DEFAULT_URL&lt;/code&gt; value to the desired configuration. I personally set mine to match my gmail credentials for now, though you’ll likely want to use something a bit more bulletproof. I’m not sure yet what we’ll use once we get to deploying this, but we’ll cross that bridge when we need to. Here is what I set mine to (minus a valid &lt;code&gt;username:password&lt;/code&gt; combination):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;export EMAIL_TRANSPORT_DEFAULT_URL=&quot;smtp://username:password@smtp.gmail.com:587/?client=null&amp;amp;timeout=30&amp;amp;tls=true&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, lets test sending this email. Browse to &lt;code&gt;/users/forgot-password&lt;/code&gt;, enter in the email address you set for your user earlier, submit the form, and check your email. If everything was configured properly - it was for me! - you’ll see an email like the following in your inbox:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/12/03/reset-password-email.png&quot; alt=&quot;reset password email&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Yes, my email avatar is a cat with a kermit hat. Deal with it.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This seems good so far. Click on the link to be taken to the following page:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/12/03/reset-password-page.png&quot; alt=&quot;reset password page&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And fill in your new password to reset your account.&lt;/p&gt;
+
+&lt;p&gt;Seems legit!&lt;/p&gt;
+
+&lt;h2 id=&quot;default-landing-page&quot;&gt;Default landing page&lt;/h2&gt;
+
+&lt;p&gt;You’ll notice that once you reset your password, you were redirected to the login page. If you try and login, you’ll land right back on the login page with two messages, one saying you are logged in, and one saying you do not have access. This is because we have made the app such that all controller/action pairs &lt;em&gt;must&lt;/em&gt; be individually allowed. Lets fix that and at least allow a landing page.&lt;/p&gt;
+
+&lt;p&gt;For now, our landing page will be the list of blog posts. We’ll need to first ensure that &lt;code&gt;/&lt;/code&gt; points at &lt;code&gt;PostsController::index()&lt;/code&gt;. This is done by editing our application’s routes in &lt;code&gt;config/routes.php&lt;/code&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Routes are how CakePHP knows what an incoming url points to in the application. A common use for changing routing is to add vanity urls. You can do all sorts of funny stuff with routes, as well see in later posts. CakePHP has some sane defaults that make it easy for developers to get started, which is why our &lt;code&gt;/users/login&lt;/code&gt;, &lt;code&gt;/users/forgot-password&lt;/code&gt;, etc. urls all worked out of the box.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The default route should currently be as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Pages&#39;, &#39;action&#39; =&amp;gt; &#39;display&#39;, &#39;home&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’re going to update it to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;index&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, lets allow access to this action in our &lt;code&gt;PostsController&lt;/code&gt;. We’ll need a custom &lt;code&gt;PostsController::initialize()&lt;/code&gt;. Here is what you should add to the &lt;code&gt;PostsController&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Initialization hook method.
+     *
+     * Use this method to add common initialization code like loading components.
+     *
+     * e.g. `$this-&amp;gt;loadComponent(&#39;Security&#39;);`
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this-&amp;gt;Auth-&amp;gt;allow([&#39;index&#39;]);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Why wouldn’t we have an &lt;code&gt;PostsController::isAuthorized()&lt;/code&gt;? That method applies only to already logged in users. Anonymous users would never be able to access the page, regardless of what you return from &lt;code&gt;isAuthorized()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You should now be able to access &lt;code&gt;/&lt;/code&gt;, both before and after logging in. Let’s commit what we have and end for today.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/routes.php src/Controller/PostsController.php
+git commit -m &quot;Allow logged in and anonymous access to an initial / route&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;–&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.3&quot;&gt;0.0.3&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Hurray, we have some authentication configured for our application, are sending emails, have figured out how to customize Crud for our usage, and even have a landing page. Tomorrow we’ll work on allowing the blog user to edit their account, and potentially even get to image uploading.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 03 Dec 2016 21:40:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/03/password-resets-and-email/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/03/password-resets-and-email/</guid>
+        
+        <category>passwords</category>
+        
+        <category>email</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>User Authentication in CakePHP</title>
@@ -32,7 +540,7 @@
             &#39;authorize&#39; =&amp;gt; [&#39;Controller&#39;],
             &#39;loginAction&#39; =&amp;gt; [
                 &#39;plugin&#39; =&amp;gt; null,
-                &#39;admin&#39; =&amp;gt; false,
+                &#39;prefix&#39; =&amp;gt; false,
                 &#39;controller&#39; =&amp;gt; &#39;Users&#39;,
                 &#39;action&#39; =&amp;gt; &#39;login&#39;
             ],
@@ -71,7 +579,7 @@
      *   If empty the user fetched from storage will be used.
      * @return bool True if $user is authorized, otherwise false
      */
-    public function isAuthorized(array $user = null)
+    public function isAuthorized($user = null)
     {
         return false;
     }
@@ -206,7 +714,7 @@ class UserShell extends Shell
 
 &lt;p&gt;You can run this shell - and answer the questions - via the following command:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake user --username-field emails
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake user --username-field email
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And you’ll get an error. Why? Because you cannot save &lt;code&gt;null&lt;/code&gt; to the &lt;code&gt;avatar&lt;/code&gt; and &lt;code&gt;avatar_dir&lt;/code&gt; fields. Poo. Lets fix that by creating a migration. First, lets generate a scaffold for the migration:&lt;/p&gt;
@@ -221,7 +729,7 @@ class UserShell extends Shell
 
 &lt;p&gt;Now run the &lt;code&gt;users&lt;/code&gt; shell:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake user --username-field emails
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake user --username-field email
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;If you run it again with the same options, you’ll see it happily inserts the same email address &lt;em&gt;again&lt;/em&gt;. Boo. Delete that record however you wish, but lets create a migration to ensure that doesn’t happen again:&lt;/p&gt;
@@ -345,9 +853,9 @@ git commit -m &quot;Allow user creation via shell and fix our users table&quot;
      *   If empty the user fetched from storage will be used.
      * @return bool True if $user is authorized, otherwise false
      */
-    public function isAuthorized(array $user = null)
+    public function isAuthorized($user = null)
     {
-        if ($this-&amp;gt;request-&amp;gt;params[&#39;action&#39;] == &#39;logout&#39;) {
+        if ($this-&amp;gt;request-&amp;gt;param(&#39;action&#39;) == &#39;logout&#39;) {
             return true;
         }
         return parent::isAuthorized($user);
@@ -1983,193 +2491,6 @@ bin/cake bake Controller Tags -t Crud
         <category>composer</category>
         
         <category>planning</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>SEO Considerations for CakePHP Applications</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;A lovely post that is an adventure across how you can bend CakePHP to your will.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Everyone loves free traffic, right? It allows us to continue building our applications, hopefully making money as we do so. If you aren’t making money, then why are you working on that app?&lt;/p&gt;
-
-&lt;p&gt;In any case, one thing that you should worry about is duplicate website content. If search engines see any such duplicate content - especially en masse - then the value of your web pages decreases in their eyes, potentially dropping your page views. That would be sucks.&lt;/p&gt;
-
-&lt;p&gt;One way to do this would be to automatically check that a url for a given page is the same as that which we expect. We can do this in a few ways, but the simplest is simply to check it manually!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * @param integer $id an id for the current model
- * @return void|Cake\Network\Request
- */
-public function view($id)
-{
-  $post = $this-&amp;gt;Posts-&amp;gt;get($id);
-  if ($this-&amp;gt;request-&amp;gt;here != $post-&amp;gt;getCanonicalUrl()) {
-    return $this-&amp;gt;redirect($post-&amp;gt;getCanonicalUrl());
-  }
-  $this-&amp;gt;set(&#39;post&#39;, $post);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Not too bad. One thing I like to do is use annotations for stuff, so I wrote an annotation parser for just the above:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize()
-{
-  $this-&amp;gt;loadComponent(&#39;SeoAnnotation&#39;, [
-    // this can be overriden
-    &#39;table&#39; =&amp;gt; &#39;Posts&#39;,
-    // as can this
-    &#39;primaryKey&#39; =&amp;gt; &#39;$id&#39;,
-  ]);
-}
-
-/**
- * @table Posts
- * @param integer $id an id for the current model
- * @return void|Cake\Network\Request
- */
-public function view($id)
-{
-  $post = $this-&amp;gt;Posts-&amp;gt;get($id);
-  $this-&amp;gt;set(&#39;post&#39;, $post);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The annotation parser - using the &lt;a href=&quot;https://github.com/marcioAlmada/annotations&quot;&gt;minime/annotations&lt;/a&gt; package - simply retrieves the entity on the specified table by the specified field and then automatically does the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function getTable()
-{
-  $annotations = $this-&amp;gt;geAnnotations();
-  $tableClass = $annotations-&amp;gt;get(&#39;table&#39;, $this-&amp;gt;config(&#39;table&#39;));
-  return TableRegistry::get($tableClass);
-}
-
-protected function getPrimaryKey()
-{
-  $annotations = $this-&amp;gt;geAnnotations();
-  $primaryKeyField = $annotations-&amp;gt;get(
-    &#39;primaryKey&#39;,
-    $this-&amp;gt;config(&#39;primaryKey&#39;)
-  );
-  // logic to iterate over other @param
-  // annotations to get the index of the primaryKey
-  // in the current request args
-  return $primaryKey;
-}
-
-protected function beforeFilter(\Cake\Event\Event $event)
-{
-  $primaryKey = $this-&amp;gt;getPrimaryKey();
-  if (empty($primaryKey)) {
-    return;
-  }
-
-  $entity = $this-&amp;gt;getTable()-&amp;gt;get($primaryKey);
-  if (!method_exists($entity, &#39;getCanonicalUrl&#39;)) {
-    throw new \RuntimeException(&#39;Your entity class must implement getCanonicalUrl&#39;);
-  }
-
-  if ($this-&amp;gt;request-&amp;gt;here != $entity-&amp;gt;getCanonicalUrl()) {
-    return $this-&amp;gt;redirect($entity-&amp;gt;getCanonicalUrl());
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Of course, if the specified field doesn’t exist as an &lt;code&gt;@param&lt;/code&gt; docblock, then my component does nothing. It does require a bit more work on the developer’s end, but as a bonus I also get well-documented code.&lt;/p&gt;
-
-&lt;p&gt;Note, you can always get at a controller in your custom components by doing the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$controller = $this-&amp;gt;_registry-&amp;gt;getController();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Components are “owned” by a &lt;code&gt;Cake\Controller\ComponentRegistry&lt;/code&gt;, which keeps track of both loaded components and the controller upon which they are loaded, amongst other things.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Semi-related, ComponentRegistry, TableRegistry, etc. are all simply &lt;a href=&quot;http://en.wikipedia.org/wiki/Service_locator_pattern&quot;&gt;service locators&lt;/a&gt;, and all use some form of dependency injection on the objects they build. Yes, CakePHP has those things you thought it didn’t, we’re just very good at hiding them from you :P&lt;br /&gt;
-If you’d like to use a similar pattern in your applications, you can extend the &lt;code&gt;Cake\Core\ObjectRegistry&lt;/code&gt; class. I personally use this for stuff like custom payment classes, or things where there are multiple implementations and constructing them can be a pita.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Back on topic, once I have an entity, I also like to set the canonical url for a given page. For instance, sometimes my page has querystring values that I’d like search engines to ignore. Maybe they were affiliate parameters, or things that updated filters. In any case, it’s a good idea to set a &lt;code&gt;rel=canonical&lt;/code&gt; meta tag:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if (method_exists($entity, &#39;getCanonicalUrl&#39;) {
-  $this-&amp;gt;_controller-&amp;gt;set(&#39;metaCanonical&#39;, $entity-&amp;gt;getCanonicalUrl());
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And then in your view:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;// there isn&#39;t a special helper for this,
-// so we are just using HtmlHelper::tag()
-echo $this-&amp;gt;Html-&amp;gt;tag(&#39;link&#39;, null, [
-  &#39;rel&#39; =&amp;gt; &#39;canonical&#39;,
-  // get the full url, since we don&#39;t expect `getCanonicalUrl`
-  // to return with the domain etc.
-  &#39;href&#39; =&amp;gt; \Cake\Routing\Router::url($metaCanonical, true),
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When writing an application, we often want memorable names. &lt;code&gt;/posts/view/34523&lt;/code&gt; is a boring url, but &lt;code&gt;/2015/12/24/seo-considerations-for-cakephp-applications/&lt;/code&gt; tells me a bit more. But how do I do routing off of that?&lt;/p&gt;
-
-&lt;p&gt;One thing that is useful to to &lt;em&gt;still&lt;/em&gt; have the “primarykey” to a record in the url. For instance, you might have the following url:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;/34523/seo-considerations-for-cakephp-applications/
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That still has an ID I can look for, and also contains some interesting metadata for both the user and a search engine. But how do we generate that slug? Using plugin LIKE A BAWS:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;# install the thing!
-composer require muffin/slug
-
-# enable the thing!
-bin/cake plugin load Muffin/Slug
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now add the behavior to your table:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Table;
-
-use Cake\ORM\Table;
-
-class PostsTable extends Table
-{
-  public function initialize(array $config)
-  {
-    // some other crap you think is code goes here
-    $this-&amp;gt;displayField(&#39;title&#39;);
-    $this-&amp;gt;addBehavior(&#39;Muffin/Slug.Slug&#39;, [
-      // options! https://github.com/UseMuffin/Slug#configuration
-    ]);
-  }
-}
-?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now, as long as you have a &lt;code&gt;slug&lt;/code&gt; field in your &lt;code&gt;posts&lt;/code&gt; table and a &lt;code&gt;title&lt;/code&gt; field as your displayField, you will be set. You can now use the &lt;code&gt;slug&lt;/code&gt; in your &lt;code&gt;getCanonicalUrl&lt;/code&gt; method.&lt;/p&gt;
-
-&lt;p&gt;But why stop there? You could also build a simple admin tool to let your marketing team update those canonical urls using the &lt;a href=&quot;/2015/12/02/creating-apis-using-the-crud-plugin/&quot;&gt;crud&lt;/a&gt; and &lt;a href=&quot;/2015/12/03/generating-administrative-panels-with-crud-view/&quot;&gt;crud-view&lt;/a&gt; plugin. Trust me, they’ll love you and sing your praises to your bosses, which will be especially nice when you realize you are programming on Christmas day and your boss is like “slow your roll, you did great work this year, go take a nice long vacation and come back to me fresh next year.”&lt;/p&gt;
-
-&lt;p&gt;And that’s all I have. Come back next year - or whenever I decide to write again - and we’ll see if I can muster up more tips and tricks you can use in writing your CakePHP code. Until then, pet your pets and Happy Holidays!&lt;/p&gt;
-</description>
-        <pubDate>Thu, 24 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/24/seo-considerations-for-cakephp-applications/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/24/seo-considerations-for-cakephp-applications/</guid>
-        
-        <category>cakeadvent-2015</category>
-        
-        <category>cakephp</category>
-        
-        <category>seo</category>
-        
-        <category>routing</category>
-        
-        <category>behaviors</category>
-        
-        <category>annotations</category>
         
         
         <category>cakephp</category>
