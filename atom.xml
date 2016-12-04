@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-12-03T10:27:47+00:00</updated>
+ <updated>2016-12-04T08:32:41+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -13,9 +13,17 @@
 
 
  <entry>
+   <title type="html"><![CDATA[File Uploading and Account Management]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/"/>
+   <updated>2016-12-04T01:35:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/</id>
+   <content type="html"><![CDATA[Part 4 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
+
+ <entry>
    <title type="html"><![CDATA[Password Resets and Email]]></title>
    <link href="http://josediazgonzalez.com/2016/12/03/password-resets-and-email/"/>
-   <updated>2016-12-03T21:40:00+00:00</updated>
+   <updated>2016-12-03T01:40:00+00:00</updated>
    <id>http://josediazgonzalez.com/2016/12/03/password-resets-and-email/</id>
    <content type="html"><![CDATA[Part 3 of a series of posts that will help you build out a personal CMS]]></content>
  </entry>

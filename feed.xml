@@ -5,9 +5,379 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 03 Dec 2016 10:27:47 +0000</pubDate>
-    <lastBuildDate>Sat, 03 Dec 2016 10:27:47 +0000</lastBuildDate>
+    <pubDate>Sun, 04 Dec 2016 08:32:41 +0000</pubDate>
+    <lastBuildDate>Sun, 04 Dec 2016 08:32:41 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>File Uploading and Account Management</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;managing-a-users-account&quot;&gt;Managing a User’s account&lt;/h2&gt;
+
+&lt;p&gt;Now that we can login, we’ll probably want to be able to update our profile &lt;em&gt;without&lt;/em&gt; needing to go through the reset password flow. For that, we’ll need a account page. I’d also love to be able to personalize the account so that the user will feel at home in his CMS, so we’ll allow them to upload a custom image as well. We’ll start on account management first. First, lets start by making the &lt;code&gt;UsersController::edit()&lt;/code&gt; action open to all authenticated users by modifying our &lt;code&gt;UsersController::isAuthorized()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Check if the provided user is authorized for the request.
+     *
+     * @param array|\ArrayAccess|null $user The user to check the authorization of.
+     *   If empty the user fetched from storage will be used.
+     * @return bool True if $user is authorized, otherwise false
+     */
+    public function isAuthorized($user = null)
+    {
+        if (in_array($this-&amp;gt;request-&amp;gt;param(&#39;action&#39;), [&#39;edit&#39;, &#39;logout&#39;])) {
+            return true;
+        }
+        return parent::isAuthorized($user);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, lets go to the &lt;code&gt;/users/edit&lt;/code&gt; page in our browser. You should get a &lt;code&gt;NotFoundException&lt;/code&gt;. This is because the &lt;code&gt;UsersController::edit()&lt;/code&gt; action is currently mapped to the &lt;code&gt;Crud.Edit&lt;/code&gt; action class in your &lt;code&gt;AppController::initialize()&lt;/code&gt;, and that action class expects a user id to be passed in. We can fix that and force the edit page to &lt;em&gt;always&lt;/em&gt; map to the currently logged in user by handling the &lt;code&gt;beforeHandle&lt;/code&gt; Crud event in our &lt;code&gt;UsersListener&lt;/code&gt;. First, lets add the following to the list of events handled in our &lt;code&gt;UsersListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeHandle&#39; =&amp;gt; &#39;beforeHandle&#39;,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll need to implement the &lt;code&gt;UsersListener::beforeHandle()&lt;/code&gt; method. As the &lt;code&gt;beforeHandle&lt;/code&gt; event occurs for &lt;em&gt;all&lt;/em&gt; executed Crud actions, we’ll need to take extra care to only set the action arguments when the current action is the &lt;code&gt;edit&lt;/code&gt; action.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Before Handle
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeHandle(Event $event)
+    {
+        if ($event-&amp;gt;subject-&amp;gt;action === &#39;edit&#39;) {
+            $this-&amp;gt;beforeHandleEdit($event);
+
+            return;
+        }
+    }
+
+    /**
+     * Before Handle Edit Action
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeHandleEdit(Event $event)
+    {
+        $userId = $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
+        $event-&amp;gt;subject-&amp;gt;args = [$userId];
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Browse to the &lt;code&gt;/users/edit&lt;/code&gt; page now and you’ll see a lovely form with our current user’s information filled out. Yay! Unfortunately, it leaks the existing password, which isn’t great. Honestly, I think we should clean up this form a bit:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The password field should not have the pre-hashed password set&lt;/li&gt;
+  &lt;li&gt;The password field should only be changed when the password is confirmed&lt;/li&gt;
+  &lt;li&gt;The &lt;code&gt;avatar_dir&lt;/code&gt; field shouldn’t be shown on the form&lt;/li&gt;
+  &lt;li&gt;The &lt;code&gt;avatar&lt;/code&gt; field is actually a form upload.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let’s take care of the first three tasks. We’ll start by adding an event handler to remove the hashed &lt;code&gt;password&lt;/code&gt; during the &lt;code&gt;Crud.beforeRender&lt;/code&gt; event. Add the following to your &lt;code&gt;UsersListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeRender&#39; =&amp;gt; &#39;beforeRender&#39;,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll handle the event in the same &lt;code&gt;UsersListener&lt;/code&gt; class and unset the &lt;code&gt;password&lt;/code&gt; property on the Crud-produced entity:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Before Render
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeRender(Event $event)
+    {
+        if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;edit&#39;) {
+            $this-&amp;gt;beforeRenderEdit($event);
+
+            return;
+        }
+    }
+
+    /**
+     * Before Render Edit Action
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeRenderEdit(Event $event)
+    {
+        $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;unsetProperty(&#39;password&#39;);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you refresh the &lt;code&gt;/users/edit&lt;/code&gt; page, you should see that the hashed password was removed. Now that this is set, we’ll need tomodify the edit form. We previously baked this on the first day of development, so you should have a &lt;code&gt;src/Template/Users/edit.ctp&lt;/code&gt; file. We’ll edit the form section to show the following for now (ignore the sidebar section!):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form large-9 medium-8 columns content&quot;&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create($user) ?&amp;gt;
+    &amp;lt;fieldset&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Edit User&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;?php
+            echo $this-&amp;gt;Form-&amp;gt;input(&#39;email&#39;);
+            echo $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;, [&#39;required&#39; =&amp;gt; false]);
+            echo $this-&amp;gt;Form-&amp;gt;input(&#39;confirm_password&#39;);
+            echo $this-&amp;gt;Form-&amp;gt;input(&#39;avatar&#39;);
+        ?&amp;gt;
+    &amp;lt;/fieldset&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Submit&#39;)) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above adds a &lt;code&gt;confirm_password&lt;/code&gt; field and also removes the &lt;code&gt;avatar_dir&lt;/code&gt; field. Finally, add password confirmation, and only save the updated password if it matches the &lt;code&gt;confirm_password&lt;/code&gt; field &lt;em&gt;and&lt;/em&gt; both have a value. We’ll create a custom validation method - validationAccount - to handle this. Place the following within a trait at &lt;code&gt;src/Model/Table/Traits/AccountValidationTrait.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Table\Traits;
+
+use Cake\Validation\Validator;
+
+trait AccountValidationTrait
+{
+    /**
+     * Account validation rules.
+     *
+     * @param \Cake\Validation\Validator $validator Validator instance.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationAccount(Validator $validator)
+    {
+        $validator = $this-&amp;gt;validationDefault($validator);
+        $validator-&amp;gt;remove(&#39;password&#39;);
+        $validator-&amp;gt;allowEmpty(&#39;confirm_password&#39;);
+        $validator-&amp;gt;add(&#39;confirm_password&#39;, &#39;no-misspelling&#39;, [
+            &#39;rule&#39; =&amp;gt; [&#39;compareWith&#39;, &#39;password&#39;],
+            &#39;message&#39; =&amp;gt; &#39;Passwords are not equal&#39;,
+        ]);
+        return $validator;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;I really love traits. Sorry not sorry?&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In this custom validation rule, we inherit from the default rules - defined in the &lt;code&gt;UsersTable::validationDefault()&lt;/code&gt; method - remove the rules that require a &lt;code&gt;password&lt;/code&gt; to be set, and add a rule that requires the &lt;code&gt;password&lt;/code&gt; and &lt;code&gt;confirm_password&lt;/code&gt; fields to match.&lt;/p&gt;
+
+&lt;p&gt;Next, we’ll need to add the proper &lt;code&gt;use&lt;/code&gt; statement to the &lt;em&gt;inside&lt;/em&gt; of our &lt;code&gt;UsersTable&lt;/code&gt; class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Table\Traits\AccountValidationTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To ensure that our custom validation method is actually invoked, we’ll need to modify the &lt;code&gt;UsersListener::beforeHandleEdit()&lt;/code&gt; to tell the &lt;code&gt;Edit&lt;/code&gt; action class to use it. Here is what I added to that method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_controller()-&amp;gt;Crud-&amp;gt;action()-&amp;gt;saveOptions([&#39;validate&#39; =&amp;gt; &#39;account&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One thing to note is that we never want to update the password when no password has been set. The &lt;code&gt;Edit&lt;/code&gt; action class doesn’t currently provide an event to directly edit event data, but we still have two options:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;If no &lt;code&gt;password&lt;/code&gt;/&lt;code&gt;confirm_password&lt;/code&gt; is set at the time of the &lt;code&gt;beforeHandle&lt;/code&gt; event, we can just unset it from the request.&lt;/li&gt;
+  &lt;li&gt;If no &lt;code&gt;password&lt;/code&gt;/&lt;code&gt;confirm_password&lt;/code&gt; is set at the time of the &lt;code&gt;beforeSave&lt;/code&gt; event, we can mark the &lt;code&gt;password&lt;/code&gt; field as not dirty, and it won’t be overwritten.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I prefer the latter, because I don’t like screwing around with the incoming request data. Where you perform the scrubbing is up to you. If you do as I do, you’ll have to check if &lt;code&gt;confirm_password&lt;/code&gt; is empty instead of &lt;code&gt;password&lt;/code&gt;. This is because at the &lt;code&gt;beforeSave&lt;/code&gt; event, the data has already been set upon the entity, and an empty string has been hashed by the &lt;code&gt;User::_setPassword()&lt;/code&gt; method. The &lt;code&gt;confirm_password&lt;/code&gt; field will only be empty if both are empty, otherwise we wouldn’t even have gotten to the save phase.&lt;/p&gt;
+
+&lt;p&gt;I’ll add the following to handle my event to &lt;code&gt;UsersListener::implementedEvents()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeSave&#39; =&amp;gt; &#39;beforeSave&#39;,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here are the methods to add to the &lt;code&gt;UsersListener&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Before Save
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeSave(Event $event)
+    {
+        if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;edit&#39;) {
+            $this-&amp;gt;beforeSaveEdit($event);
+
+            return;
+        }
+    }
+
+    /**
+     * Before Render Edit Action
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeSaveEdit(Event $event)
+    {
+        if ($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;confirm_password === &#39;&#39;) {
+            $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;unsetProperty(&#39;password&#39;);
+            $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;dirty(&#39;password&#39;, false);
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Woot! Very close. If you try to submit the form now, you will probably get a validation error - if your browser even lets you submit. Why? The &lt;code&gt;avatar&lt;/code&gt; field is empty. Even though we’ve set it to allow &lt;code&gt;null&lt;/code&gt; values, we need to remove the validation rules surrounding them in our &lt;code&gt;UsersTable::validationDefault()&lt;/code&gt; method. Remove the rules regarding &lt;code&gt;avatar&lt;/code&gt; and &lt;code&gt;avatar_dir&lt;/code&gt;, and you should be off to the races.&lt;/p&gt;
+
+&lt;p&gt;Let’s save our position now.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/UsersController.php src/Listener/UsersListener.php src/Model/Table/Traits/AccountValidationTrait.php src/Model/Table/UsersTable.php src/Template/Users/edit.ctp
+git commit -m &quot;Implement initial account management, including password changing&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;setting-an-image-avatar&quot;&gt;Setting an image avatar&lt;/h2&gt;
+
+&lt;p&gt;While image uploading isn’t baked into cake - &lt;em&gt;lol&lt;/em&gt; - by default, I’ve included my Upload plugin with the composer app skeleton we used to create the &lt;code&gt;calico&lt;/code&gt; app. If you don’t have it installed, you’ll want to install it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# install the plugin
+composer require josegonzalez/cakephp-upload
+
+# load it in your app
+bin/cake plugin load Josegonzalez/Upload
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You are welcome and encouraged to try other plugins that might better suit your needs. I wrote mine and like mine, but maybe you prefer a different one.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Next, we’ll need to modify our &lt;code&gt;UsersTable::initialize()&lt;/code&gt; method to add the behavior for our &lt;code&gt;avatar&lt;/code&gt; and &lt;code&gt;avatar_dir&lt;/code&gt; fields:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
+    &#39;avatar&#39; =&amp;gt; [
+        &#39;fields&#39; =&amp;gt; [
+            &#39;dir&#39; =&amp;gt; &#39;avatar_dir&#39;,
+        ],
+    ],
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll need to modify our form to show the correct input type for the &lt;code&gt;avatar&lt;/code&gt; field. I’m also going to conditionally show the avatar on the page so we know what it looks like when it has been uploaded. This is what the form section of the &lt;code&gt;edit.ctp&lt;/code&gt; should look like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form large-9 medium-8 columns content&quot;&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create($user, [&#39;type&#39; =&amp;gt; &#39;file&#39;]) ?&amp;gt;
+    &amp;lt;fieldset&amp;gt;
+        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Edit User&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
+        &amp;lt;?php
+            echo $this-&amp;gt;Form-&amp;gt;input(&#39;email&#39;);
+            echo $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;, [&#39;required&#39; =&amp;gt; false]);
+            echo $this-&amp;gt;Form-&amp;gt;input(&#39;confirm_password&#39;);
+            echo $this-&amp;gt;Form-&amp;gt;input(&#39;avatar&#39;, [&#39;type&#39; =&amp;gt; &#39;file&#39;]);
+            if (!empty($user-&amp;gt;avatar)) {
+                $imageUrl = &#39;../&#39; . preg_replace(&quot;/^webroot/&quot;, &quot;&quot;, $user-&amp;gt;avatar_dir) . &#39;/&#39; . $user-&amp;gt;avatar;
+                echo $this-&amp;gt;Html-&amp;gt;image($imageUrl, [
+                    &#39;height&#39; =&amp;gt; &#39;100&#39;,
+                    &#39;width&#39; =&amp;gt; &#39;100&#39;,
+                ]);
+            }
+        ?&amp;gt;
+    &amp;lt;/fieldset&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Submit&#39;)) ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you try it out now, you should get a working image upload. Here is what the form looks like for me after an avatar upload:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/12/04/working-image-upload.png&quot; alt=&quot;working image upload&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;My cat looks handsome, doesn’t she?&lt;/p&gt;
+
+&lt;p&gt;Before closing out image uploads, we’ll want to ignore the &lt;code&gt;webroot/files&lt;/code&gt; directory in our &lt;code&gt;.gitignore&lt;/code&gt;. If we do not, we’ll end up accidentally committing uploaded files. Please ensure the following line is in your &lt;code&gt;.gitignore&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/webroot/files
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lets commit all our changes as well.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add .gitignore src/Model/Table/UsersTable.php src/Template/Users/edit.ctp
+git commit -m &quot;Enable avatar uploads&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;validating-image-uploads&quot;&gt;Validating image uploads&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The following are only &lt;em&gt;some&lt;/em&gt; of the things you can do to validate that images uploaded are, in fact, images. I would recommend you also:&lt;br /&gt;
+- resize the images to remove extra metadata that you may not wish to show&lt;br /&gt;
+- only display images that have been sanitized&lt;br /&gt;
+- use the &lt;a href=&quot;http://cloudinary.com/blog/how_to_detect_and_prevent_malware_infected_user_uploads&quot;&gt;metascan&lt;/a&gt; tool to verify the validity of uploads before referencing them on your site.&lt;br /&gt;
+This list is also by no means exhaustive, and as security is an important subject, I defer to the experts. Please keep this in mind!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Before allowing just &lt;em&gt;any&lt;/em&gt; file uploads, lets be sure that they are indeed images. I’d also like to ensure we’re not allowing a save to occur when the image upload fails for whatever reason. This will ensure we surface the errors to the users before the UploadBehavior gets to it. The following should be added to your &lt;code&gt;AccountValidationTrait::validationAccount()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;allowEmpty(&#39;avatar&#39;);
+$validator-&amp;gt;add(&#39;avatar&#39;, &#39;valid-image&#39;, [
+    &#39;rule&#39; =&amp;gt; [&#39;uploadedFile&#39;, [
+        &#39;types&#39; =&amp;gt; [
+            &#39;image/bmp&#39;,
+            &#39;image/gif&#39;,
+            &#39;image/jpeg&#39;,
+            &#39;image/pjpeg&#39;,
+            &#39;image/png&#39;,
+            &#39;image/vnd.microsoft.icon&#39;,
+            &#39;image/x-windows-bmp&#39;,
+            &#39;image/x-icon&#39;,
+            &#39;image/x-png&#39;,
+        ],
+        &#39;optional&#39; =&amp;gt; true,
+    ]],
+    &#39;message&#39; =&amp;gt; &#39;The uploaded avatar was not a valid image&#39;
+]);
+$validator-&amp;gt;add(&#39;avatar&#39;, &#39;not-upload-error&#39;, [
+    &#39;rule&#39; =&amp;gt; [&#39;uploadError&#39;, true],
+    &#39;message&#39; =&amp;gt; &#39;There was an error uploading your avatar&#39;,
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We’re allowing the avatar field to be empty. If you don’t do this, you’re going to see errors when saving the form without an uploaded avatar.&lt;/li&gt;
+  &lt;li&gt;We’re only allowing valid images to be uploaded. Hell, our user can even upload an icon as his avatar if they want.&lt;/li&gt;
+  &lt;li&gt;We want to make sure that there are no upload errors. Note that &lt;em&gt;not&lt;/em&gt; uploading a file should not be considered an error. PHP will report it as such, and if we want to allow no files to be uploaded, we have to pass &lt;code&gt;true&lt;/code&gt; as the first option to the &lt;code&gt;uploadError&lt;/code&gt; rule.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The above validation rules are included with CakePHP, but you can &lt;em&gt;also&lt;/em&gt; use custom rules - such as file and image size limiting - that are available from the Upload plugin. Documentation for that is available &lt;a href=&quot;https://cakephp-upload.readthedocs.io/en/latest/validation.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now that we’ve validated our image uploads, lets save our changes to the git repository.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Table/Traits/AccountValidationTrait.php
+git commit -m &quot;Ensure avatar uploads are actually images&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.4&quot;&gt;0.0.4&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Our app now has proper image uploading and account management. We’ve learned a few new tricks regarding the Crud plugin event system, added advanced validation rules for managing our account, and even showed off our avatar on the form. I think we’re more or less done with account management for now. Tomorrow, we’ll get into the nitty-gritty of our blog internals, beginning with the initial stages of our posts admin panel.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 04 Dec 2016 01:35:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/</guid>
+        
+        <category>user-accounts</category>
+        
+        <category>upload</category>
+        
+        <category>files</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Password Resets and Email</title>
@@ -490,7 +860,7 @@ git commit -m &quot;Verify user tokens&quot;
 git commit -m &quot;Allow logged in and anonymous access to an initial / route&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;–&lt;/p&gt;
+&lt;hr /&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.3&quot;&gt;0.0.3&lt;/a&gt;.&lt;/p&gt;
@@ -500,7 +870,7 @@ git commit -m &quot;Allow logged in and anonymous access to an initial / route&q
 
 &lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
 </description>
-        <pubDate>Sat, 03 Dec 2016 21:40:00 +0000</pubDate>
+        <pubDate>Sat, 03 Dec 2016 01:40:00 +0000</pubDate>
         <link>http://josediazgonzalez.com/2016/12/03/password-resets-and-email/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/03/password-resets-and-email/</guid>
         
@@ -2401,96 +2771,6 @@ bin/cake bake Controller Tags -t Crud
         <category>migrations</category>
         
         <category>bake</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Creating a CakePHP skeleton</title>
-        <description>&lt;p&gt;&lt;img src=&quot;/images/2015/12/26/screenshot.png&quot; alt=&quot;File Upload Tool&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;ive-got-a-lot-of-problems-with-you-people&quot;&gt;“I’ve got a lot of problems with you people”&lt;/h2&gt;
-
-&lt;p&gt;A while back &lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;, I &lt;s&gt;stole&lt;/s&gt; built a &lt;a href=&quot;https://devcenter.heroku.com/articles/paperclip-s3&quot;&gt;simple image upload tool&lt;/a&gt; for our &lt;a href=&quot;https://seatgeek.com/sgteam&quot;&gt;marketing team&lt;/a&gt;. The reason I built this was simple; I wanted to stop the marketing team from uploading large file assets to the main repository &lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;, thereby bloating repository size. Plus they get their assets out as soon as they need them, instead of waiting for some silly dev to press the deploy button. It’s worked well enough, but has lately shown it’s age:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Thumbnails are processed in a web request, slowing down large file uploads. We should &lt;em&gt;always&lt;/em&gt; process any files in the background, to avoid slowing down the user’s interaction with the site.&lt;/li&gt;
-  &lt;li&gt;Thumbnails are created &lt;em&gt;regardless&lt;/em&gt; of the file type. Uploading a large gif? Yeah that won’t work.&lt;/li&gt;
-  &lt;li&gt;Images are uploaded through rails. Since we store assets on S3, we can just as easily upload direct to S3 in javascript.&lt;/li&gt;
-  &lt;li&gt;I never built in any categorization, tagging, or user functionality. There isn’t any way for the marketing team to know who uploaded what file, nor for what purpose.&lt;/li&gt;
-  &lt;li&gt;A “file” can actually be several different assets. For instance, we frequently resize assets manually - on the client-side at the moment - for use in different media, like ads, email, or on-site ads. Having several different “uploads” made it slightly difficult to see which one someone should use for a specific purpose.&lt;/li&gt;
-  &lt;li&gt;It doesn’t have an API, meaning other teams that might want to use it to store information - such as the Android team - can’t easily write an integration like, say, &lt;a href=&quot;https://www.getcloudapp.com/&quot;&gt;CloudApp&lt;/a&gt; &lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;#fn:3&quot; class=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt; but just for our internal tool.&lt;/li&gt;
-  &lt;li&gt;The site is built on an older version of rails &lt;sup id=&quot;fnref:4&quot;&gt;&lt;a href=&quot;#fn:4&quot; class=&quot;footnote&quot;&gt;4&lt;/a&gt;&lt;/sup&gt;, which I have no desire nor intention to upgrade. We also don’t really have a dedicated Rails developer, so it’s not like I can just toss the app at someone else. We &lt;em&gt;do&lt;/em&gt;, however, have two CakePHP Core developers on staff, so at worst I can just tell &lt;a href=&quot;https://github.com/ad7six&quot;&gt;Andy&lt;/a&gt; it’s his problem now.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;lets-try-and-get-past-this&quot;&gt;Let’s try and get past this&lt;/h2&gt;
-
-&lt;p&gt;So I’m building this new app and decided I needed a good base:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Must have all my favorite plugins - &lt;a href=&quot;/2015/12/02/creating-apis-using-the-crud-plugin/&quot;&gt;Crud&lt;/a&gt;, &lt;a href=&quot;/2015/12/03/generating-administrative-panels-with-crud-view/&quot;&gt;Crud View&lt;/a&gt;, &lt;a href=&quot;/2015/12/05/uploading-files-and-images/&quot;&gt;Upload&lt;/a&gt;, etc. - enabled by default.&lt;/li&gt;
-  &lt;li&gt;Should handle &lt;a href=&quot;/2015/12/07/error-handling-in-cakephp-3/&quot;&gt;error tracking&lt;/a&gt; and &lt;a href=&quot;/2015/12/14/custom-logging-engines-and-adding-contextual-data/&quot;&gt;logging&lt;/a&gt; in a sane way.&lt;/li&gt;
-  &lt;li&gt;Must be able to handle being &lt;a href=&quot;/2015/12/12/using-dns-to-simplify-connection-strings/&quot;&gt;deployed&lt;/a&gt; to &lt;a href=&quot;/2015/12/18/managing-application-configuration/&quot;&gt;heroku&lt;/a&gt; by default.&lt;/li&gt;
-  &lt;li&gt;Needs support for &lt;em&gt;some&lt;/em&gt; method of &lt;a href=&quot;/2015/12/20/creating-custom-background-shells/&quot;&gt;background queueing&lt;/a&gt;.&lt;/li&gt;
-  &lt;li&gt;Should be open source &lt;sup id=&quot;fnref:5&quot;&gt;&lt;a href=&quot;#fn:5&quot; class=&quot;footnote&quot;&gt;5&lt;/a&gt;&lt;/sup&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Thankfully, we can use composer to &lt;a href=&quot;/2015/12/09/customizing-your-app-template/&quot;&gt;customize our application skeleton&lt;/a&gt;. This will enable me to scaffold out my application more more quickly than I would be able to if I used the base &lt;a href=&quot;https://github.com/cakephp/app&quot;&gt;cakephp/app&lt;/a&gt; composer project template.&lt;/p&gt;
-
-&lt;p&gt;Here is my first pass, &lt;a href=&quot;https://github.com/josegonzalez/app&quot;&gt;josegonzalez/app&lt;/a&gt;. It’s based upon the original &lt;a href=&quot;https://github.com/cakephp/app&quot;&gt;cakephp/app&lt;/a&gt; project template, with many of my requirements fulfilled. Ideally everything would be done now, but that won’t ever be the case:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Still need to add a custom &lt;code&gt;config/functions.php&lt;/code&gt; for utility functions I tend to use such as &lt;code&gt;diebug()&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;I don’t &lt;em&gt;yet&lt;/em&gt; have a contextual logger in place. I’m considering switching to monolog and having all logging go to &lt;code&gt;stdout&lt;/code&gt; when using the &lt;a href=&quot;/2015/12/17/cakephp-shells-i-didnt-know-about/&quot;&gt;built-in cake server shell&lt;/a&gt;, but I’m not quite sure yet.&lt;/li&gt;
-  &lt;li&gt;I can’t yet &lt;em&gt;seed&lt;/em&gt; an environment in &lt;a href=&quot;/2015/12/18/managing-application-configuration/&quot;&gt;dotenv&lt;/a&gt;, so heroku support isn’t quite complete, but I’m working on it.&lt;/li&gt;
-  &lt;li&gt;There are quite a few plugins that would be useful to have - such as &lt;a href=&quot;https://github.com/usemuffin/footprint&quot;&gt;muffin/footprint&lt;/a&gt; - but they aren’t there yet. I’ll add them as I see general use across my application.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Side note: I wrote &lt;em&gt;way&lt;/em&gt; too many blog posts. Do you see the internal linkage up there? Incredible.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;whats-next&quot;&gt;What’s next?&lt;/h2&gt;
-
-&lt;p&gt;Now that I have a firm base for my application, I’ll need to start actually building the thing. I’m hoping there isn’t too much work, but these things tend to take forever, so we’ll see. Since I have a pretty small set of requirements, actually writing the code should be a straightforward process, but hopefully I can do this in a readable, re-usable way.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the Media Manager series. Until next post, meow!&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;div class=&quot;footnotes&quot;&gt;
-  &lt;ol&gt;
-    &lt;li id=&quot;fn:1&quot;&gt;
-      &lt;p&gt;November 12, 2013 to be precise. &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id=&quot;fn:2&quot;&gt;
-      &lt;p&gt;Our development staff is no better - and in fact worse as they should know better. Pesky devs, if only I had a good alternative for them… &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id=&quot;fn:3&quot;&gt;
-      &lt;p&gt;By the way, CloudApp is great. Our entire company uses it and I don’t understand why anyone wouldn’t. They even have a free tier, which is great of those times when I totally forget to renew my account… &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id=&quot;fn:4&quot;&gt;
-      &lt;p&gt;It’s Rails 3.2.13. I can feel the vulnerabilities pulsating through me. &lt;a href=&quot;#fnref:4&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id=&quot;fn:5&quot;&gt;
-      &lt;p&gt;Preferably on my own &lt;a href=&quot;https://github.com/josegonzalez&quot;&gt;github profile&lt;/a&gt;, though I can see this being on our company’s profile as well. &lt;em&gt;shrug&lt;/em&gt; as long as it’s out there. &lt;a href=&quot;#fnref:5&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-  &lt;/ol&gt;
-&lt;/div&gt;
-</description>
-        <pubDate>Sat, 26 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/26/creating-a-generic-cakephp-skeleton/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/26/creating-a-generic-cakephp-skeleton/</guid>
-        
-        <category>cakephp</category>
-        
-        <category>scaffold</category>
-        
-        <category>composer</category>
-        
-        <category>planning</category>
         
         
         <category>cakephp</category>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: File Uploading and Account Management</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 4 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="user-accounts, upload, files, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: File Uploading and Account Management" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/" />
+    <meta property="og:description" content="Part 4 of a series of posts that will help you build out a personal CMS" />
+    <meta property="og:image" content="http://josediazgonzalez.com/images/2016/12/04/working-image-upload.png" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: File Uploading and Account Management" />
+    <meta name="twitter:description" content="Part 4 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:image" content="http://josediazgonzalez.com/images/2016/12/04/working-image-upload.png" />
+    <link rel="alternate" type="application/rss+xml" title="File Uploading and Account Management » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>File Uploading and Account Management</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="managing-a-users-account">Managing a User’s account</h2>
+<p>Now that we can login, we’ll probably want to be able to update our profile <em>without</em> needing to go through the reset password flow. For that, we’ll need a account page. I’d also love to be able to personalize the account so that the user will feel at home in his CMS, so we’ll allow them to upload a custom image as well. We’ll start on account management first. First, lets start by making the <code>UsersController::edit()</code> action open to all authenticated users by modifying our <code>UsersController::isAuthorized()</code> method:</p>
+<pre><code class="language-php">    /**
+     * Check if the provided user is authorized for the request.
+     *
+     * @param array|\ArrayAccess|null $user The user to check the authorization of.
+     *   If empty the user fetched from storage will be used.
+     * @return bool True if $user is authorized, otherwise false
+     */
+    public function isAuthorized($user = null)
+    {
+        if (in_array($this-&gt;request-&gt;param('action'), ['edit', 'logout'])) {
+            return true;
+        }
+        return parent::isAuthorized($user);
+    }
+</code></pre>
+<p>Next, lets go to the <code>/users/edit</code> page in our browser. You should get a <code>NotFoundException</code>. This is because the <code>UsersController::edit()</code> action is currently mapped to the <code>Crud.Edit</code> action class in your <code>AppController::initialize()</code>, and that action class expects a user id to be passed in. We can fix that and force the edit page to <em>always</em> map to the currently logged in user by handling the <code>beforeHandle</code> Crud event in our <code>UsersListener</code>. First, lets add the following to the list of events handled in our <code>UsersListener::implementedEvents()</code> method:</p>
+<pre><code class="language-php">'Crud.beforeHandle' =&gt; 'beforeHandle',
+</code></pre>
+<p>Next, we’ll need to implement the <code>UsersListener::beforeHandle()</code> method. As the <code>beforeHandle</code> event occurs for <em>all</em> executed Crud actions, we’ll need to take extra care to only set the action arguments when the current action is the <code>edit</code> action.</p>
+<pre><code class="language-php">    /**
+     * Before Handle
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeHandle(Event $event)
+    {
+        if ($event-&gt;subject-&gt;action === 'edit') {
+            $this-&gt;beforeHandleEdit($event);
+            return;
+        }
+    }
+    /**
+     * Before Handle Edit Action
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeHandleEdit(Event $event)
+    {
+        $userId = $this-&gt;_controller()-&gt;Auth-&gt;user('id');
+        $event-&gt;subject-&gt;args = [$userId];
+    }
+</code></pre>
+<p>Browse to the <code>/users/edit</code> page now and you’ll see a lovely form with our current user’s information filled out. Yay! Unfortunately, it leaks the existing password, which isn’t great. Honestly, I think we should clean up this form a bit:</p>
+<ul>
+  <li>The password field should not have the pre-hashed password set</li>
+  <li>The password field should only be changed when the password is confirmed</li>
+  <li>The <code>avatar_dir</code> field shouldn’t be shown on the form</li>
+  <li>The <code>avatar</code> field is actually a form upload.</li>
+</ul>
+<p>Let’s take care of the first three tasks. We’ll start by adding an event handler to remove the hashed <code>password</code> during the <code>Crud.beforeRender</code> event. Add the following to your <code>UsersListener::implementedEvents()</code> method:</p>
+<pre><code class="language-php">'Crud.beforeRender' =&gt; 'beforeRender',
+</code></pre>
+<p>Next, we’ll handle the event in the same <code>UsersListener</code> class and unset the <code>password</code> property on the Crud-produced entity:</p>
+<pre><code class="language-php">    /**
+     * Before Render
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeRender(Event $event)
+    {
+        if ($this-&gt;_controller()-&gt;request-&gt;action === 'edit') {
+            $this-&gt;beforeRenderEdit($event);
+            return;
+        }
+    }
+    /**
+     * Before Render Edit Action
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeRenderEdit(Event $event)
+    {
+        $event-&gt;subject-&gt;entity-&gt;unsetProperty('password');
+    }
+</code></pre>
+<p>If you refresh the <code>/users/edit</code> page, you should see that the hashed password was removed. Now that this is set, we’ll need tomodify the edit form. We previously baked this on the first day of development, so you should have a <code>src/Template/Users/edit.ctp</code> file. We’ll edit the form section to show the following for now (ignore the sidebar section!):</p>
+<pre><code class="language-php">&lt;div class="users form large-9 medium-8 columns content"&gt;
+    &lt;?= $this-&gt;Form-&gt;create($user) ?&gt;
+    &lt;fieldset&gt;
+        &lt;legend&gt;&lt;?= __('Edit User') ?&gt;&lt;/legend&gt;
+        &lt;?php
+            echo $this-&gt;Form-&gt;input('email');
+            echo $this-&gt;Form-&gt;input('password', ['required' =&gt; false]);
+            echo $this-&gt;Form-&gt;input('confirm_password');
+            echo $this-&gt;Form-&gt;input('avatar');
+        ?&gt;
+    &lt;/fieldset&gt;
+    &lt;?= $this-&gt;Form-&gt;button(__('Submit')) ?&gt;
+    &lt;?= $this-&gt;Form-&gt;end() ?&gt;
+&lt;/div&gt;
+</code></pre>
+<p>The above adds a <code>confirm_password</code> field and also removes the <code>avatar_dir</code> field. Finally, add password confirmation, and only save the updated password if it matches the <code>confirm_password</code> field <em>and</em> both have a value. We’ll create a custom validation method - validationAccount - to handle this. Place the following within a trait at <code>src/Model/Table/Traits/AccountValidationTrait.php</code>:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Model\Table\Traits;
+use Cake\Validation\Validator;
+trait AccountValidationTrait
+{
+    /**
+     * Account validation rules.
+     *
+     * @param \Cake\Validation\Validator $validator Validator instance.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationAccount(Validator $validator)
+    {
+        $validator = $this-&gt;validationDefault($validator);
+        $validator-&gt;remove('password');
+        $validator-&gt;allowEmpty('confirm_password');
+        $validator-&gt;add('confirm_password', 'no-misspelling', [
+            'rule' =&gt; ['compareWith', 'password'],
+            'message' =&gt; 'Passwords are not equal',
+        ]);
+        return $validator;
+    }
+}
+</code></pre>
+<blockquote>
+  <p>I really love traits. Sorry not sorry?</p>
+</blockquote>
+<p>In this custom validation rule, we inherit from the default rules - defined in the <code>UsersTable::validationDefault()</code> method - remove the rules that require a <code>password</code> to be set, and add a rule that requires the <code>password</code> and <code>confirm_password</code> fields to match.</p>
+<p>Next, we’ll need to add the proper <code>use</code> statement to the <em>inside</em> of our <code>UsersTable</code> class.</p>
+<pre><code class="language-php">use \App\Model\Table\Traits\AccountValidationTrait;
+</code></pre>
+<p>To ensure that our custom validation method is actually invoked, we’ll need to modify the <code>UsersListener::beforeHandleEdit()</code> to tell the <code>Edit</code> action class to use it. Here is what I added to that method:</p>
+<pre><code class="language-php">$this-&gt;_controller()-&gt;Crud-&gt;action()-&gt;saveOptions(['validate' =&gt; 'account']);
+</code></pre>
+<p>One thing to note is that we never want to update the password when no password has been set. The <code>Edit</code> action class doesn’t currently provide an event to directly edit event data, but we still have two options:</p>
+<ul>
+  <li>If no <code>password</code>/<code>confirm_password</code> is set at the time of the <code>beforeHandle</code> event, we can just unset it from the request.</li>
+  <li>If no <code>password</code>/<code>confirm_password</code> is set at the time of the <code>beforeSave</code> event, we can mark the <code>password</code> field as not dirty, and it won’t be overwritten.</li>
+</ul>
+<p>I prefer the latter, because I don’t like screwing around with the incoming request data. Where you perform the scrubbing is up to you. If you do as I do, you’ll have to check if <code>confirm_password</code> is empty instead of <code>password</code>. This is because at the <code>beforeSave</code> event, the data has already been set upon the entity, and an empty string has been hashed by the <code>User::_setPassword()</code> method. The <code>confirm_password</code> field will only be empty if both are empty, otherwise we wouldn’t even have gotten to the save phase.</p>
+<p>I’ll add the following to handle my event to <code>UsersListener::implementedEvents()</code>:</p>
+<pre><code class="language-php">'Crud.beforeSave' =&gt; 'beforeSave',
+</code></pre>
+<p>And here are the methods to add to the <code>UsersListener</code>:</p>
+<pre><code class="language-php">    /**
+     * Before Save
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeSave(Event $event)
+    {
+        if ($this-&gt;_controller()-&gt;request-&gt;action === 'edit') {
+            $this-&gt;beforeSaveEdit($event);
+            return;
+        }
+    }
+    /**
+     * Before Render Edit Action
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeSaveEdit(Event $event)
+    {
+        if ($event-&gt;subject-&gt;entity-&gt;confirm_password === '') {
+            $event-&gt;subject-&gt;entity-&gt;unsetProperty('password');
+            $event-&gt;subject-&gt;entity-&gt;dirty('password', false);
+        }
+    }
+</code></pre>
+<p>Woot! Very close. If you try to submit the form now, you will probably get a validation error - if your browser even lets you submit. Why? The <code>avatar</code> field is empty. Even though we’ve set it to allow <code>null</code> values, we need to remove the validation rules surrounding them in our <code>UsersTable::validationDefault()</code> method. Remove the rules regarding <code>avatar</code> and <code>avatar_dir</code>, and you should be off to the races.</p>
+<p>Let’s save our position now.</p>
+<pre><code class="language-shell">git add src/Controller/UsersController.php src/Listener/UsersListener.php src/Model/Table/Traits/AccountValidationTrait.php src/Model/Table/UsersTable.php src/Template/Users/edit.ctp
+git commit -m "Implement initial account management, including password changing"
+</code></pre>
+<h2 id="setting-an-image-avatar">Setting an image avatar</h2>
+<p>While image uploading isn’t baked into cake - <em>lol</em> - by default, I’ve included my Upload plugin with the composer app skeleton we used to create the <code>calico</code> app. If you don’t have it installed, you’ll want to install it.</p>
+<pre><code class="language-shell"># install the plugin
+composer require josegonzalez/cakephp-upload
+# load it in your app
+bin/cake plugin load Josegonzalez/Upload
+</code></pre>
+<blockquote>
+  <p>You are welcome and encouraged to try other plugins that might better suit your needs. I wrote mine and like mine, but maybe you prefer a different one.</p>
+</blockquote>
+<p>Next, we’ll need to modify our <code>UsersTable::initialize()</code> method to add the behavior for our <code>avatar</code> and <code>avatar_dir</code> fields:</p>
+<pre><code class="language-php">$this-&gt;addBehavior('Josegonzalez/Upload.Upload', [
+    'avatar' =&gt; [
+        'fields' =&gt; [
+            'dir' =&gt; 'avatar_dir',
+        ],
+    ],
+]);
+</code></pre>
+<p>Next, we’ll need to modify our form to show the correct input type for the <code>avatar</code> field. I’m also going to conditionally show the avatar on the page so we know what it looks like when it has been uploaded. This is what the form section of the <code>edit.ctp</code> should look like:</p>
+<pre><code class="language-php">&lt;div class="users form large-9 medium-8 columns content"&gt;
+    &lt;?= $this-&gt;Form-&gt;create($user, ['type' =&gt; 'file']) ?&gt;
+    &lt;fieldset&gt;
+        &lt;legend&gt;&lt;?= __('Edit User') ?&gt;&lt;/legend&gt;
+        &lt;?php
+            echo $this-&gt;Form-&gt;input('email');
+            echo $this-&gt;Form-&gt;input('password', ['required' =&gt; false]);
+            echo $this-&gt;Form-&gt;input('confirm_password');
+            echo $this-&gt;Form-&gt;input('avatar', ['type' =&gt; 'file']);
+            if (!empty($user-&gt;avatar)) {
+                $imageUrl = '../' . preg_replace("/^webroot/", "", $user-&gt;avatar_dir) . '/' . $user-&gt;avatar;
+                echo $this-&gt;Html-&gt;image($imageUrl, [
+                    'height' =&gt; '100',
+                    'width' =&gt; '100',
+                ]);
+            }
+        ?&gt;
+    &lt;/fieldset&gt;
+    &lt;?= $this-&gt;Form-&gt;button(__('Submit')) ?&gt;
+    &lt;?= $this-&gt;Form-&gt;end() ?&gt;
+&lt;/div&gt;
+</code></pre>
+<p>If you try it out now, you should get a working image upload. Here is what the form looks like for me after an avatar upload:</p>
+<p><img src="/images/2016/12/04/working-image-upload.png" alt="working image upload" /></p>
+<p>My cat looks handsome, doesn’t she?</p>
+<p>Before closing out image uploads, we’ll want to ignore the <code>webroot/files</code> directory in our <code>.gitignore</code>. If we do not, we’ll end up accidentally committing uploaded files. Please ensure the following line is in your <code>.gitignore</code>:</p>
+<pre><code>/webroot/files
+</code></pre>
+<p>Lets commit all our changes as well.</p>
+<pre><code class="language-shell">git add .gitignore src/Model/Table/UsersTable.php src/Template/Users/edit.ctp
+git commit -m "Enable avatar uploads"
+</code></pre>
+<h2 id="validating-image-uploads">Validating image uploads</h2>
+<blockquote>
+  <p>The following are only <em>some</em> of the things you can do to validate that images uploaded are, in fact, images. I would recommend you also:<br />
+- resize the images to remove extra metadata that you may not wish to show<br />
+- only display images that have been sanitized<br />
+- use the <a href="http://cloudinary.com/blog/how_to_detect_and_prevent_malware_infected_user_uploads">metascan</a> tool to verify the validity of uploads before referencing them on your site.<br />
+This list is also by no means exhaustive, and as security is an important subject, I defer to the experts. Please keep this in mind!</p>
+</blockquote>
+<p>Before allowing just <em>any</em> file uploads, lets be sure that they are indeed images. I’d also like to ensure we’re not allowing a save to occur when the image upload fails for whatever reason. This will ensure we surface the errors to the users before the UploadBehavior gets to it. The following should be added to your <code>AccountValidationTrait::validationAccount()</code> method:</p>
+<pre><code class="language-php">$validator-&gt;allowEmpty('avatar');
+$validator-&gt;add('avatar', 'valid-image', [
+    'rule' =&gt; ['uploadedFile', [
+        'types' =&gt; [
+            'image/bmp',
+            'image/gif',
+            'image/jpeg',
+            'image/pjpeg',
+            'image/png',
+            'image/vnd.microsoft.icon',
+            'image/x-windows-bmp',
+            'image/x-icon',
+            'image/x-png',
+        ],
+        'optional' =&gt; true,
+    ]],
+    'message' =&gt; 'The uploaded avatar was not a valid image'
+]);
+$validator-&gt;add('avatar', 'not-upload-error', [
+    'rule' =&gt; ['uploadError', true],
+    'message' =&gt; 'There was an error uploading your avatar',
+]);
+</code></pre>
+<ul>
+  <li>We’re allowing the avatar field to be empty. If you don’t do this, you’re going to see errors when saving the form without an uploaded avatar.</li>
+  <li>We’re only allowing valid images to be uploaded. Hell, our user can even upload an icon as his avatar if they want.</li>
+  <li>We want to make sure that there are no upload errors. Note that <em>not</em> uploading a file should not be considered an error. PHP will report it as such, and if we want to allow no files to be uploaded, we have to pass <code>true</code> as the first option to the <code>uploadError</code> rule.</li>
+</ul>
+<p>The above validation rules are included with CakePHP, but you can <em>also</em> use custom rules - such as file and image size limiting - that are available from the Upload plugin. Documentation for that is available <a href="https://cakephp-upload.readthedocs.io/en/latest/validation.html">here</a>.</p>
+<p>Now that we’ve validated our image uploads, lets save our changes to the git repository.</p>
+<pre><code class="language-shell">git add src/Model/Table/Traits/AccountValidationTrait.php
+git commit -m "Ensure avatar uploads are actually images"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.4">0.0.4</a>.</p>
+</blockquote>
+<p>Our app now has proper image uploading and account management. We’ve learned a few new tricks regarding the Crud plugin event system, added advanced validation rules for managing our account, and even showed off our avatar on the form. I think we’re more or less done with account management for now. Tomorrow, we’ll get into the nitty-gritty of our blog internals, beginning with the initial stages of our posts admin panel.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-04 01:35:00 +0000">04 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 4</strong> of <strong>4</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li>File Uploading and Account Management</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/04/file-uploading-and-account-management/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/';
+        var disqus_title      = "CakeAdvent-2016: File Uploading and Account Management";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

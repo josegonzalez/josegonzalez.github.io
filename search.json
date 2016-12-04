@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "File Uploading and Account Management",
+    "url": "/2016/12/04/file-uploading-and-account-management/",
+    "description": "Part 4 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["account","build","cms","file","help","management","part","personal","posts","series","uploading","will"]
+  },
+  {
+    "type": "post",
     "title": "Password Resets and Email",
     "url": "/2016/12/03/password-resets-and-email/",
     "description": "Part 3 of a series of posts that will help you build out a personal CMS",
@@ -1701,6 +1708,12 @@
     "title": "cakeadvent-2016",
     "url": "/tags/cakeadvent-2016/",
     "tokens": ["cakeadvent"]
+  },
+  {
+    "type": "tag",
+    "title": "user-accounts",
+    "url": "/tags/user-accounts/",
+    "tokens": ["accounts","user"]
   },
   {
     "type": "null",
