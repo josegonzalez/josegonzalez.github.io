@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Preparing our Posts Admin",
+    "url": "/2016/12/05/preparing-our-posts-admin/",
+    "description": "Part 5 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["admin","build","cms","help","part","personal","posts","preparing","series","will"]
+  },
+  {
+    "type": "post",
     "title": "File Uploading and Account Management",
     "url": "/2016/12/04/file-uploading-and-account-management/",
     "description": "Part 4 of a series of posts that will help you build out a personal CMS",

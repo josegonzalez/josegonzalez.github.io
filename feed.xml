@@ -5,9 +5,180 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 04 Dec 2016 08:32:41 +0000</pubDate>
-    <lastBuildDate>Sun, 04 Dec 2016 08:32:41 +0000</lastBuildDate>
+    <pubDate>Mon, 05 Dec 2016 09:01:26 +0000</pubDate>
+    <lastBuildDate>Mon, 05 Dec 2016 09:01:26 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Preparing our Posts Admin</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;aliasing--to-postscontrollerhome&quot;&gt;Aliasing / to &lt;code&gt;PostsController::home&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;In the previous blog post, we decided to alias the &lt;code&gt;/&lt;/code&gt; route to the &lt;code&gt;PostsController::index()&lt;/code&gt; action. Since we still need that action for the admin dashboard, lets make a new action called &lt;code&gt;home&lt;/code&gt; and use &lt;em&gt;that&lt;/em&gt; as the alias. We’ll start by modifying the &lt;code&gt;config/routes.php&lt;/code&gt; file, and setting the default route to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;home&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we need to map that action in our controller to something real. Instead of defining a &lt;code&gt;home&lt;/code&gt; action, for now I’m just going to add an extra mapping of &lt;code&gt;home&lt;/code&gt; to the &lt;code&gt;Crud.Index&lt;/code&gt; action. We’ll use a new &lt;code&gt;PostsController::initialize()&lt;/code&gt; method to handle this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Initialization hook method.
+     *
+     * Use this method to add common initialization code like loading components.
+     *
+     * e.g. `$this-&amp;gt;loadComponent(&#39;Security&#39;);`
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;home&#39;, &#39;Crud.Index&#39;);
+        $this-&amp;gt;Auth-&amp;gt;allow([&#39;home&#39;]);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, we’ll want to set the proper template for the action. Copy the file &lt;code&gt;src/Template/Posts/index.ctp&lt;/code&gt; to &lt;code&gt;src/Template/Posts/home.ctp&lt;/code&gt;. We can decide what to display here later.&lt;/p&gt;
+
+&lt;p&gt;Once thats done, commit your changes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git config/routes.php src/Controller/PostsController.php src/Template/Posts/home.ctp
+git commit -m &quot;Move / route to /posts/home&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;crudview&quot;&gt;CrudView&lt;/h2&gt;
+
+&lt;p&gt;This entire time, we’ve been leaning on the generated bake templates to decide what we want to show users. A powerful alternative to this is the &lt;code&gt;CrudView&lt;/code&gt; plugin. &lt;code&gt;CrudView&lt;/code&gt; is a counterpart to the &lt;code&gt;Crud&lt;/code&gt; plugin in that it allows you to autogenerate views for actions contained in that plugin. It’s pretty radical.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;While we &lt;em&gt;have&lt;/em&gt; edited our &lt;code&gt;Users/edit.ctp&lt;/code&gt; template, we haven’t spent too much time there, so I think we can afford to drop our existing work.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;To start off, lets enable &lt;code&gt;CrudView&lt;/code&gt; for our PostsController. We’ll do so by modifying our &lt;code&gt;AppController&lt;/code&gt; to enable &lt;code&gt;CrudView&lt;/code&gt; whenever we are in a current admin action. Start by adding the following property to your &lt;code&gt;AppController&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * A list of actions where the CrudView.View
+     * listener should be enabled. If an action is
+     * in this list but `isAdmin` is false, the
+     * action will still be rendered via CrudView.View
+     *
+     * @var array
+     */
+    protected $adminActions = [];
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In &lt;code&gt;AppController::initialize()&lt;/code&gt;, there is a check on &lt;code&gt;$this-&amp;gt;isAdmin&lt;/code&gt; when states whether or not we can enable the &lt;code&gt;CrudView&lt;/code&gt; listener. We’ll modify that to take our &lt;code&gt;adminActions&lt;/code&gt; property into account.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;isAdmin || in_array($this-&amp;gt;request-&amp;gt;action, $this-&amp;gt;adminActions)) {
+    $this-&amp;gt;Crud-&amp;gt;addListener(&#39;CrudView.View&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’ll also need to modify the &lt;code&gt;$isAdmin&lt;/code&gt; variable in our &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; to take this into account.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$isAdmin = $this-&amp;gt;isAdmin || in_array($this-&amp;gt;request-&amp;gt;action, $this-&amp;gt;adminActions);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The above changes aren’t necessary in later versions of josegonzalez/app - certainly not after 1.4.8. They are here in case you have an older version of the app skeleton.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Now that we have some of the groundwork laid out, we need to actually specify the &lt;code&gt;adminActions&lt;/code&gt; property in our &lt;code&gt;PostsController&lt;/code&gt;. I’ve set it to allow almost all crud-actions, except for the &lt;code&gt;view&lt;/code&gt; action, which doesn’t make sense for my admin panel.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * A list of actions where the CrudView.View
+     * listener should be enabled. If an action is
+     * in this list but `isAdmin` is false, the
+     * action will still be rendered via CrudView.View
+     *
+     * @var array
+     */
+    protected $adminActions = [&#39;index&#39;, &#39;add&#39;, &#39;edit&#39;, &#39;delete&#39;];
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll need to allow access to these actions. Our admin panel won’t be very useful if we can’t see whats going on. I’ve also helpfully added the &lt;code&gt;delete&lt;/code&gt; action, because we’ll probably want to delete posts. Add the following to your &lt;code&gt;PostsController&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
+     * Check if the provided user is authorized for the request.
+     *
+     * @param array|\ArrayAccess|null $user The user to check the authorization of.
+     *   If empty the user fetched from storage will be used.
+     * @return bool True if $user is authorized, otherwise false
+     */
+    public function isAuthorized($user = null)
+    {
+        $action = $this-&amp;gt;request-&amp;gt;param(&#39;action&#39;);
+        if (in_array($action, $this-&amp;gt;adminActions) || $action == &#39;delete&#39;) {
+            return true;
+        }
+        return parent::isAuthorized($user);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And last but not least, lets remove all the baked &lt;code&gt;Posts&lt;/code&gt; templates.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;rm src/Template/Posts/index.ctp src/Template/Posts/add.ctp src/Template/Posts/edit.ctp src/Template/Posts/view.ctp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you go to the &lt;code&gt;/posts&lt;/code&gt; url now, you’ll get a view similar to the following:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/12/05/generated-posts-admin.png&quot; alt=&quot;workinggenerated posts admin&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Pretty sweet. It doesn’t match our &lt;code&gt;/users/edit&lt;/code&gt; page - or really anything else - but we’ll work on that later. For now, lets clean up that sidebar. We’ll add the following logic to our &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; method, in the block that checks on whether the crud action is mapped or not.:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.tables_blacklist&#39;, [
+    &#39;phinxlog&#39;,
+    &#39;muffin_tokenize_phinxlog&#39;,
+    &#39;post_attributes&#39;,
+    &#39;tokenize_tokens&#39;,
+    &#39;users&#39;,
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For now, we won’t have a link to the &lt;code&gt;/users/edit&lt;/code&gt; page, but in the near future, it’ll hopefully be possible to both add arbitary links to the sidebar as well as arbitrary links to the top navigation.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We have the beginnings of our admin dashboard, using CrudView. Let’s save that up:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/AppController.php src/Controller/PostsController.php src/Template/Posts/add.ctp src/Template/Posts/edit.ctp src/Template/Posts/index.ctp src/Template/Posts/view.ctp
+git commit -m &quot;CrudView now handles /posts admin panels&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.5&quot;&gt;0.0.5&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This was a short post, but we actually did quite a bit of work. We now have a programmatic admin dashboard that can be melded to our use case in future posts. It’s been a long week, and our CMS is starting to take shape. Tomorrow we’ll look at modifying what exactly is shown on our &lt;code&gt;/posts&lt;/code&gt; dashboard, and make sure our database tables line up with our needs.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+
+</description>
+        <pubDate>Mon, 05 Dec 2016 02:00:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/05/preparing-our-posts-admin/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/05/preparing-our-posts-admin/</guid>
+        
+        <category>admin</category>
+        
+        <category>crud</category>
+        
+        <category>routing</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>File Uploading and Account Management</title>
@@ -364,11 +535,11 @@ git commit -m &quot;Ensure avatar uploads are actually images&quot;
         <link>http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/</link>
         <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/</guid>
         
+        <category>files</category>
+        
         <category>user-accounts</category>
         
         <category>upload</category>
-        
-        <category>files</category>
         
         <category>cakeadvent-2016</category>
         
@@ -2580,197 +2751,6 @@ class AllowNullableGithubIdOnUsers extends AbstractMigration
         <category>scaffold</category>
         
         <category>authentication</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Initial Application Scaffolding</title>
-        <description>&lt;h2 id=&quot;requirements&quot;&gt;Requirements&lt;/h2&gt;
-
-&lt;p&gt;Before you continue, you’ll want the following stuff on your computer:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;PHP 5.4+. I’m using 5.6 locally, though 7.x should also work fine. Most, if not all, libraries and plugins I am using will work through any supported CakePHP version. I’ll let you know if that’s ever not the case.&lt;/li&gt;
-  &lt;li&gt;The following PHP extensions:
-    &lt;ul&gt;
-      &lt;li&gt;&lt;code&gt;ext-intl&lt;/code&gt;&lt;/li&gt;
-      &lt;li&gt;&lt;code&gt;ext-mbstring&lt;/code&gt;&lt;/li&gt;
-      &lt;li&gt;&lt;code&gt;ext-pdo_sqlite&lt;/code&gt;&lt;/li&gt;
-      &lt;li&gt;&lt;code&gt;ext-pdo_mysql&lt;/code&gt;&lt;/li&gt;
-      &lt;li&gt;&lt;code&gt;ext-pdo_pgsql&lt;/code&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;A database! I’m running Postgres locally, but anything supported by the CakePHP Core ORM should do fine. If you use MySQL, I won’t attack you.&lt;/li&gt;
-  &lt;li&gt;A browser. I use Chrome, though any modern browser should work fine with the Javascript I’ll be writing.&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://getcomposer.org/download/&quot;&gt;Composer&lt;/a&gt; installed locally. How you get that is up to you.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We can start once you have the above.&lt;/p&gt;
-
-&lt;h2 id=&quot;pre-planning&quot;&gt;Pre-planning&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Start out with a goal for the day before you start work. My goal is to scaffold out a small part of my app. I won’t have authentication or &lt;a href=&quot;/2015/12/05/uploading-files-and-images/&quot;&gt;file uploading&lt;/a&gt;. I just want a solid database design and some crud-like templating.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Before I begin, I want to outline what my application will probably look like from a datastore perspective:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/ditaa/ditaa-a033ba0ffbd3e106e1965c0d39c2a034.png&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The above graph was generated with &lt;a href=&quot;http://ditaa.sourceforge.net/&quot;&gt;ditaa&lt;/a&gt; and some simple ascii art.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I’ve separated the notion of an &lt;code&gt;Asset&lt;/code&gt; from a &lt;code&gt;File&lt;/code&gt;. &lt;code&gt;Assets&lt;/code&gt; are the things that my users will click on in the admin dashboard, and contain metadata that will be useful to search. Each asset can have one or more &lt;code&gt;Files&lt;/code&gt; associated with it, has and belongs to many &lt;code&gt;Tags&lt;/code&gt;, is associated with a single &lt;code&gt;Category&lt;/code&gt;, and is owned by a &lt;code&gt;User&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;A &lt;code&gt;File&lt;/code&gt; is the actual physical file, which will contain size, the directory on whatever storage device I choose, image metadata, etc. I’m choosing to do this as I &lt;em&gt;think&lt;/em&gt; storing multiple versions of a file as different records will be much easier to reason about in the UI than trying to fiddle with it in code. No real reason other than that.&lt;/p&gt;
-
-&lt;p&gt;Note, I &lt;em&gt;do&lt;/em&gt; have some legacy files I need to import into the new system, but I won’t worry about those for now, since it will presumably complicate my datastructure. I’ll almost certainly write a script to import the files into my database.&lt;/p&gt;
-
-&lt;h2 id=&quot;initializing-our-new-project&quot;&gt;Initializing our new project&lt;/h2&gt;
-
-&lt;p&gt;First, lets use composer to generate a project. I’m going to be basing it off of the &lt;code&gt;0.1.10&lt;/code&gt; release of my [own app skeleton](/2015/12/26/creating-a-generic-cakephp-skeleton/:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer create-project --prefer-dist josegonzalez/app:0.1.10 media-manager
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;From now on, assume you will be working inside of the media-manager root folder.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Before we begin, we need to at least modify our application to read from the correct database. One thing I’ve done in my new app skeleton is allow configuration via environment variables. Let’s start by copying over the defaults to a new file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;cp config/.env.default config/.env
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;.env&lt;/code&gt; file is loaded if it exists, otherwise the &lt;code&gt;config/env.php&lt;/code&gt; file will fallback to &lt;code&gt;config/.env.default&lt;/code&gt;. We’ll be configuring our app’s private configuration here.&lt;/p&gt;
-
-&lt;p&gt;Two things I’m going to do first:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;change the &lt;code&gt;APP_NAME&lt;/code&gt; export to the value &lt;code&gt;media-manager&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;Make sure I have a local datastore setup with the credentials &lt;code&gt;my_app:secret&lt;/code&gt; authed to the database &lt;code&gt;media-manager&lt;/code&gt;. I mentioned I’m using Postgres, but anything should work.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Once that is set, I can verify that my application works by running the &lt;a href=&quot;/2015/12/17/cakephp-shells-i-didnt-know-about/&quot;&gt;built-in CakePHP server shell&lt;/a&gt;. Run the following and browse to &lt;code&gt;http://localhost:8765&lt;/code&gt; to verify that you have everything done:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake server
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;I will be using the built-in CakePHP server shell for testing. You can use whatever you’d like, this is just easier for me since I haven’t setup Vagrant or Docker for my app skeleton yet.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;generating-a-database&quot;&gt;Generating a database&lt;/h2&gt;
-
-&lt;p&gt;Whenever I am building an application, I usually have some vague idea of what my database will look like once I am done. I say usually because sometimes I’m coming up with requirements as I go, which is to say that today is one of those days.&lt;/p&gt;
-
-&lt;p&gt;We can generate migration files for our database tables using the &lt;code&gt;bake&lt;/code&gt; and &lt;a href=&quot;/2015/12/10/faster-database-creation-with-migrations/&quot;&gt;&lt;code&gt;migrations&lt;/code&gt;&lt;/a&gt; plugins. I’m allowed to get this wrong because the &lt;code&gt;migrations&lt;/code&gt; plugin allows me to go back and generate new migrations to fixup any incorrect beliefs about how my application should work.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# create my assets table
-bin/cake bake migration create_assets category_id:integer:index \
-                                      user_id:integer:index name \
-                                      file_count \
-                                      created \
-                                      modified
-
-# create the files table. Note that I
-# have included a few useful fields for the upload plugin
-bin/cake bake migration create_files asset_id:integer:index \
-                                     user_id:integer:index \
-                                     name \
-                                     dir \
-                                     size:integer \
-                                     type \
-                                     metadata \
-                                     created \
-                                     modified
-
-# categories is simple
-bin/cake bake migration create_categories name:string:index \
-                                          slug:string:index \
-                                          created \
-                                          modified
-
-# tags is also simple, though I do need a join table
-# there is probably a plugin out there for this but I&#39;m too lazy
-bin/cake bake migration create_assets_tags asset_id:integer:unique:ASSET_TAG \
-                                           tag_id:integer:unique:ASSET_TAG
-bin/cake bake migration create_tags name:string:index \
-                                    slug:string:unique \
-                                    color \
-                                    created \
-                                    modified
-
-# the users table will have an extra field you might not expect
-# im going to eventually add github oauth to the app, so I want to track
-# the user id if possible
-bin/cake bake migration create_users name \
-                                     email:string:index \
-                                     password \
-                                     github_id:integer:index \
-                                     created \
-                                     modified
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can now run our generated migrations:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will create all of the above tables and two others:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;jobs&lt;/code&gt;: A simple background jobs table that is provided by the &lt;code&gt;josegonzalez/app&lt;/code&gt; application skeleton. We’ll get to this later.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;phinxlog&lt;/code&gt;: Used to keep track of migrations that have been executed.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;baking-my-cake-as-fast-as-i-can&quot;&gt;Baking my cake as fast as I can&lt;/h2&gt;
-
-&lt;p&gt;The last step for today is generating some application defaults. We’ll be using the &lt;a href=&quot;/2015/12/03/generating-administrative-panels-with-crud-view/&quot;&gt;CrudView&lt;/a&gt; plugin - and therefore &lt;a href=&quot;https://getbootstrap.com/&quot;&gt;Bootstrap 3&lt;/a&gt; - for the majority of our UI, and will be baking CrudView-compatible templates for things.&lt;/p&gt;
-
-&lt;p&gt;Lets start off by baking all of the tables and entities:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake model all
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, lets bake some controllers and views for certain things (but not everything!):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake Controller Assets -t Crud
-bin/cake bake Controller Categories -t Crud
-bin/cake bake Controller Tags -t Crud
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now we’ll turn on CrudView for the entire application. Simply change the &lt;code&gt;$isAdmin&lt;/code&gt; property of &lt;code&gt;src/Controller/AppController.php&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt;. This can be done on a per-controller basis, but as we are using CrudView everywhere, it doesn’t hurt to turn it on universally.&lt;/p&gt;
-
-&lt;p&gt;And thats it for now. Why didn’t we bake templates or certain tables:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;We need to add auth for users, and thats outside of what I wanted to accomplish today.&lt;/li&gt;
-  &lt;li&gt;We don’t need a controller for join tables, nor for managing individual files (yet).&lt;/li&gt;
-  &lt;li&gt;Templating is done via the CrudView plugin. If you browse to &lt;code&gt;http://localhost:8765/categories&lt;/code&gt;, you should see a simple crud-interface for categories. Ditto for &lt;code&gt;/assets&lt;/code&gt; and &lt;code&gt;/tags&lt;/code&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;whats-next&quot;&gt;What’s next?&lt;/h2&gt;
-
-&lt;p&gt;Since tying uploads to specific users and authentication is a bit core to my app, that will be what I tackle in my next post. I’ll also go over that semi-mysterious &lt;code&gt;github_id&lt;/code&gt; in a way that is sure to disappoint anyone who thinks I’m writing any OAuth code :)&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the Media Manager series. Until next post, meow!&lt;/p&gt;
-</description>
-        <pubDate>Thu, 31 Dec 2015 12:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2015/12/31/initial-application-scaffolding/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2015/12/31/initial-application-scaffolding/</guid>
-        
-        <category>cakephp</category>
-        
-        <category>scaffold</category>
-        
-        <category>migrations</category>
-        
-        <category>bake</category>
         
         
         <category>cakephp</category>

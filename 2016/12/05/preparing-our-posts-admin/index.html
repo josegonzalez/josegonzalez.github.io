@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Preparing our Posts Admin</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/05/preparing-our-posts-admin/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 5 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="admin, crud, routing, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Preparing our Posts Admin" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/05/preparing-our-posts-admin/" />
+    <meta property="og:description" content="Part 5 of a series of posts that will help you build out a personal CMS" />
+    <meta property="og:image" content="http://josediazgonzalez.com/images/2016/12/05/generated-posts-admin.png" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Preparing our Posts Admin" />
+    <meta name="twitter:description" content="Part 5 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:image" content="http://josediazgonzalez.com/images/2016/12/05/generated-posts-admin.png" />
+    <link rel="alternate" type="application/rss+xml" title="Preparing our Posts Admin » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Preparing our Posts Admin</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="aliasing--to-postscontrollerhome">Aliasing / to <code>PostsController::home</code></h2>
+<p>In the previous blog post, we decided to alias the <code>/</code> route to the <code>PostsController::index()</code> action. Since we still need that action for the admin dashboard, lets make a new action called <code>home</code> and use <em>that</em> as the alias. We’ll start by modifying the <code>config/routes.php</code> file, and setting the default route to the following:</p>
+<pre><code class="language-php">$routes-&gt;connect('/', ['controller' =&gt; 'Posts', 'action' =&gt; 'home']);
+</code></pre>
+<p>Next, we need to map that action in our controller to something real. Instead of defining a <code>home</code> action, for now I’m just going to add an extra mapping of <code>home</code> to the <code>Crud.Index</code> action. We’ll use a new <code>PostsController::initialize()</code> method to handle this:</p>
+<pre><code class="language-php">    /**
+     * Initialization hook method.
+     *
+     * Use this method to add common initialization code like loading components.
+     *
+     * e.g. `$this-&gt;loadComponent('Security');`
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this-&gt;Crud-&gt;mapAction('home', 'Crud.Index');
+        $this-&gt;Auth-&gt;allow(['home']);
+    }
+</code></pre>
+<p>Finally, we’ll want to set the proper template for the action. Copy the file <code>src/Template/Posts/index.ctp</code> to <code>src/Template/Posts/home.ctp</code>. We can decide what to display here later.</p>
+<p>Once thats done, commit your changes:</p>
+<pre><code class="language-shell">git config/routes.php src/Controller/PostsController.php src/Template/Posts/home.ctp
+git commit -m "Move / route to /posts/home"
+</code></pre>
+<h2 id="crudview">CrudView</h2>
+<p>This entire time, we’ve been leaning on the generated bake templates to decide what we want to show users. A powerful alternative to this is the <code>CrudView</code> plugin. <code>CrudView</code> is a counterpart to the <code>Crud</code> plugin in that it allows you to autogenerate views for actions contained in that plugin. It’s pretty radical.</p>
+<blockquote>
+  <p>While we <em>have</em> edited our <code>Users/edit.ctp</code> template, we haven’t spent too much time there, so I think we can afford to drop our existing work.</p>
+</blockquote>
+<p>To start off, lets enable <code>CrudView</code> for our PostsController. We’ll do so by modifying our <code>AppController</code> to enable <code>CrudView</code> whenever we are in a current admin action. Start by adding the following property to your <code>AppController</code>:</p>
+<pre><code class="language-php">    /**
+     * A list of actions where the CrudView.View
+     * listener should be enabled. If an action is
+     * in this list but `isAdmin` is false, the
+     * action will still be rendered via CrudView.View
+     *
+     * @var array
+     */
+    protected $adminActions = [];
+</code></pre>
+<p>In <code>AppController::initialize()</code>, there is a check on <code>$this-&gt;isAdmin</code> when states whether or not we can enable the <code>CrudView</code> listener. We’ll modify that to take our <code>adminActions</code> property into account.</p>
+<pre><code class="language-php">if ($this-&gt;isAdmin || in_array($this-&gt;request-&gt;action, $this-&gt;adminActions)) {
+    $this-&gt;Crud-&gt;addListener('CrudView.View');
+}
+</code></pre>
+<p>We’ll also need to modify the <code>$isAdmin</code> variable in our <code>AppController::beforeFilter()</code> to take this into account.</p>
+<pre><code class="language-php">$isAdmin = $this-&gt;isAdmin || in_array($this-&gt;request-&gt;action, $this-&gt;adminActions);
+</code></pre>
+<blockquote>
+  <p>The above changes aren’t necessary in later versions of josegonzalez/app - certainly not after 1.4.8. They are here in case you have an older version of the app skeleton.</p>
+</blockquote>
+<p>Now that we have some of the groundwork laid out, we need to actually specify the <code>adminActions</code> property in our <code>PostsController</code>. I’ve set it to allow almost all crud-actions, except for the <code>view</code> action, which doesn’t make sense for my admin panel.</p>
+<pre><code class="language-php">    /**
+     * A list of actions where the CrudView.View
+     * listener should be enabled. If an action is
+     * in this list but `isAdmin` is false, the
+     * action will still be rendered via CrudView.View
+     *
+     * @var array
+     */
+    protected $adminActions = ['index', 'add', 'edit', 'delete'];
+</code></pre>
+<p>Next, we’ll need to allow access to these actions. Our admin panel won’t be very useful if we can’t see whats going on. I’ve also helpfully added the <code>delete</code> action, because we’ll probably want to delete posts. Add the following to your <code>PostsController</code>:</p>
+<pre><code class="language-php">    /**
+     * Check if the provided user is authorized for the request.
+     *
+     * @param array|\ArrayAccess|null $user The user to check the authorization of.
+     *   If empty the user fetched from storage will be used.
+     * @return bool True if $user is authorized, otherwise false
+     */
+    public function isAuthorized($user = null)
+    {
+        $action = $this-&gt;request-&gt;param('action');
+        if (in_array($action, $this-&gt;adminActions) || $action == 'delete') {
+            return true;
+        }
+        return parent::isAuthorized($user);
+    }
+</code></pre>
+<p>And last but not least, lets remove all the baked <code>Posts</code> templates.</p>
+<pre><code class="language-shell">rm src/Template/Posts/index.ctp src/Template/Posts/add.ctp src/Template/Posts/edit.ctp src/Template/Posts/view.ctp
+</code></pre>
+<p>If you go to the <code>/posts</code> url now, you’ll get a view similar to the following:</p>
+<p><img src="/images/2016/12/05/generated-posts-admin.png" alt="workinggenerated posts admin" /></p>
+<p>Pretty sweet. It doesn’t match our <code>/users/edit</code> page - or really anything else - but we’ll work on that later. For now, lets clean up that sidebar. We’ll add the following logic to our <code>AppController::beforeFilter()</code> method, in the block that checks on whether the crud action is mapped or not.:</p>
+<pre><code class="language-php">$this-&gt;Crud-&gt;action()-&gt;config('scaffold.tables_blacklist', [
+    'phinxlog',
+    'muffin_tokenize_phinxlog',
+    'post_attributes',
+    'tokenize_tokens',
+    'users',
+]);
+</code></pre>
+<blockquote>
+  <p>For now, we won’t have a link to the <code>/users/edit</code> page, but in the near future, it’ll hopefully be possible to both add arbitary links to the sidebar as well as arbitrary links to the top navigation.</p>
+</blockquote>
+<p>We have the beginnings of our admin dashboard, using CrudView. Let’s save that up:</p>
+<pre><code class="language-shell">git add src/Controller/AppController.php src/Controller/PostsController.php src/Template/Posts/add.ctp src/Template/Posts/edit.ctp src/Template/Posts/index.ctp src/Template/Posts/view.ctp
+git commit -m "CrudView now handles /posts admin panels"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.5">0.0.5</a>.</p>
+</blockquote>
+<p>This was a short post, but we actually did quite a bit of work. We now have a programmatic admin dashboard that can be melded to our use case in future posts. It’s been a long week, and our CMS is starting to take shape. Tomorrow we’ll look at modifying what exactly is shown on our <code>/posts</code> dashboard, and make sure our database tables line up with our needs.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/05/preparing-our-posts-admin/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-05 02:00:00 +0000">05 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 5</strong> of <strong>5</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li>Preparing our Posts Admin</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/05/preparing-our-posts-admin/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/05/preparing-our-posts-admin/';
+        var disqus_title      = "CakeAdvent-2016: Preparing our Posts Admin";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>
