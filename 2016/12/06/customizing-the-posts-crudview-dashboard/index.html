@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Customizing the Posts Dashboard with CrudView</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/06/customizing-the-posts-crudview-dashboard/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 6 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="crud, navigation, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Customizing the Posts Dashboard with CrudView" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/06/customizing-the-posts-crudview-dashboard/" />
+    <meta property="og:description" content="Part 6 of a series of posts that will help you build out a personal CMS" />
+    <meta property="og:image" content="http://josediazgonzalez.com/images/2016/12/06/dope-admin-customizations.png" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Customizing the Posts Dashboard with CrudView" />
+    <meta name="twitter:description" content="Part 6 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:image" content="http://josediazgonzalez.com/images/2016/12/06/dope-admin-customizations.png" />
+    <link rel="alternate" type="application/rss+xml" title="Customizing the Posts Dashboard with CrudView » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Customizing the Posts Dashboard with CrudView</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="updating-plugins">Updating Plugins</h2>
+<p>Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following <code>composer</code> command:</p>
+<pre><code class="language-php">composer update
+</code></pre>
+<p>Typically you would run tests at this stage, but since we have <em>yet</em> to write any, that isn’t necessary.</p>
+<p>Let’s commit any updates:</p>
+<pre><code class="language-shell">git add composer.lock
+git commit -m "Update unpinned dependencies"
+</code></pre>
+<blockquote>
+  <p>You should always verify your application still works after upgrading dependencies.</p>
+</blockquote>
+<h2 id="modifying-the-utility-navigation-bar">Modifying the Utility Navigation Bar</h2>
+<p>The new version of CrudView that we just upgraded to has support for managing the navigation in the upper-right. I’m going to use this to add a logout button. Add the following to your <code>AppController::beforeFilter()</code> method in the <code>if ($this-&gt;Crud-&gt;isActionMapped()) {</code> section:</p>
+<pre><code class="language-php">$this-&gt;Crud-&gt;action()-&gt;config('scaffold.utility_navigation', [
+    new \CrudView\Menu\MenuItem(
+        'Log Out',
+        ['controller' =&gt; 'Users', 'action' =&gt; 'logout']
+    )
+]);
+</code></pre>
+<p>We can use the following classes for defining a utility navigation bar:</p>
+<ul>
+  <li><code>\CrudView\Menu\MenuDropdown</code>: Can be used to setup dropdown menus</li>
+  <li><code>\CrudView\Menu\MenuDivider</code>: Can be used as a separator in dropdown menus</li>
+  <li><code>\CrudView\Menu\MenuItem</code>: A menu item link. Takes the same options as <code>HtmlHelper::link()</code></li>
+</ul>
+<p>Pretty easy way for us to customize what is being shown, and as the <code>MenuItem</code> takes all the same options as <code>HtmlHelper::link()</code>, it should be quite useful.</p>
+<h2 id="modifying-the-sidebar-navigation">Modifying the Sidebar Navigation</h2>
+<p>The new version of CrudView that we just upgraded to has support for managing the navigation on the sidebar. We can disable it, blacklist tables, or control the exact contents. We previously used the table blacklist, but I’m going to replace this with a completely controled sidebar. Add the following to your <code>AppController::beforeFilter()</code> method in the <code>if ($this-&gt;Crud-&gt;isActionMapped()) {</code>:</p>
+<pre><code class="language-php">$this-&gt;Crud-&gt;action()-&gt;config('scaffold.sidebar_navigation', [
+    new \CrudView\Menu\MenuItem(
+        'Posts',
+        ['controller' =&gt; 'Posts', 'action' =&gt; 'index']
+    ),
+    new \CrudView\Menu\MenuItem(
+        'Profile',
+        ['controller' =&gt; 'Users', 'action' =&gt; 'edit']
+    ),
+]);
+</code></pre>
+<p>We can use the following classes for defining a utility navigation bar:</p>
+<ul>
+  <li><code>\CrudView\Menu\MenuDivider</code>: Can be used as a separator in dropdown menus</li>
+  <li><code>\CrudView\Menu\MenuItem</code>: A menu item link. Takes the same options as <code>HtmlHelper::link()</code></li>
+</ul>
+<p>A useful addition would be a <code>MenuList</code>, so we can have groups of sidebar items, though for now this is good enough.</p>
+<h2 id="customizing-posts-fields">Customizing <code>/posts</code> fields</h2>
+<p>If you look at the existing <code>/posts</code> page, you’ll see there are quite a few fields there that we might not want. Ideally, the following is shown:</p>
+<ul>
+  <li><code>id</code></li>
+  <li><code>title</code></li>
+  <li><code>status</code></li>
+  <li><code>published_date</code></li>
+  <li>actions list</li>
+</ul>
+<p>Looking at the list, we’re missing the following fields from our <code>posts</code> table:</p>
+<ul>
+  <li><code>title</code></li>
+  <li><code>published_date</code></li>
+</ul>
+<p>We can add those pretty easily via the migrations plugin. I ran the following to add the fields:</p>
+<pre><code class="language-shell">bin/cake bake migration add_admin_field_to_posts title:string published_date:datetime
+bin/cake migrations migrate
+</code></pre>
+<p>Simple enough. Now we’ll scope the fields being shown to just those that we want. Rather than adding a bunch of custom callbacks directly to our <code>PostsController</code>, lets create a <code>PostsListener</code> in <code>src/Listener/PostsListener.php</code>. Here is mine, with the changes needed to scope our <code>/posts</code> page:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Listener;
+use Cake\Event\Event;
+use Crud\Listener\BaseListener;
+/**
+ * Posts Listener
+ */
+class PostsListener extends BaseListener
+{
+    /**
+     * Callbacks definition
+     *
+     * @return array
+     */
+    public function implementedEvents()
+    {
+        return [
+            'Crud.beforeHandle' =&gt; 'beforeHandle',
+        ];
+    }
+    /**
+     * Before Handle
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeHandle(Event $event)
+    {
+        if ($this-&gt;_controller()-&gt;request-&gt;action === 'index') {
+            $this-&gt;beforeHandleIndex($event);
+            return;
+        }
+    }
+    /**
+     * Before Handle Index Action
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeHandleIndex(Event $event)
+    {
+        $this-&gt;_action()-&gt;config('scaffold.fields', [
+            'id',
+            'title',
+            'status',
+            'published_date',
+        ]);
+    }
+}
+</code></pre>
+<p>Now we need to load it in our <code>PostsController::initialize()</code> method:</p>
+<pre><code class="language-php">$this-&gt;Crud-&gt;addListener('Users', 'App\Listener\PostsListener');
+</code></pre>
+<p>Pretty neat.</p>
+<h2 id="modifying-field-output-using-formatters">Modifying field output using formatters</h2>
+<p>One cool thing about CrudView is that we can specify how we want fields to look like on templates by using custom formatters. Rather than show the status as just text, I’m going to switch it to use a bootstrap label depending upon the content of the text.</p>
+<pre><code class="language-php">$this-&gt;_action()-&gt;config('scaffold.fields', [
+    'id',
+    'title',
+    'status' =&gt; [
+      'formatter' =&gt; function ($name, $value, $entity) {
+          $type = $value == 'active' ? 'success' : 'default';
+          return sprintf('&lt;span class="label label-%s"&gt;%s&lt;/span&gt;', $type, $value);
+      },
+    ],
+    'published_date',
+]);
+</code></pre>
+<p><img src="/images/2016/12/06/dope-admin-customizations.png" alt="dope admin panel" /></p>
+<p>You can also use an element as a <code>formatter</code>, though please refer to the documentation on CrudView for further details.</p>
+<p>Lets save where we are for now.</p>
+<pre><code class="language-shell">git add config/Migrations/20161206204729_AddAdminFieldToPosts.php config/Migrations/schema-dump-default.lock src/Controller/AppController.php src/Controller/PostsController.php src/Listener/PostsListener.php
+git commit -m "Updated /posts dashboard"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.6">0.0.6</a>.</p>
+</blockquote>
+<p>We now have a reasonable looking <code>/posts</code> page with a few lines of code. Super Dope! Our next job is to work on the possibility of having different post types, how to model them in code, and how they relate to our database structure.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/06/customizing-the-posts-crudview-dashboard/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-06 11:28:00 +0000">06 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 6</strong> of <strong>6</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li>Customizing the Posts Dashboard with CrudView</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/06/customizing-the-posts-crudview-dashboard/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/06/customizing-the-posts-crudview-dashboard/';
+        var disqus_title      = "CakeAdvent-2016: Customizing the Posts Dashboard with CrudView";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

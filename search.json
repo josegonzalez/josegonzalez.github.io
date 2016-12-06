@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Customizing the Posts Dashboard with CrudView",
+    "url": "/2016/12/06/customizing-the-posts-crudview-dashboard/",
+    "description": "Part 6 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","crudview","customizing","dashboard","help","part","personal","posts","series","will"]
+  },
+  {
+    "type": "post",
     "title": "Preparing our Posts Admin",
     "url": "/2016/12/05/preparing-our-posts-admin/",
     "description": "Part 5 of a series of posts that will help you build out a personal CMS",
@@ -1721,6 +1728,12 @@
     "title": "user-accounts",
     "url": "/tags/user-accounts/",
     "tokens": ["accounts","user"]
+  },
+  {
+    "type": "tag",
+    "title": "navigation",
+    "url": "/tags/navigation/",
+    "tokens": ["navigation"]
   },
   {
     "type": "null",
