@@ -5,9 +5,270 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 07 Dec 2016 00:42:42 +0000</pubDate>
-    <lastBuildDate>Thu, 07 Dec 2016 00:42:42 +0000</lastBuildDate>
+    <pubDate>Thu, 08 Dec 2016 17:30:28 +0000</pubDate>
+    <lastBuildDate>Thu, 08 Dec 2016 17:30:28 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Displaying Custom Post Type Forms</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;baking-a-plugin&quot;&gt;Baking a Plugin&lt;/h2&gt;
+
+&lt;p&gt;Last post, we described what a blog post plugin would look like. Let’s actually build it now. We’ll start by using &lt;code&gt;bake&lt;/code&gt; to generate the skeleton, which should also update our &lt;code&gt;composer.json&lt;/code&gt; to update code load paths.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake plugin BlogPostType -f
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll create a &lt;code&gt;plugins/BlogPostType/config/bootstrap.php&lt;/code&gt; to load our plugin post type.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+
+EventManager::instance()-&amp;gt;on(&#39;Posts.PostTypes.get&#39;, function (Event $event) {
+  // The key is the Plugin name and the class
+  // The value is what you want to display in the ui
+  $event-&amp;gt;subject-&amp;gt;postTypes[&#39;BlogPostType.BlogPostType&#39;] = &#39;blog&#39;;
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You can remove the &lt;code&gt;plugins/BlogPostType/config/routes.php&lt;/code&gt; file as we wont need it&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We’ll want to ensure that the bootstrap file is loaded for this plugin, so check to ensure that your &lt;code&gt;config/bootstrap.php&lt;/code&gt; has the following &lt;code&gt;Plugin::load&lt;/code&gt; line:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load(&#39;BlogPostType&#39;, [&#39;bootstrap&#39; =&amp;gt; true, &#39;routes&#39; =&amp;gt; false]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We will now need the &lt;code&gt;PostType&lt;/code&gt; class that contains the code for our form. Here are the contents of &lt;code&gt;plugins/BlogPostType/PostType/BlogPostType.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace BlogPostType\PostType;
+
+use App\PostType\AbstractPostType;
+use Cake\Form\Schema;
+use Cake\Validation\Validator;
+
+class BlogPostType extends AbstractPostType
+{
+    protected function _buildSchema(Schema $schema)
+    {
+        $schema = parent::_buildSchema($schema);
+        $schema-&amp;gt;addField(&#39;body&#39;, [&#39;type&#39; =&amp;gt; &#39;text&#39;]);
+        return $schema
+    }
+
+    protected function _buildValidator(Validator $validator)
+    {
+        $validator = parent::_buildValidator($validator);
+        $validator-&amp;gt;notEmpty(&#39;body&#39;, &#39;Please fill this field&#39;);
+        return $validator;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Reflecting upon what I’ll need to show on the view, I think I’ll want to make sure we always have &lt;em&gt;some&lt;/em&gt; defaults for the schema and validator, particularly around common fields. As well, I will need a way to extract viewVars that should be set by the post type for the view - for things like dropdown selects, for instance. I’ll take care of that now by adding the following methods to my &lt;code&gt;AbstractPostType&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function _buildSchema(Schema $schema)
+{
+    $schema-&amp;gt;addField(&#39;user_id&#39;, [&#39;type&#39; =&amp;gt; &#39;hidden&#39;]);
+    $schema-&amp;gt;addField(&#39;title&#39;, [&#39;type&#39; =&amp;gt; &#39;string&#39;]);
+    $schema-&amp;gt;addField(&#39;url&#39;, [&#39;type&#39; =&amp;gt; &#39;string&#39;]);
+    $schema-&amp;gt;addField(&#39;status&#39;, [&#39;type&#39; =&amp;gt; &#39;select&#39;]);
+    return $schema
+}
+
+protected function _buildValidator(Validator $validator)
+{
+    $validator-&amp;gt;notEmpty(&#39;user_id&#39;, &#39;Please fill this field&#39;);
+    $validator-&amp;gt;notEmpty(&#39;title&#39;, &#39;Please fill this field&#39;);
+    $validator-&amp;gt;notEmpty(&#39;url&#39;, &#39;Please fill this field&#39;);
+    $validator-&amp;gt;add(&#39;status&#39;, &#39;inList&#39;, [
+        &#39;rule&#39; =&amp;gt; [&#39;inList&#39;, [&#39;active&#39;, &#39;inactive&#39;]],
+        &#39;message&#39; =&amp;gt; &#39;Status must be either active or inactive&#39;
+    ]);
+    return $validator;
+}
+
+public function viewVars()
+{
+    $statuses = [&#39;active&#39; =&amp;gt; &#39;active&#39;, &#39;inactive&#39; =&amp;gt; &#39;inactive&#39;];
+    return compact(&#39;statuses&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I noticed that we’re hard-coding the whitelisted fields in &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;, and that this whitelist is missing a few things. I’ve changed it to the following (which isn’t tested but should work):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$postFields = $postsTable-&amp;gt;schema()-&amp;gt;columns();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Getting back to our blog plugin, we’ll need two templates for displaying on the page. I’m actually going to use the same thing for both.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h3&amp;gt;&amp;lt;?= $post-&amp;gt;get(&#39;title&#39;) ?&amp;gt;&amp;lt;/h3&amp;gt;
+&amp;lt;div&amp;gt;
+    &amp;lt;?= $post-&amp;gt;get(&#39;body&#39;) ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’ve made a bit of progress, so lets save it :)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json config/bootstrap.php plugins/ src/PostType/AbstractPostType.php
+git commit -m &quot;New BlogPostType&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;displaying-the-form&quot;&gt;Displaying the form&lt;/h2&gt;
+
+&lt;p&gt;First, lets create a method of retrieving all PostTypes. I made the following trait at &lt;code&gt;src/Traits/PostTypesTrait.php&lt;/code&gt; to contain this logic:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Traits;
+
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+use Crud\Event\Subject;
+
+trait PostTypesTrait
+{
+    static $postTypes = null;
+
+    public static function postTypes()
+    {
+        if (static::$postTypes !== null) {
+            return static::$postTypes;
+        }
+
+        $event = new Event(&#39;Posts.PostTypes.get&#39;);
+        $event-&amp;gt;subject = new Subject([
+            &#39;postTypes&#39; =&amp;gt; [],
+        ]);
+
+        EventManager::instance()-&amp;gt;dispatch($event);
+        if (!empty($event-&amp;gt;subject-&amp;gt;postTypes)) {
+            static::$postTypes = $event-&amp;gt;subject-&amp;gt;postTypes;
+        } else {
+            static::$postTypes = [];
+        }
+        return static::$postTypes;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, add this trait to the PostsListener class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use App\Traits\PostTypesTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’ll need to add a &lt;code&gt;beforeRender&lt;/code&gt; event handler to our &lt;code&gt;PostsListener&lt;/code&gt; so we can properly populate the form. Start by adding the handler to our &lt;code&gt;PostsListener::implementedEvents()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeRender&#39; =&amp;gt; &#39;beforeRender&#39;,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The handler should:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;get the post type from the url - mapping &lt;code&gt;/posts/add/blog&lt;/code&gt; to our &lt;code&gt;BlogPostType&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;load the correct class&lt;/li&gt;
+  &lt;li&gt;set any view variables&lt;/li&gt;
+  &lt;li&gt;ensure the schema is specified correctly&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here is the logic for that method (and others):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Render
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRender(Event $event)
+{
+    if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;add&#39;) {
+        $this-&amp;gt;beforeRenderAdd($event);
+
+        return;
+    }
+}
+
+/**
+ * Before Render Add Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderAdd(Event $event)
+{
+    $postTypes = PostsListener::postTypes();
+    $request = $this-&amp;gt;_request();
+    $passedArgs = $request-&amp;gt;param(&#39;pass&#39;);
+
+    $postType = null;
+    if (!empty($passedArgs)) {
+        $type = $passedArgs[0];
+        foreach ($postTypes as $class =&amp;gt; $alias) {
+            if ($alias === $type) {
+                $postType = $class;
+            }
+        }
+    }
+
+    if ($postType !== null) {
+        $className = App::className($postType, &#39;PostType&#39;);
+        $postType = new $className;
+        $fields = [];
+        foreach ($postType-&amp;gt;schema()-&amp;gt;fields() as $field) {
+            $fields[$field] = [
+                &#39;type&#39; =&amp;gt; $postType-&amp;gt;schema()-&amp;gt;fieldType($field)
+            ];
+        }
+
+        $viewVars = $postType-&amp;gt;viewVars();
+        $viewVars[&#39;fields&#39;] = $fields;
+        $this-&amp;gt;_controller()-&amp;gt;set($viewVars);
+        $event-&amp;gt;subject-&amp;gt;set([&#39;entity&#39; =&amp;gt; $postType]);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Woot! If you go to &lt;code&gt;/posts/add/blog&lt;/code&gt;, you’ll see that our form is properly rendered by the CrudView. Neat!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/Traits/PostTypesTrait.php
+git commit -m &quot;Properly display the post type form&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.8&quot;&gt;0.0.8&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;It may not seem like much, but we’ve laid the groundwork for actually using custom post types. In our next segment, we’ll look at how to actually save the above data, persisting data for editing, and a ui for selecting the post type to add.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 08 Dec 2016 08:04:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/08/displaying-custom-post-type-forms/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/08/displaying-custom-post-type-forms/</guid>
+        
+        <category>events</category>
+        
+        <category>forms</category>
+        
+        <category>plugins</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Custom Post Types</title>
@@ -16,6 +277,15 @@
 &lt;blockquote&gt;
   &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
 &lt;/blockquote&gt;
+
+&lt;h2 id=&quot;errata-from-last-post&quot;&gt;Errata from last post&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I was missing a few semicolons in the &lt;code&gt;AbstractPostType&lt;/code&gt;. Oops?.&lt;/li&gt;
+  &lt;li&gt;I added some missing class &lt;code&gt;use&lt;/code&gt; statements to &lt;code&gt;AbstractPostType&lt;/code&gt; to properly scope the used classes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
 
 &lt;h2 id=&quot;custom-post-types&quot;&gt;Custom Post Types&lt;/h2&gt;
 
@@ -42,7 +312,7 @@
 &lt;p&gt;If any of the above sounds familiar, its because I’ve described a &lt;code&gt;Form&lt;/code&gt; class. Here is an example Form class for my app:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-BlogPostType extends Form
+class BlogPostType extends Form
 {
     protected function _buildSchema(Schema $schema)
     {
@@ -73,7 +343,10 @@ BlogPostType extends Form
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 namespace App\PostType;
 
+use Cake\Form\Form;
+use Cake\Form\Schema;
 use Cake\ORM\TableRegistry;
+use Cake\Validation\Validator;
 use Cake\Utility\Inflector;
 
 abstract class AbstractPostType extends Form
@@ -140,12 +413,12 @@ abstract class AbstractPostType extends Form
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function indexTemplate()
 {
-    return $this-&amp;gt;templatePrefix() . &#39;-index.ctp&#39;
+    return $this-&amp;gt;templatePrefix() . &#39;-index.ctp&#39;;
 }
 
 public function viewTemplate()
 {
-    return $this-&amp;gt;templatePrefix() . &#39;-view.ctp&#39;
+    return $this-&amp;gt;templatePrefix() . &#39;-view.ctp&#39;;
 }
 
 protected function templatePrefix()
@@ -212,7 +485,7 @@ git commit -m &quot;Lay out infrastructure for custom post types&quot;
 &lt;hr /&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.7&quot;&gt;0.0.8&lt;/a&gt;.&lt;/p&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.7&quot;&gt;0.0.7&lt;/a&gt;.&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;We now have an - unproven - post type system. We still have yet to have a way to display this on the site, nor have we started on what it looks like to edit the page, but we’ll get there. I’m pretty happy with what we have so far, and hopefully we can figure out any specific issues as we start using this system.&lt;/p&gt;
@@ -2552,113 +2825,6 @@ laambda resource:timeout FUNCTION VALUE
         
         
         <category>opschops</category>
-        
-      </item>
-    
-      <item>
-        <title>Paginating one table while sorting by a field from another table</title>
-        <description>&lt;p&gt;There was a user on irc who asked the question, “How do I sort pagination of one table by another table’s field?”. I actually had to dig a little but to do this. Let’s layout how pagination works first.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Note: all of this will assume Users belongsTo Cities. YMMV for anything else, I definitely didn’t test it.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;You can paginate by specifying a Table object:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$users = $this-&amp;gt;paginate($this-&amp;gt;Users);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can also specify the string name:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$users = $this-&amp;gt;paginate(&#39;Users&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, you can pass in a query object (which can be retrieved from a &lt;code&gt;find()&lt;/code&gt; call):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$query = $this-&amp;gt;Users-&amp;gt;find();
-$users = $this-&amp;gt;paginate($query);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Of course, if you wanted to include related data, you would need to contain that data, which is where the &lt;code&gt;query&lt;/code&gt; method shines, as you can easily modify it:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$query = $this-&amp;gt;Users-&amp;gt;find()
-                     -&amp;gt;contain(&#39;Cities&#39;);
-$users = $this-&amp;gt;paginate($query);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;One thing of note is that you can also specify the query info in a controller’s &lt;code&gt;$this-&amp;gt;paginate&lt;/code&gt; attribute:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;contain&#39;] = [&#39;Cities&#39;];
-$users = $this-&amp;gt;paginate(&#39;Users&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you wanted to sort the output by a related field, you can add it to the query:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$query = $this-&amp;gt;Users-&amp;gt;find()
-                     -&amp;gt;contain(&#39;Cities&#39;)
-                     -&amp;gt;order([&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;]);
-$users = $this-&amp;gt;paginate($query);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above works fine, but this won’t:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;contain&#39;] = [&#39;Cities&#39;];
-$this-&amp;gt;paginate[&#39;order&#39;] = [&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;];
-$users = $this-&amp;gt;paginate(&#39;Users&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Why? Because in the former, we are passing in the order via a query object explicitly. In the later, CakePHP will strip it out because the related field is &lt;strong&gt;not&lt;/strong&gt; whitelisted for pagination sorting. The scope of this is limited to the paginated model by default. This is to avoid people futzing with your querystring parameters and taking down your site because of an un-indexed sort…&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;ALWAYS ADD INDEXES FOR FIELDS YOU ARE SORTING ON&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;What if you wanted to use the &lt;code&gt;$this-&amp;gt;paginate&lt;/code&gt; method? You can do this by adding to the &lt;code&gt;sortWhitelist&lt;/code&gt; option:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;contain&#39;] = [&#39;Cities&#39;];
-$this-&amp;gt;paginate[&#39;order&#39;] = [&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;];
-$this-&amp;gt;paginate[&#39;sortWhitelist&#39;] = $this-&amp;gt;Users-&amp;gt;schema()-&amp;gt;columns() + [&#39;Cities.name&#39;];
-$users = $this-&amp;gt;paginate(&#39;Users&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Yay! You might notice that I added &lt;code&gt;$this-&amp;gt;Users-&amp;gt;schema()-&amp;gt;columns()&lt;/code&gt; to the &lt;code&gt;sortWhitelist&lt;/code&gt; as well. Since it is a whitelist, if I don’t whitelist the primary tables fields, I won’t be able to sort via those fields. You can of course restrict the fields:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;contain&#39;] = [&#39;Cities&#39;];
-$this-&amp;gt;paginate[&#39;order&#39;] = [&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;];
-// id and created will be fields in the Users table
-$this-&amp;gt;paginate[&#39;sortWhitelist&#39;] = [&#39;id&#39;, &#39;created&#39;, &#39;Cities.name&#39;];
-$users = $this-&amp;gt;paginate(&#39;Users&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that if you want to be able to sort by other fields than the one passed explicitly in a query object, you’ll need to mix the two methods:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;paginate[&#39;sortWhitelist&#39;] = $this-&amp;gt;Users-&amp;gt;schema()-&amp;gt;columns() + [&#39;Cities.id&#39;, &#39;Cities.name&#39;];
-$query = $this-&amp;gt;Users-&amp;gt;find()
-                     -&amp;gt;contain(&#39;Cities&#39;)
-                     -&amp;gt;order([&#39;Cities.name&#39; =&amp;gt; &#39;DESC&#39;]);
-$users = $this-&amp;gt;paginate($query);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;what-method-should-i-use&quot;&gt;What method should I use?&lt;/h3&gt;
-
-&lt;p&gt;The &lt;code&gt;$this-&amp;gt;paginate&lt;/code&gt; method is pretty simple to use in a pinch. Doesn’t require much change from 2.x. I would use it for a one-off pagination setup.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;$query&lt;/code&gt; method is useful if you have a complex find or want to reuse that find in another method, as you can abstract the query object behind a cakephp custom find.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 10 Mar 2016 20:51:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/03/10/pagination-sorting-by-related-tables/</guid>
-        
-        <category>cakephp</category>
-        
-        <category>table</category>
-        
-        <category>model</category>
-        
-        <category>pagination</category>
-        
-        
-        <category>cakephp</category>
         
       </item>
     

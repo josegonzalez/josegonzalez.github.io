@@ -48,6 +48,12 @@
 <blockquote>
   <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
 </blockquote>
+<h2 id="errata-from-last-post">Errata from last post</h2>
+<ul>
+  <li>I was missing a few semicolons in the <code>AbstractPostType</code>. Oops?.</li>
+  <li>I added some missing class <code>use</code> statements to <code>AbstractPostType</code> to properly scope the used classes.</li>
+</ul>
+<p>Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.</p>
 <h2 id="custom-post-types">Custom Post Types</h2>
 <p>For our cms, the following post types are things my client wants to have on their site:</p>
 <ul>
@@ -66,7 +72,7 @@
 <p>Above is a list of fields that we’ll need to provide. The <code>title</code> is required, and will be used to interpolate a url, assuming one isn’t specified by the user. All others are “optional” for every type, but can be mandatory depending upon the post type. It seems that each post type would need to be able to set it’s own validation rules at least. As each post type varies in it’s fields, we’ll also want to be able to specify a schema for use on the edit page itself.</p>
 <p>If any of the above sounds familiar, its because I’ve described a <code>Form</code> class. Here is an example Form class for my app:</p>
 <pre><code class="language-php">&lt;?php
-BlogPostType extends Form
+class BlogPostType extends Form
 {
     protected function _buildSchema(Schema $schema)
     {
@@ -92,7 +98,10 @@ BlogPostType extends Form
 <p>Pretty neat. One thing is that the optional fields cannot be saved into the <code>posts</code> table, as there is no place for them there. Our <code>_execute</code> method will need to turn them into <code>PostAttributes</code> for the purposes of using it in the ui. As well, we’ll need a method for turning the <code>PostAttributes</code> data into something our form template will be able to understand. As such, extracting that logic into a new class seems reasonable. Here is the skeleton for that:</p>
 <pre><code class="language-php">&lt;?php
 namespace App\PostType;
+use Cake\Form\Form;
+use Cake\Form\Schema;
 use Cake\ORM\TableRegistry;
+use Cake\Validation\Validator;
 use Cake\Utility\Inflector;
 abstract class AbstractPostType extends Form
 {
@@ -147,11 +156,11 @@ abstract class AbstractPostType extends Form
 <p>And finally, a few methods for deciding what template to use for <code>index</code> and <code>view</code> actions.</p>
 <pre><code class="language-php">public function indexTemplate()
 {
-    return $this-&gt;templatePrefix() . '-index.ctp'
+    return $this-&gt;templatePrefix() . '-index.ctp';
 }
 public function viewTemplate()
 {
-    return $this-&gt;templatePrefix() . '-view.ctp'
+    return $this-&gt;templatePrefix() . '-view.ctp';
 }
 protected function templatePrefix()
 {
@@ -200,7 +209,7 @@ git commit -m "Lay out infrastructure for custom post types"
 </code></pre>
 <hr />
 <blockquote>
-  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.7">0.0.8</a>.</p>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.7">0.0.7</a>.</p>
 </blockquote>
 <p>We now have an - unproven - post type system. We still have yet to have a way to display this on the site, nor have we started on what it looks like to edit the page, but we’ll get there. I’m pretty happy with what we have so far, and hopefully we can figure out any specific issues as we start using this system.</p>
 <p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
@@ -220,7 +229,7 @@ git commit -m "Lay out infrastructure for custom post types"
     <aside class="sidebar widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
 <div class="series-note">
-    <p>This entry is <strong>part 7</strong> of <strong>7</strong> in the series "CakeAdvent 2016".</p>
+    <p>This entry is <strong>part 7</strong> of <strong>8</strong> in the series "CakeAdvent 2016".</p>
     <ol>
       <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
       <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
@@ -229,6 +238,7 @@ git commit -m "Lay out infrastructure for custom post types"
       <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
       <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
       <li>Custom Post Types</li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>
