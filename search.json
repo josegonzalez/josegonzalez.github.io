@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Custom Post Types",
+    "url": "/2016/12/07/custom-post-types/",
+    "description": "Part 7 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","custom","help","part","personal","post","posts","series","types","will"]
+  },
+  {
+    "type": "post",
     "title": "Customizing the Posts Dashboard with CrudView",
     "url": "/2016/12/06/customizing-the-posts-crudview-dashboard/",
     "description": "Part 6 of a series of posts that will help you build out a personal CMS",

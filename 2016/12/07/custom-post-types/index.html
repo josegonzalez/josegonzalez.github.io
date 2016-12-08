@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Custom Post Types</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/07/custom-post-types/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 7 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="events, forms, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Custom Post Types" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/07/custom-post-types/" />
+    <meta property="og:description" content="Part 7 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Custom Post Types" />
+    <meta name="twitter:description" content="Part 7 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Custom Post Types » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Custom Post Types</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="custom-post-types">Custom Post Types</h2>
+<p>For our cms, the following post types are things my client wants to have on their site:</p>
+<ul>
+  <li>General Blog Posts</li>
+  <li>Photos</li>
+  <li>Photos with text attached</li>
+  <li>Photos with an optional price tag - for purchasing</li>
+</ul>
+<p>A bit across the board, but lets see if we can make this a bit generic:</p>
+<ul>
+  <li>title</li>
+  <li>content (optional)</li>
+  <li>image (optional)</li>
+  <li>price (optional)</li>
+</ul>
+<p>Above is a list of fields that we’ll need to provide. The <code>title</code> is required, and will be used to interpolate a url, assuming one isn’t specified by the user. All others are “optional” for every type, but can be mandatory depending upon the post type. It seems that each post type would need to be able to set it’s own validation rules at least. As each post type varies in it’s fields, we’ll also want to be able to specify a schema for use on the edit page itself.</p>
+<p>If any of the above sounds familiar, its because I’ve described a <code>Form</code> class. Here is an example Form class for my app:</p>
+<pre><code class="language-php">&lt;?php
+BlogPostType extends Form
+{
+    protected function _buildSchema(Schema $schema)
+    {
+        $schema-&gt;addField('title', 'string');
+        $schema-&gt;addField('url', ['type' =&gt; 'text']);
+        $schema-&gt;addField('body', ['type' =&gt; 'text']);
+        return $schema
+    }
+    protected function _buildValidator(Validator $validator)
+    {
+        $validator-&gt;notEmpty('title', 'Please fill this field');
+        $validator-&gt;notEmpty('url', 'Please fill this field');
+        $validator-&gt;notEmpty('body', 'Please fill this field');
+        return $validator;
+    }
+    protected function _execute(array $data)
+    {
+        // Logic here to save the thing.
+        return true;
+    }
+}
+</code></pre>
+<p>Pretty neat. One thing is that the optional fields cannot be saved into the <code>posts</code> table, as there is no place for them there. Our <code>_execute</code> method will need to turn them into <code>PostAttributes</code> for the purposes of using it in the ui. As well, we’ll need a method for turning the <code>PostAttributes</code> data into something our form template will be able to understand. As such, extracting that logic into a new class seems reasonable. Here is the skeleton for that:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\PostType;
+use Cake\ORM\TableRegistry;
+use Cake\Utility\Inflector;
+abstract class AbstractPostType extends Form
+{
+}
+</code></pre>
+<p>First, lets get the generic <code>AbstractPostType::_execute()</code> method out of the way. This method needs to massage the data into a <code>Post</code> entity and it’s related <code>PostAttributes</code> entities.</p>
+<pre><code class="language-php">protected function _execute(array $data)
+{
+    $postsTable = TableRegistry::get('Posts');
+    $attributesTable = TableRegistry::get('PostAttributes');
+    $postAttributes = [];
+    $postFields = ['id', 'user_id', 'title', 'url'];
+    foreach ($data as $key =&gt; $value)
+    {
+        if (in_array($key, $postFields)) {
+            continue;
+        }
+        $postAttributes[] = $attributesTable-&gt;newEntity([
+            'name' =&gt; $key,
+            'value' =&gt; $value,
+        ]);
+        unset($data[$key]);
+    }
+    $post = $postsTable-&gt;newEntity($data);
+    $post-&gt;post_attributes = $postAttributes;
+    return $postsTable-&gt;save($post);
+}
+</code></pre>
+<p>We also need to make a method that returns an array of data based on an incoming <code>Post</code> entity and it’s related <code>PostAttribute</code> entities.</p>
+<pre><code class="language-php">public function data(Post $post)
+{
+    $data = $post-&gt;toArray();
+    unset($data['post_attributes']);
+    foreach ($post-&gt;post_attributes as $postAttribute) {
+        $data[$postAttribute-&gt;name] = $postAttribute-&gt;value;
+    }
+    return $data;
+}
+</code></pre>
+<p>For templating purposes, I will also create a <code>get</code> method that can be used to get an individual attribute.</p>
+<pre><code class="language-php">public function get($key, $default = null)
+{
+    if (empty($this-&gt;_data)) {
+        $this-&gt;_data = $this-&gt;data();
+    }
+    if (isset($this-&gt;_data[$key])) {
+        return $this-&gt;_data[$key];
+    }
+    return $default;
+}
+</code></pre>
+<p>And finally, a few methods for deciding what template to use for <code>index</code> and <code>view</code> actions.</p>
+<pre><code class="language-php">public function indexTemplate()
+{
+    return $this-&gt;templatePrefix() . '-index.ctp'
+}
+public function viewTemplate()
+{
+    return $this-&gt;templatePrefix() . '-view.ctp'
+}
+protected function templatePrefix()
+{
+    $template = get_class($this);
+    if ($pos = strrpos($template, '\\')) {
+        return substr($template, $pos + 1);
+    }
+    $template = preg_replace('/PostType$/', '', $template);
+    return 'post_type/' . Inflector::underscore($template);
+}
+</code></pre>
+<blockquote>
+  <p>You’ll want to change the class that <code>BlogPostType</code> extends to <code>App\PostType\AbstractPostType</code>.</p>
+</blockquote>
+<h2 id="distributing-post-types">Distributing Post Types</h2>
+<p>One thing that would be cool is if I could add a new post type without adding code to the main app. This would allow me to decouple building post types, and potentially make them shareable across CMS installations. This requirement would mean that we should lean on plugins. Here is a theoretical <code>BlogPostTypePlugin</code>:</p>
+<pre><code>plugins/BlogPostTypePlugin/config/bootstrap.php
+plugins/BlogPostTypePlugin/src/PostType/BlogPostType.php
+plugins/BlogPostTypePlugin/src/Template/Element/post_type/blog-index.ctp
+plugins/BlogPostTypePlugin/src/Template/Element/post_type/blog-view.ctp
+</code></pre>
+<blockquote>
+  <p>It would also be cute if we could inject css/js into our cms, but I think that might be pushing it. For now we should instead rely on the cms theme or whatever to set what that looks like.</p>
+</blockquote>
+<p>Other than our <code>BlogPostTypePlugin</code> class - which extends the core <code>PostType</code> - we will need to use <code>config/bootstrap.php</code> to register post types. We can do so via the event system. Here is what that might look like:</p>
+<pre><code class="language-php">&lt;?php
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+EventManager::instance()-&gt;on('Posts.PostTypes.get', function (Event $event) {
+  // The key is the Plugin name and the class
+  // The value is what you want to display in the ui
+  $event-&gt;subject-&gt;postTypes['BlogPostType.BlogPostType'] = 'blog';
+});
+</code></pre>
+<p>We’ll need an element to render the post type on the screen.</p>
+<p>Our view template might look like the following:</p>
+<pre><code class="language-php">&lt;h3&gt;&lt;?= $post-&gt;get('title') ?&gt;&lt;/h3&gt;
+&lt;div&gt;
+  &lt;?= $post-&gt;get('body') ?&gt;
+&lt;/div&gt;
+</code></pre>
+<p>The above setup should allow us to create custom plugins that contain one or post types. While the parsing bit isn’t shown here, it’s simply a matter of dispatching the event and then collecting the <code>postTypes</code> attribute on the subject.</p>
+<p>Lets add the <code>PostType</code> class:</p>
+<pre><code class="language-shell">git add src/PostType/AbstractPostType.php
+git commit -m "Lay out infrastructure for custom post types"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.7">0.0.8</a>.</p>
+</blockquote>
+<p>We now have an - unproven - post type system. We still have yet to have a way to display this on the site, nor have we started on what it looks like to edit the page, but we’ll get there. I’m pretty happy with what we have so far, and hopefully we can figure out any specific issues as we start using this system.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/07/custom-post-types/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-07 06:04:00 +0000">07 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 7</strong> of <strong>7</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li>Custom Post Types</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/07/custom-post-types/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/07/custom-post-types/';
+        var disqus_title      = "CakeAdvent-2016: Custom Post Types";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>
