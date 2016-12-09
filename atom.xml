@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-12-08T17:30:28+00:00</updated>
+ <updated>2016-12-09T21:22:53+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Saving Custom Post Types]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/"/>
+   <updated>2016-12-09T10:40:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/</id>
+   <content type="html"><![CDATA[Part 9 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Displaying Custom Post Type Forms]]></title>

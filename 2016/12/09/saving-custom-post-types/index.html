@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Saving Custom Post Types</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 9 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="crud, events, forms, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Saving Custom Post Types" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/" />
+    <meta property="og:description" content="Part 9 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Saving Custom Post Types" />
+    <meta name="twitter:description" content="Part 9 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Saving Custom Post Types » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Saving Custom Post Types</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="errata-from-previous-post">Errata from previous post</h2>
+<ul>
+  <li>The <code>AbstractPostType</code> class is missing the <code>use App\Model\Entity\Post;</code> statement in the class declaration.</li>
+  <li>Added <code>unset($data['user']);</code> to <code>AbstractPostType::data()</code>.</li>
+</ul>
+<p>Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.</p>
+<h2 id="updating-plugins">Updating Plugins</h2>
+<p>Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following <code>composer</code> command:</p>
+<pre><code class="language-php">composer update
+</code></pre>
+<p>Typically you would run tests at this stage, but since we have <em>yet</em> to write any, that isn’t necessary.</p>
+<p>Let’s commit any updates:</p>
+<pre><code class="language-shell">git add composer.lock
+git commit -m "Update unpinned dependencies"
+</code></pre>
+<blockquote>
+  <p>You should always verify your application still works after upgrading dependencies.</p>
+</blockquote>
+<h2 id="handling-edits">Handling Edits</h2>
+<p>Our previous post only handled the <code>add</code> action, while we’ll need to also support the <code>edit</code> action. I’ve extracted the logic necessary for both into the <code>PostsListener::_setPostType()</code> method.</p>
+<pre><code class="language-php">/**
+ * Set the post type for add/edit actions
+ *
+ * @param \Cake\Event\Event $event Event
+ * @param string $postType the name of a post type class
+ * @return void
+ */
+protected function _setPostType(Event $event, $postType)
+{
+    $className = App::className($postType, 'PostType');
+    $postType = new $className;
+    $fields = [];
+    foreach ($postType-&gt;schema()-&gt;fields() as $field) {
+        $fields[$field] = [
+            'type' =&gt; $postType-&gt;schema()-&gt;fieldType($field)
+        ];
+    }
+    $viewVars = $postType-&gt;viewVars();
+    $viewVars['fields'] = $fields;
+    $this-&gt;_controller()-&gt;set($viewVars);
+    $event-&gt;subject-&gt;set(['entity' =&gt; $postType]);
+}
+</code></pre>
+<p>As well, I moved the alias to class name mapping into it’s own function so that it can be used for the edit action:</p>
+<pre><code class="language-php">/**
+ * Returns a class name for a given post type alias
+ *
+ * @param string $typeAlias the alias of a post type class
+ * @return string
+ */
+public function _postTypeAliasToClass($typeAlias)
+{
+    $className = null;
+    $postTypes = PostsListener::postTypes();
+    foreach ($postTypes as $class =&gt; $alias) {
+        if ($alias === $typeAlias) {
+            $className = $class;
+        }
+    }
+    return $className;
+}
+</code></pre>
+<p>I’ve also added a new <code>PostsListener::beforeRenderEdit()</code> method to perform all the logic necessary for setting the correct post type:</p>
+<pre><code class="language-php">/**
+ * Before Render Edit Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderEdit(Event $event)
+{
+    $entity = $event-&gt;subject-&gt;entity;
+    $className = $this-&gt;_postTypeAliasToClass($entity-&gt;type);
+    $this-&gt;_setPostType($event, $className);
+    if ($this-&gt;_request()-&gt;is('get')) {
+        $this-&gt;request-&gt;data = $event-&gt;subject-&gt;entity-&gt;data($entity);
+    }
+}
+</code></pre>
+<p>In order to set the post type for an edit action, we need ensure we invoke the <code>PostsListener::beforeRenderEdit()</code> method.</p>
+<p>Finally, we need to update <code>PostsListener::beforeRenderAdd()</code> to:</p>
+<pre><code class="language-php">/**
+ * Before Render Add Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderAdd(Event $event)
+{
+    $passedArgs = $this-&gt;_request()-&gt;param('pass');
+    $className = null;
+    if (!empty($passedArgs)) {
+        $className = $this-&gt;_postTypeAliasToClass($passedArgs[0]);
+    }
+    if ($className !== null) {
+        $this-&gt;_setPostType($event, $className);
+    }
+}
+</code></pre>
+<p>Time to commit our changes.</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php
+git commit -m "Handle both add and edit saves"
+</code></pre>
+<h2 id="associating-a-user-with-a-post">Associating a User with a Post</h2>
+<p>When a post is created or edited, we’ll want to ensure that it is properly associated with the current user. This is pretty simple, as we can do this automatically in the <code>beforeSave</code>. We’ll start by mapping the event handler in our <code>PostsListener::implementedEvents()</code> method:</p>
+<pre><code class="language-php">'Crud.beforeSave' =&gt; 'beforeSave',
+</code></pre>
+<p>And finally, here is the event handler itself. It’s pretty straightforward:</p>
+<pre><code class="language-php">/**
+ * Before Save
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeSave(Event $event)
+{
+    $event-&gt;subject-&gt;entity-&gt;user_id = $this-&gt;_controller()-&gt;Auth-&gt;user('id');
+}
+</code></pre>
+<p>Commit!</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php
+git commit -m "Set the user_id to the currently authenticated user"
+</code></pre>
+<h2 id="saving-extra-fields-in-the-postattributes-table">Saving extra fields in the post_attributes table</h2>
+<p>Since we have a few extra fields, they all need to be saved as <code>post_attributes</code>. The easiest way is to hook into our new <code>PostsListener::beforeSave()</code> method and massage the entity. We’ll modify our <code>PostsListener::beforeSave()</code> to look like the following:</p>
+<pre><code class="language-php">/**
+ * Before Save
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeSave(Event $event)
+    $type = $event-&gt;subject-&gt;entity-&gt;type;
+    if (empty($type)) {
+        $passedArgs = $this-&gt;_request()-&gt;param('pass');
+        $type = $passedArgs[0];
+    }
+    $event-&gt;subject-&gt;entity-&gt;type = $type;
+    $postTypeClassName = $this-&gt;_postTypeAliasToClass($type);
+    $className = App::className($postTypeClassName, 'PostType');
+    $postType = new $className;
+    $validFields = $postType-&gt;schema()-&gt;fields();
+    $postAttributes = [];
+    $PostsTable = TableRegistry::get('Posts');
+    $postColumns = $PostsTable-&gt;schema()-&gt;columns();
+    foreach ($event-&gt;subject-&gt;entity-&gt;toArray() as $field =&gt; $value) {
+        if (!in_array($field, $postColumns) &amp;&amp; in_array($field, $validFields)) {
+            $postAttributes[] = [
+                'name' =&gt; $field,
+                'value' =&gt; $value,
+            ];
+        }
+    }
+    $data = [
+        'user_id' =&gt; $this-&gt;_controller()-&gt;Auth-&gt;user('id'),
+        'type' =&gt; $type,
+        'post_attributes' =&gt; $postAttributes,
+    ] + $this-&gt;_request()-&gt;data;
+    if (empty($data['published_date'])) {
+        $data['published_date'] = Time::now();
+    }
+    $PostsTable-&gt;patchEntity($event-&gt;subject-&gt;entity, $data);
+}
+</code></pre>
+<p>Lots of code there, so lets go over it:</p>
+<ul>
+  <li>Still setting the <code>user_id</code> to the currently logged in user, just later, and via <code>PostsTable::patchEntity()</code></li>
+  <li>We need to retrieve all valid fields for the current post type. Users should <em>never</em> be able to save data that we don’t expect as extra attributes.</li>
+  <li>I’m building an array of <code>postAttributes</code> from the set post fields where:
+    <ul>
+      <li>the field isn’t a column of the <code>post</code> entity</li>
+      <li>the field is allowed to be saved for the <code>PostType</code></li>
+    </ul>
+  </li>
+  <li>I’m setting the default <code>published_date</code> to the current time if it isn’t already set. We’ll come back to this at a later date (pun intended).</li>
+  <li>We are patching our <code>post</code> entity with the list of postAttributes.</li>
+</ul>
+<p>Remember to add the following <code>use</code> call to your <code>PostsListener</code> class declaration:</p>
+<pre><code class="language-php">use Cake\I18n\Time;
+use Cake\ORM\TableRegistry;
+</code></pre>
+<p>Dope. You can try going to <code>/posts/add/blog</code> to add a blog post, and then edits should also work fine. It’s a bit nasty looking, but it’ll do for now.</p>
+<p>Lets save our work for now.</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php
+git commit -m "Implement post saving"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.9">0.0.9</a>.</p>
+</blockquote>
+<p>Posts can be added and saved hurray! We’ll definitely use this as a good base for building out our CMS, and while we don’t yet have a way to select a post-type, that should come Real Soon™.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-09 10:40:00 +0000">09 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 9</strong> of <strong>9</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li>Saving Custom Post Types</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/09/saving-custom-post-types/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/';
+        var disqus_title      = "CakeAdvent-2016: Saving Custom Post Types";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Saving Custom Post Types",
+    "url": "/2016/12/09/saving-custom-post-types/",
+    "description": "Part 9 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","custom","help","part","personal","post","posts","saving","series","types","will"]
+  },
+  {
+    "type": "post",
     "title": "Displaying Custom Post Type Forms",
     "url": "/2016/12/08/displaying-custom-post-type-forms/",
     "description": "Part 8 of a series of posts that will help you build out a personal CMS",

@@ -5,9 +5,277 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Thu, 08 Dec 2016 17:30:28 +0000</pubDate>
-    <lastBuildDate>Thu, 08 Dec 2016 17:30:28 +0000</lastBuildDate>
+    <pubDate>Fri, 09 Dec 2016 21:22:53 +0000</pubDate>
+    <lastBuildDate>Fri, 09 Dec 2016 21:22:53 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Saving Custom Post Types</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;errata-from-previous-post&quot;&gt;Errata from previous post&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The &lt;code&gt;AbstractPostType&lt;/code&gt; class is missing the &lt;code&gt;use App\Model\Entity\Post;&lt;/code&gt; statement in the class declaration.&lt;/li&gt;
+  &lt;li&gt;Added &lt;code&gt;unset($data[&#39;user&#39;]);&lt;/code&gt; to &lt;code&gt;AbstractPostType::data()&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
+
+&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
+
+&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;composer update
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
+
+&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
+git commit -m &quot;Update unpinned dependencies&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;handling-edits&quot;&gt;Handling Edits&lt;/h2&gt;
+
+&lt;p&gt;Our previous post only handled the &lt;code&gt;add&lt;/code&gt; action, while we’ll need to also support the &lt;code&gt;edit&lt;/code&gt; action. I’ve extracted the logic necessary for both into the &lt;code&gt;PostsListener::_setPostType()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Set the post type for add/edit actions
+ *
+ * @param \Cake\Event\Event $event Event
+ * @param string $postType the name of a post type class
+ * @return void
+ */
+protected function _setPostType(Event $event, $postType)
+{
+    $className = App::className($postType, &#39;PostType&#39;);
+    $postType = new $className;
+    $fields = [];
+    foreach ($postType-&amp;gt;schema()-&amp;gt;fields() as $field) {
+        $fields[$field] = [
+            &#39;type&#39; =&amp;gt; $postType-&amp;gt;schema()-&amp;gt;fieldType($field)
+        ];
+    }
+
+    $viewVars = $postType-&amp;gt;viewVars();
+    $viewVars[&#39;fields&#39;] = $fields;
+    $this-&amp;gt;_controller()-&amp;gt;set($viewVars);
+    $event-&amp;gt;subject-&amp;gt;set([&#39;entity&#39; =&amp;gt; $postType]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As well, I moved the alias to class name mapping into it’s own function so that it can be used for the edit action:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Returns a class name for a given post type alias
+ *
+ * @param string $typeAlias the alias of a post type class
+ * @return string
+ */
+public function _postTypeAliasToClass($typeAlias)
+{
+    $className = null;
+    $postTypes = PostsListener::postTypes();
+    foreach ($postTypes as $class =&amp;gt; $alias) {
+        if ($alias === $typeAlias) {
+            $className = $class;
+        }
+    }
+    return $className;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’ve also added a new &lt;code&gt;PostsListener::beforeRenderEdit()&lt;/code&gt; method to perform all the logic necessary for setting the correct post type:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Render Edit Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderEdit(Event $event)
+{
+    $entity = $event-&amp;gt;subject-&amp;gt;entity;
+    $className = $this-&amp;gt;_postTypeAliasToClass($entity-&amp;gt;type);
+    $this-&amp;gt;_setPostType($event, $className);
+    if ($this-&amp;gt;_request()-&amp;gt;is(&#39;get&#39;)) {
+        $this-&amp;gt;request-&amp;gt;data = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;data($entity);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In order to set the post type for an edit action, we need ensure we invoke the &lt;code&gt;PostsListener::beforeRenderEdit()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;Finally, we need to update &lt;code&gt;PostsListener::beforeRenderAdd()&lt;/code&gt; to:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Render Add Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderAdd(Event $event)
+{
+    $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
+    $className = null;
+    if (!empty($passedArgs)) {
+        $className = $this-&amp;gt;_postTypeAliasToClass($passedArgs[0]);
+    }
+
+    if ($className !== null) {
+        $this-&amp;gt;_setPostType($event, $className);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Time to commit our changes.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
+git commit -m &quot;Handle both add and edit saves&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;associating-a-user-with-a-post&quot;&gt;Associating a User with a Post&lt;/h2&gt;
+
+&lt;p&gt;When a post is created or edited, we’ll want to ensure that it is properly associated with the current user. This is pretty simple, as we can do this automatically in the &lt;code&gt;beforeSave&lt;/code&gt;. We’ll start by mapping the event handler in our &lt;code&gt;PostsListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeSave&#39; =&amp;gt; &#39;beforeSave&#39;,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And finally, here is the event handler itself. It’s pretty straightforward:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Save
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeSave(Event $event)
+{
+    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;user_id = $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Commit!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
+git commit -m &quot;Set the user_id to the currently authenticated user&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;saving-extra-fields-in-the-postattributes-table&quot;&gt;Saving extra fields in the post_attributes table&lt;/h2&gt;
+
+&lt;p&gt;Since we have a few extra fields, they all need to be saved as &lt;code&gt;post_attributes&lt;/code&gt;. The easiest way is to hook into our new &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; method and massage the entity. We’ll modify our &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; to look like the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Save
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeSave(Event $event)
+    $type = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type;
+    if (empty($type)) {
+        $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
+        $type = $passedArgs[0];
+    }
+
+    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type = $type;
+    $postTypeClassName = $this-&amp;gt;_postTypeAliasToClass($type);
+    $className = App::className($postTypeClassName, &#39;PostType&#39;);
+    $postType = new $className;
+    $validFields = $postType-&amp;gt;schema()-&amp;gt;fields();
+
+    $postAttributes = [];
+    $PostsTable = TableRegistry::get(&#39;Posts&#39;);
+    $postColumns = $PostsTable-&amp;gt;schema()-&amp;gt;columns();
+    foreach ($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;toArray() as $field =&amp;gt; $value) {
+        if (!in_array($field, $postColumns) &amp;amp;&amp;amp; in_array($field, $validFields)) {
+            $postAttributes[] = [
+                &#39;name&#39; =&amp;gt; $field,
+                &#39;value&#39; =&amp;gt; $value,
+            ];
+        }
+    }
+
+    $data = [
+        &#39;user_id&#39; =&amp;gt; $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;),
+        &#39;type&#39; =&amp;gt; $type,
+        &#39;post_attributes&#39; =&amp;gt; $postAttributes,
+    ] + $this-&amp;gt;_request()-&amp;gt;data;
+    if (empty($data[&#39;published_date&#39;])) {
+        $data[&#39;published_date&#39;] = Time::now();
+    }
+
+    $PostsTable-&amp;gt;patchEntity($event-&amp;gt;subject-&amp;gt;entity, $data);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lots of code there, so lets go over it:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Still setting the &lt;code&gt;user_id&lt;/code&gt; to the currently logged in user, just later, and via &lt;code&gt;PostsTable::patchEntity()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;We need to retrieve all valid fields for the current post type. Users should &lt;em&gt;never&lt;/em&gt; be able to save data that we don’t expect as extra attributes.&lt;/li&gt;
+  &lt;li&gt;I’m building an array of &lt;code&gt;postAttributes&lt;/code&gt; from the set post fields where:
+    &lt;ul&gt;
+      &lt;li&gt;the field isn’t a column of the &lt;code&gt;post&lt;/code&gt; entity&lt;/li&gt;
+      &lt;li&gt;the field is allowed to be saved for the &lt;code&gt;PostType&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;I’m setting the default &lt;code&gt;published_date&lt;/code&gt; to the current time if it isn’t already set. We’ll come back to this at a later date (pun intended).&lt;/li&gt;
+  &lt;li&gt;We are patching our &lt;code&gt;post&lt;/code&gt; entity with the list of postAttributes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Remember to add the following &lt;code&gt;use&lt;/code&gt; call to your &lt;code&gt;PostsListener&lt;/code&gt; class declaration:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\I18n\Time;
+use Cake\ORM\TableRegistry;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Dope. You can try going to &lt;code&gt;/posts/add/blog&lt;/code&gt; to add a blog post, and then edits should also work fine. It’s a bit nasty looking, but it’ll do for now.&lt;/p&gt;
+
+&lt;p&gt;Lets save our work for now.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
+git commit -m &quot;Implement post saving&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.9&quot;&gt;0.0.9&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Posts can be added and saved hurray! We’ll definitely use this as a good base for building out our CMS, and while we don’t yet have a way to select a post-type, that should come Real Soon™.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 09 Dec 2016 10:40:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/</guid>
+        
+        <category>crud</category>
+        
+        <category>events</category>
+        
+        <category>forms</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Displaying Custom Post Type Forms</title>
@@ -2588,236 +2856,6 @@ laambda resource:timeout FUNCTION VALUE
         <guid isPermaLink="true">http://josediazgonzalez.com/2016/11/21/push-to-deploy-lambda-applications/</guid>
         
         <category>deployment</category>
-        
-        <category>infrastructure</category>
-        
-        <category>serverless</category>
-        
-        
-        <category>opschops</category>
-        
-      </item>
-    
-      <item>
-        <title>Serverless Distributed Cron System</title>
-        <description>&lt;p&gt;I’ve implemented the following in a &lt;em&gt;very&lt;/em&gt; untested project I have decided not to release, but the mental exercise of going through the system is worth doing.&lt;/p&gt;
-
-&lt;h2 id=&quot;what-is-cron-baby-dont-hurt-me&quot;&gt;What is Cron? (baby don’t hurt me)&lt;/h2&gt;
-
-&lt;p&gt;Cron is a generic name for various schedulers that run commands at a specific interval. Many developers encounter it via a &lt;code&gt;crontab&lt;/code&gt; file or similar that they have to edit. Here is an example (with a neat graph from wikipedia):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-cron&quot;&gt; ┌───────────── min (0 - 59)
- │ ┌────────────── hour (0 - 23)
- │ │ ┌─────────────── day of month (1 - 31)
- │ │ │ ┌──────────────── month (1 - 12)
- │ │ │ │ ┌───────────────── day of week (0 - 6) (Sunday to Saturday;
- │ │ │ │ │                                         7 is also Sunday)
- │ │ │ │ │ ┌────────────the command you are going to run (should be executable)
- │ │ │ │ │ │
- 5 2 * * 6 /var/lib/scripts/awesome-script.sh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It’s pretty nifty, and fairly easy to automate. Lots of developers seem to want to write versions in their own languages (because why not!), and here is a list of awful implementations in various languages. If you aren’t listed here, don’t worry, your version is almost certainly also awful.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Java: &lt;a href=&quot;http://www.sauronsoftware.it/projects/cron4j/&quot;&gt;cron4j&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Node.JS: &lt;a href=&quot;https://bunkat.github.io/later/&quot;&gt;later&lt;/a&gt; and &lt;a href=&quot;https://github.com/kelektiv/node-cron&quot;&gt;node-cron&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;PHP: this &lt;a href=&quot;https://packagist.org/packages/cron/cron&quot;&gt;cron&lt;/a&gt; library and &lt;a href=&quot;https://laravel.com/docs/5.3/scheduling&quot;&gt;laravel’s sceheduler&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Python: &lt;a href=&quot;https://github.com/fengsp/plan&quot;&gt;plan&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Ruby: &lt;a href=&quot;https://github.com/jmettraux/rufus-scheduler&quot;&gt;rufus-scheduler&lt;/a&gt; and &lt;a href=&quot;https://github.com/javan/whenever&quot;&gt;whenever&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;There are certainly others, these are just the ones I knew off the top of my head or googled really quickly. They are probably fine projects, just that re-implementing cron for the hell of it seems like a waste of time.&lt;/p&gt;
-
-&lt;p&gt;For the record, here are the components of a reasonable cron scheduler:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A scheduler (cron)&lt;/li&gt;
-  &lt;li&gt;A process to retrieve logs and process results (cron/syslog)&lt;/li&gt;
-  &lt;li&gt;A mechanism for storing the tasks (your cron file)&lt;/li&gt;
-  &lt;li&gt;A ui for editing cron tasks (your text editor of choice)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;distributed-cron&quot;&gt;Distributed Cron&lt;/h2&gt;
-
-&lt;p&gt;This is a pretty nasty problem. It turns out that building distributed systems is hard, and the semantics around running cron tasks don’t necessarily work for every problem.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;You may want to ensure only one version of a command is running at a time.&lt;/li&gt;
-  &lt;li&gt;You may want to ensure every invocation of a command is handled.&lt;/li&gt;
-  &lt;li&gt;You may want to ensure every task completes successfully.&lt;/li&gt;
-  &lt;li&gt;You may want to log all output somewhere for later investigation.&lt;/li&gt;
-  &lt;li&gt;You may want to be able to pause a command from being scheduled.&lt;/li&gt;
-  &lt;li&gt;You may want to stop a run that is &lt;em&gt;currently&lt;/em&gt; executing.&lt;/li&gt;
-  &lt;li&gt;You may want to place commands in maintenance mode.&lt;/li&gt;
-  &lt;li&gt;You may want to group commands for easy perusal in large installations.&lt;/li&gt;
-  &lt;li&gt;You may want to lock down commands to certain groups of users.&lt;/li&gt;
-  &lt;li&gt;You may want to be able to schedule commands via both an api and web ui.&lt;/li&gt;
-  &lt;li&gt;You may want to notify on errors.&lt;/li&gt;
-  &lt;li&gt;You may be dealing with commands that have an exit code of &lt;code&gt;0&lt;/code&gt; but actually failed.&lt;/li&gt;
-  &lt;li&gt;You may hope that you won’t need to learn entirely knew ways of thinking in order to manage this system.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;There aren’t really too many ways to “properly” do distributed cron. You can hack it pretty easily using a MySQL based system for scheduling jobs, as noted by Quora in &lt;a href=&quot;https://engineering.quora.com/Quoras-Distributed-Cron-Architecture&quot;&gt;this blog post&lt;/a&gt;. It works, but isn’t the greatest thing in the world, as you are probably also using MySQL for your queuing system (lulz).&lt;/p&gt;
-
-&lt;p&gt;At work, a hackathon project turned into &lt;a href=&quot;https://github.com/seatgeek/cronq&quot;&gt;CronQ&lt;/a&gt;, our distributed cron solution using MySQL and RabbitMQ. Now we have THREE systems to keep highly-available! Turns out it works - using like 4 processes, one to inject jobs, one for running jobs, one for gathering results, and one for an ok ui - but certainly doesn’t have all of the above things built-in. Also, as a by-product of using MySQL, the developer interface is this terrible ISO 8601 Interval format. Even I have trouble explaining how it works to developers, and I maintain the thing.&lt;/p&gt;
-
-&lt;p&gt;At the webscale end of this problem, you have &lt;a href=&quot;https://mesos.github.io/chronos/&quot;&gt;Chronos&lt;/a&gt;. It’s pretty awesome, is built on &lt;a href=&quot;https://mesos.apache.org/&quot;&gt;Mesos&lt;/a&gt;, and is webscale af. But you probably don’t want to run all that just so your rinky-dink cron task doesn’t not execute when the only host it is on goes down. If you have Mesos, awesome, try it out. I don’t, and I also don’t think it’s a good use of my time to maintain.&lt;/p&gt;
-
-&lt;p&gt;You could also:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;wrap every command with your favorite locking mechanism of choice - consul is distributed and you might have it up, but I’ve seen a ton of Redis or Postgres usage here&lt;/li&gt;
-  &lt;li&gt;place the same crontab on every file&lt;/li&gt;
-  &lt;li&gt;hope for no network partitions&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Good luck? Hope you’re using a service like &lt;a href=&quot;https://cronitor.io/&quot;&gt;cronitor.io&lt;/a&gt; to monitor your jobs.&lt;/p&gt;
-
-&lt;h2 id=&quot;serverless-cron&quot;&gt;Serverless Cron&lt;/h2&gt;
-
-&lt;p&gt;Heroku has a pretty nice scheduler. Here is a screenshot!&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/11/21/heroku-dashboard-scheduler.png&quot; alt=&quot;dashboard scheduler confessional&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;It’s also very barebones. You can add a command, set one of three frequencies, and more or less hope for the best. Still, pretty useful for developers. They don’t really need to think about much except for the command itself.&lt;/p&gt;
-
-&lt;p&gt;AWS Lambda has a similar feature. You can schedule based on one of two syntaxes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;rate&lt;/code&gt;: Think &lt;code&gt;yearly&lt;/code&gt; or &lt;code&gt;hourly&lt;/code&gt;. Rates are pretty useful if you want to not need to decipher when your cron syntax says something will run. The heroku dashboard gets this right I think, and I believe rate will continue to be pretty powerful.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;cron&lt;/code&gt;: This is the syntax we all know and love to lookup every time we write it.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Lambda, however, has a few limitations:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;You can only execute code in lambda. You cannot execute code on other servers, at least not directly (webcron? lol).&lt;/li&gt;
-  &lt;li&gt;By default, you can only execute 100 functions at a time. You can have this raised, but you probably don’t want to break other uses of lambda in your system.&lt;/li&gt;
-  &lt;li&gt;The deployment environment is pretty limited - Java, Node.JS, Python - unless you use a shim, which is less than ideal.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Still, it’s a pretty useful primitive for building on top of.&lt;/p&gt;
-
-&lt;h2 id=&quot;distributed-serverless-mostly-cron&quot;&gt;Distributed Serverless (mostly) Cron&lt;/h2&gt;
-
-&lt;p&gt;Components?&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Lambda Scheduler Function&lt;/li&gt;
-  &lt;li&gt;Lambda Results Retriever Function&lt;/li&gt;
-  &lt;li&gt;Lambda DynamoDB Pruning Function&lt;/li&gt;
-  &lt;li&gt;Cloudwatch&lt;/li&gt;
-  &lt;li&gt;DynamoDB&lt;/li&gt;
-  &lt;li&gt;SQS&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Jobs are stored in a DynamoDB table. This table can be hand-edited in the AWS Console for now, but in the future, you’d probably build some sort of Web UI (and API) on top of it. Here is what you would store:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Group identifier for the command&lt;/li&gt;
-  &lt;li&gt;Name of the command&lt;/li&gt;
-  &lt;li&gt;Command&lt;/li&gt;
-  &lt;li&gt;Cron syntax specifying the interval at which to run&lt;/li&gt;
-  &lt;li&gt;Whether the command is enabled or not&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Execution events are &lt;em&gt;also&lt;/em&gt; stored in DynamoDB. Whenever a task is:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Scheduled&lt;/li&gt;
-  &lt;li&gt;Started&lt;/li&gt;
-  &lt;li&gt;Completed (fail or success)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;An entry is stored in the execution table. The entry has a reference to the original job, the current timestamp, position in the workflow, and any metadata (such as the executor and the exit code). This can be used at a later date to construct a history of runs for the job.&lt;/p&gt;
-
-&lt;p&gt;There is a Lambda function that is executed which prunes the executed events DynamoDB table. You probably don’t care about whether the command executed three months ago, so storing only relevant recent data here is important.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Aside: MongoDB’s capped collection functionality would be pretty useful in this situation, as then its somewhat fire and forget.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Lambda can execute a function every minute. Even with a 10 second start-time overhead, that gives us roughly 50 seconds to schedule tasks for that minute interval. Each iteration will:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Retrieve all tasks from DynamoDB&lt;/li&gt;
-  &lt;li&gt;Throw away any tasks that do not need to be executed in that minute interval&lt;/li&gt;
-  &lt;li&gt;Enqeue a message (with a unique identifer for the job run!) into a group-specific SQS queue&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Next, you have the actual task runner. This can be any old daemon that lives on your server. It simply listens for jobs on SQS and executes them. You can have a few different running modes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;One at a time: Each task runner can execute one job at a time. If another job appears on it’s queue, it’ll ignore it until it’s current job is fulfilled.&lt;/li&gt;
-  &lt;li&gt;Resource-based: You could probably associated each job with an amount of resources it needs in order to be executed. With a bit of work, the task-runner can be made aware of what resources are left on the server, and appropriately retrieve a job to execute next. Users of plain-old-cron probably don’t care about this, but those living in highly available worlds might want to build this into their task runners (lol you’re also probably building something akin to Mesos at this point, so just use Chronos).&lt;/li&gt;
-  &lt;li&gt;Free-for-all task runners: Each task runner in a group will just continue trying to get a job from the queue. If it gets a job, it just starts it, OOM-killers be damned. Most developers sort of expect this behavior, though I believe the “One at a time” behavior is a bit easier to predict.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Why do we have task runners on actual servers? Personally, I like being able to execute the full range of code in my repositories. At work, we deploy the following languages in production:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;C#&lt;/li&gt;
-  &lt;li&gt;Golang&lt;/li&gt;
-  &lt;li&gt;Node.JS&lt;/li&gt;
-  &lt;li&gt;Ruby&lt;/li&gt;
-  &lt;li&gt;PHP&lt;/li&gt;
-  &lt;li&gt;Python&lt;/li&gt;
-  &lt;li&gt;Ruby&lt;/li&gt;
-  &lt;li&gt;Scala&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Hell, there’s even a bit of Perl and Lua running around (don’t ask). Each system has it’s own tasks we want to run on a schedule, and usually on “actual” hardware. For traditional, non-container based systems, the tasks should run on the servers where a codebase is deployed, so it makes sense to have a task runner.&lt;/p&gt;
-
-&lt;p&gt;The task runner is responsible for the following:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Executing a task: A subprocess will likely work here. You can get fancy and orphan a process, then poll for it’s file descriptor if you wish.&lt;/li&gt;
-  &lt;li&gt;Collecting logs: You can ship logs to cloudwatch if that is all you have handy, which gives you a shitty web ui for looking at logs. You may also want to integrate with your syslog solution of choice, such as the ELK stack or Graylog.&lt;/li&gt;
-  &lt;li&gt;Sending execution event notifications: Starts, Stops, Exit Codes, Host information etc. All of this should be recorded for later inspection.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Finally, you’ll have your Lambda function that retrieves results from a results queue and stores them in your execution events DynamoDB table.&lt;/p&gt;
-
-&lt;h2 id=&quot;implementation-notes&quot;&gt;Implementation Notes&lt;/h2&gt;
-
-&lt;p&gt;The simplest solution here is to use python as your Lambda deploy target. It is supported, has a wide range of libraries, and is easy enough to deploy. Here are a few libraries you can use for your implementation:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/boto/boto3&quot;&gt;boto3&lt;/a&gt;: Because you’ll need something to both read and write to SQS.&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/taichino/croniter/&quot;&gt;croniter&lt;/a&gt;: For parsing cron syntax in python. It’s the best library I found.&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/myusuf3/delorean&quot;&gt;delorean&lt;/a&gt;: You’ll need this to properly parse datetimes in the correct timezone (use UTC please).&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/kennethreitz/envoy&quot;&gt;envoy&lt;/a&gt;: For dealing with python subprocesses. It’s honestly not so bad to do directly, but you really need to know what you’re doing or you’ll do something silly with log messages or file descriptors.&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/stevearc/flywheel&quot;&gt;flywheel&lt;/a&gt;: Works well for interacting with DynamoDB in an ORM-like interface.&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/amoffat/sh&quot;&gt;sh&lt;/a&gt;: In case you hate envoy for subprocesses.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If you wish to go the Golang route - which I would probably prefer, given that you can ship a binary for the task runner - you should look into the following:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/eawsy/aws-lambda-go&quot;&gt;aws-lambda-go&lt;/a&gt;: You need a wrapper to deploy golang to Lambda, and this was the nicest thing I found.&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/gorhill/cronexpr&quot;&gt;cronexpr&lt;/a&gt;: Well-tested cron parsing&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/underarmour/dynago&quot;&gt;dynago&lt;/a&gt;: A surprisingly good way to interface with DynamoDB&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/goamz/goamz/tree/master/sqs&quot;&gt;goamz&lt;/a&gt;: SQS&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;closing-thoughts&quot;&gt;Closing Thoughts&lt;/h2&gt;
-
-&lt;p&gt;At the end of the day, this is a system you are now maintaining. I &lt;em&gt;highly&lt;/em&gt; suggest open sourcing it and being as loud as possible about how it works and how awesome it is (or isn’t) so that you’re not the only one looking at the code.&lt;/p&gt;
-
-&lt;p&gt;This system also doesn’t track dependencies and the like. It’s a straight reimplementation of cron, but for “the cloud”. If you need more, you’ll need to either write that other bit, or simply go to a system like &lt;a href=&quot;https://github.com/mesos/chronos&quot;&gt;Chronos&lt;/a&gt; or &lt;a href=&quot;https://github.com/spotify/luigi&quot;&gt;Luigi&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;The above system did not describe any sort of reasonable web ui for tackling the developer experience problems. Bring in someone from your frontend team to work on that part, and be nice to them when they want to build an asset-pipeline for it. You reimplemented cron and your implementation is awful, you have no right to complain.&lt;/p&gt;
-
-&lt;p&gt;The task runners are going to be a bit of work. Things like waiting on new jobs to appear on the queue, properly handling subprocesses, and managing where logs go after they are collected will be a bit painful. Be sure to test any “performance” enhancements you implement first on a “toy” system before rolling it out into production and killing the distributed cron.&lt;/p&gt;
-
-&lt;p&gt;One last thing: Give credit where credit is due. The folks who have written the underlying libraries, frameworks, and infrastructure primitives have put you in a good position to succeed. If you’re filing a bug, try and also come up with a patch. OSS is a two-way street.&lt;/p&gt;
-</description>
-        <pubDate>Mon, 21 Nov 2016 00:08:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/11/21/serverless-distributed-cron-system/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/11/21/serverless-distributed-cron-system/</guid>
-        
-        <category>cron</category>
         
         <category>infrastructure</category>
         
