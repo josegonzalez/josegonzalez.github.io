@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Making the UI usable",
+    "url": "/2016/12/10/making-the-ui-usable/",
+    "description": "Part 10 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","help","making","part","personal","posts","series","ui","usable","will"]
+  },
+  {
+    "type": "post",
     "title": "Saving Custom Post Types",
     "url": "/2016/12/09/saving-custom-post-types/",
     "description": "Part 9 of a series of posts that will help you build out a personal CMS",
@@ -1755,6 +1762,12 @@
     "title": "navigation",
     "url": "/tags/navigation/",
     "tokens": ["navigation"]
+  },
+  {
+    "type": "tag",
+    "title": "crud-view",
+    "url": "/tags/crud-view/",
+    "tokens": ["crud","view"]
   },
   {
     "type": "null",

@@ -5,9 +5,321 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 09 Dec 2016 21:22:53 +0000</pubDate>
-    <lastBuildDate>Fri, 09 Dec 2016 21:22:53 +0000</lastBuildDate>
+    <pubDate>Sat, 10 Dec 2016 22:24:05 +0000</pubDate>
+    <lastBuildDate>Sat, 10 Dec 2016 22:24:05 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Making the UI usable</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;errata-from-previous-posts&quot;&gt;Errata from previous posts&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The &lt;code&gt;AbstractPostType&lt;/code&gt; class had errors in how it retrieved templates for a &lt;code&gt;PostType&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;The &lt;code&gt;Template&lt;/code&gt; directory for the &lt;code&gt;BlogPostType&lt;/code&gt; plugin was misnamed to &lt;code&gt;Templates&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;There was no way to pre-seed data in a post-type instance for &lt;code&gt;get()&lt;/code&gt; calls.&lt;/li&gt;
+  &lt;li&gt;If the passed in &lt;code&gt;Post&lt;/code&gt; object for a &lt;code&gt;PostType&lt;/code&gt; was missing &lt;code&gt;post_attributes&lt;/code&gt;, an error would appear&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
+
+&lt;h2 id=&quot;fixing-incongruity&quot;&gt;Fixing Incongruity&lt;/h2&gt;
+
+&lt;p&gt;While we have a semblance of working code, a lot of it is a bit all over the place.:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We broke rendering of the home page (&lt;code&gt;/&lt;/code&gt;).&lt;/li&gt;
+  &lt;li&gt;There isn’t a way to go directly to adding a blog post, and instead we have to type out the url.&lt;/li&gt;
+  &lt;li&gt;The login screen looks different from the rest of the site.&lt;/li&gt;
+  &lt;li&gt;The &lt;code&gt;/users/edit&lt;/code&gt; page has the wrong look and wrong sidebar.&lt;/li&gt;
+  &lt;li&gt;We don’t error check when there is no &lt;code&gt;PostType&lt;/code&gt; set for adding a post.&lt;/li&gt;
+  &lt;li&gt;Our default user-facing theme is, well, lame. No offense CakePHP team, it’s just not the best default theme.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Over the next few posts, let’s fix some of these ux issues.&lt;/p&gt;
+
+&lt;h2 id=&quot;refactoring-posttype-retrieval&quot;&gt;Refactoring PostType retrieval&lt;/h2&gt;
+
+&lt;p&gt;Before we can setup the home page properly, we’ll need to refactor how we retrieve the PostType. I’d really rather not have a bunch of duplicated logic in our template layer when it can very easily go in a helper or elsewhere. I’m going to centralize retrieving the &lt;code&gt;PostType&lt;/code&gt; for an entity&lt;/p&gt;
+
+&lt;p&gt;Now, lets make sure we can retrieve the correct element to display our &lt;code&gt;PostType&lt;/code&gt;. I’ll do so via a Trait on the &lt;code&gt;Post&lt;/code&gt; entity.&lt;/p&gt;
+
+&lt;h3 id=&quot;preparing-traits&quot;&gt;Preparing Traits&lt;/h3&gt;
+
+&lt;p&gt;Looking back at my codebase, I noticed that the &lt;code&gt;Table&lt;/code&gt; directory has a subdirectory for traits, but &lt;code&gt;Entity&lt;/code&gt; does not. Let’s correct that.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;mkdir -p src/Model/Entity/Traits
+git mv src/Model/Entity/PasswordHashingTrait.php src/Model/Entity/Traits/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Also, update the reference in your &lt;code&gt;User&lt;/code&gt; entity for using this trait:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Entity\Traits\PasswordHashingTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And update the namespace on that trait, or you’re gonna have a bad time:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;namespace App\Model\Entity\Traits;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Committing!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Entity/User.php
+git commit -m &quot;Move PasswordHashingTrait to correct location&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;getting-the-posttype-from-a-post-entity&quot;&gt;Getting the &lt;code&gt;PostType&lt;/code&gt; from a Post Entity&lt;/h3&gt;
+
+&lt;p&gt;This is going to be a bit of refactoring. First, we’re going to add the &lt;code&gt;PostTypesTrait&lt;/code&gt; to our &lt;code&gt;PostsTable&lt;/code&gt;. We’ll also move it into the correct directory.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git mv src/Traits/PostTypesTrait.php src/Model/Table/Traits/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now add it to the table:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Table\Traits\PostTypesTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And update the namespace on that trait, or you’re gonna have a bad time:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;namespace App\Model\Table\Traits;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll remove it from the &lt;code&gt;PostsListener&lt;/code&gt;. This will temporarily break the application, but bear with me. Once that’s done, we can start working on making it so a &lt;code&gt;Post&lt;/code&gt; entity knows what &lt;code&gt;PostType&lt;/code&gt; it has, and can return it. I’ve created the following &lt;code&gt;PostTypeTrait&lt;/code&gt; at &lt;code&gt;src/Model/Entity/Traits/PostTypeTrait.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Entity\Traits;
+
+use App\Model\Entity\Post;
+use App\Model\Table\PostsTable;
+use Cake\Core\App;
+
+trait PostTypeTrait
+{
+    public function getPostType()
+    {
+        $postTypeClassName = $this-&amp;gt;_postTypeAliasToClass($this-&amp;gt;type);
+        $className = App::className($postTypeClassName, &#39;PostType&#39;);
+        return new $className($this);
+    }
+
+    /**
+     * Returns a class name for a given post type alias
+     *
+     * @param string $typeAlias the alias of a post type class
+     * @return string
+     */
+    protected function _postTypeAliasToClass($typeAlias)
+    {
+        $className = null;
+        $postTypes = PostsTable::postTypes();
+        foreach ($postTypes as $class =&amp;gt; $alias) {
+            if ($alias === $typeAlias) {
+                $className = $class;
+            }
+        }
+        return $className;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You’ll notice I took &lt;code&gt;_postTypeAliasToClass&lt;/code&gt; from &lt;code&gt;PostsListener&lt;/code&gt; and modified it to use the &lt;code&gt;PostsTable&lt;/code&gt; instead. I believe this a better place to put it, but feel free to argue with me. I’ll also remove &lt;code&gt;PostsListener::_postTypeAliasToClass()&lt;/code&gt;, as we’ll be refactoring the &lt;code&gt;PostsListener&lt;/code&gt; to use my new setup.&lt;/p&gt;
+
+&lt;p&gt;Add the above trait &lt;em&gt;inside&lt;/em&gt; of your &lt;code&gt;Post&lt;/code&gt; entity class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Entity\Traits\PostTypeTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lets commit our changes for now.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/Model/Entity/Post.php src/Model/Entity/Traits/PostTypeTrait.php src/Model/Table/PostsTable.php src/Traits/PostTypesTrait.php -&amp;gt; src/Model/Table/Traits/PostTypesTrait.php
+git commit -m &quot;Move post type retrieval into the Post entity&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;refactoring-postslistener&quot;&gt;Refactoring PostsListener&lt;/h3&gt;
+
+&lt;p&gt;Because we’ve basically kneecapped our &lt;code&gt;PostsListener&lt;/code&gt;, the whole admin is probably flipping a crap. I’ll begin by changing &lt;code&gt;PostsListener::_setPostType()&lt;/code&gt; to accept an &lt;code&gt;AbstractPostType&lt;/code&gt; instance. Add the following &lt;code&gt;use&lt;/code&gt; call to the top of the &lt;code&gt;PostsListener&lt;/code&gt; class declaration:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use App\PostType\AbstractPostType;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, change the &lt;code&gt;PostsListener::_setPostType()&lt;/code&gt; method to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Set the post type for add/edit actions
+ *
+ * @param \Cake\Event\Event $event Event
+ * @param string $postType the name of a post type class
+ * @return void
+ */
+protected function _setPostType(Event $event, AbstractPostType $postType)
+{
+    $fields = [];
+    foreach ($postType-&amp;gt;schema()-&amp;gt;fields() as $field) {
+        $fields[$field] = [
+            &#39;type&#39; =&amp;gt; $postType-&amp;gt;schema()-&amp;gt;fieldType($field)
+        ];
+    }
+
+    $viewVars = $postType-&amp;gt;viewVars();
+    $viewVars[&#39;fields&#39;] = $fields;
+    $this-&amp;gt;_controller()-&amp;gt;set($viewVars);
+    $event-&amp;gt;subject-&amp;gt;set([&#39;entity&#39; =&amp;gt; $postType]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we need to fix all references to this method. I’ve changed &lt;code&gt;PostsListener::beforeRenderAdd()&lt;/code&gt; almost completely, and it’s much smaller.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Render Add Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderAdd(Event $event)
+{
+    $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
+    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type = $passedArgs[0];
+    $this-&amp;gt;_setPostType($event, $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;getPostType());
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;PostsListener::beforeRenderEdit()&lt;/code&gt; gets a similar facelift.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Render Edit Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderEdit(Event $event)
+{
+    $entity = $event-&amp;gt;subject-&amp;gt;entity;
+    $this-&amp;gt;_setPostType($event, $entity-&amp;gt;getPostType());
+    if ($this-&amp;gt;_request()-&amp;gt;is(&#39;get&#39;)) {
+        $this-&amp;gt;_request()-&amp;gt;data = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;data($entity);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, the &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; method needs a minor change. Right after we set the &lt;code&gt;type&lt;/code&gt; on the entity, we’ll remove the following three lines and replace them with:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$postType = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;getPostType();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That’s it, our admin dashboard should be in working order again. Let’s save our work:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
+git commit -m &quot;Fix PostsListener&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;render--properly&quot;&gt;Render &lt;code&gt;/&lt;/code&gt; properly&lt;/h2&gt;
+
+&lt;p&gt;Our user will rely heavily on themes, but the default state of the blog should be useful. First, lets remove the &lt;code&gt;PostsController::home()&lt;/code&gt; action and use the default template for the view layer. I’ve created &lt;code&gt;src/Templates/Posts/home.ctp&lt;/code&gt; with the following contents (feel free to replace what is already there):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;posts index large-12 medium-12 columns content&quot;&amp;gt;
+    &amp;lt;h3&amp;gt;&amp;lt;?= __(&#39;Posts&#39;) ?&amp;gt;&amp;lt;/h3&amp;gt;
+    &amp;lt;?php
+        foreach ($posts as $post) {
+            $postType = $post-&amp;gt;getPostType();
+            echo $this-&amp;gt;element($postType-&amp;gt;indexTemplate(), [&#39;post&#39; =&amp;gt; $postType]);
+        }
+    ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you go to the homepage, you’ll see a bunch of posts, but no actual content for each, even though the &lt;code&gt;BlogPostType&lt;/code&gt; index template displays the &lt;code&gt;body&lt;/code&gt;. What gives?&lt;/p&gt;
+
+&lt;p&gt;Well, the default find for this view &lt;em&gt;does not&lt;/em&gt; include related data. This can be easily ameliorated by using a custom find. As I’ve done before, I’ll create a trait for it in &lt;code&gt;src/Model/Table/Traits/BlogFinderTrait.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Table\Traits;
+
+trait BlogFinderTrait
+{
+    /**
+     * Find posts with related data
+     *
+     * @param \Cake\ORM\Query $query The query to find with
+     * @param array $options The options to find with
+     * @return \Cake\ORM\Query The query builder
+     */
+    public function findBlog($query, $options)
+    {
+        return $this-&amp;gt;find()-&amp;gt;contain(&#39;PostAttributes&#39;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Simple enough. Let’s add it &lt;em&gt;inside&lt;/em&gt; our &lt;code&gt;PostsTable&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Table\Traits\BlogFinderTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, we’ll need to ensure our finder is in use for the &lt;code&gt;PostsController::home()&lt;/code&gt; action. We’ll add a special case to our &lt;code&gt;PostsListener::beforeHandle()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;home&#39;) {
+    $this-&amp;gt;beforeHandleHome($event);
+
+    return;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is the &lt;code&gt;PostsListener::beforeHandleHome()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Handle Home Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleHome(Event $event)
+{
+    $this-&amp;gt;_action()-&amp;gt;config(&#39;findMethod&#39;, &#39;blog&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And now you can go to &lt;code&gt;/&lt;/code&gt; and you’ll see all of our blog posts! We’ll commit our changes for today as we’re done here.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/PostsController.php src/Listener/PostsListener.php src/Model/Table/PostsTable.php src/Model/Table/Traits/BlogFinderTrait.php src/Template/Posts/home.ctp
+git commit -m &quot;Finally working homepage&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.10&quot;&gt;0.0.10&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We’ve refactored quite a bit of code, but still have a few things to fix up before we can go back to building out more custom post types. Hopefully we can make quick work of the rest of our todo list.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 10 Dec 2016 09:32:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/10/making-the-ui-usable/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/10/making-the-ui-usable/</guid>
+        
+        <category>custom-find</category>
+        
+        <category>crud-view</category>
+        
+        <category>refactoring</category>
+        
+        <category>templates</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Saving Custom Post Types</title>
@@ -2617,252 +2929,6 @@ git commit -m &quot;Add baked files for initial application&quot;
         
         
         <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>A Lambda PaaS</title>
-        <description>&lt;p&gt;Infrastructure is a confusing beast to developers. Here are things you would have to learn about and manage:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Proper Logging (and storage thereof)&lt;/li&gt;
-  &lt;li&gt;Application Configuration&lt;/li&gt;
-  &lt;li&gt;Deployment Pipelines&lt;/li&gt;
-  &lt;li&gt;Metric Collection&lt;/li&gt;
-  &lt;li&gt;Automatic Scaling&lt;/li&gt;
-  &lt;li&gt;Database Maintenance&lt;/li&gt;
-  &lt;li&gt;Environment Management (dev/staging/prod)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Unless you are using a PaaS, you are probably in a bad spot in one or more ways. If you’re not, it is likely that you can go to the software company down the block and they would be doing all of these things &lt;em&gt;quite&lt;/em&gt; differently than you are.&lt;/p&gt;
-
-&lt;p&gt;I’m not all-in on serverless application development, but some platforms get it right. Heroku certainly does, and AWS has nice pieces that can be used to implement the above - albeit in a jank ui. I was playing with a few bits of tech this weekend to make the experience a bit nicer, and here is a description of what I came up with.&lt;/p&gt;
-
-&lt;h2 id=&quot;pushing-code-and-executing-a-pipeline&quot;&gt;Pushing Code and Executing a Pipeline&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You’ll need to be running a build server for this. Install docker on the instance, as we’ll be using that. Also, install the &lt;code&gt;zip&lt;/code&gt; utility.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This is probably the most boring part to me. I’ve already worked on a few systems that have this sort of functionality - Dokku being the biggest - but for this purpose, lets just use &lt;a href=&quot;https://github.com/coreos/go-gitreceive&quot;&gt;go-gitreceive&lt;/a&gt;. You’ll need to install it and initialize the &lt;code&gt;git&lt;/code&gt; user, but once that is done, here is our stub &lt;code&gt;receiver&lt;/code&gt; script that goes in &lt;code&gt;/home/git/receiver&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;#!/bin/bash
-main() {
-  local TMP_WORK_DIR=$(mktemp -d &quot;/tmp/laambda.XXXX&quot;)
-  trap &#39;rm -rf &quot;$TMP_WORK_DIR&quot; &amp;gt; /dev/null&#39; RETURN INT TERM EXIT
-
-  mkdir -p &quot;$TMP_WORK_DIR&quot; &amp;amp;&amp;amp; cat | tar -x -C &quot;$TMP_WORK_DIR&quot;
-
-  if [[ ! -f &quot;$TMP_WORK_DIR/requirements.txt&quot;]]; then
-    echo &quot;Invalid python application detected, bailing&quot;
-  fi
-
-  # the rest of the script goes here
-}
-
-main &quot;$@&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;For my dummy implementation, I didn’t keep the repository around, though you are welcome to do so using &lt;code&gt;git-upload-pack&lt;/code&gt; if you have it installed on your server.&lt;/p&gt;
-
-&lt;p&gt;Note that you’ll also need to add your ssh key to the server via &lt;code&gt;go-gitreceive upload-key git&lt;/code&gt; or similar. Please read the docs for the referenced project.&lt;/p&gt;
-
-&lt;h2 id=&quot;laambda-two-as-because-its-a-paas&quot;&gt;laambda (two As because its a PaaS)&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;This system only supported Python because I don’t believe in Node.JS. It doesn’t exist, sorry. I also don’t drink coffee, so Java is out.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;One thing I hate about the current lambda deploy model is that it is annoying to build assets locally and then push that into the cloud. My Macbook isn’t CentOS 7 with a bunch of funny bits changed, so I can’t be sure my code will work &lt;em&gt;exactly&lt;/em&gt; as I expect it to. The hack that a few people use is to build in a VM or an EC2 instance, but I’d like something slightly closer to Lambda’s infrastructure. For that, I turned to the &lt;a href=&quot;https://github.com/lambci/docker-lambda&quot;&gt;docker-lambda&lt;/a&gt; project.&lt;/p&gt;
-
-&lt;p&gt;The docker-lambda project is more or less a replica of the Lambda container used on AWS. It does have a few changes - notably task runners are changed in order to be able to run outside of the AWS infrastructure - but overall is an easy to use replica of the Lambda environment. You can use it to build an application locally&lt;/p&gt;
-
-&lt;p&gt;Here is a quick test of how it might work for a given python application:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# make this configurable somehow ;)
-APP_NAME=api
-
-# cd into the app you want to build for lambda
-cd &quot;$TMP_WORK_DIR&quot;
-
-# in a docker container, do the following:
-# - create a virtualenv
-# - activate it
-# - install your dependencies
-# be sure to load up a volume for caching, or you&#39;re gonna have a bad time
-docker run --rm \
-    -v &quot;$TMP_WORK_DIR&quot;:/var/task \
-    -v /tmp/.cache:/root/.cache \
-    lambci/lambda:build-python2.7 \
-    bash -c &#39;virtualenv .virtualenv &amp;amp;&amp;amp; source .virtualenv/bin/activate &amp;amp;&amp;amp; pip install -r requirements.txt&#39;
-
-# move the built virtualenv out of the way for now
-mv .virtualenv /tmp/.virtualenv
-VIRTUAL_ENV=/tmp/.virtualenv
-
-# create your initial zip file
-zip -9 &quot;/tmp/${APP_NAME}.zip&quot;
-
-# now zip up the site-packages for lib
-cd $VIRTUAL_ENV/lib/python2.7/site-packages
-zip -r9 &quot;/tmp/${APP_NAME}.zip&quot; *
-
-# and also the site-packages for lib64
-cd $VIRTUAL_ENV/lib64/python2.7/site-packages
-zip -r9 &quot;/tmp/${APP_NAME}.zip&quot; *
-
-# and now add all of your app code
-cd &quot;$TMP_WORK_DIR&quot;
-zip -g &quot;/tmp/${APP_NAME}.zip&quot; *
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty nifty I think. We’ve still got a bit of work to do.&lt;/p&gt;
-
-&lt;h2 id=&quot;specifying-multiple-functions&quot;&gt;Specifying multiple functions&lt;/h2&gt;
-
-&lt;p&gt;At this point in the game, while I do believe that it’s a bit inflexible, the &lt;code&gt;Procfile&lt;/code&gt; fits right into how we might specify commands. Lets say my codebase has two python files:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;CreateThumbnail&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;ResizeThumbnail&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Each one has a function called &lt;code&gt;handler&lt;/code&gt;, which does all the work for our api. We could spend time coming up with yet another yaml format - oh joy, our developers will &lt;em&gt;love&lt;/em&gt; learning a new format - or we could just use the following Procfile:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-yaml&quot;&gt;create: CreateThumbnail.handler
-resize: ResizeThumbnail.handler
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Seems pretty reasonable to me. No, it doesn’t specify any extra info, like memory, timeout, iam profile, etc., but all those can have “sane” defaults within our &lt;code&gt;laambda&lt;/code&gt; PaaS. We’ll get into that later. Lets assume the following are the defaults:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;region&lt;/code&gt;: &lt;code&gt;us-east-1&lt;/code&gt;, the best region&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;function-name&lt;/code&gt;: The name of the codebase (&lt;code&gt;api&lt;/code&gt; in this case), suffixed with the entry in the Procfile (&lt;code&gt;create&lt;/code&gt; or &lt;code&gt;resize&lt;/code&gt;)&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;runtime&lt;/code&gt;: &lt;code&gt;python2.7&lt;/code&gt;. No other runtimes exist, remember?&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;timeout&lt;/code&gt;: &lt;code&gt;10&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;memory-size&lt;/code&gt;: &lt;code&gt;1024&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The following will need to be specified on app creation:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;role&lt;/code&gt;: An arn role for your function&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Since you have the zip file, you can just run your &lt;code&gt;aws&lt;/code&gt; command for each function to upload the codebase like normal:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;aws lambda create-function \
-  --region &quot;$REGION&quot; \
-  --function-name &quot;$FUNCTION_MAME&quot; \
-  --zip-file &quot;fileb://tmp/${APP_NAME}.zip&quot; \
-  --role &quot;$ROLE_ARN&quot; \
-  --handler &quot;$FUNCTION_HANDLER&quot; \
-  --runtime &quot;$RUNTIME&quot; \
-  --timeout &quot;$TIMEOUT&quot; \
-  --memory-size &quot;$MEMORY_SIZE&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty good, I think.&lt;/p&gt;
-
-&lt;h2 id=&quot;managing-the-lambda-functions&quot;&gt;Managing the Lambda functions&lt;/h2&gt;
-
-&lt;p&gt;No one wants to remember the &lt;code&gt;aws lambda&lt;/code&gt; cli, so provide your developers with the tooling to manage that sort of thing. For my test, I configured the event sources on the web ui, but you might want to have a cli like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# manage event sources
-laambda event-sources        FUNCTION
-laambda event-sources:add    FUNCTION SOURCE_HERE
-laambda event-sources:remove FUNCTION SOURCE_HERE
-laambda event-sources:clear  FUNCTION SOURCE_HERE
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Similarly, any bit that can be managed by the &lt;code&gt;aws lambda&lt;/code&gt; cli should be handled by your tooling. I implemented the following handlers for my own purposes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# manage configuration
-# all functions in an app have access to the same env in my model
-laambda config
-laambda config:get KEY
-laambda config:set KEY=VALUE
-laambda config:unset KEY
-laambda config:clear
-
-# manage resources
-laambda resource:memory FUNCTION VALUE
-laambda resource:timeout FUNCTION VALUE
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’d imagine it would be a good idea to also handle VPC configuration, KMS encryption keys, roles associated with your function, and anything else either not version controlled or that AWS exposes in the future.&lt;/p&gt;
-
-&lt;h2 id=&quot;rollbacks&quot;&gt;Rollbacks&lt;/h2&gt;
-
-&lt;p&gt;One nice thing about Heroku is that you can rollback in time to basically any state of your application. Like it or not, a developer (and the ops folks!) will screw things up eventually, so turning back the clock is almost assuredly necessary.&lt;/p&gt;
-
-&lt;p&gt;Ideally, you are storing your app configuration in a distributed, encrypted k/v, &lt;em&gt;outside&lt;/em&gt; of Lambda. This will allow you to maintain some notion of state. I have no real recommendations here, other than to keep the following for each changeset:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;A reference to the built zip file (likely as a hash of the codebase) which you may want to store on S3&lt;/li&gt;
-  &lt;li&gt;An encrypted bag of the current configuration for every function within an APP.&lt;/li&gt;
-  &lt;li&gt;A description of the changes (config change, deploy, etc.)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;You should also be able to list these changesets so that you actually know what went down. I’d build the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;laambda releases
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And give it some sort of &lt;code&gt;git changelog&lt;/code&gt; style output.&lt;/p&gt;
-
-&lt;h2 id=&quot;further-considerations&quot;&gt;Further considerations&lt;/h2&gt;
-
-&lt;p&gt;Some questions you’ll want to answer:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Where are you storing logs?
-    &lt;ul&gt;
-      &lt;li&gt;The easiest is Cloudwatch, though honestly the UI kinda blows. You can probably get away with shipping them elsewhere, like an external service - Honeycomb.io, Logentries, Papertrail all would work - or you can ship them to whatever centralized logging system you have - the ELK stack and Graylog are popular ones. Just also expose the logs via the same cli tooling you built to manage this thing.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;How are you collecting metrics?
-    &lt;ul&gt;
-      &lt;li&gt;The same applies here as does for logging. The big issue with either is DNS, as Lambda functions aren’t necessarily listening to your custom DNS server. I’d likely setup a simple Grafana/Graphite/StatsD setup and go from there.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;How do you test functions?
-    &lt;ul&gt;
-      &lt;li&gt;Be sure to setup multiple environments. Your tooling could take a &lt;code&gt;--env&lt;/code&gt; flag to specify a VPC, for instance, and you’d simply partition environments based on the VPC.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Other enhancements you may want to consider:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The system above has no authentication, so anyone with ssh access can push to any application.&lt;/li&gt;
-  &lt;li&gt;While developers are fine with a CLI, they’ll also be hurting for a web ui. Having a web ui will also allow you to personally audit what is going on, without needing to depend upon the developer to paste the output. If you have a web ui, build an API that does all the coordination for your CLI tool, instead of having that CLI tool be a crappy wrapper around &lt;code&gt;awscli&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;Your system &lt;em&gt;is&lt;/em&gt; capable of continuous deployment, and I highly encourage that model.&lt;/li&gt;
-  &lt;li&gt;You could add support for each AWS Lambda runtime by detecting the language in use on deploy. We added a small amount of python detection to our &lt;code&gt;go-gitreceive&lt;/code&gt; handler, though you can expand on that quite easily. I would suggest looking into the heroku buildpack model for figuring out how to properly detect and install each “runtime”.&lt;/li&gt;
-  &lt;li&gt;None of this handles the local development cycle of a Laambda function.&lt;/li&gt;
-  &lt;li&gt;Autoscale your build servers. You’ll have some issues around having the same dependency cache - get around that by uploading/downloading it from S3 - but it will allow you to weather an outage of your build servers. Route53 can be set to round-robbin DNS requests with healthchecks, making it easy to perform maintenance on your build environment.&lt;/li&gt;
-  &lt;li&gt;Promoting apps from environment to environment, or even allowing “pull request” apps to be deployed in a specific environment, would allow developers to gain confidence in what they are deploying. Heroku has PR apps, so why shouldn’t you?&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I do think that services like Lambda provide an excellent framework for building applications, but we should start thinking about how we’d like to interact with these services, instead of how these services force us to interact with them.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Why isn’t this &lt;em&gt;also&lt;/em&gt; a thing for EMR? Or really any similar kind of service?&lt;/p&gt;
-&lt;/blockquote&gt;
-</description>
-        <pubDate>Mon, 21 Nov 2016 19:51:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/11/21/push-to-deploy-lambda-applications/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/11/21/push-to-deploy-lambda-applications/</guid>
-        
-        <category>deployment</category>
-        
-        <category>infrastructure</category>
-        
-        <category>serverless</category>
-        
-        
-        <category>opschops</category>
         
       </item>
     

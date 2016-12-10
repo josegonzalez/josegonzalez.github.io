@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Making the UI usable</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/10/making-the-ui-usable/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 10 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="custom-find, crud-view, refactoring, templates, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Making the UI usable" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/10/making-the-ui-usable/" />
+    <meta property="og:description" content="Part 10 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Making the UI usable" />
+    <meta name="twitter:description" content="Part 10 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Making the UI usable » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Making the UI usable</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="errata-from-previous-posts">Errata from previous posts</h2>
+<ul>
+  <li>The <code>AbstractPostType</code> class had errors in how it retrieved templates for a <code>PostType</code>.</li>
+  <li>The <code>Template</code> directory for the <code>BlogPostType</code> plugin was misnamed to <code>Templates</code>.</li>
+  <li>There was no way to pre-seed data in a post-type instance for <code>get()</code> calls.</li>
+  <li>If the passed in <code>Post</code> object for a <code>PostType</code> was missing <code>post_attributes</code>, an error would appear</li>
+</ul>
+<p>Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.</p>
+<h2 id="fixing-incongruity">Fixing Incongruity</h2>
+<p>While we have a semblance of working code, a lot of it is a bit all over the place.:</p>
+<ul>
+  <li>We broke rendering of the home page (<code>/</code>).</li>
+  <li>There isn’t a way to go directly to adding a blog post, and instead we have to type out the url.</li>
+  <li>The login screen looks different from the rest of the site.</li>
+  <li>The <code>/users/edit</code> page has the wrong look and wrong sidebar.</li>
+  <li>We don’t error check when there is no <code>PostType</code> set for adding a post.</li>
+  <li>Our default user-facing theme is, well, lame. No offense CakePHP team, it’s just not the best default theme.</li>
+</ul>
+<p>Over the next few posts, let’s fix some of these ux issues.</p>
+<h2 id="refactoring-posttype-retrieval">Refactoring PostType retrieval</h2>
+<p>Before we can setup the home page properly, we’ll need to refactor how we retrieve the PostType. I’d really rather not have a bunch of duplicated logic in our template layer when it can very easily go in a helper or elsewhere. I’m going to centralize retrieving the <code>PostType</code> for an entity</p>
+<p>Now, lets make sure we can retrieve the correct element to display our <code>PostType</code>. I’ll do so via a Trait on the <code>Post</code> entity.</p>
+<h3 id="preparing-traits">Preparing Traits</h3>
+<p>Looking back at my codebase, I noticed that the <code>Table</code> directory has a subdirectory for traits, but <code>Entity</code> does not. Let’s correct that.</p>
+<pre><code class="language-shell">mkdir -p src/Model/Entity/Traits
+git mv src/Model/Entity/PasswordHashingTrait.php src/Model/Entity/Traits/
+</code></pre>
+<p>Also, update the reference in your <code>User</code> entity for using this trait:</p>
+<pre><code class="language-php">use \App\Model\Entity\Traits\PasswordHashingTrait;
+</code></pre>
+<p>And update the namespace on that trait, or you’re gonna have a bad time:</p>
+<pre><code class="language-php">namespace App\Model\Entity\Traits;
+</code></pre>
+<p>Committing!</p>
+<pre><code class="language-shell">git add src/Model/Entity/User.php
+git commit -m "Move PasswordHashingTrait to correct location"
+</code></pre>
+<h3 id="getting-the-posttype-from-a-post-entity">Getting the <code>PostType</code> from a Post Entity</h3>
+<p>This is going to be a bit of refactoring. First, we’re going to add the <code>PostTypesTrait</code> to our <code>PostsTable</code>. We’ll also move it into the correct directory.</p>
+<pre><code class="language-shell">git mv src/Traits/PostTypesTrait.php src/Model/Table/Traits/
+</code></pre>
+<p>Now add it to the table:</p>
+<pre><code class="language-php">use \App\Model\Table\Traits\PostTypesTrait;
+</code></pre>
+<p>And update the namespace on that trait, or you’re gonna have a bad time:</p>
+<pre><code class="language-php">namespace App\Model\Table\Traits;
+</code></pre>
+<p>Next, we’ll remove it from the <code>PostsListener</code>. This will temporarily break the application, but bear with me. Once that’s done, we can start working on making it so a <code>Post</code> entity knows what <code>PostType</code> it has, and can return it. I’ve created the following <code>PostTypeTrait</code> at <code>src/Model/Entity/Traits/PostTypeTrait.php</code>:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Model\Entity\Traits;
+use App\Model\Entity\Post;
+use App\Model\Table\PostsTable;
+use Cake\Core\App;
+trait PostTypeTrait
+{
+    public function getPostType()
+    {
+        $postTypeClassName = $this-&gt;_postTypeAliasToClass($this-&gt;type);
+        $className = App::className($postTypeClassName, 'PostType');
+        return new $className($this);
+    }
+    /**
+     * Returns a class name for a given post type alias
+     *
+     * @param string $typeAlias the alias of a post type class
+     * @return string
+     */
+    protected function _postTypeAliasToClass($typeAlias)
+    {
+        $className = null;
+        $postTypes = PostsTable::postTypes();
+        foreach ($postTypes as $class =&gt; $alias) {
+            if ($alias === $typeAlias) {
+                $className = $class;
+            }
+        }
+        return $className;
+    }
+}
+</code></pre>
+<p>You’ll notice I took <code>_postTypeAliasToClass</code> from <code>PostsListener</code> and modified it to use the <code>PostsTable</code> instead. I believe this a better place to put it, but feel free to argue with me. I’ll also remove <code>PostsListener::_postTypeAliasToClass()</code>, as we’ll be refactoring the <code>PostsListener</code> to use my new setup.</p>
+<p>Add the above trait <em>inside</em> of your <code>Post</code> entity class:</p>
+<pre><code class="language-php">use \App\Model\Entity\Traits\PostTypeTrait;
+</code></pre>
+<p>Lets commit our changes for now.</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php src/Model/Entity/Post.php src/Model/Entity/Traits/PostTypeTrait.php src/Model/Table/PostsTable.php src/Traits/PostTypesTrait.php -&gt; src/Model/Table/Traits/PostTypesTrait.php
+git commit -m "Move post type retrieval into the Post entity"
+</code></pre>
+<h3 id="refactoring-postslistener">Refactoring PostsListener</h3>
+<p>Because we’ve basically kneecapped our <code>PostsListener</code>, the whole admin is probably flipping a crap. I’ll begin by changing <code>PostsListener::_setPostType()</code> to accept an <code>AbstractPostType</code> instance. Add the following <code>use</code> call to the top of the <code>PostsListener</code> class declaration:</p>
+<pre><code class="language-php">use App\PostType\AbstractPostType;
+</code></pre>
+<p>Next, change the <code>PostsListener::_setPostType()</code> method to the following:</p>
+<pre><code class="language-php">/**
+ * Set the post type for add/edit actions
+ *
+ * @param \Cake\Event\Event $event Event
+ * @param string $postType the name of a post type class
+ * @return void
+ */
+protected function _setPostType(Event $event, AbstractPostType $postType)
+{
+    $fields = [];
+    foreach ($postType-&gt;schema()-&gt;fields() as $field) {
+        $fields[$field] = [
+            'type' =&gt; $postType-&gt;schema()-&gt;fieldType($field)
+        ];
+    }
+    $viewVars = $postType-&gt;viewVars();
+    $viewVars['fields'] = $fields;
+    $this-&gt;_controller()-&gt;set($viewVars);
+    $event-&gt;subject-&gt;set(['entity' =&gt; $postType]);
+}
+</code></pre>
+<p>Now we need to fix all references to this method. I’ve changed <code>PostsListener::beforeRenderAdd()</code> almost completely, and it’s much smaller.</p>
+<pre><code class="language-php">/**
+ * Before Render Add Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderAdd(Event $event)
+{
+    $passedArgs = $this-&gt;_request()-&gt;param('pass');
+    $event-&gt;subject-&gt;entity-&gt;type = $passedArgs[0];
+    $this-&gt;_setPostType($event, $event-&gt;subject-&gt;entity-&gt;getPostType());
+}
+</code></pre>
+<p><code>PostsListener::beforeRenderEdit()</code> gets a similar facelift.</p>
+<pre><code class="language-php">/**
+ * Before Render Edit Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderEdit(Event $event)
+{
+    $entity = $event-&gt;subject-&gt;entity;
+    $this-&gt;_setPostType($event, $entity-&gt;getPostType());
+    if ($this-&gt;_request()-&gt;is('get')) {
+        $this-&gt;_request()-&gt;data = $event-&gt;subject-&gt;entity-&gt;data($entity);
+    }
+}
+</code></pre>
+<p>Finally, the <code>PostsListener::beforeSave()</code> method needs a minor change. Right after we set the <code>type</code> on the entity, we’ll remove the following three lines and replace them with:</p>
+<pre><code class="language-php">$postType = $event-&gt;subject-&gt;entity-&gt;getPostType();
+</code></pre>
+<p>That’s it, our admin dashboard should be in working order again. Let’s save our work:</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php
+git commit -m "Fix PostsListener"
+</code></pre>
+<h2 id="render--properly">Render <code>/</code> properly</h2>
+<p>Our user will rely heavily on themes, but the default state of the blog should be useful. First, lets remove the <code>PostsController::home()</code> action and use the default template for the view layer. I’ve created <code>src/Templates/Posts/home.ctp</code> with the following contents (feel free to replace what is already there):</p>
+<pre><code class="language-php">&lt;div class="posts index large-12 medium-12 columns content"&gt;
+    &lt;h3&gt;&lt;?= __('Posts') ?&gt;&lt;/h3&gt;
+    &lt;?php
+        foreach ($posts as $post) {
+            $postType = $post-&gt;getPostType();
+            echo $this-&gt;element($postType-&gt;indexTemplate(), ['post' =&gt; $postType]);
+        }
+    ?&gt;
+&lt;/div&gt;
+</code></pre>
+<p>If you go to the homepage, you’ll see a bunch of posts, but no actual content for each, even though the <code>BlogPostType</code> index template displays the <code>body</code>. What gives?</p>
+<p>Well, the default find for this view <em>does not</em> include related data. This can be easily ameliorated by using a custom find. As I’ve done before, I’ll create a trait for it in <code>src/Model/Table/Traits/BlogFinderTrait.php</code>:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Model\Table\Traits;
+trait BlogFinderTrait
+{
+    /**
+     * Find posts with related data
+     *
+     * @param \Cake\ORM\Query $query The query to find with
+     * @param array $options The options to find with
+     * @return \Cake\ORM\Query The query builder
+     */
+    public function findBlog($query, $options)
+    {
+        return $this-&gt;find()-&gt;contain('PostAttributes');
+    }
+}
+</code></pre>
+<p>Simple enough. Let’s add it <em>inside</em> our <code>PostsTable</code> class:</p>
+<pre><code class="language-php">use \App\Model\Table\Traits\BlogFinderTrait;
+</code></pre>
+<p>Finally, we’ll need to ensure our finder is in use for the <code>PostsController::home()</code> action. We’ll add a special case to our <code>PostsListener::beforeHandle()</code>:</p>
+<pre><code class="language-php">if ($this-&gt;_controller()-&gt;request-&gt;action === 'home') {
+    $this-&gt;beforeHandleHome($event);
+    return;
+}
+</code></pre>
+<p>And here is the <code>PostsListener::beforeHandleHome()</code>:</p>
+<pre><code class="language-php">/**
+ * Before Handle Home Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleHome(Event $event)
+{
+    $this-&gt;_action()-&gt;config('findMethod', 'blog');
+}
+</code></pre>
+<p>And now you can go to <code>/</code> and you’ll see all of our blog posts! We’ll commit our changes for today as we’re done here.</p>
+<pre><code class="language-shell">git add src/Controller/PostsController.php src/Listener/PostsListener.php src/Model/Table/PostsTable.php src/Model/Table/Traits/BlogFinderTrait.php src/Template/Posts/home.ctp
+git commit -m "Finally working homepage"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.10">0.0.10</a>.</p>
+</blockquote>
+<p>We’ve refactored quite a bit of code, but still have a few things to fix up before we can go back to building out more custom post types. Hopefully we can make quick work of the rest of our todo list.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/10/making-the-ui-usable/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-10 09:32:00 +0000">10 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 10</strong> of <strong>10</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li>Making the UI usable</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/10/making-the-ui-usable/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/10/making-the-ui-usable/';
+        var disqus_title      = "CakeAdvent-2016: Making the UI usable";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>
