@@ -144,7 +144,7 @@ public static function isValidPostType($passedArgs)
         return false;
     }
     $validPostType = false;
-    $postTypes = PostsTable::postTypes();
+    $postTypes = static::postTypes();
     foreach ($postTypes as $class =&gt; $alias) {
         if ($passedArgs[0] === $alias) {
             $validPostType = true;
