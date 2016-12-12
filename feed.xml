@@ -5,8 +5,8 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 12 Dec 2016 01:03:29 +0000</pubDate>
-    <lastBuildDate>Mon, 12 Dec 2016 01:03:29 +0000</lastBuildDate>
+    <pubDate>Mon, 12 Dec 2016 01:07:15 +0000</pubDate>
+    <lastBuildDate>Mon, 12 Dec 2016 01:07:15 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -234,21 +234,20 @@ public function beforeHandleForgotPassword(Event $event)
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Handle Login Action
+ * Before Handle ResetPassword Action
  *
  * @param \Cake\Event\Event $event Event
  * @return void
  */
-public function beforeHandleLogin(Event $event)
+public function beforeHandleResetPassword(Event $event)
 {
     $this-&amp;gt;_controller()-&amp;gt;set([
-        &#39;viewVar&#39; =&amp;gt; &#39;login&#39;,
-        &#39;login&#39; =&amp;gt; null,
+        &#39;viewVar&#39; =&amp;gt; &#39;resetPassword&#39;,
+        &#39;resetPassword&#39; =&amp;gt; null,
     ]);
     $this-&amp;gt;_controller()-&amp;gt;viewBuilder()-&amp;gt;template(&#39;add&#39;);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.page_title&#39;, &#39;Login&#39;);
+    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.page_title&#39;, &#39;Enter a new password to reset your account&#39;);
     $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.fields&#39;, [
-        &#39;email&#39;,
         &#39;password&#39;,
     ]);
     $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.viewblocks&#39;, [
@@ -256,7 +255,7 @@ public function beforeHandleLogin(Event $event)
     ]);
     $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.sidebar_navigation&#39;, false);
     $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.disable_extra_buttons&#39;, true);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.submit_button_text&#39;, &#39;Login&#39;);
+    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.submit_button_text&#39;, &#39;Reset Password&#39;);
 }
 &lt;/code&gt;&lt;/pre&gt;
 

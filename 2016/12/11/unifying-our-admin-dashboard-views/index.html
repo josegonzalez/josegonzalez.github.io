@@ -226,21 +226,20 @@ public function beforeHandleForgotPassword(Event $event)
 }
 </code></pre>
 <pre><code class="language-php">/**
- * Before Handle Login Action
+ * Before Handle ResetPassword Action
  *
  * @param \Cake\Event\Event $event Event
  * @return void
  */
-public function beforeHandleLogin(Event $event)
+public function beforeHandleResetPassword(Event $event)
 {
     $this-&gt;_controller()-&gt;set([
-        'viewVar' =&gt; 'login',
-        'login' =&gt; null,
+        'viewVar' =&gt; 'resetPassword',
+        'resetPassword' =&gt; null,
     ]);
     $this-&gt;_controller()-&gt;viewBuilder()-&gt;template('add');
-    $this-&gt;_action()-&gt;config('scaffold.page_title', 'Login');
+    $this-&gt;_action()-&gt;config('scaffold.page_title', 'Enter a new password to reset your account');
     $this-&gt;_action()-&gt;config('scaffold.fields', [
-        'email',
         'password',
     ]);
     $this-&gt;_action()-&gt;config('scaffold.viewblocks', [
@@ -248,7 +247,7 @@ public function beforeHandleLogin(Event $event)
     ]);
     $this-&gt;_action()-&gt;config('scaffold.sidebar_navigation', false);
     $this-&gt;_action()-&gt;config('scaffold.disable_extra_buttons', true);
-    $this-&gt;_action()-&gt;config('scaffold.submit_button_text', 'Login');
+    $this-&gt;_action()-&gt;config('scaffold.submit_button_text', 'Reset Password');
 }
 </code></pre>
 <p>Let’s commit, as we’re done with all our edits for today.</p>
