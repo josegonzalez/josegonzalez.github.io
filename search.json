@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Unifying our admin dashboard views",
+    "url": "/2016/12/11/unifying-our-admin-dashboard-views/",
+    "description": "Part 11 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["admin","build","cms","dashboard","help","part","personal","posts","series","unifying","views","will"]
+  },
+  {
+    "type": "post",
     "title": "Making the UI usable",
     "url": "/2016/12/10/making-the-ui-usable/",
     "description": "Part 10 of a series of posts that will help you build out a personal CMS",

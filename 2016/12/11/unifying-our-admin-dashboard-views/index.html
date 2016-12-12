@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Unifying our admin dashboard views</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/11/unifying-our-admin-dashboard-views/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 11 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="events, crud-view, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Unifying our admin dashboard views" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/11/unifying-our-admin-dashboard-views/" />
+    <meta property="og:description" content="Part 11 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Unifying our admin dashboard views" />
+    <meta name="twitter:description" content="Part 11 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Unifying our admin dashboard views » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Unifying our admin dashboard views</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="updating-plugins">Updating Plugins</h2>
+<p>Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following <code>composer</code> command:</p>
+<pre><code class="language-shell">composer update
+</code></pre>
+<p>Typically you would run tests at this stage, but since we have <em>yet</em> to write any, that isn’t necessary.</p>
+<p>Let’s commit any updates:</p>
+<pre><code class="language-shell">git add composer.lock
+git commit -m "Update unpinned dependencies"
+</code></pre>
+<blockquote>
+  <p>You should always verify your application still works after upgrading dependencies.</p>
+</blockquote>
+<h2 id="todays-todolist">Today’s todolist</h2>
+<p>We’ll take care of the following two items today.</p>
+<ul>
+  <li>The login screen looks different from the rest of the site.</li>
+  <li>The <code>/users/edit</code> page has the wrong look and wrong sidebar.</li>
+  <li>The <code>/users/forgot-password</code> and <code>/users/reset-password</code> pages has the wrong look and wrong sidebar.</li>
+</ul>
+<h2 id="using-crudview-for-the-login-page">Using CrudView for the Login Page</h2>
+<p>First, lets make sure that we are using <code>CrudView</code> for the login action. I added the following property to my <code>UsersController</code>:</p>
+<pre><code class="language-php">/**
+ * A list of actions where the CrudView.View
+ * listener should be enabled. If an action is
+ * in this list but `isAdmin` is false, the
+ * action will still be rendered via CrudView.View
+ *
+ * @var array
+ */
+protected $adminActions = ['login'];
+</code></pre>
+<p>Next, we’ll want to delete the <code>src/Template/Users/login.ctp</code> and <code>src/Template/Users/add.ctp</code> files. This will force <code>CrudView</code> to take control. Once that is done, we’ll also need to set a view for the action. CrudView does not currently come with a view for the login action, so we’ll repurpose the <code>CrudView.add.ctp</code> template. I added the following to my <code>UsersListener::beforeHandle()</code>:</p>
+<pre><code class="language-php">if ($event-&gt;subject-&gt;action === 'login') {
+    $this-&gt;beforeHandleLogin($event);
+    return;
+}
+</code></pre>
+<p>And finally, here is my <code>UsersListener::beforeHandleLogin()</code>:</p>
+<pre><code class="language-php">/**
+ * Before Handle Login Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleLogin(Event $event)
+{
+    $this-&gt;_controller()-&gt;set([
+        'viewVar' =&gt; 'login',
+        'login' =&gt; null,
+    ]);
+    $this-&gt;_controller()-&gt;viewBuilder()-&gt;template('add');
+    $this-&gt;_action()-&gt;config('scaffold.page_title', 'Login');
+    $this-&gt;_action()-&gt;config('scaffold.fields', [
+        'email',
+        'password',
+    ]);
+    $this-&gt;_action()-&gt;config('scaffold.viewblocks', [
+        'actions' =&gt; ['' =&gt; 'text'],
+    ]);
+    $this-&gt;_action()-&gt;config('scaffold.sidebar_navigation', false);
+    $this-&gt;_action()-&gt;config('scaffold.disable_extra_buttons', true);
+    $this-&gt;_action()-&gt;config('scaffold.submit_button_text', 'Login');
+}
+</code></pre>
+<p>All of these options are available via CrudView, but check out the docs if you have any questions about them. You should be able to see a <code>/users/login</code> page with our normal CrudView styling now.</p>
+<p>I’m committing my changes now:</p>
+<pre><code class="language-shell">rm src/Template/Users/add.ctp src/Template/Users/login.ctp
+git rm src/Template/Users/add.ctp src/Template/Users/login.ctp
+git add src/Controller/UsersController.php src/Listener/UsersListener.php
+git commit -m "Use CrudView to template out the login page"
+</code></pre>
+<h2 id="using-crudview-for-the-account-page">Using CrudView for the Account Page</h2>
+<p>This is going to be pretty similar to the login page. Let’s add <code>edit</code> to the <code>UsersController::$adminActions</code> property.</p>
+<pre><code class="language-php">/**
+ * A list of actions where the CrudView.View
+ * listener should be enabled. If an action is
+ * in this list but `isAdmin` is false, the
+ * action will still be rendered via CrudView.View
+ *
+ * @var array
+ */
+protected $adminActions = [
+    'edit',
+    'login'
+];
+</code></pre>
+<p>Next, we’ll want to delete the <code>src/Template/Users/edit.ctp</code>. To customize the view, we can modify our <code>UsersListener::beforeHandleEdit()</code>.</p>
+<pre><code class="language-php">/**
+ * Before Handle Edit Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleEdit(Event $event)
+{
+    $userId = $this-&gt;_controller()-&gt;Auth-&gt;user('id');
+    $event-&gt;subject-&gt;args = [$userId];
+    $this-&gt;_action()-&gt;saveOptions(['validate' =&gt; 'account']);
+    $this-&gt;_action()-&gt;config('scaffold.page_title', 'Profile');
+    $this-&gt;_action()-&gt;config('scaffold.disable_extra_buttons', true);
+    $this-&gt;_action()-&gt;config('scaffold.viewblocks', [
+        'actions' =&gt; ['' =&gt; 'text'],
+    ]);
+    $this-&gt;_action()-&gt;config('scaffold.fields', [
+        'email',
+        'password' =&gt; [
+            'required' =&gt; false,
+        ],
+        'confirm_password' =&gt; [
+            'type' =&gt; 'password',
+        ],
+        'avatar' =&gt; [
+            'type' =&gt; 'file'
+        ],
+    ]);
+}
+</code></pre>
+<p>ou should be able to see a <code>/users/edit</code> page with our normal CrudView styling now. One thing that is missing is the profile image embed. That’s unfortunately non-trivial to insert into CrudView at the moment, so we are skipping that.</p>
+<p>Commit!</p>
+<pre><code class="language-shell">rm src/Template/Users/edit.ctp
+git rm src/Template/Users/edit.ctp
+git add src/Controller/UsersController.php src/Listener/UsersListener.php
+git commit -m "Use CrudView to template out the edit page"
+</code></pre>
+<h2 id="using-crudview-for-the-password-reset-flow">Using CrudView for the Password Reset Flow</h2>
+<p>This is more or less a rehash of the above. Lets start by deleting the <code>src/Template/Users/forgot_password.ctp</code> and <code>src/Template/Users/reset_password.ctp</code> files. Next, update the <code>UsersController::$adminActions</code> property to include these to actions:</p>
+<pre><code class="language-php">/**
+ * A list of actions where the CrudView.View
+ * listener should be enabled. If an action is
+ * in this list but `isAdmin` is false, the
+ * action will still be rendered via CrudView.View
+ *
+ * @var array
+ */
+protected $adminActions = [
+    'edit',
+    'login',
+    'forgotPassword',
+    'resetPassword',
+];
+</code></pre>
+<p>As always, we’ll need to update <code>UsersController::beforeHandle()</code> with new sections for our specific actions:</p>
+<pre><code class="language-php">if ($event-&gt;subject-&gt;action === 'forgotPassword') {
+    $this-&gt;beforeHandleForgotPassword($event);
+    return;
+}
+if ($event-&gt;subject-&gt;action === 'resetPassword') {
+    $this-&gt;beforeHandleResetPassword($event);
+    return;
+}
+</code></pre>
+<p>Lastly, here is the code for the above two methods.</p>
+<pre><code class="language-php">/**
+ * Before Handle ForgotPassword Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleForgotPassword(Event $event)
+{
+    $this-&gt;_controller()-&gt;set([
+        'viewVar' =&gt; 'forgotPassword',
+        'forgotPassword' =&gt; null,
+    ]);
+    $this-&gt;_controller()-&gt;viewBuilder()-&gt;template('add');
+    $this-&gt;_action()-&gt;config('scaffold.page_title', 'Forgot Password?');
+    $this-&gt;_action()-&gt;config('scaffold.fields', [
+        'email',
+    ]);
+    $this-&gt;_action()-&gt;config('scaffold.viewblocks', [
+        'actions' =&gt; ['' =&gt; 'text'],
+    ]);
+    $this-&gt;_action()-&gt;config('scaffold.sidebar_navigation', false);
+    $this-&gt;_action()-&gt;config('scaffold.disable_extra_buttons', true);
+    $this-&gt;_action()-&gt;config('scaffold.submit_button_text', 'Send Password Reset Email');
+}
+</code></pre>
+<pre><code class="language-php">/**
+ * Before Handle Login Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleLogin(Event $event)
+{
+    $this-&gt;_controller()-&gt;set([
+        'viewVar' =&gt; 'login',
+        'login' =&gt; null,
+    ]);
+    $this-&gt;_controller()-&gt;viewBuilder()-&gt;template('add');
+    $this-&gt;_action()-&gt;config('scaffold.page_title', 'Login');
+    $this-&gt;_action()-&gt;config('scaffold.fields', [
+        'email',
+        'password',
+    ]);
+    $this-&gt;_action()-&gt;config('scaffold.viewblocks', [
+        'actions' =&gt; ['' =&gt; 'text'],
+    ]);
+    $this-&gt;_action()-&gt;config('scaffold.sidebar_navigation', false);
+    $this-&gt;_action()-&gt;config('scaffold.disable_extra_buttons', true);
+    $this-&gt;_action()-&gt;config('scaffold.submit_button_text', 'Login');
+}
+</code></pre>
+<p>Let’s commit, as we’re done with all our edits for today.</p>
+<pre><code class="language-shell">rm src/Template/Users/forgot_password.ctp src/Template/Users/reset_password.ctp
+git rm src/Template/Users/forgot_password.ctp src/Template/Users/reset_password.ctp
+git add src/Controller/UsersController.php src/Listener/UsersListener.php
+git commit -m "Use CrudView for password reset flow"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.11">0.0.11</a>.</p>
+</blockquote>
+<p>Our users controller is now fully under the control of CrudView! We’ll take care of some weird ux issues when creating posts tomorrow.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/11/unifying-our-admin-dashboard-views/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-11 10:51:00 +0000">11 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 11</strong> of <strong>11</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li>Unifying our admin dashboard views</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/11/unifying-our-admin-dashboard-views/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/11/unifying-our-admin-dashboard-views/';
+        var disqus_title      = "CakeAdvent-2016: Unifying our admin dashboard views";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>
