@@ -5,9 +5,190 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 12 Dec 2016 01:07:15 +0000</pubDate>
-    <lastBuildDate>Mon, 12 Dec 2016 01:07:15 +0000</lastBuildDate>
+    <pubDate>Mon, 12 Dec 2016 19:30:59 +0000</pubDate>
+    <lastBuildDate>Mon, 12 Dec 2016 19:30:59 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Error Handling new Posts</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
+
+&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer update
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
+
+&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
+git commit -m &quot;Update unpinned dependencies&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;todays-todolist&quot;&gt;Today’s todolist&lt;/h2&gt;
+
+&lt;p&gt;We’ll take care of the following two items today.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Only showing action buttons to add valid post types.&lt;/li&gt;
+  &lt;li&gt;Redirecting when a new post is being added with an unspecified or invalid type.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;modifying-shown-buttons&quot;&gt;Modifying shown buttons&lt;/h3&gt;
+
+&lt;p&gt;On the &lt;code&gt;/posts&lt;/code&gt; page, we currently show an &lt;code&gt;Add&lt;/code&gt; button and a &lt;code&gt;Home&lt;/code&gt; button. We should only show Add buttons, but &lt;em&gt;only&lt;/em&gt; for post types that exist. To do so, we’ll replace the scaffolded &lt;code&gt;actions&lt;/code&gt; viewblock with one that contains valid action urls. I’ve added the following to our &lt;code&gt;PostsListener::beforeHandleIndex()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_controller()-&amp;gt;set(&#39;indexActions&#39;, $this-&amp;gt;_getIndexActions());
+$this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.viewblocks&#39;, [
+    &#39;actions&#39; =&amp;gt; [
+        &#39;admin/Posts/index-actions&#39; =&amp;gt; &#39;element&#39;,
+    ],
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’re going to rely on a special element - &lt;code&gt;src/Template/Element/admin/Posts/index-actions.ctp&lt;/code&gt; - to render the variable &lt;code&gt;indexActions&lt;/code&gt; for any viewblock named &lt;code&gt;actions&lt;/code&gt;. The contents of the &lt;code&gt;PostsListener::_getIndexActions()&lt;/code&gt; method is as follows.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Get valid actions for the index page
+ *
+ * @return array
+ */
+protected function _getIndexActions()
+{
+    $indexActions = [];
+    $postTypes = PostsTable::postTypes();
+    foreach ($postTypes as $class =&amp;gt; $alias) {
+        $indexActions[] = [
+            &#39;title&#39; =&amp;gt; __(&#39;Add {0}&#39;, $alias),
+            &#39;url&#39; =&amp;gt; [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;add&#39;, $alias],
+            &#39;options&#39; =&amp;gt; [&#39;class&#39; =&amp;gt; &#39;btn btn-default&#39;],
+            &#39;method&#39; =&amp;gt; &#39;GET&#39;,
+        ];
+    }
+    return $indexActions;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty straightforward. I retrieve all available &lt;code&gt;PostType&lt;/code&gt; classes, then return each one as a link.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Remember to add &lt;code&gt;use App\Model\Table\PostsTable;&lt;/code&gt; to the top of your class, otherwise you’ll get an error regarding the class not existing.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Now on to our &lt;code&gt;index-actions.ctp&lt;/code&gt; template.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+foreach ($indexActions as $config) {
+    echo $this-&amp;gt;element(&#39;CrudView.action-button&#39;, [&#39;config&#39; =&amp;gt; $config]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here, I’m relying on the &lt;code&gt;Crud.action-button&lt;/code&gt; template to render the correct button link, so if that ever changes, we’ll get the correct update on our end. Time to commit:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/Template/Element/admin/Posts/index-actions.ctp
+git commit -m &quot;Only show the buttons we want to show on the /posts page&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;redirecting-on-bad-blog-post-types&quot;&gt;Redirecting on bad blog post types&lt;/h3&gt;
+
+&lt;p&gt;This one is pretty simple. For the &lt;code&gt;add&lt;/code&gt; action, we should only allow registered post types. This is my modified &lt;code&gt;PostsListener::beforeRenderAdd()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Render Add Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderAdd(Event $event)
+{
+    $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
+    if (!PostsTable::isValidPostType($passedArgs)) {
+        return $this-&amp;gt;_controller()-&amp;gt;redirect([
+            &#39;controller&#39; =&amp;gt; &#39;Posts&#39;,
+            &#39;action&#39; =&amp;gt; &#39;index&#39;,
+        ]);
+    }
+
+    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type = $passedArgs[0];
+    $this-&amp;gt;_setPostType($event, $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;getPostType());
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, here is the method that checks if the PostType is valid. I’ve added it to the &lt;code&gt;PostTypesTrait&lt;/code&gt; that is used in the &lt;code&gt;PostsTable&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Checks if the passed arguments contain a valid post type
+ *
+ * @param string $passedArgs a list of passed request parameters
+ * @return bool
+ */
+public static function isValidPostType($passedArgs)
+{
+    if (empty($passedArgs[0])) {
+        return false;
+    }
+
+    $validPostType = false;
+    $postTypes = PostsTable::postTypes();
+    foreach ($postTypes as $class =&amp;gt; $alias) {
+        if ($passedArgs[0] === $alias) {
+            $validPostType = true;
+            break;
+        }
+    }
+    return $validPostType;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we should redirect back &lt;em&gt;even if&lt;/em&gt; the user tries to set an invalid post type. Commit time!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/Model/Table/Traits/PostTypesTrait.php
+git commit -m &quot;Ensure users do not try to add a non-existent post type&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;homework&quot;&gt;Homework!&lt;/h2&gt;
+
+&lt;p&gt;Create a validation rule for the &lt;code&gt;PostsTable&lt;/code&gt; that only allows &lt;code&gt;type&lt;/code&gt; to be a valid post type. Good luck!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.12&quot;&gt;0.0.12&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We’re quickly wrapping up our blog’s admin panel. While there will definitely be a few more things to do to clean up the UI, it’s in great shape now. We’ll be turning our attention to the other post types now, which hopefully won’t require too many additions.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 12 Dec 2016 12:06:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/</guid>
+        
+        <category>elements</category>
+        
+        <category>events</category>
+        
+        <category>viewblocks</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Unifying our admin dashboard views</title>
@@ -38,7 +219,7 @@ git commit -m &quot;Update unpinned dependencies&quot;
 
 &lt;h2 id=&quot;todays-todolist&quot;&gt;Today’s todolist&lt;/h2&gt;
 
-&lt;p&gt;We’ll take care of the following two items today.&lt;/p&gt;
+&lt;p&gt;We’ll take care of the following three items today.&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;The login screen looks different from the rest of the site.&lt;/li&gt;
@@ -2632,384 +2813,6 @@ git commit -m &quot;Allow logged in and anonymous access to an initial / route&q
         <category>passwords</category>
         
         <category>email</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>User Authentication in CakePHP</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;requiring-user-authentication&quot;&gt;Requiring User Authentication&lt;/h2&gt;
-
-&lt;p&gt;First, we’ll start by locking everything down. I’m going to centralize all my auth-related loading code in &lt;code&gt;AppController::loadAuthComponent()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Configures the AuthComponent
-     *
-     * @return void
-     */
-    protected function loadAuthComponent()
-    {
-        $this-&amp;gt;loadComponent(&#39;Auth&#39;, [
-            &#39;authorize&#39; =&amp;gt; [&#39;Controller&#39;],
-            &#39;loginAction&#39; =&amp;gt; [
-                &#39;plugin&#39; =&amp;gt; null,
-                &#39;prefix&#39; =&amp;gt; false,
-                &#39;controller&#39; =&amp;gt; &#39;Users&#39;,
-                &#39;action&#39; =&amp;gt; &#39;login&#39;
-            ],
-            &#39;loginRedirect&#39; =&amp;gt; &#39;/&#39;,
-            &#39;logoutRedirect&#39; =&amp;gt; &#39;/&#39;,
-            &#39;authenticate&#39; =&amp;gt; [
-                &#39;all&#39; =&amp;gt; [
-                    &#39;fields&#39; =&amp;gt; [&#39;username&#39; =&amp;gt; &#39;email&#39;, &#39;password&#39; =&amp;gt; &#39;password&#39;],
-                ],
-                &#39;Form&#39;,
-            ]
-        ]);
-   }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’ll walk through this a bit at a time:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Components are behavioral modifiers for Controllers. They are useful for adding logic around the request/dispatch cycle. The alternative is to use PSR-7 middleware, but as the migration to PSR-7 is currently underway, we’ll be using this method for now.&lt;/li&gt;
-  &lt;li&gt;You can load a component using &lt;code&gt;Controller::loadComponent()&lt;/code&gt;. The first argument is the component alias, and the second is an array of options for that component. This class loading pattern is pretty much the same all over CakePHP. You can also alias a component if you wish, by setting the &lt;code&gt;className&lt;/code&gt; option to your specific class.&lt;/li&gt;
-  &lt;li&gt;Authentication in CakePHP is controlled via the &lt;code&gt;AuthComponent&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;We’ve set a few options that should be pretty straightforward.
-    &lt;ul&gt;
-      &lt;li&gt;The &lt;code&gt;authorize&lt;/code&gt; key is used to specify the authorization method. This will allow us to approve or deny access to a particular plugin/controller/action set. The &lt;code&gt;Controller&lt;/code&gt; method lets us use a special &lt;code&gt;isAuthorized(array $user)&lt;/code&gt; method to check if a user has access to an action.&lt;/li&gt;
-      &lt;li&gt;One thing that may need explanation is the &lt;code&gt;authenticate&lt;/code&gt; option. It allows us to specify &lt;code&gt;Authenticate&lt;/code&gt; classes that can be used to, well, “authenticate” a user. The most common class in use is the &lt;code&gt;Form&lt;/code&gt; class, which enables form-based authorization. You must specify a class in order to enable that authorization method. I’ve also specified an &lt;code&gt;all&lt;/code&gt; key whose options are inherited by the other classes.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I’m going to call this method from my &lt;code&gt;AppController::initialize()&lt;/code&gt;, right before loading any other components. As we’ve setup &lt;code&gt;Controller&lt;/code&gt;-based authorization, our &lt;code&gt;AppController&lt;/code&gt; will need an &lt;code&gt;isAuthorized(array $user)&lt;/code&gt; method. Here is mine (I’m blocking access to everything):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Check if the provided user is authorized for the request.
-     *
-     * @param array|\ArrayAccess|null $user The user to check the authorization of.
-     *   If empty the user fetched from storage will be used.
-     * @return bool True if $user is authorized, otherwise false
-     */
-    public function isAuthorized($user = null)
-    {
-        return false;
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We also need to make a &lt;em&gt;very&lt;/em&gt; small addition to our &lt;code&gt;User&lt;/code&gt; Entity class, located in &lt;code&gt;src/Model/Entity/User.php&lt;/code&gt;. The &lt;code&gt;User&lt;/code&gt; entity needs to have a custom password setter that will automatically hash a password on save. This is important for when we create users in our database. Why? Because it would be a real shame to store passwords in plain-text in the database. Lets create a Trait to hold this logic. Add the following to &lt;code&gt;src/Model/Entity/PasswordHashingTrait.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Entity;
-
-use Cake\Auth\DefaultPasswordHasher;
-
-trait PasswordHashingTrait
-{
-    protected function _setPassword($password)
-    {
-        return (new DefaultPasswordHasher)-&amp;gt;hash($password);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;What is a Trait? Traits are little snippets of code that allow you to reuse logic across classes. Think of them as little mix-ins that you can use to make a Cat quack like a Duck. See the &lt;a href=&quot;https://secure.php.net/manual/en/language.oop5.traits.php&quot;&gt;PHP documentation&lt;/a&gt; for more details.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Now add this trait to your &lt;code&gt;User&lt;/code&gt; Entity class. To do so, add the following &lt;em&gt;inside&lt;/em&gt; the class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Entity\PasswordHashingTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will tell PHP to include the &lt;code&gt;PasswordHashingTrait&lt;/code&gt; inside of our User Entity, giving it the ability to automatically hash passwords. Neat.&lt;/p&gt;
-
-&lt;p&gt;Once that’s done, we’ll need the actual login/logout methods, but for now, lets commit these changes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/AppController.php src/Model/Entity/PasswordHashingTrait.php src/Model/Entity/User.php
-git commit -m &quot;Configure the AuthComponent and automatically hash passwords&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;creating-a-user&quot;&gt;Creating a User&lt;/h2&gt;
-
-&lt;p&gt;We’ll need to create a user in our database. This is pretty boring, so I just created a shell to do it. Here is my shell (it goes in &lt;code&gt;src/Shell/UserShell.php&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Shell;
-
-use Cake\Console\Shell;
-use Cake\ORM\TableRegistry;
-use Cake\Utility\Inflector;
-
-/**
- * User shell command.
- */
-class UserShell extends Shell
-{
-
-    /**
-     * main() method.
-     *
-     * @return bool|int Success or error code.
-     */
-    public function main()
-    {
-        $data = [];
-        $fields = [
-            $this-&amp;gt;params[&#39;username-field&#39;],
-            $this-&amp;gt;params[&#39;password-field&#39;]
-        ];
-        foreach ($fields as $field) {
-            $value = null;
-            $fieldName = Inflector::humanize($field);
-            while (empty($value)) {
-                $value = $this-&amp;gt;in(sprintf(&#39;%s?&#39;, $fieldName));
-            }
-            $data[$field] = $value;
-        }
-
-        $this-&amp;gt;out(&#39;&#39;);
-        $continue = $this-&amp;gt;in(&#39;Continue?&#39;, [&#39;y&#39;, &#39;n&#39;], &#39;n&#39;);
-        if ($continue !== &#39;y&#39;) {
-            return $this-&amp;gt;error(&#39;User not saved.&#39;);
-        }
-        $this-&amp;gt;out(&#39;&#39;);
-        $this-&amp;gt;hr();
-
-        $table = TableRegistry::get($this-&amp;gt;params[&#39;table&#39;]);
-        $entity = $table-&amp;gt;newEntity($data, [&#39;validate&#39; =&amp;gt; false]);
-        if (!$table-&amp;gt;save($entity)) {
-            return $this-&amp;gt;error(sprintf(&#39;User could not be inserted: %s&#39;, print_r($entity-&amp;gt;errors(), true)));
-        }
-        $this-&amp;gt;out(sprintf(&#39;User inserted! ID: %d, Data: %s&#39;, $entity-&amp;gt;id, print_r($entity-&amp;gt;toArray(), true)));
-    }
-
-
-    /**
-     * UserShell
-     *
-     * @return ConsoleOptionParser
-     */
-    public function getOptionParser()
-    {
-        $parser = parent::getOptionParser();
-        $parser-&amp;gt;description(&#39;The User shell can create a user on the fly for local development.&#39;);
-
-        $parser-&amp;gt;addOption(&#39;table&#39;, [
-            &#39;short&#39; =&amp;gt; &#39;t&#39;,
-            &#39;help&#39; =&amp;gt; &#39;Name of Table class (with plugin prefix) to use to create a user&#39;,
-            &#39;default&#39; =&amp;gt; &#39;Users&#39;,
-        ]);
-        $parser-&amp;gt;addOption(&#39;username-field&#39;, [
-            &#39;short&#39; =&amp;gt; &#39;u&#39;,
-            &#39;help&#39; =&amp;gt; &#39;Name of username field&#39;,
-            &#39;default&#39; =&amp;gt; &#39;username&#39;,
-        ]);
-        $parser-&amp;gt;addOption(&#39;password-field&#39;, [
-            &#39;short&#39; =&amp;gt; &#39;p&#39;,
-            &#39;help&#39; =&amp;gt; &#39;Name of password field&#39;,
-            &#39;default&#39; =&amp;gt; &#39;password&#39;,
-        ]);
-        return $parser;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;LOTS OF CODE! A few notes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;This might be familiar to anyone who has seen any of my other blog posts.&lt;/li&gt;
-  &lt;li&gt;This is an interactive shell that will ask you two questions - Username/Password - and create the User for you.&lt;/li&gt;
-  &lt;li&gt;We’ve exposed a few ways of customizing the shell usage, including modifying the table, username-field, and password-field. You might even wish to further customize it to give automatic values for these fields.&lt;/li&gt;
-  &lt;li&gt;I’m not validating the data, and will assume it’s good.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;You can run this shell - and answer the questions - via the following command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake user --username-field email
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And you’ll get an error. Why? Because you cannot save &lt;code&gt;null&lt;/code&gt; to the &lt;code&gt;avatar&lt;/code&gt; and &lt;code&gt;avatar_dir&lt;/code&gt; fields. Poo. Lets fix that by creating a migration. First, lets generate a scaffold for the migration:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration alter_users avatar:string? avatar_dir:string?
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’ll need to change the migration slightly to accommodate for the fact that the fields already exist. You can do this by changing &lt;code&gt;addColumn&lt;/code&gt; to &lt;code&gt;changeColumn&lt;/code&gt; in the generated migration file. Once thats done, lets run the migration:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now run the &lt;code&gt;users&lt;/code&gt; shell:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake user --username-field email
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you run it again with the same options, you’ll see it happily inserts the same email address &lt;em&gt;again&lt;/em&gt;. Boo. Delete that record however you wish, but lets create a migration to ensure that doesn’t happen again:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration unique_users
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The contents of the &lt;code&gt;change&lt;/code&gt; method should be as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Change Method.
-     *
-     * More information on this method is available here:
-     * http://docs.phinx.org/en/latest/migrations.html#the-change-method
-     * @return void
-     */
-    public function change()
-    {
-        $table = $this-&amp;gt;table(&#39;users&#39;);
-        $table-&amp;gt;removeIndex([
-            &#39;email&#39;,
-        ], [
-            &#39;name&#39; =&amp;gt; &#39;BY_EMAIL&#39;,
-            &#39;unique&#39; =&amp;gt; false,
-        ]);
-        $table-&amp;gt;addIndex([
-            &#39;email&#39;,
-        ], [
-            &#39;name&#39; =&amp;gt; &#39;UNIQUE_EMAIL&#39;,
-            &#39;unique&#39; =&amp;gt; true,
-        ]);
-        $table-&amp;gt;update();
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now run the migration:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And our &lt;code&gt;users&lt;/code&gt; table should be set. Lets commit our changes before we get lost:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/Migrations/* src/Shell/UserShell.php
-git commit -m &quot;Allow user creation via shell and fix our users table&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;login-and-logout&quot;&gt;Login and Logout&lt;/h2&gt;
-
-&lt;p&gt;A given controller is made up of a collection of actions. Normally, you’d add the following to your controller to enable login/logout functionality in your app:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    public function login()
-    {
-        if ($this-&amp;gt;request-&amp;gt;is(&#39;post&#39;)) {
-            $user = $this-&amp;gt;Auth-&amp;gt;identify();
-            if ($user) {
-                $this-&amp;gt;Auth-&amp;gt;setUser($user);
-                return $this-&amp;gt;redirect($this-&amp;gt;Auth-&amp;gt;redirectUrl());
-            }
-            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Invalid username or password, try again&#39;));
-        }
-    }
-
-    public function logout()
-    {
-        return $this-&amp;gt;redirect($this-&amp;gt;Auth-&amp;gt;logout());
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The above is copied verbatim from the &lt;a href=&quot;http://book.cakephp.org/&quot;&gt;CakePHP book&lt;/a&gt;, an excellent source for all things CakePHP.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;You’re totally welcome to do that, but I’m not going to because I’m even lazier than that and cannot be arsed to copy the code. Remember how I said Crud has “action” classes that we can reuse across your application? Lets lean on it here and install the &lt;code&gt;CrudUsers&lt;/code&gt; plugin.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require friendsofcake/crud-users
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;CrudUsers&lt;/code&gt; plugin has action classes for various user-related functionality, including a &lt;code&gt;LoginAction&lt;/code&gt; and  &lt;code&gt;LogoutAction&lt;/code&gt;. These can be “mapped” to action names using &lt;code&gt;CrudComponent::mapAction()&lt;/code&gt;. Add the following code to your - mostly empty - &lt;code&gt;UsersController&lt;/code&gt;, located in &lt;code&gt;src/Controller/UsersController.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Initialization hook method.
-     *
-     * Use this method to add common initialization code like loading components.
-     *
-     * e.g. `$this-&amp;gt;loadComponent(&#39;Security&#39;);`
-     *
-     * @return void
-     */
-    public function initialize()
-    {
-        parent::initialize();
-
-        $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;login&#39;, &#39;CrudUsers.Login&#39;);
-        $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;logout&#39;, &#39;CrudUsers.Logout&#39;);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you browse to any part of your site in a browser, you should be redirected to a page like the following:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/12/02/users-login-missing-template.png&quot; alt=&quot;missing users::login template&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;If you don’t have CakePHP installed under a web server, you can start up the built-in PHP server by running &lt;code&gt;bin/cake server&lt;/code&gt;. Your application will be accessible at &lt;a href=&quot;http://localhost:8765&quot;&gt;http://localhost:8765&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;While the CrudUsers plugin &lt;em&gt;does&lt;/em&gt; have an action class for login, we’ll still need the relevant cake template file. Thankfully, we can just create it using the &lt;code&gt;Bake&lt;/code&gt; plugin, which has a sample &lt;code&gt;login.ctp&lt;/code&gt; for use with our apps:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake template Users login
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’ll need to make one &lt;em&gt;very small&lt;/em&gt; change to the generated &lt;code&gt;src/Template/Users/login.ctp&lt;/code&gt;. It currently references a &lt;code&gt;username&lt;/code&gt; field when it should instead reference the &lt;code&gt;email&lt;/code&gt; field. Once this is done, browse to &lt;code&gt;/users/login&lt;/code&gt;, and attempt to login with the credentials you created before. You should get a page like the following:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/12/02/users-login-success.png&quot; alt=&quot;users::login success kid&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;To allow logging out, we’ll need to explicitely whitelist it for authenticated users. Add the following to your &lt;code&gt;UsersController&lt;/code&gt; to do so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Check if the provided user is authorized for the request.
-     *
-     * @param array|\ArrayAccess|null $user The user to check the authorization of.
-     *   If empty the user fetched from storage will be used.
-     * @return bool True if $user is authorized, otherwise false
-     */
-    public function isAuthorized($user = null)
-    {
-        if ($this-&amp;gt;request-&amp;gt;param(&#39;action&#39;) == &#39;logout&#39;) {
-            return true;
-        }
-        return parent::isAuthorized($user);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now browse to &lt;code&gt;/users/logout&lt;/code&gt;. You’ll be redirected back to the login with potentially confusing flash messages. You &lt;em&gt;are&lt;/em&gt; in fact logged out. The error messages are because we haven’t allowed access to &lt;code&gt;/&lt;/code&gt; in our app. We can fix that later, but for now, lets save our progress:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json composer.lock src/Controller/UsersController.php src/Template/Users/login.ctp
-git commit -m &quot;Working login flow&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.2&quot;&gt;0.0.2&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Yep, we’re stopping here. We did say we’d get the whole forgot-password flow working, but it’s about quittin’ time for the day and we’ve covered quite a bit of ground. We’ll save that task for tomorrow, and also create a viewable landing page for our app.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 02 Dec 2016 02:20:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/02/user-authentication-in-cakephp/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/02/user-authentication-in-cakephp/</guid>
-        
-        <category>authentication</category>
-        
-        <category>authorization</category>
         
         <category>cakeadvent-2016</category>
         

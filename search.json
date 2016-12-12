@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Error Handling new Posts",
+    "url": "/2016/12/12/error-handling-new-posts/",
+    "description": "Part 12 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","error","handling","help","new","part","personal","posts","series","will"]
+  },
+  {
+    "type": "post",
     "title": "Unifying our admin dashboard views",
     "url": "/2016/12/11/unifying-our-admin-dashboard-views/",
     "description": "Part 11 of a series of posts that will help you build out a personal CMS",
@@ -1775,6 +1782,18 @@
     "title": "crud-view",
     "url": "/tags/crud-view/",
     "tokens": ["crud","view"]
+  },
+  {
+    "type": "tag",
+    "title": "elements",
+    "url": "/tags/elements/",
+    "tokens": ["elements"]
+  },
+  {
+    "type": "tag",
+    "title": "viewblocks",
+    "url": "/tags/viewblocks/",
+    "tokens": ["viewblocks"]
   },
   {
     "type": "null",

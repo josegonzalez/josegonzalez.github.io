@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Error Handling new Posts</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 12 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="elements, events, viewblocks, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Error Handling new Posts" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/" />
+    <meta property="og:description" content="Part 12 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Error Handling new Posts" />
+    <meta name="twitter:description" content="Part 12 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Error Handling new Posts » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Error Handling new Posts</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="updating-plugins">Updating Plugins</h2>
+<p>Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following <code>composer</code> command:</p>
+<pre><code class="language-shell">composer update
+</code></pre>
+<p>Typically you would run tests at this stage, but since we have <em>yet</em> to write any, that isn’t necessary.</p>
+<p>Let’s commit any updates:</p>
+<pre><code class="language-shell">git add composer.lock
+git commit -m "Update unpinned dependencies"
+</code></pre>
+<blockquote>
+  <p>You should always verify your application still works after upgrading dependencies.</p>
+</blockquote>
+<h2 id="todays-todolist">Today’s todolist</h2>
+<p>We’ll take care of the following two items today.</p>
+<ul>
+  <li>Only showing action buttons to add valid post types.</li>
+  <li>Redirecting when a new post is being added with an unspecified or invalid type.</li>
+</ul>
+<h3 id="modifying-shown-buttons">Modifying shown buttons</h3>
+<p>On the <code>/posts</code> page, we currently show an <code>Add</code> button and a <code>Home</code> button. We should only show Add buttons, but <em>only</em> for post types that exist. To do so, we’ll replace the scaffolded <code>actions</code> viewblock with one that contains valid action urls. I’ve added the following to our <code>PostsListener::beforeHandleIndex()</code>:</p>
+<pre><code class="language-php">$this-&gt;_controller()-&gt;set('indexActions', $this-&gt;_getIndexActions());
+$this-&gt;_action()-&gt;config('scaffold.viewblocks', [
+    'actions' =&gt; [
+        'admin/Posts/index-actions' =&gt; 'element',
+    ],
+]);
+</code></pre>
+<p>We’re going to rely on a special element - <code>src/Template/Element/admin/Posts/index-actions.ctp</code> - to render the variable <code>indexActions</code> for any viewblock named <code>actions</code>. The contents of the <code>PostsListener::_getIndexActions()</code> method is as follows.</p>
+<pre><code class="language-php">/**
+ * Get valid actions for the index page
+ *
+ * @return array
+ */
+protected function _getIndexActions()
+{
+    $indexActions = [];
+    $postTypes = PostsTable::postTypes();
+    foreach ($postTypes as $class =&gt; $alias) {
+        $indexActions[] = [
+            'title' =&gt; __('Add {0}', $alias),
+            'url' =&gt; ['controller' =&gt; 'Posts', 'action' =&gt; 'add', $alias],
+            'options' =&gt; ['class' =&gt; 'btn btn-default'],
+            'method' =&gt; 'GET',
+        ];
+    }
+    return $indexActions;
+}
+</code></pre>
+<p>Pretty straightforward. I retrieve all available <code>PostType</code> classes, then return each one as a link.</p>
+<blockquote>
+  <p>Remember to add <code>use App\Model\Table\PostsTable;</code> to the top of your class, otherwise you’ll get an error regarding the class not existing.</p>
+</blockquote>
+<p>Now on to our <code>index-actions.ctp</code> template.</p>
+<pre><code class="language-php">&lt;?php
+foreach ($indexActions as $config) {
+    echo $this-&gt;element('CrudView.action-button', ['config' =&gt; $config]);
+}
+</code></pre>
+<p>Here, I’m relying on the <code>Crud.action-button</code> template to render the correct button link, so if that ever changes, we’ll get the correct update on our end. Time to commit:</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php src/Template/Element/admin/Posts/index-actions.ctp
+git commit -m "Only show the buttons we want to show on the /posts page"
+</code></pre>
+<h3 id="redirecting-on-bad-blog-post-types">Redirecting on bad blog post types</h3>
+<p>This one is pretty simple. For the <code>add</code> action, we should only allow registered post types. This is my modified <code>PostsListener::beforeRenderAdd()</code>.</p>
+<pre><code class="language-php">/**
+ * Before Render Add Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeRenderAdd(Event $event)
+{
+    $passedArgs = $this-&gt;_request()-&gt;param('pass');
+    if (!PostsTable::isValidPostType($passedArgs)) {
+        return $this-&gt;_controller()-&gt;redirect([
+            'controller' =&gt; 'Posts',
+            'action' =&gt; 'index',
+        ]);
+    }
+    $event-&gt;subject-&gt;entity-&gt;type = $passedArgs[0];
+    $this-&gt;_setPostType($event, $event-&gt;subject-&gt;entity-&gt;getPostType());
+}
+</code></pre>
+<p>Next, here is the method that checks if the PostType is valid. I’ve added it to the <code>PostTypesTrait</code> that is used in the <code>PostsTable</code>.</p>
+<pre><code class="language-php">/**
+ * Checks if the passed arguments contain a valid post type
+ *
+ * @param string $passedArgs a list of passed request parameters
+ * @return bool
+ */
+public static function isValidPostType($passedArgs)
+{
+    if (empty($passedArgs[0])) {
+        return false;
+    }
+    $validPostType = false;
+    $postTypes = PostsTable::postTypes();
+    foreach ($postTypes as $class =&gt; $alias) {
+        if ($passedArgs[0] === $alias) {
+            $validPostType = true;
+            break;
+        }
+    }
+    return $validPostType;
+}
+</code></pre>
+<p>Now we should redirect back <em>even if</em> the user tries to set an invalid post type. Commit time!</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php src/Model/Table/Traits/PostTypesTrait.php
+git commit -m "Ensure users do not try to add a non-existent post type"
+</code></pre>
+<h2 id="homework">Homework!</h2>
+<p>Create a validation rule for the <code>PostsTable</code> that only allows <code>type</code> to be a valid post type. Good luck!</p>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.12">0.0.12</a>.</p>
+</blockquote>
+<p>We’re quickly wrapping up our blog’s admin panel. While there will definitely be a few more things to do to clean up the UI, it’s in great shape now. We’ll be turning our attention to the other post types now, which hopefully won’t require too many additions.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-12 12:06:00 +0000">12 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 12</strong> of <strong>12</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li>Error Handling new Posts</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/12/error-handling-new-posts/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/';
+        var disqus_title      = "CakeAdvent-2016: Error Handling new Posts";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

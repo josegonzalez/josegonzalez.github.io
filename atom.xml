@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-12-12T01:07:15+00:00</updated>
+ <updated>2016-12-12T19:30:59+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Error Handling new Posts]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/"/>
+   <updated>2016-12-12T12:06:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/</id>
+   <content type="html"><![CDATA[Part 12 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Unifying our admin dashboard views]]></title>
