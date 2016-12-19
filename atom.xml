@@ -4,13 +4,69 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-12-12T19:30:59+00:00</updated>
+ <updated>2016-12-19T19:32:44+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Cosmetic Admin Cleanup]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/19/admin-cleanup/"/>
+   <updated>2016-12-19T11:31:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/19/admin-cleanup/</id>
+   <content type="html"><![CDATA[Part 19 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[Queuing up emails]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/18/queuing-up-emails/"/>
+   <updated>2016-12-18T06:26:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/18/queuing-up-emails/</id>
+   <content type="html"><![CDATA[Part 18 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[Routing Blog Posts to custom urls]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/"/>
+   <updated>2016-12-17T05:21:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/</id>
+   <content type="html"><![CDATA[Part 17 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[Ensuring Posts properly handle custom urls]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/"/>
+   <updated>2016-12-16T04:16:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/</id>
+   <content type="html"><![CDATA[Part 16 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[Theming our CMS]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/15/theming-our-cms/"/>
+   <updated>2016-12-15T03:20:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/15/theming-our-cms/</id>
+   <content type="html"><![CDATA[Part 15 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[Photo Post Types]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/14/photo-post-types/"/>
+   <updated>2016-12-14T01:37:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/14/photo-post-types/</id>
+   <content type="html"><![CDATA[Part 14 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
+
+ <entry>
+   <title type="html"><![CDATA[Refactoring Post Types]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/13/refactoring-post-types/"/>
+   <updated>2016-12-13T12:40:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/13/refactoring-post-types/</id>
+   <content type="html"><![CDATA[Part 13 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Error Handling new Posts]]></title>

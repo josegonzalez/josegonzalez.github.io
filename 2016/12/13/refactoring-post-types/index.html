@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Refactoring Post Types</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/13/refactoring-post-types/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 13 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="refactoring, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Refactoring Post Types" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/13/refactoring-post-types/" />
+    <meta property="og:description" content="Part 13 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Refactoring Post Types" />
+    <meta name="twitter:description" content="Part 13 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Refactoring Post Types » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Refactoring Post Types</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="updating-plugins">Updating Plugins</h2>
+<p>Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. If there are any bugfixes for dependencies, we’ll grab those with the following <code>composer</code> command:</p>
+<pre><code class="language-shell">composer update
+</code></pre>
+<p>Typically you would run tests at this stage, but since we have <em>yet</em> to write any, that isn’t necessary.</p>
+<p>Let’s commit any updates:</p>
+<pre><code class="language-shell">git add composer.lock
+git commit -m "Update unpinned dependencies"
+</code></pre>
+<blockquote>
+  <p>You should always verify your application still works after upgrading dependencies.</p>
+</blockquote>
+<h2 id="duplicative-logic">Duplicative Logic</h2>
+<p>In the process of adding a new post type, I noticed that there is a bit of duplication between the <code>PostsListener::beforeSave()</code> and the <code>AbstractPostType::_execute()</code> method. Specifically, we’re not even using the <code>_execute()</code> logic in our save. I’m going to refactor it with the following goals:</p>
+<ul>
+  <li>Save logic belongs with Crud, so it will be removed from both the <code>PostsListener</code> and <code>AbstractPostType</code> classes.</li>
+  <li>Extra data from the request should be injected at the <code>PostsListener</code> level.</li>
+  <li>The data that we’ll actually save should be returned by the <code>AbstractPostType::execute()</code> method.</li>
+  <li>We should be able to lean on our <code>PostType</code> validation rules as much as possible.</li>
+</ul>
+<h3 id="dropping-extra-code-in-postslistenerbeforesave">Dropping extra code in <code>PostsListener::beforeSave()</code></h3>
+<p>This is the <code>PostsListener::beforeSave()</code></p>
+<pre><code class="language-php">/**
+ * Before Save
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeSave(Event $event)
+{
+    $type = $event-&gt;subject-&gt;entity-&gt;type;
+    if (empty($type)) {
+        $passedArgs = $this-&gt;_request()-&gt;param('pass');
+        $type = $passedArgs[0];
+    }
+    $event-&gt;subject-&gt;entity-&gt;type = $type;
+    $data = [
+        'user_id' =&gt; $this-&gt;_controller()-&gt;Auth-&gt;user('id'),
+        'type' =&gt; $type,
+    ] + $this-&gt;_request()-&gt;data() + ['published_date' =&gt; Time::now()];
+    $postType = $event-&gt;subject-&gt;entity-&gt;getPostType();
+    $data = $postType-&gt;execute($data);
+    $PostsTable = TableRegistry::get('Posts');
+    $PostsTable-&gt;patchEntity($event-&gt;subject-&gt;entity, $data);
+}
+</code></pre>
+<p>In it, you’ll see I can still inject data from the request - <code>user_id</code>, <code>type</code>, <code>published_date</code> - but also get the “real” data from the specific <code>PostType::execute()</code> method. As it’s the <code>Crud.beforeSave</code> event, we don’t actually need to save data, and just patching it onto the event’s entity is enough.</p>
+<h3 id="restructuring-abstractposttypeexecute">Restructuring <code>AbstractPostType::_execute()</code></h3>
+<p>This is my new <code>AbstractPostType::_execute()</code> method:</p>
+<pre><code class="language-php">protected function _execute(array $data)
+{
+    if (empty($data['post_attributes'])) {
+        $data['post_attributes'] = [];
+    }
+    $PostsTable = TableRegistry::get('Posts');
+    $AttributesTable = TableRegistry::get('PostAttributes');
+    $postAttributes = $data['post_attributes'];
+    $postColumns = $PostsTable-&gt;schema()-&gt;columns();
+    $validColumns = $this-&gt;schema()-&gt;fields();
+    foreach ($data as $key =&gt; $value) {
+        if (in_array($key, $postColumns)) {
+            continue;
+        }
+        unset($data[$key]);
+        if (!in_array($key, $validColumns)) {
+            continue;
+        }
+        $postAttributes[] = [
+            'name' =&gt; $key,
+            'value' =&gt; $value,
+        ];
+    }
+    $data['post_attributes'] = $postAttributes;
+    return $data;
+}
+</code></pre>
+<p>A bit more going on here:</p>
+<ul>
+  <li>We’re assuming there will <em>always</em> be at least an empty set of <code>post_attributes</code>.</li>
+  <li>If a key is both not a valid post column and not a valid post-type field, then we drop it.</li>
+  <li>We’re no longer creating a <code>PostAttribute</code> Entity, and instead allowing the <code>PostsTable-&gt;patchEntity()</code> call in the <code>PostsListener::beforeSave()</code> to properly martial the data.</li>
+</ul>
+<p>With these two changes in place, you can test saving a post and everything should be just fine. Let’s commit:</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php src/PostType/AbstractPostType.php
+git commit -m "Clean up post marshalling and saving"
+</code></pre>
+<h3 id="allowing-post-data-modification">Allowing Post Data Modification</h3>
+<p>In our upcoming post type - the PhotoPostType - we’ll need to save the file to disk and also ensure we track a <code>photo_path</code> that can be used to display the image. This is a bit more logic than our automated system will handle, so we’ll need an extra function call to perform these modifications. I’ve added the following method to <code>AbstractPostType</code>:</p>
+<pre><code class="language-php">public function transformData($data)
+{
+    return $data;
+}
+</code></pre>
+<p>By default, my <code>AbstractPostType::transformData()</code> is a no-op. And I call it <em>right</em> after I set a default for <code>post_attributes</code> in <code>AbstractPostType::_execute()</code></p>
+<pre><code class="language-php">$data = $this-&gt;transformData($data);
+</code></pre>
+<p>Why can’t I just depend upon the UploadBehavior to do this logic for me? Many behaviors end up changing where things are stored in the <code>Table.beforeSave</code> event, which happens <em>after</em> the <code>Crud.beforeSave</code> event. This means that we’d end up trashing the upload data before the <code>UploadBehavior</code> can handle it. As well, that behavior doesn’t know anything about our weird <code>post_attributes</code> system, so we’d need to handle the logic on our own.</p>
+<p>I’ll save my changes for now, and get to add a custom <code>PhotoPostType</code> tomorrow.</p>
+<pre><code class="language-shell">git add src/PostType/AbstractPostType.php
+git commit -m "Allow post types to transform the data before it is further marshalled"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.13">0.0.13</a>.</p>
+</blockquote>
+<p>A bit of light refactoring is always useful to get your application priorities in order. In this case, it was absolutely necessary in order to figure out where exactly we’d need to hook in for our custom photo type.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/13/refactoring-post-types/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-13 12:40:00 +0000">13 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 13</strong> of <strong>19</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li>Refactoring Post Types</li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/13/refactoring-post-types/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/13/refactoring-post-types/';
+        var disqus_title      = "CakeAdvent-2016: Refactoring Post Types";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

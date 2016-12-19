@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Theming our CMS</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/15/theming-our-cms/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 15 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="themes, views, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Theming our CMS" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/15/theming-our-cms/" />
+    <meta property="og:description" content="Part 15 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Theming our CMS" />
+    <meta name="twitter:description" content="Part 15 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Theming our CMS » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Theming our CMS</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="setting-up-a-theme">Setting up a Theme</h2>
+<p>As much as I love the default CakePHP css, I’d like the default installation to look a bit different. To do so, I’ll distribute a custom theme with the Cms called <code>DefaultTheme</code>.</p>
+<p>In CakePHP 3, themes are distributed as plugins. This makes it pretty easy to create an installer or similar for your themes, as well as scaffold them :)</p>
+<pre><code class="language-shell">bin/cake bake plugin DefaultTheme -f
+</code></pre>
+<p>We’ve scaffolded a theme, but we’ll want to modify a few things:</p>
+<ul>
+  <li>You remove the <code>plugins/DefaultTheme/config/routes.php</code> file as we wont need it</li>
+  <li>Remove <code>plugins/DefaultTheme/src</code> as we won’t be using the AppController that is created</li>
+  <li>
+    <p>Modify your <code>config/bootstrap.php</code> to <em>not</em> load the plugin’s bootstrap or routes. It should look like so:</p>
+    <p>Plugin::load(‘DefaultTheme’);</p>
+  </li>
+</ul>
+<p>To load a theme, we’ll modify our <code>AppView</code> - located in <code>src/View/AppView.php</code> - to be the following:</p>
+<pre><code class="language-php">public function initialize()
+{
+    $this-&gt;theme('DefaultTheme');
+}
+</code></pre>
+<p>Let’s save our work and move on:</p>
+<pre><code class="language-shell">git add composer.json config/bootstrap.php plugins/DefaultTheme src/View/AppView.php
+git commit -m "Add a dummy DefaultTheme"
+</code></pre>
+<h2 id="cakephp-theme-internals">CakePHP Theme internals</h2>
+<p>CakePHP themes are a bit weird. Here are some general guidelines:</p>
+<ul>
+  <li>Using a theme will inject it’s template files into the cake template search paths <em>first</em>. If a file is not found in a theme, it will default to any other search paths (so the main <code>src/Template</code> dir, or other plugins).</li>
+  <li>General template files, elements, and layouts can all be overriden from a theme.</li>
+  <li>Assets referenced from a theme will be loaded from that theme. If they aren’t found, CakePHP will try and load them from the main repo.</li>
+  <li>Assets - css, images, javascript files - will be proxied via PHP unless you symlink the theme’s webroot directory into place.</li>
+  <li>There is no way to override a file provided by a theme.</li>
+</ul>
+<p>I’m not going to include all of my theme code, but I will show some interesting bits.</p>
+<blockquote>
+  <p>The theme is based on the <a href="https://github.com/bencentra/centrarium">Centrarium Jekyll Theme</a>, and uses a logo by Kassy from <a href="https://www.sketchport.com/drawing/1782016/camera">sketchport</a>.</p>
+</blockquote>
+<p>I’ll commit my theme so you can take a look at the changes.</p>
+<pre><code class="language-shell">git add plugins/DefaultTheme
+git commit -m "Implement DefaultTheme"
+</code></pre>
+<h3 id="custom-helper-templates">Custom Helper Templates</h3>
+<p>In CakePHP 3, all helpers output html fragments based on a simple templating language. It uses string fragments to specify what the “template” should be for an html element, such as a <code>link</code> or <code>image</code> tag. It’s used throughout CakePHP, which is good as in our case, we’re going to modify what pagination looks like.</p>
+<blockquote>
+  <p>Templates use  style placeholders. It is important to not add any spaces around the  or the replacements will not work.</p>
+</blockquote>
+<p>Here is what I’ve placed in my theme’s <code>home.ctp</code> to customize what the <code>PaginatorHelper</code> uses for building next/previous links:</p>
+<pre><code class="language-php">&lt;?php
+$this-&gt;Paginator-&gt;templates([
+    'nextDisabled' =&gt; implode(' ', [
+        '&lt;span class="fa-stack fa-lg"&gt;',
+            '&lt;i class="fa fa-square fa-stack-2x"&gt;&lt;/i&gt;',
+            '&lt;i class="fa fa-angle-double-right fa-stack-1x fa-inverse"&gt;&lt;/i&gt;',
+        '&lt;/span&gt;',
+    ]),
+    'nextActive' =&gt; implode(' ', [
+        '&lt;a rel="prev" href=""&gt;',
+            '&lt;span class="fa-stack fa-lg"&gt;',
+                '&lt;i class="fa fa-square fa-stack-2x"&gt;&lt;/i&gt;',
+                '&lt;i class="fa fa-angle-double-right fa-stack-1x fa-inverse"&gt;&lt;/i&gt;',
+            '&lt;/span&gt;',
+        '&lt;/a&gt;',
+    ]),
+    'prevDisabled' =&gt; implode(' ', [
+        '&lt;span class="fa-stack fa-lg"&gt;',
+            '&lt;i class="fa fa-square fa-stack-2x"&gt;&lt;/i&gt;',
+            '&lt;i class="fa fa-angle-double-left fa-stack-1x fa-inverse"&gt;&lt;/i&gt;',
+        '&lt;/span&gt;',
+    ]),
+    'prevActive' =&gt; implode(' ', [
+        '&lt;a rel="prev" href=""&gt;',
+            '&lt;span class="fa-stack fa-lg"&gt;',
+                '&lt;i class="fa fa-square fa-stack-2x"&gt;&lt;/i&gt;',
+                '&lt;i class="fa fa-angle-double-left fa-stack-1x fa-inverse"&gt;&lt;/i&gt;',
+            '&lt;/span&gt;',
+        '&lt;/a&gt;',
+    ]),
+]);
+</code></pre>
+<p>You can also customize templates for the <code>FormHelper</code> and <code>HtmlHelper</code>.</p>
+<h3 id="custom-theme-elements">Custom Theme Elements</h3>
+<p>I’ve overriden what the post types will display as in my theme. If I hadn’t, we’d be using the default elements from the respective post type plugin. Here is what my <code>plugins/DefaultTheme/src/Template/Element/post_type/photo-index.ctp</code> looks like:</p>
+<pre><code class="language-php">&lt;h2&gt;&lt;?= $this-&gt;Html-&gt;link($post-&gt;get('title'), $post-&gt;get('url')) ?&gt;&lt;/h2&gt;
+&lt;section class="post-meta"&gt;
+    &lt;div class="post-date"&gt;&lt;?= $this-&gt;Time-&gt;nice($post-&gt;get('published_date')) ?&gt;&lt;/div&gt;
+&lt;/section&gt;
+&lt;section class="post-excerpt" itemprop="description"&gt;
+    &lt;?= $this-&gt;Html-&gt;image('../' . $post-&gt;get('photo_path')) ?&gt;
+&lt;/section&gt;
+</code></pre>
+<p>Note that my image link works as normal, and displays the original post image as desired.</p>
+<h3 id="theme-links">Theme Links</h3>
+<p>One thing I’m doing in my theme is linking to custom pages, such as <code>/about</code>, and also using the post urls as links. These aren’t currently routed by the CMS, so we’ll want to handle that next.</p>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.15">0.0.15</a>.</p>
+</blockquote>
+<p>The frontend of our site is in decent shape, though now we have some routing work to do. None of our custom post types have their own user-reachable urls, so in our next post, we’ll update the CakePHP routing to understand our routing schema.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/15/theming-our-cms/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-15 03:20:00 +0000">15 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 15</strong> of <strong>19</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li>Theming our CMS</li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/15/theming-our-cms/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/15/theming-our-cms/';
+        var disqus_title      = "CakeAdvent-2016: Theming our CMS";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

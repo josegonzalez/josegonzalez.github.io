@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Ensuring Posts properly handle custom urls</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 16 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="application-rules, validation, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Ensuring Posts properly handle custom urls" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/" />
+    <meta property="og:description" content="Part 16 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Ensuring Posts properly handle custom urls" />
+    <meta name="twitter:description" content="Part 16 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Ensuring Posts properly handle custom urls » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Ensuring Posts properly handle custom urls</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="validating-custom-urls">Validating custom urls</h2>
+<p>Each one of our posts can be assigned a url. Previously, this could be any non-empty string. Let’s put in some ground rules:</p>
+<ul>
+  <li>It should be unique in our database.</li>
+  <li>The url will be automatically generated from the <code>title</code> field if not otherwise specified</li>
+  <li>It should start with a forward slash.</li>
+  <li>It should not end with a forward slash.</li>
+  <li>All special characters should be replaced with dashes.</li>
+  <li>It must be lowercase.</li>
+  <li>It cannot be within a specific set of whitelisted urls.</li>
+  <li>It cannot be prefixed with a specific set of strings.</li>
+</ul>
+<p>Lets start with the first item:</p>
+<h3 id="application-rules">Application Rules</h3>
+<p>Application Rules differ from Validation rules. Validation rules should be stateless - that is, they are not affected by datastore lookups or similar. You can use them to check types or values. Application Rules <em>are</em> stateful, and are typically used for stuff like “this field must be unique” or “the state change of this field is invalid”. We’re going to use the former and modify our <code>PostsTable::buildRules()</code> method to be the following:</p>
+<pre><code class="language-php">/**
+ * Returns a rules checker object that will be used for validating
+ * application integrity.
+ *
+ * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+ * @return \Cake\ORM\RulesChecker
+ */
+public function buildRules(RulesChecker $rules)
+{
+    $rules-&gt;add($rules-&gt;existsIn(['user_id'], 'Users'));
+    $rules-&gt;add($rules-&gt;isUnique(['url']));
+    return $rules;
+}
+</code></pre>
+<p>I’ll commit here:</p>
+<pre><code class="language-shell">git add src/Model/Table/PostsTable.php
+git commit -m "Force the url field to be unique"
+</code></pre>
+<h3 id="auto-generating-urls">Auto-generating urls</h3>
+<p>First, we’ll need to allow fields to be “empty” in the form. Remove the following from <code>AbstractPostType::_buildValidator()</code>:</p>
+<pre><code class="language-php">$validator-&gt;notEmpty('url', 'Please fill this field');
+</code></pre>
+<p>Next, lets generate the url when empty! I’ve added the following class to our use statements at the top of my <code>AbstractPostType</code> class:</p>
+<pre><code class="language-php">use Cake\Utility\Hash;
+</code></pre>
+<p>Right after we call <code>AbstractPostType::transformData()</code> inside of <code>AbstractPostType::_execute()</code>, I call the following:</p>
+<pre><code class="language-php">$data['url'] = $this-&gt;ensureUrl($data);
+</code></pre>
+<p>And here is the body of <code>AbstractPostType::ensureUrl()</code>.</p>
+<pre><code class="language-php">protected function ensureUrl(array $data)
+{
+    $url = trim(Hash::get($data, 'url', ''), '/');
+    if (strlen($url) !== 0) {
+        return $url;
+    }
+    return Hash::get($data, 'title', '');
+}
+</code></pre>
+<p>We leave the url alone if the user has specified one, and otherwise return the contents of the <code>title</code> field.</p>
+<p>Finally, we can strip values from the url by adding a <code>_setUrl()</code> method to our Post entity. This ensures that it is properly massaged whenever that value is set, without requiring extra work at other layers. I’ve created a <code>UrlSettingTrait</code> in <code>src/Model/Entity/Traits/UrlSettingTrait.php</code> that contains the following:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Model\Entity\Traits;
+use Cake\Utility\Text;
+trait UrlSettingTrait
+{
+    /**
+     * Trims slashes and prepends the url with a slash
+     * If the input is invalid - such as an empty string - the url will become null.
+     *
+     * @param string $url The url that is to be set
+     * @return string
+     */
+    public function _setUrl($url)
+    {
+        if (strlen($url) === 0) {
+            return '';
+        }
+        $url = Text::slug($url, [
+            'lowercase' =&gt; true,
+            'replacement' =&gt; '-',
+        ]);
+        $url = '/' . trim($url, '/');
+        if ($url === '/') {
+            $url = null;
+        }
+        return $url;
+    }
+}
+</code></pre>
+<p>You’ll need to <code>use</code> this class within your <code>Post</code> entity as well.</p>
+<pre><code class="language-php">use \App\Model\Entity\Traits\UrlSettingTrait;
+</code></pre>
+<p>I’ll save our progress now:</p>
+<pre><code class="language-shell">git add src/Model/Entity/Post.php src/Model/Entity/Traits/UrlSettingTrait.php src/PostType/AbstractPostType.php
+git commit -m "Automatically generate urls from the title field"
+</code></pre>
+<h3 id="validating-the-url-field">Validating the <code>url</code> field</h3>
+<p>We’ll want to ensure we don’t set invalid urls. For instance, shadowing an existing route would potentially break stuff like the admin or similar. In our next post, I’ll cover how to use admin routing for our dashboard, as well as custom routes for all other pages, but just assuming that the following urls are to be whitelisted:</p>
+<ul>
+  <li><code>/</code></li>
+  <li><code>/about</code></li>
+  <li><code>/home</code></li>
+  <li><code>/contact</code></li>
+  <li><code>/login</code></li>
+  <li><code>/logout</code></li>
+  <li><code>/forgot-password</code></li>
+</ul>
+<p>I’ll add the following to my <code>PostsTable::validationDefault()</code> method:</p>
+<pre><code class="language-php">$validator-&gt;add('url', 'notInList', [
+    'rule' =&gt; function ($value, $context) {
+        $list = ['/', '/about', '/home', '/contact', '/login', '/logout', '/forgot-password'];
+        $list = array_map('strval', $list);
+        return !in_array((string)$value, $list, true);
+    },
+    'message' =&gt; 'Reserved urls cannot be specified',
+]);
+</code></pre>
+<blockquote>
+  <p>We may want to expand this list later, but for now this seems adequate.</p>
+</blockquote>
+<p>We have to use a custom rule here because the built-in CakePHP rules cannot be negated, otherwise we would use `inList.</p>
+<p>Urls must also not be prefixed with any of the following:</p>
+<ul>
+  <li><code>/admin</code></li>
+  <li><code>/reset-password</code></li>
+  <li><code>/verify</code></li>
+</ul>
+<p>We’ll use another custom validation rule for this.</p>
+<pre><code class="language-php">$validator-&gt;add('url', 'withoutPrefix', [
+    'rule' =&gt; function ($value, $context) {
+        if (preg_match("/^\/(admin|reset-password|verify)/", $value)) {
+            return false;
+        }
+        if (preg_match("/^(admin|reset-password|verify)/", $value)) {
+            return false;
+        }
+        return true;
+    },
+    'message' =&gt; 'Urls cannot start with "/admin", "/reset-password", or "/verify"',
+]);
+</code></pre>
+<p>I’ve used two regex matches because urls can be set with a starting forward slash or not, and the <code>Post</code> entity setter will ensure they start with one. Allowing both makes it easier for users to reason about what the url will look like, as we’ll handle it correctly on our end.</p>
+<blockquote>
+  <p>Validation rules can contain inline functions, which are useful in a pinch but also more difficult to test</p>
+</blockquote>
+<p>Remember to save your work.</p>
+<pre><code class="language-shell">git add src/Model/Table/PostsTable.php
+git commit -m "Properly validate a submitted url"
+</code></pre>
+<h3 id="persisting-error-messages">Persisting error messages</h3>
+<p>One thing you might notice when saving a post is that the validation errors from the <code>PostsTable</code> are not shown. This is because we are overwriting the template’s entity in our <code>PostsListener::_setPostType()</code> method. I’ve added the following right before I update the template entity in that method:</p>
+<pre><code class="language-php">$postType-&gt;mergeErrors($event-&gt;subject-&gt;entity-&gt;errors());
+</code></pre>
+<p>And here is the code for <code>AbstractPostType::mergeErrors()</code>. We want to ensure any existing errors from other places are properly persisted, so we need to merge our post errors <em>onto</em> the post type:</p>
+<pre><code class="language-php">public function mergeErrors(array $errors)
+{
+    foreach ($errors as $field =&gt; $err) {
+        if (!isset($this-&gt;_errors[$field])) {
+            $this-&gt;_errors[$field] = $err;
+            continue;
+        }
+        foreach ($err as $name =&gt; $message) {
+            $this-&gt;_errors[$field][$name] = $message;
+        }
+    }
+}
+</code></pre>
+<blockquote>
+  <p>This code is not unit tested, and error handling is a place where you may want to dive into unit testing to ensure you get it right. We may end up revisiting this implementation at a later date.</p>
+</blockquote>
+<p>If you try out the form now, you’ll see that we now have all the errors from our Post instance validation. I’ll save my work for now:</p>
+<pre><code class="language-shell">git add src/Listener/PostsListener.php src/PostType/AbstractPostType.php
+git commit -m "Persist validation errors when saving forms"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.16">0.0.16</a>.</p>
+</blockquote>
+<p>We have now placed some mitigations in place for ensuring our users do not set invalid urls. We can now look into the routing layer portion of this, which will make the user-facing portion of our site much more usable.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-16 04:16:00 +0000">16 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 16</strong> of <strong>19</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li>Ensuring Posts properly handle custom urls</li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/';
+        var disqus_title      = "CakeAdvent-2016: Ensuring Posts properly handle custom urls";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

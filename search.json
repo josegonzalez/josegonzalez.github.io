@@ -1,6 +1,55 @@
 [
   {
     "type": "post",
+    "title": "Cosmetic Admin Cleanup",
+    "url": "/2016/12/19/admin-cleanup/",
+    "description": "Part 19 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["admin","build","cleanup","cms","cosmetic","help","part","personal","posts","series","will"]
+  },
+  {
+    "type": "post",
+    "title": "Queuing up emails",
+    "url": "/2016/12/18/queuing-up-emails/",
+    "description": "Part 18 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","emails","help","part","personal","posts","queuing","series","will"]
+  },
+  {
+    "type": "post",
+    "title": "Routing Blog Posts to custom urls",
+    "url": "/2016/12/17/routing-blog-posts-to-custom-urls/",
+    "description": "Part 17 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["blog","build","cms","custom","help","part","personal","posts","routing","series","urls","will"]
+  },
+  {
+    "type": "post",
+    "title": "Ensuring Posts properly handle custom urls",
+    "url": "/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/",
+    "description": "Part 16 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","custom","ensuring","handle","help","part","personal","posts","properly","series","urls","will"]
+  },
+  {
+    "type": "post",
+    "title": "Theming our CMS",
+    "url": "/2016/12/15/theming-our-cms/",
+    "description": "Part 15 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","help","part","personal","posts","series","theming","will"]
+  },
+  {
+    "type": "post",
+    "title": "Photo Post Types",
+    "url": "/2016/12/14/photo-post-types/",
+    "description": "Part 14 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","help","part","personal","photo","post","posts","series","types","will"]
+  },
+  {
+    "type": "post",
+    "title": "Refactoring Post Types",
+    "url": "/2016/12/13/refactoring-post-types/",
+    "description": "Part 13 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","help","part","personal","post","posts","refactoring","series","types","will"]
+  },
+  {
+    "type": "post",
     "title": "Error Handling new Posts",
     "url": "/2016/12/12/error-handling-new-posts/",
     "description": "Part 12 of a series of posts that will help you build out a personal CMS",
@@ -1794,6 +1843,24 @@
     "title": "viewblocks",
     "url": "/tags/viewblocks/",
     "tokens": ["viewblocks"]
+  },
+  {
+    "type": "tag",
+    "title": "uploads",
+    "url": "/tags/uploads/",
+    "tokens": ["uploads"]
+  },
+  {
+    "type": "tag",
+    "title": "themes",
+    "url": "/tags/themes/",
+    "tokens": ["themes"]
+  },
+  {
+    "type": "tag",
+    "title": "application-rules",
+    "url": "/tags/application-rules/",
+    "tokens": ["application","rules"]
   },
   {
     "type": "null",

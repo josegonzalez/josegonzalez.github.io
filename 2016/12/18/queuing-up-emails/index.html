@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Queuing up emails</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/18/queuing-up-emails/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 18 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="queuing, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Queuing up emails" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/18/queuing-up-emails/" />
+    <meta property="og:description" content="Part 18 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Queuing up emails" />
+    <meta name="twitter:description" content="Part 18 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Queuing up emails » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Queuing up emails</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="emailing-in-the-background">Emailing in the Background</h2>
+<p>One thing you may notice is that sending the “forgot password” email causes the site to slow down. There are a few things to think about here:</p>
+<ul>
+  <li>Users will get upset if their requests don’t complete “instantly”.</li>
+  <li>Google will actually penalize slower sites in their rankings</li>
+  <li>If you perform more work in a web request, those requests can build up, potentially allowing users to DDoS you.</li>
+</ul>
+<p>Overall, it’s pretty jank to send emails in the foreground. We’ll instead queue the messages to be sent in the background using the <a href="https://github.com/josegonzalez/cakephp-queuesadilla"><code>josegonzalez/cakephp-queuesadilla</code></a> plugin which is included with the <code>josegonzalez/app</code> skeleton we are using.</p>
+<blockquote>
+  <p>CakePHP does not yet have an official queueing library, though we hope to have one soon. My hope is that it will be a slightly repackaged Queuesadilla.</p>
+</blockquote>
+<h3 id="creating-a-job-class">Creating a Job class</h3>
+<p>We’ll start by creating a generic <code>MailerJob</code> class in <code>src/Job/MailerJob.php</code>. Here is the contents of that file:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Job;
+use Cake\Log\LogTrait;
+use Cake\Mailer\MailerAwareTrait;
+use josegonzalez\Queuesadilla\Job\Base as JobContainer;
+class MailerJob
+{
+    use LogTrait;
+    use MailerAwareTrait;
+    public function execute(JobContainer $job)
+    {
+        $mailer = $job-&gt;data('mailer');
+        $action = $job-&gt;data('action');
+        $data = $job-&gt;data('data', []);
+        if (empty($mailer)) {
+            $this-&gt;log('Missing mailer in job config');
+            return;
+        }
+        if (empty($action)) {
+            $this-&gt;log('Missing action in job config');
+            return;
+        }
+        $this-&gt;getMailer($mailer)-&gt;send($action, $data);
+    }
+}
+</code></pre>
+<p>Briefly, we’ll go over this:</p>
+<ul>
+  <li>Jobs can be either functions, static methods in classes, or instances with a method that we execute. We are going for the instance methodology.</li>
+  <li>When a job method is executed, we pass in a <code>JobContainer</code> which has access to the relevant job data.</li>
+  <li>We still use the <code>MailerAwareTrait</code> so that we can reuse our <code>Mailer</code> classes.</li>
+  <li>The <code>MailerJob::execute()</code> method has been made generic so that we might be able to reuse this job for other cases where we’ll send email.</li>
+</ul>
+<h3 id="queuing-the-mailerjob">Queuing the <code>MailerJob</code></h3>
+<p>This is relatively simple. We’ll start by removing all <code>MailerAwareTrait</code> code from our <code>UsersListener</code>. In particular, remove the following <code>use</code> statement:</p>
+<pre><code class="language-php">use Cake\Mailer\MailerAwareTrait;
+</code></pre>
+<p>As well as the following from within the class:</p>
+<pre><code class="language-php">use MailerAwareTrait;
+/**
+ * Default config for this object.
+ *
+ * @var array
+ */
+protected $_defaultConfig = [
+    'mailer' =&gt; 'User',
+];
+</code></pre>
+<p>At this point, you should add the following <code>use</code> statement to the top of the class:</p>
+<pre><code class="language-php">use Josegonzalez\CakeQueuesadilla\Queue\Queue;
+</code></pre>
+<p>Finally, we’ll update <code>UsersListener::afterForgotPassword()</code> to actually enqueue the job:</p>
+<pre><code class="language-php">/**
+ * After Forgot Password
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function afterForgotPassword(Event $event)
+{
+    if (!$event-&gt;subject-&gt;success) {
+        return;
+    }
+    $table = TableRegistry::get($this-&gt;_controller()-&gt;modelClass);
+    $token = $table-&gt;tokenize($event-&gt;subject-&gt;entity-&gt;id);
+    Queue::push(['\App\Job\MailerJob', 'execute'], [
+        'action' =&gt; 'forgotPassword',
+        'mailer' =&gt; 'User',
+        'data' =&gt; [
+            'email' =&gt; $event-&gt;subject-&gt;entity-&gt;email,
+            'token' =&gt; $token,
+        ]
+    ]);
+}
+</code></pre>
+<p>A few things:</p>
+<ul>
+  <li><code>Queue::push()</code> takes two arguments, a callable and data for the job.</li>
+  <li>Our callable should include the fully-namespaced class name and the function being invoked, so <code>['\App\Job\MailerJob', 'execute']</code>.</li>
+  <li>Our <code>MailerJob</code> requires an <code>action</code> and a <code>mailer</code> to be specified, so we pass those in as data, and also send in the user’s email</li>
+</ul>
+<p>Finally, we need to update our <code>UserMailer::forgotPassword()</code> signature so that we only need the <code>email</code> and not an entire <code>user</code> object.</p>
+<pre><code class="language-php">/**
+ * Email sent on password recovery requests
+ *
+ * @param array $email User email
+ * @param string $token Token used for validation
+ * @return \Cake\Mailer\Mailer
+ */
+public function forgotPassword($email, $token)
+{
+    return $this-&gt;to($email)
+        -&gt;subject('Reset your password')
+        -&gt;template('forgot_password')
+        -&gt;layout(false)
+        -&gt;set([
+            'token' =&gt; $token,
+        ])
+        -&gt;emailFormat('html');
+}
+</code></pre>
+<p>Before testing this, one thing that we’ll need to do is make sure that we have specified a full base url for all environments. CakePHP will normally retrieve this from the current request, but cannot do so in a CLI environment. As such, we’ll need to add the following to <code>line 17</code> of our <code>config/env.php</code>:</p>
+<pre><code class="language-php">'App.fullbaseurl' =&gt; 'App.fullBaseUrl',
+</code></pre>
+<p>Now we can set the <code>APP_FULLBASEURL</code> environment variable and have it properly scope all of our urls.</p>
+<blockquote>
+  <p>Newer installs of the <code>josegonzalez/app</code> skeleton will not need the above change to your <code>config/env.php</code> file.</p>
+</blockquote>
+<p>Lets save our changes:</p>
+<pre><code class="language-shell">git add config/env.php src/Job/MailerJob.php src/Listener/UsersListener.php src/Mailer/UserMailer.php
+git commit -m "Send emails via a background job"
+</code></pre>
+<h3 id="running-jobs">Running Jobs</h3>
+<p>To run a job, we’ll need to first create the requisite tables. Queusadilla can use a variety of backends, though we are defaulting to the PDO backend for ease of use. Let’s run the migration for that:</p>
+<pre><code class="language-shell">bin/cake migrations migrate --plugin Josegonzalez/CakeQueuesadilla
+</code></pre>
+<p>Now we can just run the default queue:</p>
+<pre><code class="language-shell">bin/cake queuesadilla
+</code></pre>
+<p>And we’re done!</p>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.18">0.0.18</a>.</p>
+</blockquote>
+<p>We have no sped up our slowest endpoint by over 9000, which is great because I’m pretty sure the scouter is broken. For our next post, we’ll do a bit more minor cleanup of our admin panels.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/18/queuing-up-emails/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-18 06:26:00 +0000">18 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 18</strong> of <strong>19</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li>Queuing up emails</li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/18/queuing-up-emails/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/18/queuing-up-emails/';
+        var disqus_title      = "CakeAdvent-2016: Queuing up emails";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

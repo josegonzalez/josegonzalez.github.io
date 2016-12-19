@@ -15,6 +15,41 @@
 
 
   <url>
+      <loc>http://josediazgonzalez.com/2016/12/19/admin-cleanup/</loc>
+      <lastmod>2016-12-19</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2016/12/18/queuing-up-emails/</loc>
+      <lastmod>2016-12-18</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/</loc>
+      <lastmod>2016-12-17</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/</loc>
+      <lastmod>2016-12-16</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2016/12/15/theming-our-cms/</loc>
+      <lastmod>2016-12-15</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2016/12/14/photo-post-types/</loc>
+      <lastmod>2016-12-14</lastmod>
+  </url>
+
+  <url>
+      <loc>http://josediazgonzalez.com/2016/12/13/refactoring-post-types/</loc>
+      <lastmod>2016-12-13</lastmod>
+  </url>
+
+  <url>
       <loc>http://josediazgonzalez.com/2016/12/12/error-handling-new-posts/</loc>
       <lastmod>2016-12-12</lastmod>
   </url>

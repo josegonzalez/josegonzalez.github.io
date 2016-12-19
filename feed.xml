@@ -5,9 +5,1486 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 12 Dec 2016 19:30:59 +0000</pubDate>
-    <lastBuildDate>Mon, 12 Dec 2016 19:30:59 +0000</lastBuildDate>
+    <pubDate>Mon, 19 Dec 2016 19:32:44 +0000</pubDate>
+    <lastBuildDate>Mon, 19 Dec 2016 19:32:44 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Cosmetic Admin Cleanup</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;errata-from-previous-post&quot;&gt;Errata from previous post&lt;/h2&gt;
+
+&lt;p&gt;The connected routes in &lt;code&gt;config/routes.php&lt;/code&gt; for &lt;code&gt;/forgot-password&lt;/code&gt; and &lt;code&gt;/reset-password&lt;/code&gt; were incorrect and should be as follows&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/forgot-password&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgotPassword&#39;]);
+$routes-&amp;gt;connect(&#39;/reset-password/*&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;resetPassword&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
+
+&lt;h2 id=&quot;cosmetic-cleanup&quot;&gt;Cosmetic Cleanup&lt;/h2&gt;
+
+&lt;p&gt;There are a few things that currently irk me about the admin panel:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We are duplicating navigation in the header and sidebar&lt;/li&gt;
+  &lt;li&gt;The default header link on the top-right when logged out is the &lt;code&gt;logout&lt;/code&gt; link.&lt;/li&gt;
+  &lt;li&gt;The login redirect goes to &lt;code&gt;/&lt;/code&gt;, when it should go to the &lt;code&gt;/admin/posts&lt;/code&gt; page. The logout redirect should just go to the logout page.&lt;/li&gt;
+  &lt;li&gt;We’re showing a link to the &lt;code&gt;view&lt;/code&gt; action on the &lt;code&gt;/admin/posts&lt;/code&gt; page but we should not.&lt;/li&gt;
+  &lt;li&gt;We’re showing a link to the &lt;code&gt;home&lt;/code&gt; action on the &lt;code&gt;/admin/posts/edit&lt;/code&gt; page but we should not.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let’s fix that.&lt;/p&gt;
+
+&lt;h3 id=&quot;de-duplicating-navigation-links&quot;&gt;De-duplicating Navigation Links&lt;/h3&gt;
+
+&lt;p&gt;We can very easily combine our navigation by modifying the &lt;code&gt;scaffold.utility_navigation&lt;/code&gt; crud config option to include the &lt;code&gt;scaffold.sidebar_navigation&lt;/code&gt; elements. I’m going to refactor this into a helper method in our &lt;code&gt;AppController&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Retrieves the navigation elements for the page
+ *
+ * @return array
+ */
+protected function getUtilityNavigation()
+{
+    return [
+        new \CrudView\Menu\MenuItem(
+            &#39;Posts&#39;,
+            [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;index&#39;]
+        ),
+        new \CrudView\Menu\MenuItem(
+            &#39;Profile&#39;,
+            [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;edit&#39;]
+        ),
+        new \CrudView\Menu\MenuItem(
+            &#39;Log Out&#39;,
+            [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;logout&#39;]
+        )
+    ];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we can update our &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; to remove the &lt;code&gt;scaffold.sidebar_navigation&lt;/code&gt; and &lt;code&gt;scaffold.tables_blacklist&lt;/code&gt; configuration, replacing it with&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.utility_navigation&#39;, $this-&amp;gt;getUtilityNavigation());
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will move our navigation to the top, but will also re-enable the default sidebar. Let’s fix that next. For now, commit our changes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/AppController.php
+git commit -m &quot;Move sidebar navigation to header&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;disabling-the-sidebar&quot;&gt;Disabling the Sidebar&lt;/h3&gt;
+
+&lt;p&gt;This is pretty simple. We’ve already done this for a few actions in the &lt;code&gt;UsersController&lt;/code&gt;, but we’ll want to do this more globally. Add the following line to your &lt;code&gt;AppController::beforeFilter()&lt;/code&gt;, in the block checking if &lt;code&gt;Crud::isActionMapped()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.sidebar_navigation&#39;, false);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now your entire page layout should be taken up by the contents of the view, sans sidebar.&lt;/p&gt;
+
+&lt;p&gt;You can also remove this setting from your &lt;code&gt;UsersListener&lt;/code&gt;, as we are handling it globally now. The following methods will be updated:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;UsersListener::beforeHandleLogin()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;UsersListener::beforeHandleResetPassword()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;UsersListener::beforeHandleForgotPassword()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Time to commit:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/AppController.php src/Listener/UsersListener.php
+git commit -m &quot;Disable the sidebar navigation completely&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;switching-header-links-for-logged-out-users&quot;&gt;Switching header links for logged out users&lt;/h3&gt;
+
+&lt;p&gt;We should almost certainly not be showing the “Posts”, “Profile”, and “Log Out” utility navigation links to logged out users. Instead, lets show a link to login and start the forgot password flow to logged out users. I added the following to the beginning of my &lt;code&gt;AppController::getUtilityNavigation()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;) === null) {
+    return [
+        new \CrudView\Menu\MenuItem(
+            &#39;Forgot Password?&#39;,
+            [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgotPassword&#39;]
+        ),
+        new \CrudView\Menu\MenuItem(
+            &#39;Login&#39;,
+            [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;login&#39;]
+        ),
+    ];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Nothing obtuse here, it’s all pretty straightforward. We’ll commit our changes&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/AppController.php
+git commit -m &quot;Show alternative utility navigation to logged out users&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;fixing-the-loginlogout-redirects&quot;&gt;Fixing the login/logout redirects&lt;/h3&gt;
+
+&lt;p&gt;This is just a matter of changing configuration in our &lt;code&gt;AppController::loadAuthComponent()&lt;/code&gt;, and very specifically the &lt;code&gt;loginRedirect&lt;/code&gt; and &lt;code&gt;logoutRedirect&lt;/code&gt; configuration options. Here is the full method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Configures the AuthComponent
+ *
+ * @return void
+ */
+protected function loadAuthComponent()
+{
+    $this-&amp;gt;loadComponent(&#39;Auth&#39;, [
+        &#39;authorize&#39; =&amp;gt; [&#39;Controller&#39;],
+        &#39;loginAction&#39; =&amp;gt; [
+            &#39;plugin&#39; =&amp;gt; null,
+            &#39;prefix&#39; =&amp;gt; false,
+            &#39;controller&#39; =&amp;gt; &#39;Users&#39;,
+            &#39;action&#39; =&amp;gt; &#39;login&#39;
+        ],
+        &#39;loginRedirect&#39; =&amp;gt; [
+            &#39;plugin&#39; =&amp;gt; null,
+            &#39;prefix&#39; =&amp;gt; false,
+            &#39;controller&#39; =&amp;gt; &#39;Posts&#39;,
+            &#39;action&#39; =&amp;gt; &#39;index&#39;,
+        ],
+        &#39;logoutRedirect&#39; =&amp;gt; [
+            &#39;plugin&#39; =&amp;gt; null,
+            &#39;prefix&#39; =&amp;gt; false,
+            &#39;controller&#39; =&amp;gt; &#39;Users&#39;,
+            &#39;action&#39; =&amp;gt; &#39;login&#39;,
+        ],
+        &#39;authenticate&#39; =&amp;gt; [
+            &#39;all&#39; =&amp;gt; [
+                &#39;fields&#39; =&amp;gt; [&#39;username&#39; =&amp;gt; &#39;email&#39;, &#39;password&#39; =&amp;gt; &#39;password&#39;],
+            ],
+            &#39;Form&#39;,
+        ]
+    ]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You know the drill, save your changes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/AppController.php
+git commit -m &quot;Properly redirect users on login/logout&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;removing-the-view-link-from-our-post-action-list&quot;&gt;Removing the &lt;code&gt;view&lt;/code&gt; link from our post action list&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;scaffold.actions_blacklist&lt;/code&gt; Crud config option can be used to remove an action from being linked to. We’ll add the following to our &lt;code&gt;PostsListener::beforeHandleIndex()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.actions_blacklist&#39;, [
+    &#39;view&#39;,
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yay commit!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
+git commit -m &quot;Disable the view action link&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;removing-the-home-link-from-our-post-action-list&quot;&gt;Removing the &lt;code&gt;home&lt;/code&gt; link from our post action list&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;scaffold.actions_blacklist&lt;/code&gt; Crud config option can be used to remove an action from being linked to. Add the following to our &lt;code&gt;PostsListener::beforeHandleEdit()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Handle Edit Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleEdit(Event $event)
+{
+    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.actions_blacklist&#39;, [
+        &#39;home&#39;,
+    ]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’ll need to add the following to &lt;code&gt;PostsListener::beforeHandle()&lt;/code&gt; in order to trigger this as well:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;_request()-&amp;gt;action === &#39;edit&#39;) {
+    $this-&amp;gt;beforeHandleEdit($event);
+
+    return;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Be sure to save your changes&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
+git commit -m &quot;Disable the home action link&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.19&quot;&gt;0.0.19&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Our admin panel is in pretty good shape now - we could certainly try and spruce up the edit page for photo posts, but we’ll leave that for another day. Tomorrow, we’ll try add “sellable” photos to our CMS.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 19 Dec 2016 11:31:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/19/admin-cleanup/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/19/admin-cleanup/</guid>
+        
+        <category>crud-view</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Queuing up emails</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;emailing-in-the-background&quot;&gt;Emailing in the Background&lt;/h2&gt;
+
+&lt;p&gt;One thing you may notice is that sending the “forgot password” email causes the site to slow down. There are a few things to think about here:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Users will get upset if their requests don’t complete “instantly”.&lt;/li&gt;
+  &lt;li&gt;Google will actually penalize slower sites in their rankings&lt;/li&gt;
+  &lt;li&gt;If you perform more work in a web request, those requests can build up, potentially allowing users to DDoS you.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Overall, it’s pretty jank to send emails in the foreground. We’ll instead queue the messages to be sent in the background using the &lt;a href=&quot;https://github.com/josegonzalez/cakephp-queuesadilla&quot;&gt;&lt;code&gt;josegonzalez/cakephp-queuesadilla&lt;/code&gt;&lt;/a&gt; plugin which is included with the &lt;code&gt;josegonzalez/app&lt;/code&gt; skeleton we are using.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;CakePHP does not yet have an official queueing library, though we hope to have one soon. My hope is that it will be a slightly repackaged Queuesadilla.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;creating-a-job-class&quot;&gt;Creating a Job class&lt;/h3&gt;
+
+&lt;p&gt;We’ll start by creating a generic &lt;code&gt;MailerJob&lt;/code&gt; class in &lt;code&gt;src/Job/MailerJob.php&lt;/code&gt;. Here is the contents of that file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Job;
+
+use Cake\Log\LogTrait;
+use Cake\Mailer\MailerAwareTrait;
+use josegonzalez\Queuesadilla\Job\Base as JobContainer;
+
+class MailerJob
+{
+    use LogTrait;
+    use MailerAwareTrait;
+
+    public function execute(JobContainer $job)
+    {
+        $mailer = $job-&amp;gt;data(&#39;mailer&#39;);
+        $action = $job-&amp;gt;data(&#39;action&#39;);
+        $data = $job-&amp;gt;data(&#39;data&#39;, []);
+
+        if (empty($mailer)) {
+            $this-&amp;gt;log(&#39;Missing mailer in job config&#39;);
+            return;
+        }
+
+        if (empty($action)) {
+            $this-&amp;gt;log(&#39;Missing action in job config&#39;);
+            return;
+        }
+
+        $this-&amp;gt;getMailer($mailer)-&amp;gt;send($action, $data);
+    }
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Briefly, we’ll go over this:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Jobs can be either functions, static methods in classes, or instances with a method that we execute. We are going for the instance methodology.&lt;/li&gt;
+  &lt;li&gt;When a job method is executed, we pass in a &lt;code&gt;JobContainer&lt;/code&gt; which has access to the relevant job data.&lt;/li&gt;
+  &lt;li&gt;We still use the &lt;code&gt;MailerAwareTrait&lt;/code&gt; so that we can reuse our &lt;code&gt;Mailer&lt;/code&gt; classes.&lt;/li&gt;
+  &lt;li&gt;The &lt;code&gt;MailerJob::execute()&lt;/code&gt; method has been made generic so that we might be able to reuse this job for other cases where we’ll send email.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;queuing-the-mailerjob&quot;&gt;Queuing the &lt;code&gt;MailerJob&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;This is relatively simple. We’ll start by removing all &lt;code&gt;MailerAwareTrait&lt;/code&gt; code from our &lt;code&gt;UsersListener&lt;/code&gt;. In particular, remove the following &lt;code&gt;use&lt;/code&gt; statement:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Mailer\MailerAwareTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As well as the following from within the class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use MailerAwareTrait;
+
+/**
+ * Default config for this object.
+ *
+ * @var array
+ */
+protected $_defaultConfig = [
+    &#39;mailer&#39; =&amp;gt; &#39;User&#39;,
+];
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At this point, you should add the following &lt;code&gt;use&lt;/code&gt; statement to the top of the class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Josegonzalez\CakeQueuesadilla\Queue\Queue;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, we’ll update &lt;code&gt;UsersListener::afterForgotPassword()&lt;/code&gt; to actually enqueue the job:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * After Forgot Password
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function afterForgotPassword(Event $event)
+{
+    if (!$event-&amp;gt;subject-&amp;gt;success) {
+        return;
+    }
+
+    $table = TableRegistry::get($this-&amp;gt;_controller()-&amp;gt;modelClass);
+    $token = $table-&amp;gt;tokenize($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;id);
+
+    Queue::push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
+        &#39;action&#39; =&amp;gt; &#39;forgotPassword&#39;,
+        &#39;mailer&#39; =&amp;gt; &#39;User&#39;,
+        &#39;data&#39; =&amp;gt; [
+            &#39;email&#39; =&amp;gt; $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;email,
+            &#39;token&#39; =&amp;gt; $token,
+        ]
+    ]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few things:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;Queue::push()&lt;/code&gt; takes two arguments, a callable and data for the job.&lt;/li&gt;
+  &lt;li&gt;Our callable should include the fully-namespaced class name and the function being invoked, so &lt;code&gt;[&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;]&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Our &lt;code&gt;MailerJob&lt;/code&gt; requires an &lt;code&gt;action&lt;/code&gt; and a &lt;code&gt;mailer&lt;/code&gt; to be specified, so we pass those in as data, and also send in the user’s email&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Finally, we need to update our &lt;code&gt;UserMailer::forgotPassword()&lt;/code&gt; signature so that we only need the &lt;code&gt;email&lt;/code&gt; and not an entire &lt;code&gt;user&lt;/code&gt; object.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Email sent on password recovery requests
+ *
+ * @param array $email User email
+ * @param string $token Token used for validation
+ * @return \Cake\Mailer\Mailer
+ */
+public function forgotPassword($email, $token)
+{
+    return $this-&amp;gt;to($email)
+        -&amp;gt;subject(&#39;Reset your password&#39;)
+        -&amp;gt;template(&#39;forgot_password&#39;)
+        -&amp;gt;layout(false)
+        -&amp;gt;set([
+            &#39;token&#39; =&amp;gt; $token,
+        ])
+        -&amp;gt;emailFormat(&#39;html&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before testing this, one thing that we’ll need to do is make sure that we have specified a full base url for all environments. CakePHP will normally retrieve this from the current request, but cannot do so in a CLI environment. As such, we’ll need to add the following to &lt;code&gt;line 17&lt;/code&gt; of our &lt;code&gt;config/env.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;App.fullbaseurl&#39; =&amp;gt; &#39;App.fullBaseUrl&#39;,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we can set the &lt;code&gt;APP_FULLBASEURL&lt;/code&gt; environment variable and have it properly scope all of our urls.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Newer installs of the &lt;code&gt;josegonzalez/app&lt;/code&gt; skeleton will not need the above change to your &lt;code&gt;config/env.php&lt;/code&gt; file.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Lets save our changes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/env.php src/Job/MailerJob.php src/Listener/UsersListener.php src/Mailer/UserMailer.php
+git commit -m &quot;Send emails via a background job&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;running-jobs&quot;&gt;Running Jobs&lt;/h3&gt;
+
+&lt;p&gt;To run a job, we’ll need to first create the requisite tables. Queusadilla can use a variety of backends, though we are defaulting to the PDO backend for ease of use. Let’s run the migration for that:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate --plugin Josegonzalez/CakeQueuesadilla
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we can just run the default queue:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake queuesadilla
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we’re done!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.18&quot;&gt;0.0.18&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We have no sped up our slowest endpoint by over 9000, which is great because I’m pretty sure the scouter is broken. For our next post, we’ll do a bit more minor cleanup of our admin panels.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 18 Dec 2016 06:26:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/18/queuing-up-emails/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/18/queuing-up-emails/</guid>
+        
+        <category>queuing</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Routing Blog Posts to custom urls</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;routing-built-in-urls&quot;&gt;Routing built-in urls&lt;/h2&gt;
+
+&lt;p&gt;One thing you may have noticed is that we haven’t really touched our routing files. Up till now, we’ve relied on the default CakePHP routes to handle where our requests are sent. Because we have allowed users to specify arbitrary urls, we’ll need to create custom routes to handle both our existing urls &lt;em&gt;as well as&lt;/em&gt; the custom routes we’ve specified for each post.&lt;/p&gt;
+
+&lt;p&gt;I’ve updated my &lt;code&gt;config/routes.php&lt;/code&gt; to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Core\Plugin;
+use Cake\Routing\RouteBuilder;
+use Cake\Routing\Router;
+use Cake\Routing\Route\DashedRoute;
+
+Router::defaultRouteClass(DashedRoute::class);
+
+Router::scope(&#39;/&#39;, function (RouteBuilder $routes) {
+    $routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;home&#39;]);
+    $routes-&amp;gt;connect(&#39;/login&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;login&#39;]);
+    $routes-&amp;gt;connect(&#39;/logout&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;logout&#39;]);
+    $routes-&amp;gt;connect(&#39;/forgot-password&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgot-password&#39;]);
+    $routes-&amp;gt;connect(&#39;/reset-password/*&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgot-password&#39;]);
+});
+
+Router::scope(&#39;/admin&#39;, function (RouteBuilder $routes) {
+    $routes-&amp;gt;scope(&#39;/posts&#39;, [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;], function (RouteBuilder $routes) {
+        $routes-&amp;gt;connect(&#39;/&#39;, [&#39;action&#39; =&amp;gt; &#39;index&#39;]);
+        $routes-&amp;gt;fallbacks();
+    });
+    $routes-&amp;gt;connect(&#39;/profile&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;edit&#39;]);
+});
+
+Plugin::routes();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;You can specify a “default route class”. This is used for inflecting urls correctly, and I’m using the CakePHP default of &lt;code&gt;DashedRoute&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;You can specify one or more route “scopes”, which are kinda like route prefixes. Routes specified within a scope have that scope prefixed onto any matching urls.&lt;/li&gt;
+  &lt;li&gt;Route scopes can have default values specified, as we do for anything in &lt;code&gt;/admin/posts&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Route scopes can be embedded.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now you can use the new url patterns for any of the existing pages.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/routes.php
+git commit -m &quot;Specify all hardcoded app routes&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;routing-custom-urls&quot;&gt;Routing Custom Urls&lt;/h2&gt;
+
+&lt;p&gt;This part is a bit more complex. We need to do the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Match a custom &lt;code&gt;/:url&lt;/code&gt; catch-all pattern &lt;em&gt;only&lt;/em&gt; when there is a matching url in the &lt;code&gt;posts&lt;/code&gt; table.&lt;/li&gt;
+  &lt;li&gt;Allow access to &lt;code&gt;PostsController::view()&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Ensure the correct variables are set for the &lt;code&gt;PostsController::view()&lt;/code&gt; template layer.&lt;/li&gt;
+  &lt;li&gt;Add templates for &lt;code&gt;PostsController::view()&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Set default views for the &lt;code&gt;PostsController::view()&lt;/code&gt; action.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll do this piecemeal.&lt;/p&gt;
+
+&lt;h3 id=&quot;custom-route-classes&quot;&gt;Custom Route Classes&lt;/h3&gt;
+
+&lt;p&gt;In order to match our catch-all route, we’ll need a &lt;code&gt;PostRoute&lt;/code&gt;. Lets first connect the route in our &lt;code&gt;config/routes.php&lt;/code&gt; under the &lt;code&gt;/&lt;/code&gt; scope:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(
+    &#39;/:url&#39;,
+    [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;view&#39;],
+    [&#39;routeClass&#39; =&amp;gt; &#39;PostRoute&#39;]
+);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll add the following to our &lt;code&gt;PostRoute&lt;/code&gt; class, located in &lt;code&gt;src/Routing/Route/PostRoute.php&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Routing\Route;
+
+use Cake\ORM\TableRegistry;
+use Cake\Routing\Route\Route;
+
+class PostRoute extends Route
+{
+    public function parse($url, $method = &#39;&#39;)
+    {
+        $params = parent::parse($url, $method);
+        if (empty($params)) {
+            return false;
+        }
+
+        $PostsTable = TableRegistry::get(&#39;Posts&#39;);
+        $post = $PostsTable-&amp;gt;find()-&amp;gt;where([&#39;url&#39; =&amp;gt; &#39;/&#39; . $params[&#39;url&#39;]])-&amp;gt;first();
+        if (empty($post)) {
+            return false;
+        }
+
+        $params[&#39;pass&#39;] = [$post-&amp;gt;id];
+        return $params;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will perform a lookup for all urls that do not match another route. If the url doesn’t exist in our table, we simply don’t parse that request. If it does, we set the post id as the first passed argument.&lt;/p&gt;
+
+&lt;p&gt;Next, we need to modify our &lt;code&gt;PostsController::initialize()&lt;/code&gt; method to allow access to the &lt;code&gt;PostsController::view()&lt;/code&gt; action:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Auth-&amp;gt;allow([&#39;home&#39;, &#39;view&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that this is set, we can use the &lt;code&gt;Crud.beforeFind&lt;/code&gt; event to modify the finder to return related post data from the &lt;code&gt;post_attributes&lt;/code&gt; database table. Add the following to your &lt;code&gt;PostsListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeFind&#39; =&amp;gt; &#39;beforeFind&#39;,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is the logic for the new &lt;code&gt;PostsListener::beforeFind()&lt;/code&gt; and friends:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Find
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeFind(Event $event)
+{
+    if ($this-&amp;gt;_request()-&amp;gt;action === &#39;view&#39;) {
+        $this-&amp;gt;beforeFindView($event);
+
+        return;
+    }
+}
+
+/**
+ * Before Find View Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeFindView(Event $event)
+{
+    $event-&amp;gt;subject-&amp;gt;query-&amp;gt;contain([&#39;PostAttributes&#39;]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty straightforward. I also created a &lt;code&gt;src/Template/Posts/view.ctp&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;posts index large-12 medium-12 columns content&quot;&amp;gt;
+    &amp;lt;?php $postType = $post-&amp;gt;getPostType(); ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;element($postType-&amp;gt;viewTemplate(), [&#39;post&#39; =&amp;gt; $postType]); ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And one for the &lt;code&gt;DefaultTheme&lt;/code&gt; plugin in &lt;code&gt;plugins/DefaultTheme/src/Template/Posts/view.ctp&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;wrapper&quot;&amp;gt;
+    &amp;lt;ul class=&quot;post-list&quot;&amp;gt;
+        &amp;lt;li&amp;gt;
+            &amp;lt;?php $postType = $post-&amp;gt;getPostType(); ?&amp;gt;
+            &amp;lt;?= $this-&amp;gt;element($postType-&amp;gt;viewTemplate(), [&#39;post&#39; =&amp;gt; $postType]); ?&amp;gt;
+        &amp;lt;/li&amp;gt;
+    &amp;lt;/ul&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you browse to the homepage of the CMS and click any of the URLs, you should now see content :)&lt;/p&gt;
+
+&lt;p&gt;Let’s stop here for today.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/routes.php plugins/DefaultTheme/src/Template/Posts/view.ctp src/Controller/PostsController.php src/Listener/PostsListener.php src/Routing/Route/PostRoute.php src/Template/Posts/view.ctp
+git commit -m &quot;Implement custom routing for blog posts&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.17&quot;&gt;0.0.17&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Awh yis, our custom application routing layer is complete, and our blog is looking a bit sharper now. We still have a few more features to fill in, but for our next post, we’ll take a look optimizing email sends for password resets.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 17 Dec 2016 05:21:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/</guid>
+        
+        <category>routing</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Ensuring Posts properly handle custom urls</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;validating-custom-urls&quot;&gt;Validating custom urls&lt;/h2&gt;
+
+&lt;p&gt;Each one of our posts can be assigned a url. Previously, this could be any non-empty string. Let’s put in some ground rules:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;It should be unique in our database.&lt;/li&gt;
+  &lt;li&gt;The url will be automatically generated from the &lt;code&gt;title&lt;/code&gt; field if not otherwise specified&lt;/li&gt;
+  &lt;li&gt;It should start with a forward slash.&lt;/li&gt;
+  &lt;li&gt;It should not end with a forward slash.&lt;/li&gt;
+  &lt;li&gt;All special characters should be replaced with dashes.&lt;/li&gt;
+  &lt;li&gt;It must be lowercase.&lt;/li&gt;
+  &lt;li&gt;It cannot be within a specific set of whitelisted urls.&lt;/li&gt;
+  &lt;li&gt;It cannot be prefixed with a specific set of strings.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Lets start with the first item:&lt;/p&gt;
+
+&lt;h3 id=&quot;application-rules&quot;&gt;Application Rules&lt;/h3&gt;
+
+&lt;p&gt;Application Rules differ from Validation rules. Validation rules should be stateless - that is, they are not affected by datastore lookups or similar. You can use them to check types or values. Application Rules &lt;em&gt;are&lt;/em&gt; stateful, and are typically used for stuff like “this field must be unique” or “the state change of this field is invalid”. We’re going to use the former and modify our &lt;code&gt;PostsTable::buildRules()&lt;/code&gt; method to be the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Returns a rules checker object that will be used for validating
+ * application integrity.
+ *
+ * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+ * @return \Cake\ORM\RulesChecker
+ */
+public function buildRules(RulesChecker $rules)
+{
+    $rules-&amp;gt;add($rules-&amp;gt;existsIn([&#39;user_id&#39;], &#39;Users&#39;));
+    $rules-&amp;gt;add($rules-&amp;gt;isUnique([&#39;url&#39;]));
+
+    return $rules;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’ll commit here:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Table/PostsTable.php
+git commit -m &quot;Force the url field to be unique&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;auto-generating-urls&quot;&gt;Auto-generating urls&lt;/h3&gt;
+
+&lt;p&gt;First, we’ll need to allow fields to be “empty” in the form. Remove the following from &lt;code&gt;AbstractPostType::_buildValidator()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;notEmpty(&#39;url&#39;, &#39;Please fill this field&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, lets generate the url when empty! I’ve added the following class to our use statements at the top of my &lt;code&gt;AbstractPostType&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Utility\Hash;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Right after we call &lt;code&gt;AbstractPostType::transformData()&lt;/code&gt; inside of &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;, I call the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$data[&#39;url&#39;] = $this-&amp;gt;ensureUrl($data);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is the body of &lt;code&gt;AbstractPostType::ensureUrl()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function ensureUrl(array $data)
+{
+    $url = trim(Hash::get($data, &#39;url&#39;, &#39;&#39;), &#39;/&#39;);
+    if (strlen($url) !== 0) {
+        return $url;
+    }
+
+    return Hash::get($data, &#39;title&#39;, &#39;&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We leave the url alone if the user has specified one, and otherwise return the contents of the &lt;code&gt;title&lt;/code&gt; field.&lt;/p&gt;
+
+&lt;p&gt;Finally, we can strip values from the url by adding a &lt;code&gt;_setUrl()&lt;/code&gt; method to our Post entity. This ensures that it is properly massaged whenever that value is set, without requiring extra work at other layers. I’ve created a &lt;code&gt;UrlSettingTrait&lt;/code&gt; in &lt;code&gt;src/Model/Entity/Traits/UrlSettingTrait.php&lt;/code&gt; that contains the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Model\Entity\Traits;
+
+use Cake\Utility\Text;
+
+trait UrlSettingTrait
+{
+    /**
+     * Trims slashes and prepends the url with a slash
+     * If the input is invalid - such as an empty string - the url will become null.
+     *
+     * @param string $url The url that is to be set
+     * @return string
+     */
+    public function _setUrl($url)
+    {
+        if (strlen($url) === 0) {
+            return &#39;&#39;;
+        }
+
+        $url = Text::slug($url, [
+            &#39;lowercase&#39; =&amp;gt; true,
+            &#39;replacement&#39; =&amp;gt; &#39;-&#39;,
+        ]);
+        $url = &#39;/&#39; . trim($url, &#39;/&#39;);
+        if ($url === &#39;/&#39;) {
+            $url = null;
+        }
+
+        return $url;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You’ll need to &lt;code&gt;use&lt;/code&gt; this class within your &lt;code&gt;Post&lt;/code&gt; entity as well.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Entity\Traits\UrlSettingTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’ll save our progress now:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Entity/Post.php src/Model/Entity/Traits/UrlSettingTrait.php src/PostType/AbstractPostType.php
+git commit -m &quot;Automatically generate urls from the title field&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;validating-the-url-field&quot;&gt;Validating the &lt;code&gt;url&lt;/code&gt; field&lt;/h3&gt;
+
+&lt;p&gt;We’ll want to ensure we don’t set invalid urls. For instance, shadowing an existing route would potentially break stuff like the admin or similar. In our next post, I’ll cover how to use admin routing for our dashboard, as well as custom routes for all other pages, but just assuming that the following urls are to be whitelisted:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;/&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;/about&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;/home&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;/contact&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;/login&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;/logout&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;/forgot-password&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I’ll add the following to my &lt;code&gt;PostsTable::validationDefault()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add(&#39;url&#39;, &#39;notInList&#39;, [
+    &#39;rule&#39; =&amp;gt; function ($value, $context) {
+        $list = [&#39;/&#39;, &#39;/about&#39;, &#39;/home&#39;, &#39;/contact&#39;, &#39;/login&#39;, &#39;/logout&#39;, &#39;/forgot-password&#39;];
+        $list = array_map(&#39;strval&#39;, $list);
+        return !in_array((string)$value, $list, true);
+    },
+    &#39;message&#39; =&amp;gt; &#39;Reserved urls cannot be specified&#39;,
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;We may want to expand this list later, but for now this seems adequate.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We have to use a custom rule here because the built-in CakePHP rules cannot be negated, otherwise we would use `inList.&lt;/p&gt;
+
+&lt;p&gt;Urls must also not be prefixed with any of the following:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;/admin&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;/reset-password&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;/verify&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll use another custom validation rule for this.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add(&#39;url&#39;, &#39;withoutPrefix&#39;, [
+    &#39;rule&#39; =&amp;gt; function ($value, $context) {
+        if (preg_match(&quot;/^\/(admin|reset-password|verify)/&quot;, $value)) {
+            return false;
+        }
+        if (preg_match(&quot;/^(admin|reset-password|verify)/&quot;, $value)) {
+            return false;
+        }
+        return true;
+    },
+    &#39;message&#39; =&amp;gt; &#39;Urls cannot start with &quot;/admin&quot;, &quot;/reset-password&quot;, or &quot;/verify&quot;&#39;,
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’ve used two regex matches because urls can be set with a starting forward slash or not, and the &lt;code&gt;Post&lt;/code&gt; entity setter will ensure they start with one. Allowing both makes it easier for users to reason about what the url will look like, as we’ll handle it correctly on our end.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Validation rules can contain inline functions, which are useful in a pinch but also more difficult to test&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Remember to save your work.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Table/PostsTable.php
+git commit -m &quot;Properly validate a submitted url&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;persisting-error-messages&quot;&gt;Persisting error messages&lt;/h3&gt;
+
+&lt;p&gt;One thing you might notice when saving a post is that the validation errors from the &lt;code&gt;PostsTable&lt;/code&gt; are not shown. This is because we are overwriting the template’s entity in our &lt;code&gt;PostsListener::_setPostType()&lt;/code&gt; method. I’ve added the following right before I update the template entity in that method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$postType-&amp;gt;mergeErrors($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;errors());
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is the code for &lt;code&gt;AbstractPostType::mergeErrors()&lt;/code&gt;. We want to ensure any existing errors from other places are properly persisted, so we need to merge our post errors &lt;em&gt;onto&lt;/em&gt; the post type:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function mergeErrors(array $errors)
+{
+    foreach ($errors as $field =&amp;gt; $err) {
+        if (!isset($this-&amp;gt;_errors[$field])) {
+            $this-&amp;gt;_errors[$field] = $err;
+            continue;
+        }
+        foreach ($err as $name =&amp;gt; $message) {
+            $this-&amp;gt;_errors[$field][$name] = $message;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;This code is not unit tested, and error handling is a place where you may want to dive into unit testing to ensure you get it right. We may end up revisiting this implementation at a later date.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;If you try out the form now, you’ll see that we now have all the errors from our Post instance validation. I’ll save my work for now:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/PostType/AbstractPostType.php
+git commit -m &quot;Persist validation errors when saving forms&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.16&quot;&gt;0.0.16&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We have now placed some mitigations in place for ensuring our users do not set invalid urls. We can now look into the routing layer portion of this, which will make the user-facing portion of our site much more usable.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 16 Dec 2016 04:16:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/</guid>
+        
+        <category>application-rules</category>
+        
+        <category>validation</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Theming our CMS</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;setting-up-a-theme&quot;&gt;Setting up a Theme&lt;/h2&gt;
+
+&lt;p&gt;As much as I love the default CakePHP css, I’d like the default installation to look a bit different. To do so, I’ll distribute a custom theme with the Cms called &lt;code&gt;DefaultTheme&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In CakePHP 3, themes are distributed as plugins. This makes it pretty easy to create an installer or similar for your themes, as well as scaffold them :)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake plugin DefaultTheme -f
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’ve scaffolded a theme, but we’ll want to modify a few things:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;You remove the &lt;code&gt;plugins/DefaultTheme/config/routes.php&lt;/code&gt; file as we wont need it&lt;/li&gt;
+  &lt;li&gt;Remove &lt;code&gt;plugins/DefaultTheme/src&lt;/code&gt; as we won’t be using the AppController that is created&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Modify your &lt;code&gt;config/bootstrap.php&lt;/code&gt; to &lt;em&gt;not&lt;/em&gt; load the plugin’s bootstrap or routes. It should look like so:&lt;/p&gt;
+
+    &lt;p&gt;Plugin::load(‘DefaultTheme’);&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To load a theme, we’ll modify our &lt;code&gt;AppView&lt;/code&gt; - located in &lt;code&gt;src/View/AppView.php&lt;/code&gt; - to be the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize()
+{
+    $this-&amp;gt;theme(&#39;DefaultTheme&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let’s save our work and move on:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json config/bootstrap.php plugins/DefaultTheme src/View/AppView.php
+git commit -m &quot;Add a dummy DefaultTheme&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;cakephp-theme-internals&quot;&gt;CakePHP Theme internals&lt;/h2&gt;
+
+&lt;p&gt;CakePHP themes are a bit weird. Here are some general guidelines:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Using a theme will inject it’s template files into the cake template search paths &lt;em&gt;first&lt;/em&gt;. If a file is not found in a theme, it will default to any other search paths (so the main &lt;code&gt;src/Template&lt;/code&gt; dir, or other plugins).&lt;/li&gt;
+  &lt;li&gt;General template files, elements, and layouts can all be overriden from a theme.&lt;/li&gt;
+  &lt;li&gt;Assets referenced from a theme will be loaded from that theme. If they aren’t found, CakePHP will try and load them from the main repo.&lt;/li&gt;
+  &lt;li&gt;Assets - css, images, javascript files - will be proxied via PHP unless you symlink the theme’s webroot directory into place.&lt;/li&gt;
+  &lt;li&gt;There is no way to override a file provided by a theme.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I’m not going to include all of my theme code, but I will show some interesting bits.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The theme is based on the &lt;a href=&quot;https://github.com/bencentra/centrarium&quot;&gt;Centrarium Jekyll Theme&lt;/a&gt;, and uses a logo by Kassy from &lt;a href=&quot;https://www.sketchport.com/drawing/1782016/camera&quot;&gt;sketchport&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I’ll commit my theme so you can take a look at the changes.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/DefaultTheme
+git commit -m &quot;Implement DefaultTheme&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;custom-helper-templates&quot;&gt;Custom Helper Templates&lt;/h3&gt;
+
+&lt;p&gt;In CakePHP 3, all helpers output html fragments based on a simple templating language. It uses string fragments to specify what the “template” should be for an html element, such as a &lt;code&gt;link&lt;/code&gt; or &lt;code&gt;image&lt;/code&gt; tag. It’s used throughout CakePHP, which is good as in our case, we’re going to modify what pagination looks like.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Templates use  style placeholders. It is important to not add any spaces around the  or the replacements will not work.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Here is what I’ve placed in my theme’s &lt;code&gt;home.ctp&lt;/code&gt; to customize what the &lt;code&gt;PaginatorHelper&lt;/code&gt; uses for building next/previous links:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$this-&amp;gt;Paginator-&amp;gt;templates([
+    &#39;nextDisabled&#39; =&amp;gt; implode(&#39; &#39;, [
+        &#39;&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;&#39;,
+            &#39;&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;&#39;,
+            &#39;&amp;lt;i class=&quot;fa fa-angle-double-right fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;&#39;,
+        &#39;&amp;lt;/span&amp;gt;&#39;,
+    ]),
+    &#39;nextActive&#39; =&amp;gt; implode(&#39; &#39;, [
+        &#39;&amp;lt;a rel=&quot;prev&quot; href=&quot;&quot;&amp;gt;&#39;,
+            &#39;&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;&#39;,
+                &#39;&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;&#39;,
+                &#39;&amp;lt;i class=&quot;fa fa-angle-double-right fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;&#39;,
+            &#39;&amp;lt;/span&amp;gt;&#39;,
+        &#39;&amp;lt;/a&amp;gt;&#39;,
+    ]),
+    &#39;prevDisabled&#39; =&amp;gt; implode(&#39; &#39;, [
+        &#39;&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;&#39;,
+            &#39;&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;&#39;,
+            &#39;&amp;lt;i class=&quot;fa fa-angle-double-left fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;&#39;,
+        &#39;&amp;lt;/span&amp;gt;&#39;,
+    ]),
+    &#39;prevActive&#39; =&amp;gt; implode(&#39; &#39;, [
+        &#39;&amp;lt;a rel=&quot;prev&quot; href=&quot;&quot;&amp;gt;&#39;,
+            &#39;&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;&#39;,
+                &#39;&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;&#39;,
+                &#39;&amp;lt;i class=&quot;fa fa-angle-double-left fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;&#39;,
+            &#39;&amp;lt;/span&amp;gt;&#39;,
+        &#39;&amp;lt;/a&amp;gt;&#39;,
+    ]),
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also customize templates for the &lt;code&gt;FormHelper&lt;/code&gt; and &lt;code&gt;HtmlHelper&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;custom-theme-elements&quot;&gt;Custom Theme Elements&lt;/h3&gt;
+
+&lt;p&gt;I’ve overriden what the post types will display as in my theme. If I hadn’t, we’d be using the default elements from the respective post type plugin. Here is what my &lt;code&gt;plugins/DefaultTheme/src/Template/Element/post_type/photo-index.ctp&lt;/code&gt; looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h2&amp;gt;&amp;lt;?= $this-&amp;gt;Html-&amp;gt;link($post-&amp;gt;get(&#39;title&#39;), $post-&amp;gt;get(&#39;url&#39;)) ?&amp;gt;&amp;lt;/h2&amp;gt;
+&amp;lt;section class=&quot;post-meta&quot;&amp;gt;
+    &amp;lt;div class=&quot;post-date&quot;&amp;gt;&amp;lt;?= $this-&amp;gt;Time-&amp;gt;nice($post-&amp;gt;get(&#39;published_date&#39;)) ?&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/section&amp;gt;
+&amp;lt;section class=&quot;post-excerpt&quot; itemprop=&quot;description&quot;&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;image(&#39;../&#39; . $post-&amp;gt;get(&#39;photo_path&#39;)) ?&amp;gt;
+&amp;lt;/section&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that my image link works as normal, and displays the original post image as desired.&lt;/p&gt;
+
+&lt;h3 id=&quot;theme-links&quot;&gt;Theme Links&lt;/h3&gt;
+
+&lt;p&gt;One thing I’m doing in my theme is linking to custom pages, such as &lt;code&gt;/about&lt;/code&gt;, and also using the post urls as links. These aren’t currently routed by the CMS, so we’ll want to handle that next.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.15&quot;&gt;0.0.15&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The frontend of our site is in decent shape, though now we have some routing work to do. None of our custom post types have their own user-reachable urls, so in our next post, we’ll update the CakePHP routing to understand our routing schema.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 15 Dec 2016 03:20:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/15/theming-our-cms/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/15/theming-our-cms/</guid>
+        
+        <category>themes</category>
+        
+        <category>views</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Photo Post Types</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;scaffolding-the-photoposttype-plugin&quot;&gt;Scaffolding the PhotoPostType plugin&lt;/h2&gt;
+
+&lt;p&gt;For our photo posts, here are the extra fields we are tracking:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;photo&lt;/code&gt;: The name the user used for the image being uploaded&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;photo_dir&lt;/code&gt;: Path on disk - relative to www_root - where the file will be stored&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;photo_path&lt;/code&gt;: Path on disk - relative to www_root - where the file will be stored &lt;em&gt;including&lt;/em&gt; a sanitized filename&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll also want to validate that our photo is a valid image before attempting to upload it. Finally, we need to upload the image before saving the post itself. Let’s start by baking a &lt;code&gt;PhotoPostType&lt;/code&gt; plugin, which should also update our &lt;code&gt;composer.json&lt;/code&gt; to update code load paths.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake plugin PhotoPostType -f
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll create a &lt;code&gt;plugins/PhotoPostType/config/bootstrap.php&lt;/code&gt; to load our plugin post type.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+
+EventManager::instance()-&amp;gt;on(&#39;Posts.PostTypes.get&#39;, function (Event $event) {
+  // The key is the Plugin name and the class
+  // The value is what you want to display in the ui
+  $event-&amp;gt;subject-&amp;gt;postTypes[&#39;PhotoPostType.PhotoPostType&#39;] = &#39;blog&#39;;
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You can remove the &lt;code&gt;plugins/PhotoPostType/config/routes.php&lt;/code&gt; file as we wont need it&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We’ll want to ensure that the bootstrap file is loaded for this plugin, so check to ensure that your &lt;code&gt;config/bootstrap.php&lt;/code&gt; has the following &lt;code&gt;Plugin::load&lt;/code&gt; line (update it if need be):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load(&#39;PhotoPostType&#39;, [&#39;bootstrap&#39; =&amp;gt; true, &#39;routes&#39; =&amp;gt; false]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Remember to save your work!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json config/bootstrap.php plugins/PhotoPostType
+git commit -m &quot;Scaffold the PhotoPostType plugin&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;photoposttype-form-fields-and-validation&quot;&gt;PhotoPostType form fields and validation&lt;/h2&gt;
+
+&lt;p&gt;We will now need the &lt;code&gt;PostType&lt;/code&gt; class that contains the code for our form. Here are the initial contents of &lt;code&gt;plugins/PhotoPostType/PostType/PhotoPostType.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace PhotoPostType\PostType;
+
+use App\PostType\AbstractPostType;
+use Cake\Form\Schema;
+use Cake\Validation\Validator;
+
+class PhotoPostType extends AbstractPostType
+{
+    protected function _buildSchema(Schema $schema)
+    {
+        $schema = parent::_buildSchema($schema);
+        $schema-&amp;gt;addField(&#39;photo&#39;, [&#39;type&#39; =&amp;gt; &#39;file&#39;]);
+        $schema-&amp;gt;addField(&#39;photo_dir&#39;, [&#39;type&#39; =&amp;gt; &#39;hidden&#39;]);
+        $schema-&amp;gt;addField(&#39;photo_path&#39;, [&#39;type&#39; =&amp;gt; &#39;hidden&#39;]);
+        return $schema;
+    }
+
+    protected function _buildValidator(Validator $validator)
+    {
+        $validator = parent::_buildValidator($validator);
+        $validator-&amp;gt;add(&#39;photo&#39;, &#39;valid-image&#39;, [
+            &#39;rule&#39; =&amp;gt; [&#39;uploadedFile&#39;, [
+                &#39;types&#39; =&amp;gt; [
+                    &#39;image/bmp&#39;,
+                    &#39;image/gif&#39;,
+                    &#39;image/jpeg&#39;,
+                    &#39;image/pjpeg&#39;,
+                    &#39;image/png&#39;,
+                    &#39;image/x-windows-bmp&#39;,
+                    &#39;image/x-png&#39;,
+                ],
+                &#39;optional&#39; =&amp;gt; true,
+            ]],
+            &#39;message&#39; =&amp;gt; &#39;The uploaded photo was not a valid image&#39;
+        ]);
+        return $validator;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty simple. We’re adding a few fields for the form - two of which are hidden - and then adding a validation rule to allow &lt;em&gt;only&lt;/em&gt; images. Seems pretty straightforward. I’ll also commit my changes here.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/PhotoPostType/src/PostType/PhotoPostType.php
+git commit -m &quot;Initial form display for photo post types&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;handling-file-uploads&quot;&gt;Handling file uploads&lt;/h3&gt;
+
+&lt;p&gt;We’re going to need to actually write the files to disk. To do this, I’m going to use the wonderful &lt;a href=&quot;http://flysystem.thephpleague.com/&quot;&gt;League/Flysystem&lt;/a&gt; library. This will abstract actual file writing for me, and also potentially allow me to upload images to non-local storage.&lt;/p&gt;
+
+&lt;p&gt;All the file upload logic begins in our &lt;code&gt;PhotoPostType::transformData()&lt;/code&gt; method. Here is the body of that method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function transformData($data)
+{
+    $photoExtension = pathinfo($data[&#39;photo&#39;][&#39;name&#39;], PATHINFO_EXTENSION);
+    $photoDirectory  = &#39;files/Posts/photo/&#39; . uniqid();
+    $photoFilename = uniqid() . &#39;.&#39; . $photoExtension;
+    $photoPath $photoDirectory . &#39;/&#39; . $photoFilename
+    $postAttributes = [
+        [&#39;name&#39; =&amp;gt; &#39;photo_dir&#39;, &#39;value&#39; =&amp;gt; $photoDirectory],
+        [&#39;name&#39; =&amp;gt; &#39;photo&#39;, &#39;value&#39; =&amp;gt; $data[&#39;photo&#39;][&#39;name&#39;]],
+        [&#39;name&#39; =&amp;gt; &#39;photo_path&#39;, &#39;value&#39; =&amp;gt; $photoPath],
+    ];
+
+    $success = $this-&amp;gt;writeFile($data[&#39;photo&#39;], $photoPath);
+    unset($data[&#39;photo&#39;], $data[&#39;photo_dir&#39;], $data[&#39;photo_path&#39;] $data[&#39;post_attributes&#39;]);
+    if (!$success) {
+        return $data;
+    }
+
+    $data[&#39;post_attributes&#39;] = $postAttributes;
+
+    return $data;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let’s walk through this:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I get the photo extension using the &lt;code&gt;pathinfo&lt;/code&gt; method. This might fail if there was no original extension on the uploaded file, so in a future revision, we’ll want to properly detect the mimetype and remap the extension, but this is good for now.&lt;/li&gt;
+  &lt;li&gt;I’m using &lt;code&gt;uniqid&lt;/code&gt; to get a filepath on disk. I won’t currently be handling vacuuming old file uploads, so we want to ensure we don’t overwrite existing files. A good alternative would be to use &lt;code&gt;Text::uuid()&lt;/code&gt;, but I don’t expect any issues for my use case.&lt;/li&gt;
+  &lt;li&gt;We’ll need to write the file to disk, and that logic is shown elsewhere.&lt;/li&gt;
+  &lt;li&gt;If the file is saved successfully, we add the extra post attributes, and otherwise just return as is. We would be better suited in handling this error, but I’ll leave that up to the reader.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;What does file uploading look like? First, add the following &lt;code&gt;use&lt;/code&gt; calls to the top of the class for classes that will be, well, used by our file uploading mechanism:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use League\Flysystem\Adapter\Local;
+use League\Flysystem\AdapterInterface;
+use League\Flysystem\FileNotFoundException;
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemInterface;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here is the &lt;code&gt;PhotoPostType::writeFile()&lt;/code&gt; method (and related helper methods):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function writeFile(array $filedata, $filepath)
+{
+    $success = false;
+    $stream = @fopen($filedata[&#39;tmp_name&#39;], &#39;r&#39;);
+    if ($stream === false) {
+        return $success;
+    }
+
+    $filesystem = $this-&amp;gt;filesystem();
+    $success = $filesystem-&amp;gt;writeStream($filepath, $stream);
+    fclose($stream);
+
+    return $success;
+}
+
+protected function filesystem()
+{
+    $adapter = new Local(WWW_ROOT);
+    $filesystem = new Filesystem($adapter, [
+        &#39;visibility&#39; =&amp;gt; AdapterInterface::VISIBILITY_PUBLIC
+    ]);
+
+    return $filesystem;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A bit to go through, but a pretty-straightforward read I think. Some implementation notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I typically use streams for writing to flysystem. You can also write content directly, but as the file already exists locally, using a file stream is the most natural.&lt;/li&gt;
+  &lt;li&gt;If we can’t open the temp file, we fail the write.&lt;/li&gt;
+  &lt;li&gt;I’ve used an extra method to get the &lt;code&gt;Filesystem&lt;/code&gt; object, which will allow me to mock the filesystem for tests.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Neat! Let’s save our progress.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/PhotoPostType/src/PostType/PhotoPostType.php
+git commit -m &quot;Handle file uploads for the photo post type&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;displaying-photos-in-the-frontend&quot;&gt;Displaying Photos in the frontend&lt;/h3&gt;
+
+&lt;p&gt;Our default &lt;code&gt;src/Template/Element/post_type/photo-index.ctp&lt;/code&gt; and &lt;code&gt;src/Template/Element/post_type/photo-view.ctp&lt;/code&gt; template files are pretty trivial. I’m simply going to show the post type and then a link to the image in each:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h3&amp;gt;&amp;lt;?= $post-&amp;gt;get(&#39;title&#39;) ?&amp;gt;&amp;lt;/h3&amp;gt;
+&amp;lt;div&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;image(&#39;../&#39; . $post-&amp;gt;get(&#39;photo_path&#39;)) ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here is what it looks like (using my favorite picture of &lt;a href=&quot;https://twitter.com/grmpyprogrammer&quot;&gt;Chris Hartjes&lt;/a&gt;):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/12/14/baby-upload.png&quot; alt=&quot;baby image&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Remember to commit your new files.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/PhotoPostType/src/Template/Element/post_type/photo-index.ctp plugins/PhotoPostType/src/Template/Element/post_type/photo-view.ctp
+git commit -m &quot;Add default photo templates&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.14&quot;&gt;0.0.14&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We now have our custom photo post type, and it’s pretty bad-ass. While the admin ui could use some work - how do you know you’ve already uploaded an image? - we’re pretty far along.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 14 Dec 2016 01:37:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/14/photo-post-types/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/14/photo-post-types/</guid>
+        
+        <category>uploads</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Refactoring Post Types</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
+
+&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. If there are any bugfixes for dependencies, we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer update
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
+
+&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
+git commit -m &quot;Update unpinned dependencies&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;duplicative-logic&quot;&gt;Duplicative Logic&lt;/h2&gt;
+
+&lt;p&gt;In the process of adding a new post type, I noticed that there is a bit of duplication between the &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; and the &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt; method. Specifically, we’re not even using the &lt;code&gt;_execute()&lt;/code&gt; logic in our save. I’m going to refactor it with the following goals:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Save logic belongs with Crud, so it will be removed from both the &lt;code&gt;PostsListener&lt;/code&gt; and &lt;code&gt;AbstractPostType&lt;/code&gt; classes.&lt;/li&gt;
+  &lt;li&gt;Extra data from the request should be injected at the &lt;code&gt;PostsListener&lt;/code&gt; level.&lt;/li&gt;
+  &lt;li&gt;The data that we’ll actually save should be returned by the &lt;code&gt;AbstractPostType::execute()&lt;/code&gt; method.&lt;/li&gt;
+  &lt;li&gt;We should be able to lean on our &lt;code&gt;PostType&lt;/code&gt; validation rules as much as possible.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;dropping-extra-code-in-postslistenerbeforesave&quot;&gt;Dropping extra code in &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;This is the &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Before Save
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeSave(Event $event)
+{
+    $type = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type;
+    if (empty($type)) {
+        $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
+        $type = $passedArgs[0];
+    }
+
+    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type = $type;
+
+    $data = [
+        &#39;user_id&#39; =&amp;gt; $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;),
+        &#39;type&#39; =&amp;gt; $type,
+    ] + $this-&amp;gt;_request()-&amp;gt;data() + [&#39;published_date&#39; =&amp;gt; Time::now()];
+    $postType = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;getPostType();
+    $data = $postType-&amp;gt;execute($data);
+
+    $PostsTable = TableRegistry::get(&#39;Posts&#39;);
+    $PostsTable-&amp;gt;patchEntity($event-&amp;gt;subject-&amp;gt;entity, $data);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In it, you’ll see I can still inject data from the request - &lt;code&gt;user_id&lt;/code&gt;, &lt;code&gt;type&lt;/code&gt;, &lt;code&gt;published_date&lt;/code&gt; - but also get the “real” data from the specific &lt;code&gt;PostType::execute()&lt;/code&gt; method. As it’s the &lt;code&gt;Crud.beforeSave&lt;/code&gt; event, we don’t actually need to save data, and just patching it onto the event’s entity is enough.&lt;/p&gt;
+
+&lt;h3 id=&quot;restructuring-abstractposttypeexecute&quot;&gt;Restructuring &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;This is my new &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function _execute(array $data)
+{
+    if (empty($data[&#39;post_attributes&#39;])) {
+        $data[&#39;post_attributes&#39;] = [];
+    }
+
+    $PostsTable = TableRegistry::get(&#39;Posts&#39;);
+    $AttributesTable = TableRegistry::get(&#39;PostAttributes&#39;);
+    $postAttributes = $data[&#39;post_attributes&#39;];
+
+    $postColumns = $PostsTable-&amp;gt;schema()-&amp;gt;columns();
+    $validColumns = $this-&amp;gt;schema()-&amp;gt;fields();
+    foreach ($data as $key =&amp;gt; $value) {
+        if (in_array($key, $postColumns)) {
+            continue;
+        }
+
+        unset($data[$key]);
+        if (!in_array($key, $validColumns)) {
+            continue;
+        }
+        $postAttributes[] = [
+            &#39;name&#39; =&amp;gt; $key,
+            &#39;value&#39; =&amp;gt; $value,
+        ];
+    }
+
+    $data[&#39;post_attributes&#39;] = $postAttributes;
+
+    return $data;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A bit more going on here:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We’re assuming there will &lt;em&gt;always&lt;/em&gt; be at least an empty set of &lt;code&gt;post_attributes&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;If a key is both not a valid post column and not a valid post-type field, then we drop it.&lt;/li&gt;
+  &lt;li&gt;We’re no longer creating a &lt;code&gt;PostAttribute&lt;/code&gt; Entity, and instead allowing the &lt;code&gt;PostsTable-&amp;gt;patchEntity()&lt;/code&gt; call in the &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; to properly martial the data.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;With these two changes in place, you can test saving a post and everything should be just fine. Let’s commit:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/PostType/AbstractPostType.php
+git commit -m &quot;Clean up post marshalling and saving&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;allowing-post-data-modification&quot;&gt;Allowing Post Data Modification&lt;/h3&gt;
+
+&lt;p&gt;In our upcoming post type - the PhotoPostType - we’ll need to save the file to disk and also ensure we track a &lt;code&gt;photo_path&lt;/code&gt; that can be used to display the image. This is a bit more logic than our automated system will handle, so we’ll need an extra function call to perform these modifications. I’ve added the following method to &lt;code&gt;AbstractPostType&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function transformData($data)
+{
+    return $data;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;By default, my &lt;code&gt;AbstractPostType::transformData()&lt;/code&gt; is a no-op. And I call it &lt;em&gt;right&lt;/em&gt; after I set a default for &lt;code&gt;post_attributes&lt;/code&gt; in &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$data = $this-&amp;gt;transformData($data);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Why can’t I just depend upon the UploadBehavior to do this logic for me? Many behaviors end up changing where things are stored in the &lt;code&gt;Table.beforeSave&lt;/code&gt; event, which happens &lt;em&gt;after&lt;/em&gt; the &lt;code&gt;Crud.beforeSave&lt;/code&gt; event. This means that we’d end up trashing the upload data before the &lt;code&gt;UploadBehavior&lt;/code&gt; can handle it. As well, that behavior doesn’t know anything about our weird &lt;code&gt;post_attributes&lt;/code&gt; system, so we’d need to handle the logic on our own.&lt;/p&gt;
+
+&lt;p&gt;I’ll save my changes for now, and get to add a custom &lt;code&gt;PhotoPostType&lt;/code&gt; tomorrow.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/PostType/AbstractPostType.php
+git commit -m &quot;Allow post types to transform the data before it is further marshalled&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.13&quot;&gt;0.0.13&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A bit of light refactoring is always useful to get your application priorities in order. In this case, it was absolutely necessary in order to figure out where exactly we’d need to hook in for our custom photo type.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 13 Dec 2016 12:40:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/13/refactoring-post-types/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/13/refactoring-post-types/</guid>
+        
+        <category>refactoring</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Error Handling new Posts</title>
@@ -777,2042 +2254,6 @@ git commit -m &quot;Finally working homepage&quot;
         <category>refactoring</category>
         
         <category>templates</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Saving Custom Post Types</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;errata-from-previous-post&quot;&gt;Errata from previous post&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The &lt;code&gt;AbstractPostType&lt;/code&gt; class is missing the &lt;code&gt;use App\Model\Entity\Post;&lt;/code&gt; statement in the class declaration.&lt;/li&gt;
-  &lt;li&gt;Added &lt;code&gt;unset($data[&#39;user&#39;]);&lt;/code&gt; to &lt;code&gt;AbstractPostType::data()&lt;/code&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
-
-&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
-
-&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer update
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
-
-&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
-git commit -m &quot;Update unpinned dependencies&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;handling-edits&quot;&gt;Handling Edits&lt;/h2&gt;
-
-&lt;p&gt;Our previous post only handled the &lt;code&gt;add&lt;/code&gt; action, while we’ll need to also support the &lt;code&gt;edit&lt;/code&gt; action. I’ve extracted the logic necessary for both into the &lt;code&gt;PostsListener::_setPostType()&lt;/code&gt; method.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Set the post type for add/edit actions
- *
- * @param \Cake\Event\Event $event Event
- * @param string $postType the name of a post type class
- * @return void
- */
-protected function _setPostType(Event $event, $postType)
-{
-    $className = App::className($postType, &#39;PostType&#39;);
-    $postType = new $className;
-    $fields = [];
-    foreach ($postType-&amp;gt;schema()-&amp;gt;fields() as $field) {
-        $fields[$field] = [
-            &#39;type&#39; =&amp;gt; $postType-&amp;gt;schema()-&amp;gt;fieldType($field)
-        ];
-    }
-
-    $viewVars = $postType-&amp;gt;viewVars();
-    $viewVars[&#39;fields&#39;] = $fields;
-    $this-&amp;gt;_controller()-&amp;gt;set($viewVars);
-    $event-&amp;gt;subject-&amp;gt;set([&#39;entity&#39; =&amp;gt; $postType]);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;As well, I moved the alias to class name mapping into it’s own function so that it can be used for the edit action:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Returns a class name for a given post type alias
- *
- * @param string $typeAlias the alias of a post type class
- * @return string
- */
-public function _postTypeAliasToClass($typeAlias)
-{
-    $className = null;
-    $postTypes = PostsListener::postTypes();
-    foreach ($postTypes as $class =&amp;gt; $alias) {
-        if ($alias === $typeAlias) {
-            $className = $class;
-        }
-    }
-    return $className;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’ve also added a new &lt;code&gt;PostsListener::beforeRenderEdit()&lt;/code&gt; method to perform all the logic necessary for setting the correct post type:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Render Edit Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeRenderEdit(Event $event)
-{
-    $entity = $event-&amp;gt;subject-&amp;gt;entity;
-    $className = $this-&amp;gt;_postTypeAliasToClass($entity-&amp;gt;type);
-    $this-&amp;gt;_setPostType($event, $className);
-    if ($this-&amp;gt;_request()-&amp;gt;is(&#39;get&#39;)) {
-        $this-&amp;gt;request-&amp;gt;data = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;data($entity);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In order to set the post type for an edit action, we need ensure we invoke the &lt;code&gt;PostsListener::beforeRenderEdit()&lt;/code&gt; method.&lt;/p&gt;
-
-&lt;p&gt;Finally, we need to update &lt;code&gt;PostsListener::beforeRenderAdd()&lt;/code&gt; to:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Render Add Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeRenderAdd(Event $event)
-{
-    $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
-    $className = null;
-    if (!empty($passedArgs)) {
-        $className = $this-&amp;gt;_postTypeAliasToClass($passedArgs[0]);
-    }
-
-    if ($className !== null) {
-        $this-&amp;gt;_setPostType($event, $className);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Time to commit our changes.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
-git commit -m &quot;Handle both add and edit saves&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;associating-a-user-with-a-post&quot;&gt;Associating a User with a Post&lt;/h2&gt;
-
-&lt;p&gt;When a post is created or edited, we’ll want to ensure that it is properly associated with the current user. This is pretty simple, as we can do this automatically in the &lt;code&gt;beforeSave&lt;/code&gt;. We’ll start by mapping the event handler in our &lt;code&gt;PostsListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeSave&#39; =&amp;gt; &#39;beforeSave&#39;,
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And finally, here is the event handler itself. It’s pretty straightforward:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Save
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeSave(Event $event)
-{
-    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;user_id = $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Commit!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
-git commit -m &quot;Set the user_id to the currently authenticated user&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;saving-extra-fields-in-the-postattributes-table&quot;&gt;Saving extra fields in the post_attributes table&lt;/h2&gt;
-
-&lt;p&gt;Since we have a few extra fields, they all need to be saved as &lt;code&gt;post_attributes&lt;/code&gt;. The easiest way is to hook into our new &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; method and massage the entity. We’ll modify our &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; to look like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Save
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeSave(Event $event)
-    $type = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type;
-    if (empty($type)) {
-        $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
-        $type = $passedArgs[0];
-    }
-
-    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type = $type;
-    $postTypeClassName = $this-&amp;gt;_postTypeAliasToClass($type);
-    $className = App::className($postTypeClassName, &#39;PostType&#39;);
-    $postType = new $className;
-    $validFields = $postType-&amp;gt;schema()-&amp;gt;fields();
-
-    $postAttributes = [];
-    $PostsTable = TableRegistry::get(&#39;Posts&#39;);
-    $postColumns = $PostsTable-&amp;gt;schema()-&amp;gt;columns();
-    foreach ($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;toArray() as $field =&amp;gt; $value) {
-        if (!in_array($field, $postColumns) &amp;amp;&amp;amp; in_array($field, $validFields)) {
-            $postAttributes[] = [
-                &#39;name&#39; =&amp;gt; $field,
-                &#39;value&#39; =&amp;gt; $value,
-            ];
-        }
-    }
-
-    $data = [
-        &#39;user_id&#39; =&amp;gt; $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;),
-        &#39;type&#39; =&amp;gt; $type,
-        &#39;post_attributes&#39; =&amp;gt; $postAttributes,
-    ] + $this-&amp;gt;_request()-&amp;gt;data;
-    if (empty($data[&#39;published_date&#39;])) {
-        $data[&#39;published_date&#39;] = Time::now();
-    }
-
-    $PostsTable-&amp;gt;patchEntity($event-&amp;gt;subject-&amp;gt;entity, $data);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lots of code there, so lets go over it:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Still setting the &lt;code&gt;user_id&lt;/code&gt; to the currently logged in user, just later, and via &lt;code&gt;PostsTable::patchEntity()&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;We need to retrieve all valid fields for the current post type. Users should &lt;em&gt;never&lt;/em&gt; be able to save data that we don’t expect as extra attributes.&lt;/li&gt;
-  &lt;li&gt;I’m building an array of &lt;code&gt;postAttributes&lt;/code&gt; from the set post fields where:
-    &lt;ul&gt;
-      &lt;li&gt;the field isn’t a column of the &lt;code&gt;post&lt;/code&gt; entity&lt;/li&gt;
-      &lt;li&gt;the field is allowed to be saved for the &lt;code&gt;PostType&lt;/code&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;I’m setting the default &lt;code&gt;published_date&lt;/code&gt; to the current time if it isn’t already set. We’ll come back to this at a later date (pun intended).&lt;/li&gt;
-  &lt;li&gt;We are patching our &lt;code&gt;post&lt;/code&gt; entity with the list of postAttributes.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Remember to add the following &lt;code&gt;use&lt;/code&gt; call to your &lt;code&gt;PostsListener&lt;/code&gt; class declaration:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\I18n\Time;
-use Cake\ORM\TableRegistry;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Dope. You can try going to &lt;code&gt;/posts/add/blog&lt;/code&gt; to add a blog post, and then edits should also work fine. It’s a bit nasty looking, but it’ll do for now.&lt;/p&gt;
-
-&lt;p&gt;Lets save our work for now.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
-git commit -m &quot;Implement post saving&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.9&quot;&gt;0.0.9&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Posts can be added and saved hurray! We’ll definitely use this as a good base for building out our CMS, and while we don’t yet have a way to select a post-type, that should come Real Soon™.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 09 Dec 2016 10:40:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/09/saving-custom-post-types/</guid>
-        
-        <category>crud</category>
-        
-        <category>events</category>
-        
-        <category>forms</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Displaying Custom Post Type Forms</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;baking-a-plugin&quot;&gt;Baking a Plugin&lt;/h2&gt;
-
-&lt;p&gt;Last post, we described what a blog post plugin would look like. Let’s actually build it now. We’ll start by using &lt;code&gt;bake&lt;/code&gt; to generate the skeleton, which should also update our &lt;code&gt;composer.json&lt;/code&gt; to update code load paths.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake plugin BlogPostType -f
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll create a &lt;code&gt;plugins/BlogPostType/config/bootstrap.php&lt;/code&gt; to load our plugin post type.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Event\Event;
-use Cake\Event\EventManager;
-
-EventManager::instance()-&amp;gt;on(&#39;Posts.PostTypes.get&#39;, function (Event $event) {
-  // The key is the Plugin name and the class
-  // The value is what you want to display in the ui
-  $event-&amp;gt;subject-&amp;gt;postTypes[&#39;BlogPostType.BlogPostType&#39;] = &#39;blog&#39;;
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You can remove the &lt;code&gt;plugins/BlogPostType/config/routes.php&lt;/code&gt; file as we wont need it&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We’ll want to ensure that the bootstrap file is loaded for this plugin, so check to ensure that your &lt;code&gt;config/bootstrap.php&lt;/code&gt; has the following &lt;code&gt;Plugin::load&lt;/code&gt; line:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load(&#39;BlogPostType&#39;, [&#39;bootstrap&#39; =&amp;gt; true, &#39;routes&#39; =&amp;gt; false]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We will now need the &lt;code&gt;PostType&lt;/code&gt; class that contains the code for our form. Here are the contents of &lt;code&gt;plugins/BlogPostType/PostType/BlogPostType.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace BlogPostType\PostType;
-
-use App\PostType\AbstractPostType;
-use Cake\Form\Schema;
-use Cake\Validation\Validator;
-
-class BlogPostType extends AbstractPostType
-{
-    protected function _buildSchema(Schema $schema)
-    {
-        $schema = parent::_buildSchema($schema);
-        $schema-&amp;gt;addField(&#39;body&#39;, [&#39;type&#39; =&amp;gt; &#39;text&#39;]);
-        return $schema
-    }
-
-    protected function _buildValidator(Validator $validator)
-    {
-        $validator = parent::_buildValidator($validator);
-        $validator-&amp;gt;notEmpty(&#39;body&#39;, &#39;Please fill this field&#39;);
-        return $validator;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Reflecting upon what I’ll need to show on the view, I think I’ll want to make sure we always have &lt;em&gt;some&lt;/em&gt; defaults for the schema and validator, particularly around common fields. As well, I will need a way to extract viewVars that should be set by the post type for the view - for things like dropdown selects, for instance. I’ll take care of that now by adding the following methods to my &lt;code&gt;AbstractPostType&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function _buildSchema(Schema $schema)
-{
-    $schema-&amp;gt;addField(&#39;user_id&#39;, [&#39;type&#39; =&amp;gt; &#39;hidden&#39;]);
-    $schema-&amp;gt;addField(&#39;title&#39;, [&#39;type&#39; =&amp;gt; &#39;string&#39;]);
-    $schema-&amp;gt;addField(&#39;url&#39;, [&#39;type&#39; =&amp;gt; &#39;string&#39;]);
-    $schema-&amp;gt;addField(&#39;status&#39;, [&#39;type&#39; =&amp;gt; &#39;select&#39;]);
-    return $schema
-}
-
-protected function _buildValidator(Validator $validator)
-{
-    $validator-&amp;gt;notEmpty(&#39;user_id&#39;, &#39;Please fill this field&#39;);
-    $validator-&amp;gt;notEmpty(&#39;title&#39;, &#39;Please fill this field&#39;);
-    $validator-&amp;gt;notEmpty(&#39;url&#39;, &#39;Please fill this field&#39;);
-    $validator-&amp;gt;add(&#39;status&#39;, &#39;inList&#39;, [
-        &#39;rule&#39; =&amp;gt; [&#39;inList&#39;, [&#39;active&#39;, &#39;inactive&#39;]],
-        &#39;message&#39; =&amp;gt; &#39;Status must be either active or inactive&#39;
-    ]);
-    return $validator;
-}
-
-public function viewVars()
-{
-    $statuses = [&#39;active&#39; =&amp;gt; &#39;active&#39;, &#39;inactive&#39; =&amp;gt; &#39;inactive&#39;];
-    return compact(&#39;statuses&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I noticed that we’re hard-coding the whitelisted fields in &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;, and that this whitelist is missing a few things. I’ve changed it to the following (which isn’t tested but should work):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$postFields = $postsTable-&amp;gt;schema()-&amp;gt;columns();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Getting back to our blog plugin, we’ll need two templates for displaying on the page. I’m actually going to use the same thing for both.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h3&amp;gt;&amp;lt;?= $post-&amp;gt;get(&#39;title&#39;) ?&amp;gt;&amp;lt;/h3&amp;gt;
-&amp;lt;div&amp;gt;
-    &amp;lt;?= $post-&amp;gt;get(&#39;body&#39;) ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’ve made a bit of progress, so lets save it :)&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json config/bootstrap.php plugins/ src/PostType/AbstractPostType.php
-git commit -m &quot;New BlogPostType&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;displaying-the-form&quot;&gt;Displaying the form&lt;/h2&gt;
-
-&lt;p&gt;First, lets create a method of retrieving all PostTypes. I made the following trait at &lt;code&gt;src/Traits/PostTypesTrait.php&lt;/code&gt; to contain this logic:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Traits;
-
-use Cake\Event\Event;
-use Cake\Event\EventManager;
-use Crud\Event\Subject;
-
-trait PostTypesTrait
-{
-    static $postTypes = null;
-
-    public static function postTypes()
-    {
-        if (static::$postTypes !== null) {
-            return static::$postTypes;
-        }
-
-        $event = new Event(&#39;Posts.PostTypes.get&#39;);
-        $event-&amp;gt;subject = new Subject([
-            &#39;postTypes&#39; =&amp;gt; [],
-        ]);
-
-        EventManager::instance()-&amp;gt;dispatch($event);
-        if (!empty($event-&amp;gt;subject-&amp;gt;postTypes)) {
-            static::$postTypes = $event-&amp;gt;subject-&amp;gt;postTypes;
-        } else {
-            static::$postTypes = [];
-        }
-        return static::$postTypes;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, add this trait to the PostsListener class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use App\Traits\PostTypesTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’ll need to add a &lt;code&gt;beforeRender&lt;/code&gt; event handler to our &lt;code&gt;PostsListener&lt;/code&gt; so we can properly populate the form. Start by adding the handler to our &lt;code&gt;PostsListener::implementedEvents()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeRender&#39; =&amp;gt; &#39;beforeRender&#39;,
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The handler should:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;get the post type from the url - mapping &lt;code&gt;/posts/add/blog&lt;/code&gt; to our &lt;code&gt;BlogPostType&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;load the correct class&lt;/li&gt;
-  &lt;li&gt;set any view variables&lt;/li&gt;
-  &lt;li&gt;ensure the schema is specified correctly&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Here is the logic for that method (and others):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Render
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeRender(Event $event)
-{
-    if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;add&#39;) {
-        $this-&amp;gt;beforeRenderAdd($event);
-
-        return;
-    }
-}
-
-/**
- * Before Render Add Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeRenderAdd(Event $event)
-{
-    $postTypes = PostsListener::postTypes();
-    $request = $this-&amp;gt;_request();
-    $passedArgs = $request-&amp;gt;param(&#39;pass&#39;);
-
-    $postType = null;
-    if (!empty($passedArgs)) {
-        $type = $passedArgs[0];
-        foreach ($postTypes as $class =&amp;gt; $alias) {
-            if ($alias === $type) {
-                $postType = $class;
-            }
-        }
-    }
-
-    if ($postType !== null) {
-        $className = App::className($postType, &#39;PostType&#39;);
-        $postType = new $className;
-        $fields = [];
-        foreach ($postType-&amp;gt;schema()-&amp;gt;fields() as $field) {
-            $fields[$field] = [
-                &#39;type&#39; =&amp;gt; $postType-&amp;gt;schema()-&amp;gt;fieldType($field)
-            ];
-        }
-
-        $viewVars = $postType-&amp;gt;viewVars();
-        $viewVars[&#39;fields&#39;] = $fields;
-        $this-&amp;gt;_controller()-&amp;gt;set($viewVars);
-        $event-&amp;gt;subject-&amp;gt;set([&#39;entity&#39; =&amp;gt; $postType]);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Woot! If you go to &lt;code&gt;/posts/add/blog&lt;/code&gt;, you’ll see that our form is properly rendered by the CrudView. Neat!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/Traits/PostTypesTrait.php
-git commit -m &quot;Properly display the post type form&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.8&quot;&gt;0.0.8&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;It may not seem like much, but we’ve laid the groundwork for actually using custom post types. In our next segment, we’ll look at how to actually save the above data, persisting data for editing, and a ui for selecting the post type to add.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 08 Dec 2016 08:04:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/08/displaying-custom-post-type-forms/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/08/displaying-custom-post-type-forms/</guid>
-        
-        <category>events</category>
-        
-        <category>forms</category>
-        
-        <category>plugins</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Custom Post Types</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;errata-from-last-post&quot;&gt;Errata from last post&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;I was missing a few semicolons in the &lt;code&gt;AbstractPostType&lt;/code&gt;. Oops?.&lt;/li&gt;
-  &lt;li&gt;I added some missing class &lt;code&gt;use&lt;/code&gt; statements to &lt;code&gt;AbstractPostType&lt;/code&gt; to properly scope the used classes.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
-
-&lt;h2 id=&quot;custom-post-types&quot;&gt;Custom Post Types&lt;/h2&gt;
-
-&lt;p&gt;For our cms, the following post types are things my client wants to have on their site:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;General Blog Posts&lt;/li&gt;
-  &lt;li&gt;Photos&lt;/li&gt;
-  &lt;li&gt;Photos with text attached&lt;/li&gt;
-  &lt;li&gt;Photos with an optional price tag - for purchasing&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;A bit across the board, but lets see if we can make this a bit generic:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;title&lt;/li&gt;
-  &lt;li&gt;content (optional)&lt;/li&gt;
-  &lt;li&gt;image (optional)&lt;/li&gt;
-  &lt;li&gt;price (optional)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Above is a list of fields that we’ll need to provide. The &lt;code&gt;title&lt;/code&gt; is required, and will be used to interpolate a url, assuming one isn’t specified by the user. All others are “optional” for every type, but can be mandatory depending upon the post type. It seems that each post type would need to be able to set it’s own validation rules at least. As each post type varies in it’s fields, we’ll also want to be able to specify a schema for use on the edit page itself.&lt;/p&gt;
-
-&lt;p&gt;If any of the above sounds familiar, its because I’ve described a &lt;code&gt;Form&lt;/code&gt; class. Here is an example Form class for my app:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-class BlogPostType extends Form
-{
-    protected function _buildSchema(Schema $schema)
-    {
-        $schema-&amp;gt;addField(&#39;title&#39;, &#39;string&#39;);
-        $schema-&amp;gt;addField(&#39;url&#39;, [&#39;type&#39; =&amp;gt; &#39;text&#39;]);
-        $schema-&amp;gt;addField(&#39;body&#39;, [&#39;type&#39; =&amp;gt; &#39;text&#39;]);
-        return $schema
-    }
-
-    protected function _buildValidator(Validator $validator)
-    {
-        $validator-&amp;gt;notEmpty(&#39;title&#39;, &#39;Please fill this field&#39;);
-        $validator-&amp;gt;notEmpty(&#39;url&#39;, &#39;Please fill this field&#39;);
-        $validator-&amp;gt;notEmpty(&#39;body&#39;, &#39;Please fill this field&#39;);
-        return $validator;
-    }
-
-    protected function _execute(array $data)
-    {
-        // Logic here to save the thing.
-        return true;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty neat. One thing is that the optional fields cannot be saved into the &lt;code&gt;posts&lt;/code&gt; table, as there is no place for them there. Our &lt;code&gt;_execute&lt;/code&gt; method will need to turn them into &lt;code&gt;PostAttributes&lt;/code&gt; for the purposes of using it in the ui. As well, we’ll need a method for turning the &lt;code&gt;PostAttributes&lt;/code&gt; data into something our form template will be able to understand. As such, extracting that logic into a new class seems reasonable. Here is the skeleton for that:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\PostType;
-
-use Cake\Form\Form;
-use Cake\Form\Schema;
-use Cake\ORM\TableRegistry;
-use Cake\Validation\Validator;
-use Cake\Utility\Inflector;
-
-abstract class AbstractPostType extends Form
-{
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;First, lets get the generic &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt; method out of the way. This method needs to massage the data into a &lt;code&gt;Post&lt;/code&gt; entity and it’s related &lt;code&gt;PostAttributes&lt;/code&gt; entities.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function _execute(array $data)
-{
-    $postsTable = TableRegistry::get(&#39;Posts&#39;);
-    $attributesTable = TableRegistry::get(&#39;PostAttributes&#39;);
-    $postAttributes = [];
-
-    $postFields = [&#39;id&#39;, &#39;user_id&#39;, &#39;title&#39;, &#39;url&#39;];
-    foreach ($data as $key =&amp;gt; $value)
-    {
-        if (in_array($key, $postFields)) {
-            continue;
-        }
-        $postAttributes[] = $attributesTable-&amp;gt;newEntity([
-            &#39;name&#39; =&amp;gt; $key,
-            &#39;value&#39; =&amp;gt; $value,
-        ]);
-        unset($data[$key]);
-    }
-
-    $post = $postsTable-&amp;gt;newEntity($data);
-    $post-&amp;gt;post_attributes = $postAttributes;
-    return $postsTable-&amp;gt;save($post);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We also need to make a method that returns an array of data based on an incoming &lt;code&gt;Post&lt;/code&gt; entity and it’s related &lt;code&gt;PostAttribute&lt;/code&gt; entities.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function data(Post $post)
-{
-    $data = $post-&amp;gt;toArray();
-    unset($data[&#39;post_attributes&#39;]);
-    foreach ($post-&amp;gt;post_attributes as $postAttribute) {
-        $data[$postAttribute-&amp;gt;name] = $postAttribute-&amp;gt;value;
-    }
-    return $data;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;For templating purposes, I will also create a &lt;code&gt;get&lt;/code&gt; method that can be used to get an individual attribute.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function get($key, $default = null)
-{
-    if (empty($this-&amp;gt;_data)) {
-        $this-&amp;gt;_data = $this-&amp;gt;data();
-    }
-
-    if (isset($this-&amp;gt;_data[$key])) {
-        return $this-&amp;gt;_data[$key];
-    }
-    return $default;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And finally, a few methods for deciding what template to use for &lt;code&gt;index&lt;/code&gt; and &lt;code&gt;view&lt;/code&gt; actions.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function indexTemplate()
-{
-    return $this-&amp;gt;templatePrefix() . &#39;-index.ctp&#39;;
-}
-
-public function viewTemplate()
-{
-    return $this-&amp;gt;templatePrefix() . &#39;-view.ctp&#39;;
-}
-
-protected function templatePrefix()
-{
-    $template = get_class($this);
-    if ($pos = strrpos($template, &#39;\\&#39;)) {
-        return substr($template, $pos + 1);
-    }
-
-    $template = preg_replace(&#39;/PostType$/&#39;, &#39;&#39;, $template);
-    return &#39;post_type/&#39; . Inflector::underscore($template);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You’ll want to change the class that &lt;code&gt;BlogPostType&lt;/code&gt; extends to &lt;code&gt;App\PostType\AbstractPostType&lt;/code&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;distributing-post-types&quot;&gt;Distributing Post Types&lt;/h2&gt;
-
-&lt;p&gt;One thing that would be cool is if I could add a new post type without adding code to the main app. This would allow me to decouple building post types, and potentially make them shareable across CMS installations. This requirement would mean that we should lean on plugins. Here is a theoretical &lt;code&gt;BlogPostTypePlugin&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;plugins/BlogPostTypePlugin/config/bootstrap.php
-plugins/BlogPostTypePlugin/src/PostType/BlogPostType.php
-plugins/BlogPostTypePlugin/src/Template/Element/post_type/blog-index.ctp
-plugins/BlogPostTypePlugin/src/Template/Element/post_type/blog-view.ctp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;It would also be cute if we could inject css/js into our cms, but I think that might be pushing it. For now we should instead rely on the cms theme or whatever to set what that looks like.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Other than our &lt;code&gt;BlogPostTypePlugin&lt;/code&gt; class - which extends the core &lt;code&gt;PostType&lt;/code&gt; - we will need to use &lt;code&gt;config/bootstrap.php&lt;/code&gt; to register post types. We can do so via the event system. Here is what that might look like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Event\Event;
-use Cake\Event\EventManager;
-
-EventManager::instance()-&amp;gt;on(&#39;Posts.PostTypes.get&#39;, function (Event $event) {
-  // The key is the Plugin name and the class
-  // The value is what you want to display in the ui
-  $event-&amp;gt;subject-&amp;gt;postTypes[&#39;BlogPostType.BlogPostType&#39;] = &#39;blog&#39;;
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’ll need an element to render the post type on the screen.&lt;/p&gt;
-
-&lt;p&gt;Our view template might look like the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h3&amp;gt;&amp;lt;?= $post-&amp;gt;get(&#39;title&#39;) ?&amp;gt;&amp;lt;/h3&amp;gt;
-&amp;lt;div&amp;gt;
-  &amp;lt;?= $post-&amp;gt;get(&#39;body&#39;) ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above setup should allow us to create custom plugins that contain one or post types. While the parsing bit isn’t shown here, it’s simply a matter of dispatching the event and then collecting the &lt;code&gt;postTypes&lt;/code&gt; attribute on the subject.&lt;/p&gt;
-
-&lt;p&gt;Lets add the &lt;code&gt;PostType&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/PostType/AbstractPostType.php
-git commit -m &quot;Lay out infrastructure for custom post types&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.7&quot;&gt;0.0.7&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We now have an - unproven - post type system. We still have yet to have a way to display this on the site, nor have we started on what it looks like to edit the page, but we’ll get there. I’m pretty happy with what we have so far, and hopefully we can figure out any specific issues as we start using this system.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Wed, 07 Dec 2016 06:04:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/07/custom-post-types/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/07/custom-post-types/</guid>
-        
-        <category>events</category>
-        
-        <category>forms</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Customizing the Posts Dashboard with CrudView</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
-
-&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer update
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
-
-&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
-git commit -m &quot;Update unpinned dependencies&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;modifying-the-utility-navigation-bar&quot;&gt;Modifying the Utility Navigation Bar&lt;/h2&gt;
-
-&lt;p&gt;The new version of CrudView that we just upgraded to has support for managing the navigation in the upper-right. I’m going to use this to add a logout button. Add the following to your &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; method in the &lt;code&gt;if ($this-&amp;gt;Crud-&amp;gt;isActionMapped()) {&lt;/code&gt; section:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.utility_navigation&#39;, [
-    new \CrudView\Menu\MenuItem(
-        &#39;Log Out&#39;,
-        [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;logout&#39;]
-    )
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can use the following classes for defining a utility navigation bar:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;\CrudView\Menu\MenuDropdown&lt;/code&gt;: Can be used to setup dropdown menus&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;\CrudView\Menu\MenuDivider&lt;/code&gt;: Can be used as a separator in dropdown menus&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;\CrudView\Menu\MenuItem&lt;/code&gt;: A menu item link. Takes the same options as &lt;code&gt;HtmlHelper::link()&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Pretty easy way for us to customize what is being shown, and as the &lt;code&gt;MenuItem&lt;/code&gt; takes all the same options as &lt;code&gt;HtmlHelper::link()&lt;/code&gt;, it should be quite useful.&lt;/p&gt;
-
-&lt;h2 id=&quot;modifying-the-sidebar-navigation&quot;&gt;Modifying the Sidebar Navigation&lt;/h2&gt;
-
-&lt;p&gt;The new version of CrudView that we just upgraded to has support for managing the navigation on the sidebar. We can disable it, blacklist tables, or control the exact contents. We previously used the table blacklist, but I’m going to replace this with a completely controled sidebar. Add the following to your &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; method in the &lt;code&gt;if ($this-&amp;gt;Crud-&amp;gt;isActionMapped()) {&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.sidebar_navigation&#39;, [
-    new \CrudView\Menu\MenuItem(
-        &#39;Posts&#39;,
-        [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;index&#39;]
-    ),
-    new \CrudView\Menu\MenuItem(
-        &#39;Profile&#39;,
-        [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;edit&#39;]
-    ),
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can use the following classes for defining a utility navigation bar:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;\CrudView\Menu\MenuDivider&lt;/code&gt;: Can be used as a separator in dropdown menus&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;\CrudView\Menu\MenuItem&lt;/code&gt;: A menu item link. Takes the same options as &lt;code&gt;HtmlHelper::link()&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;A useful addition would be a &lt;code&gt;MenuList&lt;/code&gt;, so we can have groups of sidebar items, though for now this is good enough.&lt;/p&gt;
-
-&lt;h2 id=&quot;customizing-posts-fields&quot;&gt;Customizing &lt;code&gt;/posts&lt;/code&gt; fields&lt;/h2&gt;
-
-&lt;p&gt;If you look at the existing &lt;code&gt;/posts&lt;/code&gt; page, you’ll see there are quite a few fields there that we might not want. Ideally, the following is shown:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;id&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;title&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;status&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;published_date&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;actions list&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Looking at the list, we’re missing the following fields from our &lt;code&gt;posts&lt;/code&gt; table:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;title&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;published_date&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We can add those pretty easily via the migrations plugin. I ran the following to add the fields:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration add_admin_field_to_posts title:string published_date:datetime
-bin/cake migrations migrate
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Simple enough. Now we’ll scope the fields being shown to just those that we want. Rather than adding a bunch of custom callbacks directly to our &lt;code&gt;PostsController&lt;/code&gt;, lets create a &lt;code&gt;PostsListener&lt;/code&gt; in &lt;code&gt;src/Listener/PostsListener.php&lt;/code&gt;. Here is mine, with the changes needed to scope our &lt;code&gt;/posts&lt;/code&gt; page:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Listener;
-
-use Cake\Event\Event;
-use Crud\Listener\BaseListener;
-
-/**
- * Posts Listener
- */
-class PostsListener extends BaseListener
-{
-    /**
-     * Callbacks definition
-     *
-     * @return array
-     */
-    public function implementedEvents()
-    {
-        return [
-            &#39;Crud.beforeHandle&#39; =&amp;gt; &#39;beforeHandle&#39;,
-        ];
-    }
-
-    /**
-     * Before Handle
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function beforeHandle(Event $event)
-    {
-        if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;index&#39;) {
-            $this-&amp;gt;beforeHandleIndex($event);
-
-            return;
-        }
-    }
-
-    /**
-     * Before Handle Index Action
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function beforeHandleIndex(Event $event)
-    {
-        $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.fields&#39;, [
-            &#39;id&#39;,
-            &#39;title&#39;,
-            &#39;status&#39;,
-            &#39;published_date&#39;,
-        ]);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we need to load it in our &lt;code&gt;PostsController::initialize()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;addListener(&#39;Users&#39;, &#39;App\Listener\PostsListener&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty neat.&lt;/p&gt;
-
-&lt;h2 id=&quot;modifying-field-output-using-formatters&quot;&gt;Modifying field output using formatters&lt;/h2&gt;
-
-&lt;p&gt;One cool thing about CrudView is that we can specify how we want fields to look like on templates by using custom formatters. Rather than show the status as just text, I’m going to switch it to use a bootstrap label depending upon the content of the text.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.fields&#39;, [
-    &#39;id&#39;,
-    &#39;title&#39;,
-    &#39;status&#39; =&amp;gt; [
-      &#39;formatter&#39; =&amp;gt; function ($name, $value, $entity) {
-          $type = $value == &#39;active&#39; ? &#39;success&#39; : &#39;default&#39;;
-          return sprintf(&#39;&amp;lt;span class=&quot;label label-%s&quot;&amp;gt;%s&amp;lt;/span&amp;gt;&#39;, $type, $value);
-      },
-    ],
-    &#39;published_date&#39;,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/12/06/dope-admin-customizations.png&quot; alt=&quot;dope admin panel&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;You can also use an element as a &lt;code&gt;formatter&lt;/code&gt;, though please refer to the documentation on CrudView for further details.&lt;/p&gt;
-
-&lt;p&gt;Lets save where we are for now.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/Migrations/20161206204729_AddAdminFieldToPosts.php config/Migrations/schema-dump-default.lock src/Controller/AppController.php src/Controller/PostsController.php src/Listener/PostsListener.php
-git commit -m &quot;Updated /posts dashboard&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.6&quot;&gt;0.0.6&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We now have a reasonable looking &lt;code&gt;/posts&lt;/code&gt; page with a few lines of code. Super Dope! Our next job is to work on the possibility of having different post types, how to model them in code, and how they relate to our database structure.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-
-</description>
-        <pubDate>Tue, 06 Dec 2016 11:28:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/06/customizing-the-posts-crudview-dashboard/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/06/customizing-the-posts-crudview-dashboard/</guid>
-        
-        <category>crud</category>
-        
-        <category>navigation</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Preparing our Posts Admin</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;aliasing--to-postscontrollerhome&quot;&gt;Aliasing / to &lt;code&gt;PostsController::home&lt;/code&gt;&lt;/h2&gt;
-
-&lt;p&gt;In the previous blog post, we decided to alias the &lt;code&gt;/&lt;/code&gt; route to the &lt;code&gt;PostsController::index()&lt;/code&gt; action. Since we still need that action for the admin dashboard, lets make a new action called &lt;code&gt;home&lt;/code&gt; and use &lt;em&gt;that&lt;/em&gt; as the alias. We’ll start by modifying the &lt;code&gt;config/routes.php&lt;/code&gt; file, and setting the default route to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;home&#39;]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we need to map that action in our controller to something real. Instead of defining a &lt;code&gt;home&lt;/code&gt; action, for now I’m just going to add an extra mapping of &lt;code&gt;home&lt;/code&gt; to the &lt;code&gt;Crud.Index&lt;/code&gt; action. We’ll use a new &lt;code&gt;PostsController::initialize()&lt;/code&gt; method to handle this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Initialization hook method.
-     *
-     * Use this method to add common initialization code like loading components.
-     *
-     * e.g. `$this-&amp;gt;loadComponent(&#39;Security&#39;);`
-     *
-     * @return void
-     */
-    public function initialize()
-    {
-        parent::initialize();
-        $this-&amp;gt;Crud-&amp;gt;mapAction(&#39;home&#39;, &#39;Crud.Index&#39;);
-        $this-&amp;gt;Auth-&amp;gt;allow([&#39;home&#39;]);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, we’ll want to set the proper template for the action. Copy the file &lt;code&gt;src/Template/Posts/index.ctp&lt;/code&gt; to &lt;code&gt;src/Template/Posts/home.ctp&lt;/code&gt;. We can decide what to display here later.&lt;/p&gt;
-
-&lt;p&gt;Once thats done, commit your changes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git config/routes.php src/Controller/PostsController.php src/Template/Posts/home.ctp
-git commit -m &quot;Move / route to /posts/home&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;crudview&quot;&gt;CrudView&lt;/h2&gt;
-
-&lt;p&gt;This entire time, we’ve been leaning on the generated bake templates to decide what we want to show users. A powerful alternative to this is the &lt;code&gt;CrudView&lt;/code&gt; plugin. &lt;code&gt;CrudView&lt;/code&gt; is a counterpart to the &lt;code&gt;Crud&lt;/code&gt; plugin in that it allows you to autogenerate views for actions contained in that plugin. It’s pretty radical.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;While we &lt;em&gt;have&lt;/em&gt; edited our &lt;code&gt;Users/edit.ctp&lt;/code&gt; template, we haven’t spent too much time there, so I think we can afford to drop our existing work.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;To start off, lets enable &lt;code&gt;CrudView&lt;/code&gt; for our PostsController. We’ll do so by modifying our &lt;code&gt;AppController&lt;/code&gt; to enable &lt;code&gt;CrudView&lt;/code&gt; whenever we are in a current admin action. Start by adding the following property to your &lt;code&gt;AppController&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * A list of actions where the CrudView.View
-     * listener should be enabled. If an action is
-     * in this list but `isAdmin` is false, the
-     * action will still be rendered via CrudView.View
-     *
-     * @var array
-     */
-    protected $adminActions = [];
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In &lt;code&gt;AppController::initialize()&lt;/code&gt;, there is a check on &lt;code&gt;$this-&amp;gt;isAdmin&lt;/code&gt; when states whether or not we can enable the &lt;code&gt;CrudView&lt;/code&gt; listener. We’ll modify that to take our &lt;code&gt;adminActions&lt;/code&gt; property into account.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;isAdmin || in_array($this-&amp;gt;request-&amp;gt;action, $this-&amp;gt;adminActions)) {
-    $this-&amp;gt;Crud-&amp;gt;addListener(&#39;CrudView.View&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’ll also need to modify the &lt;code&gt;$isAdmin&lt;/code&gt; variable in our &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; to take this into account.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$isAdmin = $this-&amp;gt;isAdmin || in_array($this-&amp;gt;request-&amp;gt;action, $this-&amp;gt;adminActions);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The above changes aren’t necessary in later versions of josegonzalez/app - certainly not after 1.4.8. They are here in case you have an older version of the app skeleton.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Now that we have some of the groundwork laid out, we need to actually specify the &lt;code&gt;adminActions&lt;/code&gt; property in our &lt;code&gt;PostsController&lt;/code&gt;. I’ve set it to allow almost all crud-actions, except for the &lt;code&gt;view&lt;/code&gt; action, which doesn’t make sense for my admin panel.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * A list of actions where the CrudView.View
-     * listener should be enabled. If an action is
-     * in this list but `isAdmin` is false, the
-     * action will still be rendered via CrudView.View
-     *
-     * @var array
-     */
-    protected $adminActions = [&#39;index&#39;, &#39;add&#39;, &#39;edit&#39;, &#39;delete&#39;];
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll need to allow access to these actions. Our admin panel won’t be very useful if we can’t see whats going on. I’ve also helpfully added the &lt;code&gt;delete&lt;/code&gt; action, because we’ll probably want to delete posts. Add the following to your &lt;code&gt;PostsController&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Check if the provided user is authorized for the request.
-     *
-     * @param array|\ArrayAccess|null $user The user to check the authorization of.
-     *   If empty the user fetched from storage will be used.
-     * @return bool True if $user is authorized, otherwise false
-     */
-    public function isAuthorized($user = null)
-    {
-        $action = $this-&amp;gt;request-&amp;gt;param(&#39;action&#39;);
-        if (in_array($action, $this-&amp;gt;adminActions) || $action == &#39;delete&#39;) {
-            return true;
-        }
-        return parent::isAuthorized($user);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And last but not least, lets remove all the baked &lt;code&gt;Posts&lt;/code&gt; templates.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;rm src/Template/Posts/index.ctp src/Template/Posts/add.ctp src/Template/Posts/edit.ctp src/Template/Posts/view.ctp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you go to the &lt;code&gt;/posts&lt;/code&gt; url now, you’ll get a view similar to the following:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/12/05/generated-posts-admin.png&quot; alt=&quot;workinggenerated posts admin&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Pretty sweet. It doesn’t match our &lt;code&gt;/users/edit&lt;/code&gt; page - or really anything else - but we’ll work on that later. For now, lets clean up that sidebar. We’ll add the following logic to our &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; method, in the block that checks on whether the crud action is mapped or not.:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.tables_blacklist&#39;, [
-    &#39;phinxlog&#39;,
-    &#39;muffin_tokenize_phinxlog&#39;,
-    &#39;post_attributes&#39;,
-    &#39;tokenize_tokens&#39;,
-    &#39;users&#39;,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For now, we won’t have a link to the &lt;code&gt;/users/edit&lt;/code&gt; page, but in the near future, it’ll hopefully be possible to both add arbitary links to the sidebar as well as arbitrary links to the top navigation.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We have the beginnings of our admin dashboard, using CrudView. Let’s save that up:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/AppController.php src/Controller/PostsController.php src/Template/Posts/add.ctp src/Template/Posts/edit.ctp src/Template/Posts/index.ctp src/Template/Posts/view.ctp
-git commit -m &quot;CrudView now handles /posts admin panels&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.5&quot;&gt;0.0.5&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This was a short post, but we actually did quite a bit of work. We now have a programmatic admin dashboard that can be melded to our use case in future posts. It’s been a long week, and our CMS is starting to take shape. Tomorrow we’ll look at modifying what exactly is shown on our &lt;code&gt;/posts&lt;/code&gt; dashboard, and make sure our database tables line up with our needs.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-
-</description>
-        <pubDate>Mon, 05 Dec 2016 02:00:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/05/preparing-our-posts-admin/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/05/preparing-our-posts-admin/</guid>
-        
-        <category>admin</category>
-        
-        <category>crud</category>
-        
-        <category>routing</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>File Uploading and Account Management</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;managing-a-users-account&quot;&gt;Managing a User’s account&lt;/h2&gt;
-
-&lt;p&gt;Now that we can login, we’ll probably want to be able to update our profile &lt;em&gt;without&lt;/em&gt; needing to go through the reset password flow. For that, we’ll need a account page. I’d also love to be able to personalize the account so that the user will feel at home in his CMS, so we’ll allow them to upload a custom image as well. We’ll start on account management first. First, lets start by making the &lt;code&gt;UsersController::edit()&lt;/code&gt; action open to all authenticated users by modifying our &lt;code&gt;UsersController::isAuthorized()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Check if the provided user is authorized for the request.
-     *
-     * @param array|\ArrayAccess|null $user The user to check the authorization of.
-     *   If empty the user fetched from storage will be used.
-     * @return bool True if $user is authorized, otherwise false
-     */
-    public function isAuthorized($user = null)
-    {
-        if (in_array($this-&amp;gt;request-&amp;gt;param(&#39;action&#39;), [&#39;edit&#39;, &#39;logout&#39;])) {
-            return true;
-        }
-        return parent::isAuthorized($user);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, lets go to the &lt;code&gt;/users/edit&lt;/code&gt; page in our browser. You should get a &lt;code&gt;NotFoundException&lt;/code&gt;. This is because the &lt;code&gt;UsersController::edit()&lt;/code&gt; action is currently mapped to the &lt;code&gt;Crud.Edit&lt;/code&gt; action class in your &lt;code&gt;AppController::initialize()&lt;/code&gt;, and that action class expects a user id to be passed in. We can fix that and force the edit page to &lt;em&gt;always&lt;/em&gt; map to the currently logged in user by handling the &lt;code&gt;beforeHandle&lt;/code&gt; Crud event in our &lt;code&gt;UsersListener&lt;/code&gt;. First, lets add the following to the list of events handled in our &lt;code&gt;UsersListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeHandle&#39; =&amp;gt; &#39;beforeHandle&#39;,
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll need to implement the &lt;code&gt;UsersListener::beforeHandle()&lt;/code&gt; method. As the &lt;code&gt;beforeHandle&lt;/code&gt; event occurs for &lt;em&gt;all&lt;/em&gt; executed Crud actions, we’ll need to take extra care to only set the action arguments when the current action is the &lt;code&gt;edit&lt;/code&gt; action.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Before Handle
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function beforeHandle(Event $event)
-    {
-        if ($event-&amp;gt;subject-&amp;gt;action === &#39;edit&#39;) {
-            $this-&amp;gt;beforeHandleEdit($event);
-
-            return;
-        }
-    }
-
-    /**
-     * Before Handle Edit Action
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function beforeHandleEdit(Event $event)
-    {
-        $userId = $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
-        $event-&amp;gt;subject-&amp;gt;args = [$userId];
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Browse to the &lt;code&gt;/users/edit&lt;/code&gt; page now and you’ll see a lovely form with our current user’s information filled out. Yay! Unfortunately, it leaks the existing password, which isn’t great. Honestly, I think we should clean up this form a bit:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The password field should not have the pre-hashed password set&lt;/li&gt;
-  &lt;li&gt;The password field should only be changed when the password is confirmed&lt;/li&gt;
-  &lt;li&gt;The &lt;code&gt;avatar_dir&lt;/code&gt; field shouldn’t be shown on the form&lt;/li&gt;
-  &lt;li&gt;The &lt;code&gt;avatar&lt;/code&gt; field is actually a form upload.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Let’s take care of the first three tasks. We’ll start by adding an event handler to remove the hashed &lt;code&gt;password&lt;/code&gt; during the &lt;code&gt;Crud.beforeRender&lt;/code&gt; event. Add the following to your &lt;code&gt;UsersListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeRender&#39; =&amp;gt; &#39;beforeRender&#39;,
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll handle the event in the same &lt;code&gt;UsersListener&lt;/code&gt; class and unset the &lt;code&gt;password&lt;/code&gt; property on the Crud-produced entity:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Before Render
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function beforeRender(Event $event)
-    {
-        if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;edit&#39;) {
-            $this-&amp;gt;beforeRenderEdit($event);
-
-            return;
-        }
-    }
-
-    /**
-     * Before Render Edit Action
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function beforeRenderEdit(Event $event)
-    {
-        $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;unsetProperty(&#39;password&#39;);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you refresh the &lt;code&gt;/users/edit&lt;/code&gt; page, you should see that the hashed password was removed. Now that this is set, we’ll need tomodify the edit form. We previously baked this on the first day of development, so you should have a &lt;code&gt;src/Template/Users/edit.ctp&lt;/code&gt; file. We’ll edit the form section to show the following for now (ignore the sidebar section!):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form large-9 medium-8 columns content&quot;&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create($user) ?&amp;gt;
-    &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Edit User&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
-        &amp;lt;?php
-            echo $this-&amp;gt;Form-&amp;gt;input(&#39;email&#39;);
-            echo $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;, [&#39;required&#39; =&amp;gt; false]);
-            echo $this-&amp;gt;Form-&amp;gt;input(&#39;confirm_password&#39;);
-            echo $this-&amp;gt;Form-&amp;gt;input(&#39;avatar&#39;);
-        ?&amp;gt;
-    &amp;lt;/fieldset&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Submit&#39;)) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above adds a &lt;code&gt;confirm_password&lt;/code&gt; field and also removes the &lt;code&gt;avatar_dir&lt;/code&gt; field. Finally, add password confirmation, and only save the updated password if it matches the &lt;code&gt;confirm_password&lt;/code&gt; field &lt;em&gt;and&lt;/em&gt; both have a value. We’ll create a custom validation method - validationAccount - to handle this. Place the following within a trait at &lt;code&gt;src/Model/Table/Traits/AccountValidationTrait.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Table\Traits;
-
-use Cake\Validation\Validator;
-
-trait AccountValidationTrait
-{
-    /**
-     * Account validation rules.
-     *
-     * @param \Cake\Validation\Validator $validator Validator instance.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationAccount(Validator $validator)
-    {
-        $validator = $this-&amp;gt;validationDefault($validator);
-        $validator-&amp;gt;remove(&#39;password&#39;);
-        $validator-&amp;gt;allowEmpty(&#39;confirm_password&#39;);
-        $validator-&amp;gt;add(&#39;confirm_password&#39;, &#39;no-misspelling&#39;, [
-            &#39;rule&#39; =&amp;gt; [&#39;compareWith&#39;, &#39;password&#39;],
-            &#39;message&#39; =&amp;gt; &#39;Passwords are not equal&#39;,
-        ]);
-        return $validator;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;I really love traits. Sorry not sorry?&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;In this custom validation rule, we inherit from the default rules - defined in the &lt;code&gt;UsersTable::validationDefault()&lt;/code&gt; method - remove the rules that require a &lt;code&gt;password&lt;/code&gt; to be set, and add a rule that requires the &lt;code&gt;password&lt;/code&gt; and &lt;code&gt;confirm_password&lt;/code&gt; fields to match.&lt;/p&gt;
-
-&lt;p&gt;Next, we’ll need to add the proper &lt;code&gt;use&lt;/code&gt; statement to the &lt;em&gt;inside&lt;/em&gt; of our &lt;code&gt;UsersTable&lt;/code&gt; class.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Table\Traits\AccountValidationTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To ensure that our custom validation method is actually invoked, we’ll need to modify the &lt;code&gt;UsersListener::beforeHandleEdit()&lt;/code&gt; to tell the &lt;code&gt;Edit&lt;/code&gt; action class to use it. Here is what I added to that method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_controller()-&amp;gt;Crud-&amp;gt;action()-&amp;gt;saveOptions([&#39;validate&#39; =&amp;gt; &#39;account&#39;]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;One thing to note is that we never want to update the password when no password has been set. The &lt;code&gt;Edit&lt;/code&gt; action class doesn’t currently provide an event to directly edit event data, but we still have two options:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;If no &lt;code&gt;password&lt;/code&gt;/&lt;code&gt;confirm_password&lt;/code&gt; is set at the time of the &lt;code&gt;beforeHandle&lt;/code&gt; event, we can just unset it from the request.&lt;/li&gt;
-  &lt;li&gt;If no &lt;code&gt;password&lt;/code&gt;/&lt;code&gt;confirm_password&lt;/code&gt; is set at the time of the &lt;code&gt;beforeSave&lt;/code&gt; event, we can mark the &lt;code&gt;password&lt;/code&gt; field as not dirty, and it won’t be overwritten.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I prefer the latter, because I don’t like screwing around with the incoming request data. Where you perform the scrubbing is up to you. If you do as I do, you’ll have to check if &lt;code&gt;confirm_password&lt;/code&gt; is empty instead of &lt;code&gt;password&lt;/code&gt;. This is because at the &lt;code&gt;beforeSave&lt;/code&gt; event, the data has already been set upon the entity, and an empty string has been hashed by the &lt;code&gt;User::_setPassword()&lt;/code&gt; method. The &lt;code&gt;confirm_password&lt;/code&gt; field will only be empty if both are empty, otherwise we wouldn’t even have gotten to the save phase.&lt;/p&gt;
-
-&lt;p&gt;I’ll add the following to handle my event to &lt;code&gt;UsersListener::implementedEvents()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeSave&#39; =&amp;gt; &#39;beforeSave&#39;,
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here are the methods to add to the &lt;code&gt;UsersListener&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Before Save
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function beforeSave(Event $event)
-    {
-        if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;edit&#39;) {
-            $this-&amp;gt;beforeSaveEdit($event);
-
-            return;
-        }
-    }
-
-    /**
-     * Before Render Edit Action
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function beforeSaveEdit(Event $event)
-    {
-        if ($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;confirm_password === &#39;&#39;) {
-            $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;unsetProperty(&#39;password&#39;);
-            $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;dirty(&#39;password&#39;, false);
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Woot! Very close. If you try to submit the form now, you will probably get a validation error - if your browser even lets you submit. Why? The &lt;code&gt;avatar&lt;/code&gt; field is empty. Even though we’ve set it to allow &lt;code&gt;null&lt;/code&gt; values, we need to remove the validation rules surrounding them in our &lt;code&gt;UsersTable::validationDefault()&lt;/code&gt; method. Remove the rules regarding &lt;code&gt;avatar&lt;/code&gt; and &lt;code&gt;avatar_dir&lt;/code&gt;, and you should be off to the races.&lt;/p&gt;
-
-&lt;p&gt;Let’s save our position now.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/UsersController.php src/Listener/UsersListener.php src/Model/Table/Traits/AccountValidationTrait.php src/Model/Table/UsersTable.php src/Template/Users/edit.ctp
-git commit -m &quot;Implement initial account management, including password changing&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;setting-an-image-avatar&quot;&gt;Setting an image avatar&lt;/h2&gt;
-
-&lt;p&gt;While image uploading isn’t baked into cake - &lt;em&gt;lol&lt;/em&gt; - by default, I’ve included my Upload plugin with the composer app skeleton we used to create the &lt;code&gt;calico&lt;/code&gt; app. If you don’t have it installed, you’ll want to install it.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# install the plugin
-composer require josegonzalez/cakephp-upload
-
-# load it in your app
-bin/cake plugin load Josegonzalez/Upload
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You are welcome and encouraged to try other plugins that might better suit your needs. I wrote mine and like mine, but maybe you prefer a different one.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Next, we’ll need to modify our &lt;code&gt;UsersTable::initialize()&lt;/code&gt; method to add the behavior for our &lt;code&gt;avatar&lt;/code&gt; and &lt;code&gt;avatar_dir&lt;/code&gt; fields:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Josegonzalez/Upload.Upload&#39;, [
-    &#39;avatar&#39; =&amp;gt; [
-        &#39;fields&#39; =&amp;gt; [
-            &#39;dir&#39; =&amp;gt; &#39;avatar_dir&#39;,
-        ],
-    ],
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll need to modify our form to show the correct input type for the &lt;code&gt;avatar&lt;/code&gt; field. I’m also going to conditionally show the avatar on the page so we know what it looks like when it has been uploaded. This is what the form section of the &lt;code&gt;edit.ctp&lt;/code&gt; should look like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form large-9 medium-8 columns content&quot;&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create($user, [&#39;type&#39; =&amp;gt; &#39;file&#39;]) ?&amp;gt;
-    &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Edit User&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
-        &amp;lt;?php
-            echo $this-&amp;gt;Form-&amp;gt;input(&#39;email&#39;);
-            echo $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;, [&#39;required&#39; =&amp;gt; false]);
-            echo $this-&amp;gt;Form-&amp;gt;input(&#39;confirm_password&#39;);
-            echo $this-&amp;gt;Form-&amp;gt;input(&#39;avatar&#39;, [&#39;type&#39; =&amp;gt; &#39;file&#39;]);
-            if (!empty($user-&amp;gt;avatar)) {
-                $imageUrl = &#39;../&#39; . preg_replace(&quot;/^webroot/&quot;, &quot;&quot;, $user-&amp;gt;avatar_dir) . &#39;/&#39; . $user-&amp;gt;avatar;
-                echo $this-&amp;gt;Html-&amp;gt;image($imageUrl, [
-                    &#39;height&#39; =&amp;gt; &#39;100&#39;,
-                    &#39;width&#39; =&amp;gt; &#39;100&#39;,
-                ]);
-            }
-        ?&amp;gt;
-    &amp;lt;/fieldset&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Submit&#39;)) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you try it out now, you should get a working image upload. Here is what the form looks like for me after an avatar upload:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/12/04/working-image-upload.png&quot; alt=&quot;working image upload&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;My cat looks handsome, doesn’t she?&lt;/p&gt;
-
-&lt;p&gt;Before closing out image uploads, we’ll want to ignore the &lt;code&gt;webroot/files&lt;/code&gt; directory in our &lt;code&gt;.gitignore&lt;/code&gt;. If we do not, we’ll end up accidentally committing uploaded files. Please ensure the following line is in your &lt;code&gt;.gitignore&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;/webroot/files
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lets commit all our changes as well.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add .gitignore src/Model/Table/UsersTable.php src/Template/Users/edit.ctp
-git commit -m &quot;Enable avatar uploads&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;validating-image-uploads&quot;&gt;Validating image uploads&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The following are only &lt;em&gt;some&lt;/em&gt; of the things you can do to validate that images uploaded are, in fact, images. I would recommend you also:&lt;br /&gt;
-- resize the images to remove extra metadata that you may not wish to show&lt;br /&gt;
-- only display images that have been sanitized&lt;br /&gt;
-- use the &lt;a href=&quot;http://cloudinary.com/blog/how_to_detect_and_prevent_malware_infected_user_uploads&quot;&gt;metascan&lt;/a&gt; tool to verify the validity of uploads before referencing them on your site.&lt;br /&gt;
-This list is also by no means exhaustive, and as security is an important subject, I defer to the experts. Please keep this in mind!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Before allowing just &lt;em&gt;any&lt;/em&gt; file uploads, lets be sure that they are indeed images. I’d also like to ensure we’re not allowing a save to occur when the image upload fails for whatever reason. This will ensure we surface the errors to the users before the UploadBehavior gets to it. The following should be added to your &lt;code&gt;AccountValidationTrait::validationAccount()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;allowEmpty(&#39;avatar&#39;);
-$validator-&amp;gt;add(&#39;avatar&#39;, &#39;valid-image&#39;, [
-    &#39;rule&#39; =&amp;gt; [&#39;uploadedFile&#39;, [
-        &#39;types&#39; =&amp;gt; [
-            &#39;image/bmp&#39;,
-            &#39;image/gif&#39;,
-            &#39;image/jpeg&#39;,
-            &#39;image/pjpeg&#39;,
-            &#39;image/png&#39;,
-            &#39;image/vnd.microsoft.icon&#39;,
-            &#39;image/x-windows-bmp&#39;,
-            &#39;image/x-icon&#39;,
-            &#39;image/x-png&#39;,
-        ],
-        &#39;optional&#39; =&amp;gt; true,
-    ]],
-    &#39;message&#39; =&amp;gt; &#39;The uploaded avatar was not a valid image&#39;
-]);
-$validator-&amp;gt;add(&#39;avatar&#39;, &#39;not-upload-error&#39;, [
-    &#39;rule&#39; =&amp;gt; [&#39;uploadError&#39;, true],
-    &#39;message&#39; =&amp;gt; &#39;There was an error uploading your avatar&#39;,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;We’re allowing the avatar field to be empty. If you don’t do this, you’re going to see errors when saving the form without an uploaded avatar.&lt;/li&gt;
-  &lt;li&gt;We’re only allowing valid images to be uploaded. Hell, our user can even upload an icon as his avatar if they want.&lt;/li&gt;
-  &lt;li&gt;We want to make sure that there are no upload errors. Note that &lt;em&gt;not&lt;/em&gt; uploading a file should not be considered an error. PHP will report it as such, and if we want to allow no files to be uploaded, we have to pass &lt;code&gt;true&lt;/code&gt; as the first option to the &lt;code&gt;uploadError&lt;/code&gt; rule.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The above validation rules are included with CakePHP, but you can &lt;em&gt;also&lt;/em&gt; use custom rules - such as file and image size limiting - that are available from the Upload plugin. Documentation for that is available &lt;a href=&quot;https://cakephp-upload.readthedocs.io/en/latest/validation.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Now that we’ve validated our image uploads, lets save our changes to the git repository.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Table/Traits/AccountValidationTrait.php
-git commit -m &quot;Ensure avatar uploads are actually images&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.4&quot;&gt;0.0.4&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Our app now has proper image uploading and account management. We’ve learned a few new tricks regarding the Crud plugin event system, added advanced validation rules for managing our account, and even showed off our avatar on the form. I think we’re more or less done with account management for now. Tomorrow, we’ll get into the nitty-gritty of our blog internals, beginning with the initial stages of our posts admin panel.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Sun, 04 Dec 2016 01:35:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/04/file-uploading-and-account-management/</guid>
-        
-        <category>files</category>
-        
-        <category>user-accounts</category>
-        
-        <category>upload</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Password Resets and Email</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;errata-from-last-post&quot;&gt;Errata from last post&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;I fixed a few typos in executing the &lt;code&gt;users&lt;/code&gt; shell. Specifically, the &lt;code&gt;username-field&lt;/code&gt; flag should have a value of &lt;code&gt;email&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;In CakePHP 3.x, you no longer specify &lt;code&gt;admin =&amp;gt; true|false&lt;/code&gt; when configuring the &lt;code&gt;AuthComponent&lt;/code&gt;. It should be &lt;code&gt;prefix =&amp;gt; false|PREFIX_NAME&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;The preferred method of retrieving values from the request object is not &lt;code&gt;ArrayAccess&lt;/code&gt;, but via a method. You should use &lt;code&gt;$this-&amp;gt;request-&amp;gt;param(&#39;field&#39;)&lt;/code&gt; instead of the array-method.&lt;/li&gt;
-  &lt;li&gt;I’ve removed the type-hint on &lt;code&gt;AppController::isAuthorized()&lt;/code&gt; and &lt;code&gt;UsersController::isAuthorized()&lt;/code&gt;. The docblock states that they can also accept &lt;code&gt;ArrayAccess&lt;/code&gt;, so &lt;code&gt;array&lt;/code&gt; as a type-hint was inappropriate. In the recently released PHP 7.1, you can instead use &lt;code&gt;iterable&lt;/code&gt; as a type-hint.&lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;The &lt;code&gt;config/bootstrap.php&lt;/code&gt; file is missing the &lt;code&gt;Plugin::load(&#39;CrudUsers&#39;);&lt;/code&gt; statement. You can add it manually or using the cli tool as follows:&lt;/p&gt;
-
-    &lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake plugin load CrudUsers
-&lt;/code&gt;&lt;/pre&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
-
-&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
-
-&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer update
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
-
-&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
-git commit -m &quot;Update patch-level for all plugins&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;reset-password-flow&quot;&gt;Reset Password Flow&lt;/h2&gt;
-
-&lt;p&gt;First, we need a reset password flow.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;This workflow is vulnerable to email enumeration. Keep this in mind when implementing this in your application. You might want to look into some sort of rate-limiting for the &lt;code&gt;/users/forgot-password&lt;/code&gt; endpoint…&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/ditaa/ditaa-923bcc9bcd42f601ba22a85fc9f3d7ea.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Seems pretty reasonable. We will start be hooking up the appropriate crud actions for this.&lt;/p&gt;
-
-&lt;h2 id=&quot;enabling-the-crud-actions&quot;&gt;Enabling the Crud Actions&lt;/h2&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Using Crud actions is going to become more or less second nature in this app. Get used to it?&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the following three lines to your &lt;code&gt;UsersController::initialize()&lt;/code&gt; method. This will map the &lt;code&gt;forgotPassword&lt;/code&gt;, &lt;code&gt;resetPassword&lt;/code&gt;, and &lt;code&gt;verify&lt;/code&gt; actions, as well as allow anonymous access to each.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;mapAction(&#39;forgotPassword&#39;, &#39;CrudUsers.ForgotPassword&#39;);
-$this-&amp;gt;Crud-&amp;gt;mapAction(&#39;resetPassword&#39;, [
-    &#39;className&#39; =&amp;gt; &#39;CrudUsers.ResetPassword&#39;,
-    &#39;findMethod&#39; =&amp;gt; &#39;token&#39;,
-]);
-$this-&amp;gt;Crud-&amp;gt;mapAction(&#39;verify&#39;, [
-    &#39;className&#39; =&amp;gt; &#39;CrudUsers.Verify&#39;,
-    &#39;findMethod&#39; =&amp;gt; &#39;token&#39;,
-]);
-$this-&amp;gt;Auth-&amp;gt;allow([&#39;forgotPassword&#39;, &#39;resetPassword&#39;, &#39;verify&#39;]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;These three actions require the following fields for usage:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;token&lt;/code&gt;: A string field storing a reset token.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;verified&lt;/code&gt;: A boolean database field.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;adding-the-verified-field&quot;&gt;Adding the &lt;code&gt;verified&lt;/code&gt; field&lt;/h3&gt;
-
-&lt;p&gt;To get the verified field, we’ll create a migration:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration add_verified_field_to_users verified:boolean
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Once generated, you’ll want to set the &lt;code&gt;verified&lt;/code&gt; field default to either &lt;code&gt;true&lt;/code&gt; or &lt;code&gt;false&lt;/code&gt;. I set mine to &lt;code&gt;true&lt;/code&gt;, because we’ll only ever have a single verified user in this blog.&lt;/p&gt;
-
-&lt;p&gt;And now we can run it.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;adding-the-token-field&quot;&gt;Adding the &lt;code&gt;token&lt;/code&gt; field&lt;/h3&gt;
-
-&lt;p&gt;To add the token field, we &lt;em&gt;could&lt;/em&gt; generate a migration and run it, but then we’d have to worry about generating tokens themselves. The &lt;code&gt;CrudUsers.ForgotPassword&lt;/code&gt; action class &lt;em&gt;does not generate tokens&lt;/em&gt;. I’d rather not have to deal with that logic, so we’ll lean on &lt;em&gt;yet another plugin&lt;/em&gt;, the &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Doesn’t it seem like I love plugins? In truth, I just am very lazy, so I lean on them heavily. Write once, use forever.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Lets install it first:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require muffin/tokenize
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll need to enable it and run it’s migrations:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# enable the plugin (with routes and bootstrapping)
-bin/cake plugin load Muffin/Tokenize --bootstrap --routes
-
-# run migrations
-bin/cake migrations migrate --plugin Muffin/Tokenize
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin doesn’t actually store tokens in the &lt;code&gt;users&lt;/code&gt; table. It creates a separate table and stores them there. For our next act, we’ll be actually sending the email and properly verifying that the user exists. Let’s save our progress for now.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json composer.lock config/Migrations/* config/bootstrap.php src/Controller/UsersController.php
-git commit -m &quot;Initial setup for password reset flow&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;event-listeners-and-mailers&quot;&gt;Event Listeners and Mailers&lt;/h2&gt;
-
-&lt;p&gt;In order to actually trigger email sending, we’re going to create a few classes and traits. Specifically, we need to:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Be able to properly retrieve tokens from our related table&lt;/li&gt;
-  &lt;li&gt;Ensure we send emails&lt;/li&gt;
-  &lt;li&gt;Verify tokens correctly&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;finding-muffin-tokens&quot;&gt;Finding muffin tokens&lt;/h3&gt;
-
-&lt;p&gt;First things first, we’ll need to be able to lookup a token. To do so, we’ll need to add the &lt;code&gt;Muffin/Tokenize.Tokenize&lt;/code&gt; behavior to our &lt;code&gt;UsersTable::initialize()&lt;/code&gt; method, located in &lt;code&gt;src/Model/Table/UsersTable.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;Muffin/Tokenize.Tokenize&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that the behavior is loaded, we have setup a relation from the &lt;code&gt;UsersTable&lt;/code&gt; to the &lt;code&gt;TokensTable&lt;/code&gt; from the &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin. We’ll also need a custom &lt;code&gt;find&lt;/code&gt; method to bind that in.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Find methods are functions that describe how to query a table for entities. You can chain multiple find methods together to create new, more powerful finds. The built-in finds are &lt;code&gt;all&lt;/code&gt;, &lt;code&gt;list&lt;/code&gt;, and &lt;code&gt;threaded&lt;/code&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I personally like placing finds in traits, so that on the off-chance I need to use them elsewhere, I can. It also allows me to test the finds in isolation of any customizations performed in &lt;code&gt;Table&lt;/code&gt; classes. The following should go in &lt;code&gt;src/Table/Traits/TokenFinderTrait.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Table\Traits;
-
-trait TokenFinderTrait
-{
-    /**
-     * Find user based on token
-     *
-     * @param \Cake\ORM\Query $query The query to find with
-     * @param array $options The options to find with
-     * @return \Cake\ORM\Query The query builder
-     */
-    public function findToken($query, $options)
-    {
-        return $this-&amp;gt;find()-&amp;gt;matching(&#39;Tokens&#39;, function ($q) use ($options) {
-            return $q-&amp;gt;where([&#39;Tokens.token&#39; =&amp;gt; $options[&#39;token&#39;]]);
-        });
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will retrieve a user that is associated with a given token. In order to use this trait, you’ll need to add the following &lt;em&gt;inside&lt;/em&gt; the &lt;code&gt;UsersTable&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Table\Traits\TokenFinderTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can commit this small change now:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Table/UsersTable.php src/Model/Table/Traits/TokenFinderTrait.php
-git commit -m &quot;Enable finding reset tokens&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;event-listeners&quot;&gt;Event Listeners&lt;/h3&gt;
-
-&lt;p&gt;Halfway there. The &lt;code&gt;CrudUsers.ForgotPassword&lt;/code&gt; action class uses the &lt;code&gt;afterForgotPassword&lt;/code&gt; event to do the heavy lifting of notifying users of a password reset. We’ll need to handle it in our own event listener. You can do this via either a callable class - boo, hiss, hard to test - or via a nice Listener class. I’m going to do the latter, because it is cleaner. Add the following to &lt;code&gt;src/Listener/UsersListener.php&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Listener;
-
-use Cake\Event\Event;
-use Cake\Mailer\MailerAwareTrait;
-use Cake\ORM\TableRegistry;
-use Crud\Listener\BaseListener;
-
-/**
- * Users Listener
- */
-class UsersListener extends BaseListener
-{
-    use MailerAwareTrait;
-
-    /**
-     * Default config for this object.
-     *
-     * @var array
-     */
-    protected $_defaultConfig = [
-        &#39;mailer&#39; =&amp;gt; &#39;Users.User&#39;,
-    ];
-
-    /**
-     * Callbacks definition
-     *
-     * @return array
-     */
-    public function implementedEvents()
-    {
-        return [
-            &#39;Crud.afterForgotPassword&#39; =&amp;gt; &#39;afterForgotPassword&#39;,
-        ];
-    }
-
-    /**
-     * After Forgot Password
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function afterForgotPassword(Event $event)
-    {
-        if (!$event-&amp;gt;subject-&amp;gt;success) {
-            return;
-        }
-
-        $table = TableRegistry::get($this-&amp;gt;_controller()-&amp;gt;modelClass);
-        $token = $table-&amp;gt;tokenize($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;id);
-
-        if ($this-&amp;gt;config(&#39;mailer&#39;)) {
-            $this-&amp;gt;getMailer($this-&amp;gt;config(&#39;mailer&#39;))-&amp;gt;send(&#39;forgotPassword&#39;, [
-                $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;toArray(),
-                $token,
-            ]);
-        }
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is a basic &lt;a href=&quot;http://book.cakephp.org/3.0/en/core-libraries/events.html#registering-listeners&quot;&gt;event listener&lt;/a&gt;. We define a list of &lt;code&gt;implementedEvents&lt;/code&gt;, map them to functions, and have our event logic in those functions. In this case, we’re using Crud internals to automatically get stuff like:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The current controller’s model&lt;/li&gt;
-  &lt;li&gt;Ensure we implement a listener in the form that Crud wants (which is merely a bit of sugar on top of a regular CakePHP event listener)&lt;/li&gt;
-  &lt;li&gt;Get and set custom configuration.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;One thing you’ll notice is that we’ve added the &lt;code&gt;MailerAwareTrait&lt;/code&gt;. This trait is used to enable usage of CakePHP &lt;code&gt;Mailers&lt;/code&gt;, which are classes that store reusable email configuration. They are new in CakePHP 3.1, and while it’s certainly not how I used to write emails, I’ve come to appreciate them.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;It’s classes and traits all the way down! How do I keep track of all of these things? It’s mostly practice, as you can certainly do without most of this, but the separation allows us to cleanly refactor bits and pieces of code, as well as test individual pieces of logic.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;In our listener, we’ve specified the &lt;code&gt;UserMailer&lt;/code&gt;, which lives in &lt;code&gt;src/Mailer/UserMailer.php&lt;/code&gt;. We are using &lt;code&gt;forgotPassword&lt;/code&gt; method of that mailer to send our email. If you’ve ever sent an email in CakePHP, you’ll be right at home. If not, it’s a pretty easy read. Below is the contents of that class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Mailer;
-
-use Cake\Mailer\Mailer;
-
-class UserMailer extends Mailer
-{
-    /**
-     * Email sent on password recovery requests
-     *
-     * @param array $user User information, must includer email and username
-     * @param string $token Token used for validation
-     * @return \Cake\Mailer\Mailer
-     */
-    public function forgotPassword($user, $token)
-    {
-        return $this-&amp;gt;to($user[&#39;email&#39;])
-            -&amp;gt;subject(&#39;Reset your password&#39;)
-            -&amp;gt;template(&#39;forgot_password&#39;)
-            -&amp;gt;layout(false)
-            -&amp;gt;set([
-                &#39;token&#39; =&amp;gt; $token,
-            ])
-            -&amp;gt;emailFormat(&#39;html&#39;);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We have our listener and mailer setup, so now all we have to do is attach it to Crud and test it out. To begin, add the following line to your &lt;code&gt;UsersController&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;addListener(&#39;Users&#39;, &#39;App\Listener\UsersListener&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll need &lt;code&gt;html&lt;/code&gt; and &lt;code&gt;text&lt;/code&gt; templates for sending out these emails. The following are what I use in &lt;code&gt;src/Template/Email/html/forgot_password.ctp&lt;/code&gt; and &lt;code&gt;src/Template/Email/text/forgot_password.ctp&lt;/code&gt; (in that order):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Routing\Router;
-$url = Router::url(
-    [
-        &#39;controller&#39; =&amp;gt; &#39;users&#39;,
-        &#39;action&#39; =&amp;gt; &#39;verify&#39;,
-        $token
-    ],
-    true
-);
-?&amp;gt;
-&amp;lt;html&amp;gt;
-&amp;lt;head&amp;gt;
-    &amp;lt;title&amp;gt;&amp;lt;?= $this-&amp;gt;fetch(&#39;title&#39;) ?&amp;gt;&amp;lt;/title&amp;gt;
-&amp;lt;/head&amp;gt;
-&amp;lt;body&amp;gt;
-    &amp;lt;?= $this-&amp;gt;fetch(&#39;content&#39;) ?&amp;gt;
-    &amp;lt;h1&amp;gt;Set your password...&amp;lt;/h1&amp;gt;
-    &amp;lt;p&amp;gt;
-        A password recovery link has been requested for your account. If you
-        haven&#39;t requested this, please ignore this email.
-    &amp;lt;/p&amp;gt;
-    &amp;lt;p&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(&#39;Click here to reset your password&#39;, $url) ?&amp;gt;
-    &amp;lt;/p&amp;gt;
-&amp;lt;/body&amp;gt;
-&amp;lt;/html&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Routing\Router;
-$url = Router::url(
-    [
-        &#39;controller&#39; =&amp;gt; &#39;users&#39;,
-        &#39;action&#39; =&amp;gt; &#39;verify&#39;,
-        $token
-    ],
-    true
-);
-?&amp;gt;
-
-A password recovery link has been requested for your account. If you haven&#39;t requested this, please ignore this email.
-
-Click here to reset your password: &amp;lt;?= $url ?&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, we’ll need a &lt;code&gt;forgotPassword&lt;/code&gt; template, which should go in &lt;code&gt;src/Template/Users/forgot_password.ctp&lt;/code&gt;. This will be used to present the forgot password form to our users.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form&quot;&amp;gt;
-&amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render(&#39;auth&#39;) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
-    &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Please enter your email to send a reset email&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;email&#39;) ?&amp;gt;
-    &amp;lt;/fieldset&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Reset password&#39;)); ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Since we’re in a good place regarding the “forgot password” step, lets save our progress.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/UsersController.php src/Listener/UsersListener.php src/Mailer/UserMailer.php src/Template/Email/html/forgot_password.ctp src/Template/Email/text/forgot_password.ctp src/Template/Users/forgot_password.ctp
-git commit -m &quot;Implement forgot-password phase&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;verifying-tokens&quot;&gt;Verifying Tokens&lt;/h3&gt;
-
-&lt;p&gt;Once we are capable of sending emails, we’ll want to verify that the token being sent in the email is both a token we know about and is valid. The &lt;code&gt;ResetPassword&lt;/code&gt; action class does this by emitting a &lt;code&gt;verifyToken&lt;/code&gt; event, which we can listen to in our &lt;code&gt;UsersListener&lt;/code&gt;.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Tokens are a one-time use deal, and the &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin expires them in three days (configurable!).&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We’ll need to first tell the listener that we have an implementation of the event handler by adding the following entry to the array our &lt;code&gt;UsersListener::implementedEvents()&lt;/code&gt; returns:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.verifyToken&#39; =&amp;gt; &#39;verifyToken&#39;,
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now for the implementation, we’ll want to call into the &lt;code&gt;Muffin/Tokenize&lt;/code&gt; plugin and just call &lt;code&gt;verify()&lt;/code&gt; on the token like so:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Before Verify
-     *
-     * @param \Cake\Event\Event $event Event
-     * @return void
-     */
-    public function verifyToken(Event $event)
-    {
-        $event-&amp;gt;subject-&amp;gt;verified = TableRegistry::get(&#39;Muffin/Tokenize.Tokens&#39;)
-            -&amp;gt;verify($event-&amp;gt;subject-&amp;gt;token);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We also need the &lt;code&gt;reset_password&lt;/code&gt; template. Place the following in &lt;code&gt;src/Template/Users/reset_password.ctp&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;users form&quot;&amp;gt;
-&amp;lt;?= $this-&amp;gt;Flash-&amp;gt;render(&#39;auth&#39;) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create() ?&amp;gt;
-    &amp;lt;fieldset&amp;gt;
-        &amp;lt;legend&amp;gt;&amp;lt;?= __(&#39;Enter a new password to reset your account&#39;) ?&amp;gt;&amp;lt;/legend&amp;gt;
-        &amp;lt;?= $this-&amp;gt;Form-&amp;gt;input(&#39;password&#39;) ?&amp;gt;
-    &amp;lt;/fieldset&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;button(__(&#39;Signin&#39;)) ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end() ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That’s it, that’s all! Lets commit it!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/UsersListener.php src/Template/Users/reset_password.ctp
-git commit -m &quot;Verify user tokens&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;testing-the-whole-flow&quot;&gt;Testing the Whole Flow&lt;/h3&gt;
-
-&lt;p&gt;In order to send email, we’ll need to configure a transport properly. You can do this in your &lt;code&gt;config/.env&lt;/code&gt; file, by changing the &lt;code&gt;EMAIL_TRANSPORT_DEFAULT_URL&lt;/code&gt; value to the desired configuration. I personally set mine to match my gmail credentials for now, though you’ll likely want to use something a bit more bulletproof. I’m not sure yet what we’ll use once we get to deploying this, but we’ll cross that bridge when we need to. Here is what I set mine to (minus a valid &lt;code&gt;username:password&lt;/code&gt; combination):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;export EMAIL_TRANSPORT_DEFAULT_URL=&quot;smtp://username:password@smtp.gmail.com:587/?client=null&amp;amp;timeout=30&amp;amp;tls=true&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, lets test sending this email. Browse to &lt;code&gt;/users/forgot-password&lt;/code&gt;, enter in the email address you set for your user earlier, submit the form, and check your email. If everything was configured properly - it was for me! - you’ll see an email like the following in your inbox:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/12/03/reset-password-email.png&quot; alt=&quot;reset password email&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Yes, my email avatar is a cat with a kermit hat. Deal with it.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This seems good so far. Click on the link to be taken to the following page:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/12/03/reset-password-page.png&quot; alt=&quot;reset password page&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;And fill in your new password to reset your account.&lt;/p&gt;
-
-&lt;p&gt;Seems legit!&lt;/p&gt;
-
-&lt;h2 id=&quot;default-landing-page&quot;&gt;Default landing page&lt;/h2&gt;
-
-&lt;p&gt;You’ll notice that once you reset your password, you were redirected to the login page. If you try and login, you’ll land right back on the login page with two messages, one saying you are logged in, and one saying you do not have access. This is because we have made the app such that all controller/action pairs &lt;em&gt;must&lt;/em&gt; be individually allowed. Lets fix that and at least allow a landing page.&lt;/p&gt;
-
-&lt;p&gt;For now, our landing page will be the list of blog posts. We’ll need to first ensure that &lt;code&gt;/&lt;/code&gt; points at &lt;code&gt;PostsController::index()&lt;/code&gt;. This is done by editing our application’s routes in &lt;code&gt;config/routes.php&lt;/code&gt;.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Routes are how CakePHP knows what an incoming url points to in the application. A common use for changing routing is to add vanity urls. You can do all sorts of funny stuff with routes, as well see in later posts. CakePHP has some sane defaults that make it easy for developers to get started, which is why our &lt;code&gt;/users/login&lt;/code&gt;, &lt;code&gt;/users/forgot-password&lt;/code&gt;, etc. urls all worked out of the box.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;The default route should currently be as follows:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Pages&#39;, &#39;action&#39; =&amp;gt; &#39;display&#39;, &#39;home&#39;]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’re going to update it to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;index&#39;]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, lets allow access to this action in our &lt;code&gt;PostsController&lt;/code&gt;. We’ll need a custom &lt;code&gt;PostsController::initialize()&lt;/code&gt;. Here is what you should add to the &lt;code&gt;PostsController&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;    /**
-     * Initialization hook method.
-     *
-     * Use this method to add common initialization code like loading components.
-     *
-     * e.g. `$this-&amp;gt;loadComponent(&#39;Security&#39;);`
-     *
-     * @return void
-     */
-    public function initialize()
-    {
-        parent::initialize();
-        $this-&amp;gt;Auth-&amp;gt;allow([&#39;index&#39;]);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Why wouldn’t we have an &lt;code&gt;PostsController::isAuthorized()&lt;/code&gt;? That method applies only to already logged in users. Anonymous users would never be able to access the page, regardless of what you return from &lt;code&gt;isAuthorized()&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;You should now be able to access &lt;code&gt;/&lt;/code&gt;, both before and after logging in. Let’s commit what we have and end for today.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/routes.php src/Controller/PostsController.php
-git commit -m &quot;Allow logged in and anonymous access to an initial / route&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.3&quot;&gt;0.0.3&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Hurray, we have some authentication configured for our application, are sending emails, have figured out how to customize Crud for our usage, and even have a landing page. Tomorrow we’ll work on allowing the blog user to edit their account, and potentially even get to image uploading.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Sat, 03 Dec 2016 01:40:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/03/password-resets-and-email/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/03/password-resets-and-email/</guid>
-        
-        <category>passwords</category>
-        
-        <category>email</category>
         
         <category>cakeadvent-2016</category>
         

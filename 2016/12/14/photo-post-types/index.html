@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Photo Post Types</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/14/photo-post-types/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 14 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="uploads, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Photo Post Types" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/14/photo-post-types/" />
+    <meta property="og:description" content="Part 14 of a series of posts that will help you build out a personal CMS" />
+    <meta property="og:image" content="http://josediazgonzalez.com/images/2016/12/14/baby-upload.png" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Photo Post Types" />
+    <meta name="twitter:description" content="Part 14 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:image" content="http://josediazgonzalez.com/images/2016/12/14/baby-upload.png" />
+    <link rel="alternate" type="application/rss+xml" title="Photo Post Types » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Photo Post Types</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="scaffolding-the-photoposttype-plugin">Scaffolding the PhotoPostType plugin</h2>
+<p>For our photo posts, here are the extra fields we are tracking:</p>
+<ul>
+  <li><code>photo</code>: The name the user used for the image being uploaded</li>
+  <li><code>photo_dir</code>: Path on disk - relative to www_root - where the file will be stored</li>
+  <li><code>photo_path</code>: Path on disk - relative to www_root - where the file will be stored <em>including</em> a sanitized filename</li>
+</ul>
+<p>We’ll also want to validate that our photo is a valid image before attempting to upload it. Finally, we need to upload the image before saving the post itself. Let’s start by baking a <code>PhotoPostType</code> plugin, which should also update our <code>composer.json</code> to update code load paths.</p>
+<pre><code class="language-shell">bin/cake bake plugin PhotoPostType -f
+</code></pre>
+<p>Next, we’ll create a <code>plugins/PhotoPostType/config/bootstrap.php</code> to load our plugin post type.</p>
+<pre><code class="language-php">&lt;?php
+use Cake\Event\Event;
+use Cake\Event\EventManager;
+EventManager::instance()-&gt;on('Posts.PostTypes.get', function (Event $event) {
+  // The key is the Plugin name and the class
+  // The value is what you want to display in the ui
+  $event-&gt;subject-&gt;postTypes['PhotoPostType.PhotoPostType'] = 'blog';
+});
+</code></pre>
+<blockquote>
+  <p>You can remove the <code>plugins/PhotoPostType/config/routes.php</code> file as we wont need it</p>
+</blockquote>
+<p>We’ll want to ensure that the bootstrap file is loaded for this plugin, so check to ensure that your <code>config/bootstrap.php</code> has the following <code>Plugin::load</code> line (update it if need be):</p>
+<pre><code class="language-php">Plugin::load('PhotoPostType', ['bootstrap' =&gt; true, 'routes' =&gt; false]);
+</code></pre>
+<p>Remember to save your work!</p>
+<pre><code class="language-shell">git add composer.json config/bootstrap.php plugins/PhotoPostType
+git commit -m "Scaffold the PhotoPostType plugin"
+</code></pre>
+<h2 id="photoposttype-form-fields-and-validation">PhotoPostType form fields and validation</h2>
+<p>We will now need the <code>PostType</code> class that contains the code for our form. Here are the initial contents of <code>plugins/PhotoPostType/PostType/PhotoPostType.php</code>:</p>
+<pre><code class="language-php">&lt;?php
+namespace PhotoPostType\PostType;
+use App\PostType\AbstractPostType;
+use Cake\Form\Schema;
+use Cake\Validation\Validator;
+class PhotoPostType extends AbstractPostType
+{
+    protected function _buildSchema(Schema $schema)
+    {
+        $schema = parent::_buildSchema($schema);
+        $schema-&gt;addField('photo', ['type' =&gt; 'file']);
+        $schema-&gt;addField('photo_dir', ['type' =&gt; 'hidden']);
+        $schema-&gt;addField('photo_path', ['type' =&gt; 'hidden']);
+        return $schema;
+    }
+    protected function _buildValidator(Validator $validator)
+    {
+        $validator = parent::_buildValidator($validator);
+        $validator-&gt;add('photo', 'valid-image', [
+            'rule' =&gt; ['uploadedFile', [
+                'types' =&gt; [
+                    'image/bmp',
+                    'image/gif',
+                    'image/jpeg',
+                    'image/pjpeg',
+                    'image/png',
+                    'image/x-windows-bmp',
+                    'image/x-png',
+                ],
+                'optional' =&gt; true,
+            ]],
+            'message' =&gt; 'The uploaded photo was not a valid image'
+        ]);
+        return $validator;
+    }
+}
+</code></pre>
+<p>Pretty simple. We’re adding a few fields for the form - two of which are hidden - and then adding a validation rule to allow <em>only</em> images. Seems pretty straightforward. I’ll also commit my changes here.</p>
+<pre><code class="language-shell">git add plugins/PhotoPostType/src/PostType/PhotoPostType.php
+git commit -m "Initial form display for photo post types"
+</code></pre>
+<h3 id="handling-file-uploads">Handling file uploads</h3>
+<p>We’re going to need to actually write the files to disk. To do this, I’m going to use the wonderful <a href="http://flysystem.thephpleague.com/">League/Flysystem</a> library. This will abstract actual file writing for me, and also potentially allow me to upload images to non-local storage.</p>
+<p>All the file upload logic begins in our <code>PhotoPostType::transformData()</code> method. Here is the body of that method:</p>
+<pre><code class="language-php">public function transformData($data)
+{
+    $photoExtension = pathinfo($data['photo']['name'], PATHINFO_EXTENSION);
+    $photoDirectory  = 'files/Posts/photo/' . uniqid();
+    $photoFilename = uniqid() . '.' . $photoExtension;
+    $photoPath $photoDirectory . '/' . $photoFilename
+    $postAttributes = [
+        ['name' =&gt; 'photo_dir', 'value' =&gt; $photoDirectory],
+        ['name' =&gt; 'photo', 'value' =&gt; $data['photo']['name']],
+        ['name' =&gt; 'photo_path', 'value' =&gt; $photoPath],
+    ];
+    $success = $this-&gt;writeFile($data['photo'], $photoPath);
+    unset($data['photo'], $data['photo_dir'], $data['photo_path'] $data['post_attributes']);
+    if (!$success) {
+        return $data;
+    }
+    $data['post_attributes'] = $postAttributes;
+    return $data;
+}
+</code></pre>
+<p>Let’s walk through this:</p>
+<ul>
+  <li>I get the photo extension using the <code>pathinfo</code> method. This might fail if there was no original extension on the uploaded file, so in a future revision, we’ll want to properly detect the mimetype and remap the extension, but this is good for now.</li>
+  <li>I’m using <code>uniqid</code> to get a filepath on disk. I won’t currently be handling vacuuming old file uploads, so we want to ensure we don’t overwrite existing files. A good alternative would be to use <code>Text::uuid()</code>, but I don’t expect any issues for my use case.</li>
+  <li>We’ll need to write the file to disk, and that logic is shown elsewhere.</li>
+  <li>If the file is saved successfully, we add the extra post attributes, and otherwise just return as is. We would be better suited in handling this error, but I’ll leave that up to the reader.</li>
+</ul>
+<p>What does file uploading look like? First, add the following <code>use</code> calls to the top of the class for classes that will be, well, used by our file uploading mechanism:</p>
+<pre><code class="language-php">use League\Flysystem\Adapter\Local;
+use League\Flysystem\AdapterInterface;
+use League\Flysystem\FileNotFoundException;
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemInterface;
+</code></pre>
+<p>Here is the <code>PhotoPostType::writeFile()</code> method (and related helper methods):</p>
+<pre><code class="language-php">protected function writeFile(array $filedata, $filepath)
+{
+    $success = false;
+    $stream = @fopen($filedata['tmp_name'], 'r');
+    if ($stream === false) {
+        return $success;
+    }
+    $filesystem = $this-&gt;filesystem();
+    $success = $filesystem-&gt;writeStream($filepath, $stream);
+    fclose($stream);
+    return $success;
+}
+protected function filesystem()
+{
+    $adapter = new Local(WWW_ROOT);
+    $filesystem = new Filesystem($adapter, [
+        'visibility' =&gt; AdapterInterface::VISIBILITY_PUBLIC
+    ]);
+    return $filesystem;
+}
+</code></pre>
+<p>A bit to go through, but a pretty-straightforward read I think. Some implementation notes:</p>
+<ul>
+  <li>I typically use streams for writing to flysystem. You can also write content directly, but as the file already exists locally, using a file stream is the most natural.</li>
+  <li>If we can’t open the temp file, we fail the write.</li>
+  <li>I’ve used an extra method to get the <code>Filesystem</code> object, which will allow me to mock the filesystem for tests.</li>
+</ul>
+<p>Neat! Let’s save our progress.</p>
+<pre><code class="language-shell">git add plugins/PhotoPostType/src/PostType/PhotoPostType.php
+git commit -m "Handle file uploads for the photo post type"
+</code></pre>
+<h3 id="displaying-photos-in-the-frontend">Displaying Photos in the frontend</h3>
+<p>Our default <code>src/Template/Element/post_type/photo-index.ctp</code> and <code>src/Template/Element/post_type/photo-view.ctp</code> template files are pretty trivial. I’m simply going to show the post type and then a link to the image in each:</p>
+<pre><code class="language-php">&lt;h3&gt;&lt;?= $post-&gt;get('title') ?&gt;&lt;/h3&gt;
+&lt;div&gt;
+    &lt;?= $this-&gt;Html-&gt;image('../' . $post-&gt;get('photo_path')) ?&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Here is what it looks like (using my favorite picture of <a href="https://twitter.com/grmpyprogrammer">Chris Hartjes</a>):</p>
+<p><img src="/images/2016/12/14/baby-upload.png" alt="baby image" /></p>
+<p>Remember to commit your new files.</p>
+<pre><code class="language-shell">git add plugins/PhotoPostType/src/Template/Element/post_type/photo-index.ctp plugins/PhotoPostType/src/Template/Element/post_type/photo-view.ctp
+git commit -m "Add default photo templates"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.14">0.0.14</a>.</p>
+</blockquote>
+<p>We now have our custom photo post type, and it’s pretty bad-ass. While the admin ui could use some work - how do you know you’ve already uploaded an image? - we’re pretty far along.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/14/photo-post-types/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-14 01:37:00 +0000">14 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 14</strong> of <strong>19</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li>Photo Post Types</li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/14/photo-post-types/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/14/photo-post-types/';
+        var disqus_title      = "CakeAdvent-2016: Photo Post Types";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

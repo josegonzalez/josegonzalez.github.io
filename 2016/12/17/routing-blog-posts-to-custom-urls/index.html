@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Routing Blog Posts to custom urls</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 17 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="routing, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Routing Blog Posts to custom urls" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/" />
+    <meta property="og:description" content="Part 17 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Routing Blog Posts to custom urls" />
+    <meta name="twitter:description" content="Part 17 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Routing Blog Posts to custom urls » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Routing Blog Posts to custom urls</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="routing-built-in-urls">Routing built-in urls</h2>
+<p>One thing you may have noticed is that we haven’t really touched our routing files. Up till now, we’ve relied on the default CakePHP routes to handle where our requests are sent. Because we have allowed users to specify arbitrary urls, we’ll need to create custom routes to handle both our existing urls <em>as well as</em> the custom routes we’ve specified for each post.</p>
+<p>I’ve updated my <code>config/routes.php</code> to the following:</p>
+<pre><code class="language-php">&lt;?php
+use Cake\Core\Plugin;
+use Cake\Routing\RouteBuilder;
+use Cake\Routing\Router;
+use Cake\Routing\Route\DashedRoute;
+Router::defaultRouteClass(DashedRoute::class);
+Router::scope('/', function (RouteBuilder $routes) {
+    $routes-&gt;connect('/', ['controller' =&gt; 'Posts', 'action' =&gt; 'home']);
+    $routes-&gt;connect('/login', ['controller' =&gt; 'Users', 'action' =&gt; 'login']);
+    $routes-&gt;connect('/logout', ['controller' =&gt; 'Users', 'action' =&gt; 'logout']);
+    $routes-&gt;connect('/forgot-password', ['controller' =&gt; 'Users', 'action' =&gt; 'forgot-password']);
+    $routes-&gt;connect('/reset-password/*', ['controller' =&gt; 'Users', 'action' =&gt; 'forgot-password']);
+});
+Router::scope('/admin', function (RouteBuilder $routes) {
+    $routes-&gt;scope('/posts', ['controller' =&gt; 'Posts'], function (RouteBuilder $routes) {
+        $routes-&gt;connect('/', ['action' =&gt; 'index']);
+        $routes-&gt;fallbacks();
+    });
+    $routes-&gt;connect('/profile', ['controller' =&gt; 'Users', 'action' =&gt; 'edit']);
+});
+Plugin::routes();
+</code></pre>
+<p>A few notes:</p>
+<ul>
+  <li>You can specify a “default route class”. This is used for inflecting urls correctly, and I’m using the CakePHP default of <code>DashedRoute</code>.</li>
+  <li>You can specify one or more route “scopes”, which are kinda like route prefixes. Routes specified within a scope have that scope prefixed onto any matching urls.</li>
+  <li>Route scopes can have default values specified, as we do for anything in <code>/admin/posts</code>.</li>
+  <li>Route scopes can be embedded.</li>
+</ul>
+<p>Now you can use the new url patterns for any of the existing pages.</p>
+<pre><code class="language-shell">git add config/routes.php
+git commit -m "Specify all hardcoded app routes"
+</code></pre>
+<h2 id="routing-custom-urls">Routing Custom Urls</h2>
+<p>This part is a bit more complex. We need to do the following:</p>
+<ul>
+  <li>Match a custom <code>/:url</code> catch-all pattern <em>only</em> when there is a matching url in the <code>posts</code> table.</li>
+  <li>Allow access to <code>PostsController::view()</code>.</li>
+  <li>Ensure the correct variables are set for the <code>PostsController::view()</code> template layer.</li>
+  <li>Add templates for <code>PostsController::view()</code>.</li>
+  <li>Set default views for the <code>PostsController::view()</code> action.</li>
+</ul>
+<p>We’ll do this piecemeal.</p>
+<h3 id="custom-route-classes">Custom Route Classes</h3>
+<p>In order to match our catch-all route, we’ll need a <code>PostRoute</code>. Lets first connect the route in our <code>config/routes.php</code> under the <code>/</code> scope:</p>
+<pre><code class="language-php">$routes-&gt;connect(
+    '/:url',
+    ['controller' =&gt; 'Posts', 'action' =&gt; 'view'],
+    ['routeClass' =&gt; 'PostRoute']
+);
+</code></pre>
+<p>Next, we’ll add the following to our <code>PostRoute</code> class, located in <code>src/Routing/Route/PostRoute.php</code>.</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Routing\Route;
+use Cake\ORM\TableRegistry;
+use Cake\Routing\Route\Route;
+class PostRoute extends Route
+{
+    public function parse($url, $method = '')
+    {
+        $params = parent::parse($url, $method);
+        if (empty($params)) {
+            return false;
+        }
+        $PostsTable = TableRegistry::get('Posts');
+        $post = $PostsTable-&gt;find()-&gt;where(['url' =&gt; '/' . $params['url']])-&gt;first();
+        if (empty($post)) {
+            return false;
+        }
+        $params['pass'] = [$post-&gt;id];
+        return $params;
+    }
+}
+</code></pre>
+<p>This will perform a lookup for all urls that do not match another route. If the url doesn’t exist in our table, we simply don’t parse that request. If it does, we set the post id as the first passed argument.</p>
+<p>Next, we need to modify our <code>PostsController::initialize()</code> method to allow access to the <code>PostsController::view()</code> action:</p>
+<pre><code class="language-php">$this-&gt;Auth-&gt;allow(['home', 'view']);
+</code></pre>
+<p>Now that this is set, we can use the <code>Crud.beforeFind</code> event to modify the finder to return related post data from the <code>post_attributes</code> database table. Add the following to your <code>PostsListener::implementedEvents()</code> method:</p>
+<pre><code class="language-php">'Crud.beforeFind' =&gt; 'beforeFind',
+</code></pre>
+<p>And here is the logic for the new <code>PostsListener::beforeFind()</code> and friends:</p>
+<pre><code class="language-php">/**
+ * Before Find
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeFind(Event $event)
+{
+    if ($this-&gt;_request()-&gt;action === 'view') {
+        $this-&gt;beforeFindView($event);
+        return;
+    }
+}
+/**
+ * Before Find View Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeFindView(Event $event)
+{
+    $event-&gt;subject-&gt;query-&gt;contain(['PostAttributes']);
+}
+</code></pre>
+<p>Pretty straightforward. I also created a <code>src/Template/Posts/view.ctp</code>:</p>
+<pre><code class="language-php">&lt;div class="posts index large-12 medium-12 columns content"&gt;
+    &lt;?php $postType = $post-&gt;getPostType(); ?&gt;
+    &lt;?= $this-&gt;element($postType-&gt;viewTemplate(), ['post' =&gt; $postType]); ?&gt;
+&lt;/div&gt;
+</code></pre>
+<p>And one for the <code>DefaultTheme</code> plugin in <code>plugins/DefaultTheme/src/Template/Posts/view.ctp</code>:</p>
+<pre><code class="language-php">&lt;div class="wrapper"&gt;
+    &lt;ul class="post-list"&gt;
+        &lt;li&gt;
+            &lt;?php $postType = $post-&gt;getPostType(); ?&gt;
+            &lt;?= $this-&gt;element($postType-&gt;viewTemplate(), ['post' =&gt; $postType]); ?&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+</code></pre>
+<p>If you browse to the homepage of the CMS and click any of the URLs, you should now see content :)</p>
+<p>Let’s stop here for today.</p>
+<pre><code class="language-shell">git add config/routes.php plugins/DefaultTheme/src/Template/Posts/view.ctp src/Controller/PostsController.php src/Listener/PostsListener.php src/Routing/Route/PostRoute.php src/Template/Posts/view.ctp
+git commit -m "Implement custom routing for blog posts"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.17">0.0.17</a>.</p>
+</blockquote>
+<p>Awh yis, our custom application routing layer is complete, and our blog is looking a bit sharper now. We still have a few more features to fill in, but for our next post, we’ll take a look optimizing email sends for password resets.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-17 05:21:00 +0000">17 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 17</strong> of <strong>19</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li>Routing Blog Posts to custom urls</li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/17/routing-blog-posts-to-custom-urls/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/';
+        var disqus_title      = "CakeAdvent-2016: Routing Blog Posts to custom urls";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>
