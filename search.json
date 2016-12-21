@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Sending Responsive Emails",
+    "url": "/2016/12/20/sending-responsive-emails/",
+    "description": "Part 20 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","emails","help","part","personal","posts","responsive","sending","series","will"]
+  },
+  {
+    "type": "post",
     "title": "Cosmetic Admin Cleanup",
     "url": "/2016/12/19/admin-cleanup/",
     "description": "Part 19 of a series of posts that will help you build out a personal CMS",
@@ -1861,6 +1868,18 @@
     "title": "application-rules",
     "url": "/tags/application-rules/",
     "tokens": ["application","rules"]
+  },
+  {
+    "type": "tag",
+    "title": "emails",
+    "url": "/tags/emails/",
+    "tokens": ["emails"]
+  },
+  {
+    "type": "tag",
+    "title": "email-preview",
+    "url": "/tags/email-preview/",
+    "tokens": ["email","preview"]
   },
   {
     "type": "null",

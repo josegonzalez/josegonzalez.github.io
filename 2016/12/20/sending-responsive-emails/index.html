@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Sending Responsive Emails</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/20/sending-responsive-emails/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 20 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="emails, email-preview, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Sending Responsive Emails" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/20/sending-responsive-emails/" />
+    <meta property="og:description" content="Part 20 of a series of posts that will help you build out a personal CMS" />
+    <meta property="og:image" content="http://josediazgonzalez.com/images/2016/12/20/better-email-preview.png" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Sending Responsive Emails" />
+    <meta name="twitter:description" content="Part 20 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:image" content="http://josediazgonzalez.com/images/2016/12/20/better-email-preview.png" />
+    <link rel="alternate" type="application/rss+xml" title="Sending Responsive Emails » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Sending Responsive Emails</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="email-previewing">Email Previewing</h2>
+<p>One thing that has always annoyed me about developing emails within an application is that the preview step is pretty manual. I do agree that all emails should be seen in the actual email clients - all clients render at least slightly differently - but I personally hate the following workflow:</p>
+<ul>
+  <li>Update email</li>
+  <li>Send test email to client</li>
+  <li>Wait until client has received the email</li>
+  <li>Check email</li>
+  <li>Repeat until done</li>
+</ul>
+<p>It’s sort of annoying to go through, and not very nice for rapid application development. Fortunately, there is a solution! We’ll use my <a href="https://github.com/josegonzalez/cakephp-mail-preview">MailPreview</a> plugin to shorten the development cycle significantly. Start off my installing it:</p>
+<pre><code class="language-shell">composer require josegonzalez/cakephp-mail-preview
+</code></pre>
+<p>Next, we’ll want to load the plugin (and it’s routes):</p>
+<pre><code class="language-shell">bin/cake plugin load Josegonzalez/MailPreview --routes
+</code></pre>
+<p>The <code>MailPreview</code> plugin integrates with the CakePHP <code>Mailer</code> class, but currently requires a single addition to get previews going. We’ll need to add the following <code>use</code> statement to <code>UserMailer</code> class declaration:</p>
+<pre><code class="language-php">use Josegonzalez\MailPreview\Mailer\PreviewTrait;
+</code></pre>
+<p>And we’ll need to add the trait usage <em>inside</em> of the class:</p>
+<pre><code class="language-php">use PreviewTrait;
+</code></pre>
+<p>Now we can create a <code>MailPreview</code> class for our <code>UserMailer</code>. Think of the <code>MailPreview</code> class as a type of fixture, except it provides testing data for emails instead of databases. I’ll create a <code>UserMailPreview</code> in <code>src/Mailer/Preview/UserMailPreview.php</code> with the following contents:</p>
+<pre><code class="language-php">&lt;?php
+namespace App\Mailer\Preview;
+use Josegonzalez\MailPreview\Mailer\Preview\MailPreview;
+class UserMailPreview extends MailPreview
+{
+    public function forgotPassword()
+    {
+        return $this-&gt;getMailer('User')
+                    -&gt;preview('forgotPassword', [
+                        'example@example.com',
+                        'some-test-token'
+                    ]);
+    }
+}
+</code></pre>
+<p>The usage is pretty straightforward. The <code>PreviewTrait</code> adds a <code>preview()</code> method to the Mailer, which takes in the name of the email and the arguments to send that email. The return is then used to show what the email looks like on screen.</p>
+<p>In order to display the previews, we’ll need to allow the actions if the controller is the <code>MailPreviewController</code>. I added the following to my <code>AppController::initialize()</code> method:</p>
+<pre><code class="language-php">if ($this-&gt;request-&gt;params['controller'] == 'MailPreview') {
+    $this-&gt;Auth-&gt;allow();
+}
+</code></pre>
+<p>If you browse to <code>/mail-preview</code>, you will see a list of your mailers and the emails they contain. If you click on one, you’ll get a weird routing error. Why? Because we are in a plugin, all urls are scoped to this plugin, and since the urls in question are not mapped, boom goes the email. Fix that by adding <code>'plugin' =&gt; null</code> to the urls in your <code>forgot_password.ctp</code> templates, and you should see the following in your browser:</p>
+<p><img src="/images/2016/12/20/email-preview.png" alt="email preview" /></p>
+<blockquote>
+  <p>Always be explicit about your urls!</p>
+</blockquote>
+<p>Pretty good, right? Now we can work on our email to our hearts content! We’ll save our progress here.</p>
+<pre><code class="language-shell">git add composer.json composer.lock config/bootstrap.php src/Controller/AppController.php src/Mailer/UserMailer.php src/Template/Email/html/forgot_password.ctp src/Template/Email/text/forgot_password.ctp src/Mailer/Preview/
+git commit -m "Setup email previews"
+</code></pre>
+<h2 id="displaying-a-responsive-email">Displaying a Responsive Email</h2>
+<p>I more or less am going to grab the layout template from <a href="https://github.com/leemunroe/responsive-html-email-template">leemunroe/responsive-html-email-template</a> with a few minor tweaks:</p>
+<ul>
+  <li>Replaced the <code>&lt;title&gt;</code> element contents with <code>&lt;?= $this-&gt;fetch('title') ?&gt;</code></li>
+  <li>Replaced the body with <code>&lt;?= $this-&gt;fetch('content') ?&gt;</code></li>
+</ul>
+<p>You can modify the email otherwise however you see fit. I placed mine in <code>src/Template/Layout/Email/html/default.ctp</code>. In order to load this layout, I removed <code>-&gt;layout(false)</code> from my <code>UserMailer::forgotPassword()</code> method.</p>
+<p>With a few minor changes, my email now looks like this:</p>
+<p><img src="/images/2016/12/20/better-email-preview.png" alt="better email preview" /></p>
+<p>I’ll save my work for now, but here are a few ideas to try:</p>
+<ul>
+  <li>Setup some sort of email unsubscribe flow.</li>
+  <li>Add images or backgrounds to your emails.</li>
+  <li>Create an <code>EmailHelper</code> to make adding buttons etc. easier.</li>
+</ul>
+<pre><code class="language-shell">git add src/Mailer/UserMailer.php src/Template/Email/html/forgot_password.ctp src/Template/Layout/Email/html/default.ctp
+git commit -m "Nicer html email layout"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.20">0.0.20</a>.</p>
+</blockquote>
+<p>Looks like I lied about what we were going to work on today, but I wanted to go back and show off a neat development feature I’d been working on. I think the results speak for themselves, and hope it was a worthwhile trip. Tomorrow we’ll <em>actually</em> work on selling photos.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/20/sending-responsive-emails/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-20 07:02:00 +0000">20 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 20</strong> of <strong>20</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+      <li>Sending Responsive Emails</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/20/sending-responsive-emails/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/20/sending-responsive-emails/';
+        var disqus_title      = "CakeAdvent-2016: Sending Responsive Emails";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

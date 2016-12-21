@@ -5,9 +5,146 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 19 Dec 2016 19:32:44 +0000</pubDate>
-    <lastBuildDate>Mon, 19 Dec 2016 19:32:44 +0000</lastBuildDate>
+    <pubDate>Wed, 21 Dec 2016 00:52:00 +0000</pubDate>
+    <lastBuildDate>Wed, 21 Dec 2016 00:52:00 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Sending Responsive Emails</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;email-previewing&quot;&gt;Email Previewing&lt;/h2&gt;
+
+&lt;p&gt;One thing that has always annoyed me about developing emails within an application is that the preview step is pretty manual. I do agree that all emails should be seen in the actual email clients - all clients render at least slightly differently - but I personally hate the following workflow:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Update email&lt;/li&gt;
+  &lt;li&gt;Send test email to client&lt;/li&gt;
+  &lt;li&gt;Wait until client has received the email&lt;/li&gt;
+  &lt;li&gt;Check email&lt;/li&gt;
+  &lt;li&gt;Repeat until done&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It’s sort of annoying to go through, and not very nice for rapid application development. Fortunately, there is a solution! We’ll use my &lt;a href=&quot;https://github.com/josegonzalez/cakephp-mail-preview&quot;&gt;MailPreview&lt;/a&gt; plugin to shorten the development cycle significantly. Start off my installing it:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require josegonzalez/cakephp-mail-preview
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll want to load the plugin (and it’s routes):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake plugin load Josegonzalez/MailPreview --routes
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;MailPreview&lt;/code&gt; plugin integrates with the CakePHP &lt;code&gt;Mailer&lt;/code&gt; class, but currently requires a single addition to get previews going. We’ll need to add the following &lt;code&gt;use&lt;/code&gt; statement to &lt;code&gt;UserMailer&lt;/code&gt; class declaration:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Josegonzalez\MailPreview\Mailer\PreviewTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we’ll need to add the trait usage &lt;em&gt;inside&lt;/em&gt; of the class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use PreviewTrait;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we can create a &lt;code&gt;MailPreview&lt;/code&gt; class for our &lt;code&gt;UserMailer&lt;/code&gt;. Think of the &lt;code&gt;MailPreview&lt;/code&gt; class as a type of fixture, except it provides testing data for emails instead of databases. I’ll create a &lt;code&gt;UserMailPreview&lt;/code&gt; in &lt;code&gt;src/Mailer/Preview/UserMailPreview.php&lt;/code&gt; with the following contents:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace App\Mailer\Preview;
+
+use Josegonzalez\MailPreview\Mailer\Preview\MailPreview;
+
+class UserMailPreview extends MailPreview
+{
+    public function forgotPassword()
+    {
+        return $this-&amp;gt;getMailer(&#39;User&#39;)
+                    -&amp;gt;preview(&#39;forgotPassword&#39;, [
+                        &#39;example@example.com&#39;,
+                        &#39;some-test-token&#39;
+                    ]);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The usage is pretty straightforward. The &lt;code&gt;PreviewTrait&lt;/code&gt; adds a &lt;code&gt;preview()&lt;/code&gt; method to the Mailer, which takes in the name of the email and the arguments to send that email. The return is then used to show what the email looks like on screen.&lt;/p&gt;
+
+&lt;p&gt;In order to display the previews, we’ll need to allow the actions if the controller is the &lt;code&gt;MailPreviewController&lt;/code&gt;. I added the following to my &lt;code&gt;AppController::initialize()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;request-&amp;gt;params[&#39;controller&#39;] == &#39;MailPreview&#39;) {
+    $this-&amp;gt;Auth-&amp;gt;allow();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you browse to &lt;code&gt;/mail-preview&lt;/code&gt;, you will see a list of your mailers and the emails they contain. If you click on one, you’ll get a weird routing error. Why? Because we are in a plugin, all urls are scoped to this plugin, and since the urls in question are not mapped, boom goes the email. Fix that by adding &lt;code&gt;&#39;plugin&#39; =&amp;gt; null&lt;/code&gt; to the urls in your &lt;code&gt;forgot_password.ctp&lt;/code&gt; templates, and you should see the following in your browser:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/12/20/email-preview.png&quot; alt=&quot;email preview&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Always be explicit about your urls!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Pretty good, right? Now we can work on our email to our hearts content! We’ll save our progress here.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json composer.lock config/bootstrap.php src/Controller/AppController.php src/Mailer/UserMailer.php src/Template/Email/html/forgot_password.ctp src/Template/Email/text/forgot_password.ctp src/Mailer/Preview/
+git commit -m &quot;Setup email previews&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;displaying-a-responsive-email&quot;&gt;Displaying a Responsive Email&lt;/h2&gt;
+
+&lt;p&gt;I more or less am going to grab the layout template from &lt;a href=&quot;https://github.com/leemunroe/responsive-html-email-template&quot;&gt;leemunroe/responsive-html-email-template&lt;/a&gt; with a few minor tweaks:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Replaced the &lt;code&gt;&amp;lt;title&amp;gt;&lt;/code&gt; element contents with &lt;code&gt;&amp;lt;?= $this-&amp;gt;fetch(&#39;title&#39;) ?&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Replaced the body with &lt;code&gt;&amp;lt;?= $this-&amp;gt;fetch(&#39;content&#39;) ?&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can modify the email otherwise however you see fit. I placed mine in &lt;code&gt;src/Template/Layout/Email/html/default.ctp&lt;/code&gt;. In order to load this layout, I removed &lt;code&gt;-&amp;gt;layout(false)&lt;/code&gt; from my &lt;code&gt;UserMailer::forgotPassword()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;With a few minor changes, my email now looks like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/12/20/better-email-preview.png&quot; alt=&quot;better email preview&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’ll save my work for now, but here are a few ideas to try:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Setup some sort of email unsubscribe flow.&lt;/li&gt;
+  &lt;li&gt;Add images or backgrounds to your emails.&lt;/li&gt;
+  &lt;li&gt;Create an &lt;code&gt;EmailHelper&lt;/code&gt; to make adding buttons etc. easier.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Mailer/UserMailer.php src/Template/Email/html/forgot_password.ctp src/Template/Layout/Email/html/default.ctp
+git commit -m &quot;Nicer html email layout&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.20&quot;&gt;0.0.20&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Looks like I lied about what we were going to work on today, but I wanted to go back and show off a neat development feature I’d been working on. I think the results speak for themselves, and hope it was a worthwhile trip. Tomorrow we’ll &lt;em&gt;actually&lt;/em&gt; work on selling photos.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 20 Dec 2016 07:02:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/20/sending-responsive-emails/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/20/sending-responsive-emails/</guid>
+        
+        <category>emails</category>
+        
+        <category>email-preview</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Cosmetic Admin Cleanup</title>
@@ -1942,318 +2079,6 @@ git commit -m &quot;Use CrudView for password reset flow&quot;
         <category>events</category>
         
         <category>crud-view</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Making the UI usable</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;errata-from-previous-posts&quot;&gt;Errata from previous posts&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The &lt;code&gt;AbstractPostType&lt;/code&gt; class had errors in how it retrieved templates for a &lt;code&gt;PostType&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;The &lt;code&gt;Template&lt;/code&gt; directory for the &lt;code&gt;BlogPostType&lt;/code&gt; plugin was misnamed to &lt;code&gt;Templates&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;There was no way to pre-seed data in a post-type instance for &lt;code&gt;get()&lt;/code&gt; calls.&lt;/li&gt;
-  &lt;li&gt;If the passed in &lt;code&gt;Post&lt;/code&gt; object for a &lt;code&gt;PostType&lt;/code&gt; was missing &lt;code&gt;post_attributes&lt;/code&gt;, an error would appear&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
-
-&lt;h2 id=&quot;fixing-incongruity&quot;&gt;Fixing Incongruity&lt;/h2&gt;
-
-&lt;p&gt;While we have a semblance of working code, a lot of it is a bit all over the place.:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;We broke rendering of the home page (&lt;code&gt;/&lt;/code&gt;).&lt;/li&gt;
-  &lt;li&gt;There isn’t a way to go directly to adding a blog post, and instead we have to type out the url.&lt;/li&gt;
-  &lt;li&gt;The login screen looks different from the rest of the site.&lt;/li&gt;
-  &lt;li&gt;The &lt;code&gt;/users/edit&lt;/code&gt; page has the wrong look and wrong sidebar.&lt;/li&gt;
-  &lt;li&gt;We don’t error check when there is no &lt;code&gt;PostType&lt;/code&gt; set for adding a post.&lt;/li&gt;
-  &lt;li&gt;Our default user-facing theme is, well, lame. No offense CakePHP team, it’s just not the best default theme.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Over the next few posts, let’s fix some of these ux issues.&lt;/p&gt;
-
-&lt;h2 id=&quot;refactoring-posttype-retrieval&quot;&gt;Refactoring PostType retrieval&lt;/h2&gt;
-
-&lt;p&gt;Before we can setup the home page properly, we’ll need to refactor how we retrieve the PostType. I’d really rather not have a bunch of duplicated logic in our template layer when it can very easily go in a helper or elsewhere. I’m going to centralize retrieving the &lt;code&gt;PostType&lt;/code&gt; for an entity&lt;/p&gt;
-
-&lt;p&gt;Now, lets make sure we can retrieve the correct element to display our &lt;code&gt;PostType&lt;/code&gt;. I’ll do so via a Trait on the &lt;code&gt;Post&lt;/code&gt; entity.&lt;/p&gt;
-
-&lt;h3 id=&quot;preparing-traits&quot;&gt;Preparing Traits&lt;/h3&gt;
-
-&lt;p&gt;Looking back at my codebase, I noticed that the &lt;code&gt;Table&lt;/code&gt; directory has a subdirectory for traits, but &lt;code&gt;Entity&lt;/code&gt; does not. Let’s correct that.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;mkdir -p src/Model/Entity/Traits
-git mv src/Model/Entity/PasswordHashingTrait.php src/Model/Entity/Traits/
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Also, update the reference in your &lt;code&gt;User&lt;/code&gt; entity for using this trait:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Entity\Traits\PasswordHashingTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And update the namespace on that trait, or you’re gonna have a bad time:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;namespace App\Model\Entity\Traits;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Committing!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Entity/User.php
-git commit -m &quot;Move PasswordHashingTrait to correct location&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;getting-the-posttype-from-a-post-entity&quot;&gt;Getting the &lt;code&gt;PostType&lt;/code&gt; from a Post Entity&lt;/h3&gt;
-
-&lt;p&gt;This is going to be a bit of refactoring. First, we’re going to add the &lt;code&gt;PostTypesTrait&lt;/code&gt; to our &lt;code&gt;PostsTable&lt;/code&gt;. We’ll also move it into the correct directory.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git mv src/Traits/PostTypesTrait.php src/Model/Table/Traits/
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now add it to the table:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Table\Traits\PostTypesTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And update the namespace on that trait, or you’re gonna have a bad time:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;namespace App\Model\Table\Traits;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll remove it from the &lt;code&gt;PostsListener&lt;/code&gt;. This will temporarily break the application, but bear with me. Once that’s done, we can start working on making it so a &lt;code&gt;Post&lt;/code&gt; entity knows what &lt;code&gt;PostType&lt;/code&gt; it has, and can return it. I’ve created the following &lt;code&gt;PostTypeTrait&lt;/code&gt; at &lt;code&gt;src/Model/Entity/Traits/PostTypeTrait.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Entity\Traits;
-
-use App\Model\Entity\Post;
-use App\Model\Table\PostsTable;
-use Cake\Core\App;
-
-trait PostTypeTrait
-{
-    public function getPostType()
-    {
-        $postTypeClassName = $this-&amp;gt;_postTypeAliasToClass($this-&amp;gt;type);
-        $className = App::className($postTypeClassName, &#39;PostType&#39;);
-        return new $className($this);
-    }
-
-    /**
-     * Returns a class name for a given post type alias
-     *
-     * @param string $typeAlias the alias of a post type class
-     * @return string
-     */
-    protected function _postTypeAliasToClass($typeAlias)
-    {
-        $className = null;
-        $postTypes = PostsTable::postTypes();
-        foreach ($postTypes as $class =&amp;gt; $alias) {
-            if ($alias === $typeAlias) {
-                $className = $class;
-            }
-        }
-        return $className;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You’ll notice I took &lt;code&gt;_postTypeAliasToClass&lt;/code&gt; from &lt;code&gt;PostsListener&lt;/code&gt; and modified it to use the &lt;code&gt;PostsTable&lt;/code&gt; instead. I believe this a better place to put it, but feel free to argue with me. I’ll also remove &lt;code&gt;PostsListener::_postTypeAliasToClass()&lt;/code&gt;, as we’ll be refactoring the &lt;code&gt;PostsListener&lt;/code&gt; to use my new setup.&lt;/p&gt;
-
-&lt;p&gt;Add the above trait &lt;em&gt;inside&lt;/em&gt; of your &lt;code&gt;Post&lt;/code&gt; entity class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Entity\Traits\PostTypeTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lets commit our changes for now.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/Model/Entity/Post.php src/Model/Entity/Traits/PostTypeTrait.php src/Model/Table/PostsTable.php src/Traits/PostTypesTrait.php -&amp;gt; src/Model/Table/Traits/PostTypesTrait.php
-git commit -m &quot;Move post type retrieval into the Post entity&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;refactoring-postslistener&quot;&gt;Refactoring PostsListener&lt;/h3&gt;
-
-&lt;p&gt;Because we’ve basically kneecapped our &lt;code&gt;PostsListener&lt;/code&gt;, the whole admin is probably flipping a crap. I’ll begin by changing &lt;code&gt;PostsListener::_setPostType()&lt;/code&gt; to accept an &lt;code&gt;AbstractPostType&lt;/code&gt; instance. Add the following &lt;code&gt;use&lt;/code&gt; call to the top of the &lt;code&gt;PostsListener&lt;/code&gt; class declaration:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use App\PostType\AbstractPostType;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, change the &lt;code&gt;PostsListener::_setPostType()&lt;/code&gt; method to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Set the post type for add/edit actions
- *
- * @param \Cake\Event\Event $event Event
- * @param string $postType the name of a post type class
- * @return void
- */
-protected function _setPostType(Event $event, AbstractPostType $postType)
-{
-    $fields = [];
-    foreach ($postType-&amp;gt;schema()-&amp;gt;fields() as $field) {
-        $fields[$field] = [
-            &#39;type&#39; =&amp;gt; $postType-&amp;gt;schema()-&amp;gt;fieldType($field)
-        ];
-    }
-
-    $viewVars = $postType-&amp;gt;viewVars();
-    $viewVars[&#39;fields&#39;] = $fields;
-    $this-&amp;gt;_controller()-&amp;gt;set($viewVars);
-    $event-&amp;gt;subject-&amp;gt;set([&#39;entity&#39; =&amp;gt; $postType]);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we need to fix all references to this method. I’ve changed &lt;code&gt;PostsListener::beforeRenderAdd()&lt;/code&gt; almost completely, and it’s much smaller.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Render Add Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeRenderAdd(Event $event)
-{
-    $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
-    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type = $passedArgs[0];
-    $this-&amp;gt;_setPostType($event, $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;getPostType());
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;PostsListener::beforeRenderEdit()&lt;/code&gt; gets a similar facelift.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Render Edit Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeRenderEdit(Event $event)
-{
-    $entity = $event-&amp;gt;subject-&amp;gt;entity;
-    $this-&amp;gt;_setPostType($event, $entity-&amp;gt;getPostType());
-    if ($this-&amp;gt;_request()-&amp;gt;is(&#39;get&#39;)) {
-        $this-&amp;gt;_request()-&amp;gt;data = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;data($entity);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, the &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; method needs a minor change. Right after we set the &lt;code&gt;type&lt;/code&gt; on the entity, we’ll remove the following three lines and replace them with:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$postType = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;getPostType();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That’s it, our admin dashboard should be in working order again. Let’s save our work:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php
-git commit -m &quot;Fix PostsListener&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;render--properly&quot;&gt;Render &lt;code&gt;/&lt;/code&gt; properly&lt;/h2&gt;
-
-&lt;p&gt;Our user will rely heavily on themes, but the default state of the blog should be useful. First, lets remove the &lt;code&gt;PostsController::home()&lt;/code&gt; action and use the default template for the view layer. I’ve created &lt;code&gt;src/Templates/Posts/home.ctp&lt;/code&gt; with the following contents (feel free to replace what is already there):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;posts index large-12 medium-12 columns content&quot;&amp;gt;
-    &amp;lt;h3&amp;gt;&amp;lt;?= __(&#39;Posts&#39;) ?&amp;gt;&amp;lt;/h3&amp;gt;
-    &amp;lt;?php
-        foreach ($posts as $post) {
-            $postType = $post-&amp;gt;getPostType();
-            echo $this-&amp;gt;element($postType-&amp;gt;indexTemplate(), [&#39;post&#39; =&amp;gt; $postType]);
-        }
-    ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you go to the homepage, you’ll see a bunch of posts, but no actual content for each, even though the &lt;code&gt;BlogPostType&lt;/code&gt; index template displays the &lt;code&gt;body&lt;/code&gt;. What gives?&lt;/p&gt;
-
-&lt;p&gt;Well, the default find for this view &lt;em&gt;does not&lt;/em&gt; include related data. This can be easily ameliorated by using a custom find. As I’ve done before, I’ll create a trait for it in &lt;code&gt;src/Model/Table/Traits/BlogFinderTrait.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Table\Traits;
-
-trait BlogFinderTrait
-{
-    /**
-     * Find posts with related data
-     *
-     * @param \Cake\ORM\Query $query The query to find with
-     * @param array $options The options to find with
-     * @return \Cake\ORM\Query The query builder
-     */
-    public function findBlog($query, $options)
-    {
-        return $this-&amp;gt;find()-&amp;gt;contain(&#39;PostAttributes&#39;);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Simple enough. Let’s add it &lt;em&gt;inside&lt;/em&gt; our &lt;code&gt;PostsTable&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Table\Traits\BlogFinderTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Finally, we’ll need to ensure our finder is in use for the &lt;code&gt;PostsController::home()&lt;/code&gt; action. We’ll add a special case to our &lt;code&gt;PostsListener::beforeHandle()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;_controller()-&amp;gt;request-&amp;gt;action === &#39;home&#39;) {
-    $this-&amp;gt;beforeHandleHome($event);
-
-    return;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here is the &lt;code&gt;PostsListener::beforeHandleHome()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Handle Home Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeHandleHome(Event $event)
-{
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;findMethod&#39;, &#39;blog&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And now you can go to &lt;code&gt;/&lt;/code&gt; and you’ll see all of our blog posts! We’ll commit our changes for today as we’re done here.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Controller/PostsController.php src/Listener/PostsListener.php src/Model/Table/PostsTable.php src/Model/Table/Traits/BlogFinderTrait.php src/Template/Posts/home.ctp
-git commit -m &quot;Finally working homepage&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.10&quot;&gt;0.0.10&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We’ve refactored quite a bit of code, but still have a few things to fix up before we can go back to building out more custom post types. Hopefully we can make quick work of the rest of our todo list.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Sat, 10 Dec 2016 09:32:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/10/making-the-ui-usable/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/10/making-the-ui-usable/</guid>
-        
-        <category>custom-find</category>
-        
-        <category>crud-view</category>
-        
-        <category>refactoring</category>
-        
-        <category>templates</category>
         
         <category>cakeadvent-2016</category>
         
