@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Selling Photos</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/21/selling-photos/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 21 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="payments, stripe, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Selling Photos" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/21/selling-photos/" />
+    <meta property="og:description" content="Part 21 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Selling Photos" />
+    <meta name="twitter:description" content="Part 21 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Selling Photos » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Selling Photos</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="errata-from-previous-post">Errata from previous post</h2>
+<p>There is a missing commit which removed the <code>-&gt;layout(false)</code> call in our <code>UserMailer</code> class.</p>
+<p>Thanks to those who’ve pointed out my derp. These fixes are available as the first commit in the current release.</p>
+<h2 id="allowing-paid-photos">Allowing Paid Photos</h2>
+<p>Rather than making a whole new post type, we’re going to repurpose the existing Photo Post Type. First, lets add a <code>price</code> field to our <code>PhotoPostType::_buildSchema()</code> method.</p>
+<pre><code class="language-php">$schema-&gt;addField('price', ['type' =&gt; 'text']);
+</code></pre>
+<p>We also want to validate that any prices are positive numbers (we’re only allowing whole dollar amounts). I added the following to my <code>PhotoPostType::_buildValidator()</code>:</p>
+<pre><code class="language-php">$validator-&gt;allowEmpty('price');
+$validator-&gt;add('price', 'numeric', [
+    'rule' =&gt; ['naturalNumber', true]
+]);
+</code></pre>
+<p>Simple enough. We can now add pricing to our photos :)</p>
+<pre><code class="language-shell">git add plugins/PhotoPostType/src/PostType/PhotoPostType.php
+git commit -m "Enable photo pricing"
+</code></pre>
+<h2 id="displaying-checkout-buttons-via-stripe">Displaying Checkout Buttons via Stripe</h2>
+<p>We’ll be using Stripe to process payments. Install it via composer:</p>
+<pre><code class="language-shell">composer require stripe/stripe-php
+</code></pre>
+<p>In order to simplify our integration, we’ll be using their <code>checkout</code> product. I created the element <code>src/Template/Element/stripe.ctp</code> in order to contain the client-side portion of the integration:</p>
+<pre><code class="language-php">&lt;?php
+if (empty($post-&gt;get('price'))) {
+    return;
+}
+?&gt;
+&lt;div style="text-align:center;"&gt;
+    &lt;?= $this-&gt;Form-&gt;create(null, ['class' =&gt; 'payment-form', 'url' =&gt; ['plugin' =&gt; 'PhotoPostType', 'controller' =&gt; 'Orders', 'action' =&gt; 'order', 'id' =&gt; $post-&gt;get('id')]]); ?&gt;
+        &lt;script
+            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="&lt;?= \Cake\Core\Configure::read('Stripe.publishablekey') ?&gt;"
+            data-amount="&lt;?= $post-&gt;getPriceInCents() ?&gt;"
+            data-name="&lt;?= \Cake\Core\Configure::read('App.name') ?&gt;"
+            data-description="&lt;?= $post-&gt;get('title') ?&gt;"
+            data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+            data-locale="auto"
+            data-zip-code="true"
+            data-billing-address="true"
+            data-shipping-address="true"
+            data-label="Buy this photo"&gt;
+          &lt;/script&gt;
+    &lt;?= $this-&gt;Form-&gt;end(); ?&gt;
+&lt;/div&gt;
+</code></pre>
+<p>The above form uses the converted <code>PostType</code> object to configure the button. We’ll need two new environment variables though, which you can retrieve from your stripe dashboard:</p>
+<pre><code class="language-shell">export STRIPE_PUBLISHABLEKEY=pk_test_1234
+export STRIPE_SECRETKEY=sk_test_abcd
+</code></pre>
+<p>You can include this element in your <code>photo-view.ctp</code> files like so:</p>
+<pre><code class="language-php">&lt;?= $this-&gt;element('stripe', ['post' =&gt; $post]); ?&gt;
+</code></pre>
+<p>One tricky thing about stripe is that the amount it accepts is a number in cents, not whole dollars, so we need to add the following to our <code>PhotoPostType</code> class to make the conversion:</p>
+<pre><code class="language-php">public function getPriceInCents()
+{
+    $price = $this-&gt;get('price');
+    if (empty($price)) {
+        return 0;
+    }
+    return $price * 100;
+}
+</code></pre>
+<p>This takes care of most of the user-facing integration, so we’ll save our work for now:</p>
+<pre><code class="language-shell">git add composer.json composer.lock config/.env.default plugins/DefaultTheme/src/Template/Element/post_type/photo-view.ctp plugins/PhotoPostType/src/PostType/PhotoPostType.php plugins/PhotoPostType/src/Template/Element/post_type/photo-view.ctp src/Template/Element/stripe.ctp
+git commit -m "Implement user-facing portion of stripe integration"
+</code></pre>
+<h2 id="processing-payments">Processing Payments</h2>
+<p>We’ll be storing order information in a new table. This is the migration I generated:</p>
+<pre><code class="language-shell">bin/cake bake migration --plugin PhotoPostType create_orders charge_id email shipping_name shipping_address_line_1 shipping_address_zip shipping_address_state shipping_address_city shipping_address_country shipped:boolean created modified
+</code></pre>
+<p>I had to modify the default for <code>shipped</code> to be <code>false</code> in the generated migration file. We can now run it:</p>
+<pre><code class="language-shell">bin/cake migrations migrate --plugin PhotoPostType
+</code></pre>
+<p>Since I want composer to run this automatically when the application is “compiled”, I added the following to <code>scripts.compile</code> in my <code>composer.json</code> file:</p>
+<pre><code class="language-json">"bin/cake migrations migrate -p PhotoPostType"
+</code></pre>
+<p>Now we can generate tables for this:</p>
+<pre><code class="language-shell">bin/cake bake model Orders --plugin PhotoPostType
+</code></pre>
+<p>On the server-side, we’ll need an <code>OrdersController::order()</code> action to handle the actual payments. Here is the initial scaffolding for that:</p>
+<pre><code class="language-php">&lt;?php
+namespace PhotoPostType\Controller;
+use Cake\Core\Configure;
+use PhotoPostType\Controller\AppController;
+use Stripe\Error\Card as CardError;
+use Stripe\Charge;
+use Stripe\Customer;
+use Stripe\Stripe;
+class OrdersController extends AppController
+{
+    /**
+     * Initialization hook method.
+     *
+     * Use this method to add common initialization code like loading components.
+     *
+     * e.g. `$this-&gt;loadComponent('Security');`
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this-&gt;Auth-&gt;allow('order');
+    }
+    /**
+     * Order action
+     *
+     * @return void
+     */
+    public function order()
+    {
+        $this-&gt;loadModel('Posts');
+        $post = $this-&gt;Posts-&gt;find()
+                           -&gt;where(['id' =&gt; $this-&gt;request-&gt;query('id')])
+                           -&gt;contain('PostAttributes')
+                           -&gt;first()
+                           -&gt;getPostType();
+        $charge = $this-&gt;chargeCard($post-&gt;getPriceInCents());
+        if (empty($charge)) {
+            $this-&gt;Flash-&gt;error(__('Your card was declined'));
+            return $this-&gt;redirect($this-&gt;referer('/', true));
+        }
+        $this-&gt;createOrder($charge);
+        $this-&gt;Flash-&gt;success(__('Order placed! Check your email for more details :)'));
+        return $this-&gt;redirect($this-&gt;referer('/', true));
+    }
+}
+</code></pre>
+<p>A few notes:</p>
+<ul>
+  <li>I’m allowing the <code>order</code> action. This is necessary as we have default denied requests to all actions in our <code>AppController</code>.</li>
+  <li>We need to retrieve the post being requested as a post-type, hence the find at the beginning.</li>
+  <li>There isn’t too much error handling, but you can expand this to suit your needs.</li>
+  <li>This should be refactored as a custom Form class, but it’s here because I am lazy.</li>
+</ul>
+<p>Here is the contents of my <code>OrdersController::chargeCard()</code> method:</p>
+<pre><code class="language-php">/**
+ * Order action
+ *
+ * @return null|\Stripe\Charge
+ */
+protected function chargeCard($amount)
+{
+    Stripe::setApiKey(Configure::read('Stripe.secretkey'));
+    try {
+        $customer = Customer::create(array(
+            'email' =&gt; $this-&gt;request-&gt;data('stripeEmail'),
+            'card'  =&gt; $this-&gt;request-&gt;data('stripeToken')
+        ));
+        return Charge::create(array(
+            'customer' =&gt; $customer-&gt;id,
+            'amount'   =&gt; $amount,
+            'currency' =&gt; 'usd'
+        ));
+    } catch (CardError $e) {
+        $this-&gt;log($e);
+        return null;
+    }
+}
+</code></pre>
+<p>Pretty straightforward. We need to create a customer in stripe and then charge the card. If we get any card authentication errors, we log it for inspection and don’t return the charge. My <code>OrdersController::createOrder()</code> method is as follows:</p>
+<pre><code class="language-php">/**
+ * Order action
+ *
+ * @return null|\Stripe\Charge
+ */
+protected function createOrder($charge)
+{
+    $data = [
+        'chargeid' =&gt; $charge-&gt;id,
+        'email' =&gt; $this-&gt;request-&gt;data('stripeEmail'),
+        'shipping_name' =&gt; $this-&gt;request-&gt;data('stripeShippingName'),
+        'shipping_address_line_1' =&gt; $this-&gt;request-&gt;data('stripeShippingAddressLine1'),
+        'shipping_address_zip' =&gt; $this-&gt;request-&gt;data('stripeShippingAddressZip'),
+        'shipping_address_state' =&gt; $this-&gt;request-&gt;data('stripeShippingAddressState'),
+        'shipping_address_city' =&gt; $this-&gt;request-&gt;data('stripeShippingAddressCity'),
+        'shipping_address_country' =&gt; $this-&gt;request-&gt;data('stripeShippingAddressCountry'),
+        'shipped' =&gt; false,
+    ];
+    $order = $this-&gt;Orders-&gt;newEntity($data);
+    if (!$this-&gt;Orders-&gt;save($order)) {
+        $this-&gt;log($order-&gt;errors());
+    }
+}
+</code></pre>
+<p>We’re just taking the charge and the submitted data and saving it as an order.</p>
+<p>Now we need to enable routing for this controller action. I created the <code>plugins/PhotoPostType/config/routes.php</code> with the following contents:</p>
+<pre><code class="language-php">&lt;?php
+use Cake\Core\Configure;
+use Cake\Routing\Router;
+use Cake\Routing\Route\DashedRoute;
+$routeClass = Configure::read('PhotoPostType.Routes.routeClass');
+$routeClass = $routeClass ?: DashedRoute::class;
+$photoPostTypePrefix = Configure::read('PhotoPostType.Routes.prefix');
+$photoPostTypePrefix = $photoPostTypePrefix ?: '/order';
+$photoPostTypePrefix = '/' . trim($photoPostTypePrefix, "\t\n\r\0\x0B/");
+Router::plugin('PhotoPostType', ['path' =&gt; $photoPostTypePrefix], function ($routes) use ($routeClass) {
+    $routes-&gt;connect(
+        '/',
+        ['controller' =&gt; 'Orders', 'action' =&gt; 'order'],
+        ['id' =&gt; '\d+', 'pass' =&gt; ['id'], 'routeClass' =&gt; $routeClass]
+    );
+});
+</code></pre>
+<p>We also need to load the routes for this plugin in our <code>config/bootstrap.php</code>. Replace the line loading the <code>PhotoPostType</code> plugin with the following:</p>
+<pre><code class="language-php">Plugin::load('PhotoPostType', ['bootstrap' =&gt; true, 'routes' =&gt; true]);
+</code></pre>
+<p>Lastly, I added a bit of css to <code>plugins/DefaultTheme/webroot/css/style.css</code> to show off our flash styling.</p>
+<pre><code class="language-css">.message {
+    text-align: center;
+}
+.message.success {
+    background-color: lightgreen;
+}
+.message.error {
+    background-color: #D33C44;
+}
+</code></pre>
+<p>Now you can try it out on any user-facing post page. You should get a message like the following:</p>
+<p><img src="/images/2016/12/21/sold.png" alt="awh yis" /></p>
+<p>Commit your changes :)</p>
+<pre><code class="language-shell">git add composer.json config/bootstrap.php plugins/DefaultTheme/webroot/css/style.css plugins/PhotoPostType/config/Migrations/20161222013607_CreateOrders.php plugins/PhotoPostType/config/routes.php plugins/PhotoPostType/src/Controller/OrdersController.php plugins/PhotoPostType/src/Model/Entity/Order.php plugins/PhotoPostType/src/Model/Table/OrdersTable.php plugins/PhotoPostType/tests/Fixture/OrdersFixture.php plugins/PhotoPostType/tests/TestCase/Model/Table/OrdersTableTest.php
+git commit -m "Implement payment processing"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.21">0.0.21</a>.</p>
+</blockquote>
+<p>Our CMS is pretty complete. We’ve got a few odds and ends to tie up - like showing off orders in the admin and notifying users of their order and when it’s shipped - but we’re done for today.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/21/selling-photos/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-21 17:19:00 +0000">21 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 21</strong> of <strong>21</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+      <li><a href="/2016/12/20/sending-responsive-emails/">Sending Responsive Emails</a></li>
+      <li>Selling Photos</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/21/selling-photos/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/21/selling-photos/';
+        var disqus_title      = "CakeAdvent-2016: Selling Photos";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

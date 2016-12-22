@@ -5,9 +5,329 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 21 Dec 2016 00:52:00 +0000</pubDate>
-    <lastBuildDate>Wed, 21 Dec 2016 00:52:00 +0000</lastBuildDate>
+    <pubDate>Thu, 22 Dec 2016 02:17:24 +0000</pubDate>
+    <lastBuildDate>Thu, 22 Dec 2016 02:17:24 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Selling Photos</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;errata-from-previous-post&quot;&gt;Errata from previous post&lt;/h2&gt;
+
+&lt;p&gt;There is a missing commit which removed the &lt;code&gt;-&amp;gt;layout(false)&lt;/code&gt; call in our &lt;code&gt;UserMailer&lt;/code&gt; class.&lt;/p&gt;
+
+&lt;p&gt;Thanks to those who’ve pointed out my derp. These fixes are available as the first commit in the current release.&lt;/p&gt;
+
+&lt;h2 id=&quot;allowing-paid-photos&quot;&gt;Allowing Paid Photos&lt;/h2&gt;
+
+&lt;p&gt;Rather than making a whole new post type, we’re going to repurpose the existing Photo Post Type. First, lets add a &lt;code&gt;price&lt;/code&gt; field to our &lt;code&gt;PhotoPostType::_buildSchema()&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$schema-&amp;gt;addField(&#39;price&#39;, [&#39;type&#39; =&amp;gt; &#39;text&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We also want to validate that any prices are positive numbers (we’re only allowing whole dollar amounts). I added the following to my &lt;code&gt;PhotoPostType::_buildValidator()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;allowEmpty(&#39;price&#39;);
+$validator-&amp;gt;add(&#39;price&#39;, &#39;numeric&#39;, [
+    &#39;rule&#39; =&amp;gt; [&#39;naturalNumber&#39;, true]
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Simple enough. We can now add pricing to our photos :)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/PhotoPostType/src/PostType/PhotoPostType.php
+git commit -m &quot;Enable photo pricing&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;displaying-checkout-buttons-via-stripe&quot;&gt;Displaying Checkout Buttons via Stripe&lt;/h2&gt;
+
+&lt;p&gt;We’ll be using Stripe to process payments. Install it via composer:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer require stripe/stripe-php
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In order to simplify our integration, we’ll be using their &lt;code&gt;checkout&lt;/code&gt; product. I created the element &lt;code&gt;src/Template/Element/stripe.ctp&lt;/code&gt; in order to contain the client-side portion of the integration:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+if (empty($post-&amp;gt;get(&#39;price&#39;))) {
+    return;
+}
+?&amp;gt;
+
+&amp;lt;div style=&quot;text-align:center;&quot;&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create(null, [&#39;class&#39; =&amp;gt; &#39;payment-form&#39;, &#39;url&#39; =&amp;gt; [&#39;plugin&#39; =&amp;gt; &#39;PhotoPostType&#39;, &#39;controller&#39; =&amp;gt; &#39;Orders&#39;, &#39;action&#39; =&amp;gt; &#39;order&#39;, &#39;id&#39; =&amp;gt; $post-&amp;gt;get(&#39;id&#39;)]]); ?&amp;gt;
+        &amp;lt;script
+            src=&quot;https://checkout.stripe.com/checkout.js&quot; class=&quot;stripe-button&quot;
+            data-key=&quot;&amp;lt;?= \Cake\Core\Configure::read(&#39;Stripe.publishablekey&#39;) ?&amp;gt;&quot;
+            data-amount=&quot;&amp;lt;?= $post-&amp;gt;getPriceInCents() ?&amp;gt;&quot;
+            data-name=&quot;&amp;lt;?= \Cake\Core\Configure::read(&#39;App.name&#39;) ?&amp;gt;&quot;
+            data-description=&quot;&amp;lt;?= $post-&amp;gt;get(&#39;title&#39;) ?&amp;gt;&quot;
+            data-image=&quot;https://stripe.com/img/documentation/checkout/marketplace.png&quot;
+            data-locale=&quot;auto&quot;
+            data-zip-code=&quot;true&quot;
+            data-billing-address=&quot;true&quot;
+            data-shipping-address=&quot;true&quot;
+            data-label=&quot;Buy this photo&quot;&amp;gt;
+          &amp;lt;/script&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;end(); ?&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above form uses the converted &lt;code&gt;PostType&lt;/code&gt; object to configure the button. We’ll need two new environment variables though, which you can retrieve from your stripe dashboard:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;export STRIPE_PUBLISHABLEKEY=pk_test_1234
+export STRIPE_SECRETKEY=sk_test_abcd
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can include this element in your &lt;code&gt;photo-view.ctp&lt;/code&gt; files like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;element(&#39;stripe&#39;, [&#39;post&#39; =&amp;gt; $post]); ?&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One tricky thing about stripe is that the amount it accepts is a number in cents, not whole dollars, so we need to add the following to our &lt;code&gt;PhotoPostType&lt;/code&gt; class to make the conversion:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function getPriceInCents()
+{
+    $price = $this-&amp;gt;get(&#39;price&#39;);
+    if (empty($price)) {
+        return 0;
+    }
+
+    return $price * 100;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This takes care of most of the user-facing integration, so we’ll save our work for now:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json composer.lock config/.env.default plugins/DefaultTheme/src/Template/Element/post_type/photo-view.ctp plugins/PhotoPostType/src/PostType/PhotoPostType.php plugins/PhotoPostType/src/Template/Element/post_type/photo-view.ctp src/Template/Element/stripe.ctp
+git commit -m &quot;Implement user-facing portion of stripe integration&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;processing-payments&quot;&gt;Processing Payments&lt;/h2&gt;
+
+&lt;p&gt;We’ll be storing order information in a new table. This is the migration I generated:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake migration --plugin PhotoPostType create_orders charge_id email shipping_name shipping_address_line_1 shipping_address_zip shipping_address_state shipping_address_city shipping_address_country shipped:boolean created modified
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I had to modify the default for &lt;code&gt;shipped&lt;/code&gt; to be &lt;code&gt;false&lt;/code&gt; in the generated migration file. We can now run it:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake migrations migrate --plugin PhotoPostType
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since I want composer to run this automatically when the application is “compiled”, I added the following to &lt;code&gt;scripts.compile&lt;/code&gt; in my &lt;code&gt;composer.json&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-json&quot;&gt;&quot;bin/cake migrations migrate -p PhotoPostType&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we can generate tables for this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake model Orders --plugin PhotoPostType
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;On the server-side, we’ll need an &lt;code&gt;OrdersController::order()&lt;/code&gt; action to handle the actual payments. Here is the initial scaffolding for that:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace PhotoPostType\Controller;
+
+use Cake\Core\Configure;
+use PhotoPostType\Controller\AppController;
+use Stripe\Error\Card as CardError;
+use Stripe\Charge;
+use Stripe\Customer;
+use Stripe\Stripe;
+
+class OrdersController extends AppController
+{
+    /**
+     * Initialization hook method.
+     *
+     * Use this method to add common initialization code like loading components.
+     *
+     * e.g. `$this-&amp;gt;loadComponent(&#39;Security&#39;);`
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this-&amp;gt;Auth-&amp;gt;allow(&#39;order&#39;);
+    }
+
+    /**
+     * Order action
+     *
+     * @return void
+     */
+    public function order()
+    {
+        $this-&amp;gt;loadModel(&#39;Posts&#39;);
+        $post = $this-&amp;gt;Posts-&amp;gt;find()
+                           -&amp;gt;where([&#39;id&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;query(&#39;id&#39;)])
+                           -&amp;gt;contain(&#39;PostAttributes&#39;)
+                           -&amp;gt;first()
+                           -&amp;gt;getPostType();
+
+        $charge = $this-&amp;gt;chargeCard($post-&amp;gt;getPriceInCents());
+        if (empty($charge)) {
+            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Your card was declined&#39;));
+            return $this-&amp;gt;redirect($this-&amp;gt;referer(&#39;/&#39;, true));
+        }
+
+        $this-&amp;gt;createOrder($charge);
+        $this-&amp;gt;Flash-&amp;gt;success(__(&#39;Order placed! Check your email for more details :)&#39;));
+        return $this-&amp;gt;redirect($this-&amp;gt;referer(&#39;/&#39;, true));
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A few notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I’m allowing the &lt;code&gt;order&lt;/code&gt; action. This is necessary as we have default denied requests to all actions in our &lt;code&gt;AppController&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;We need to retrieve the post being requested as a post-type, hence the find at the beginning.&lt;/li&gt;
+  &lt;li&gt;There isn’t too much error handling, but you can expand this to suit your needs.&lt;/li&gt;
+  &lt;li&gt;This should be refactored as a custom Form class, but it’s here because I am lazy.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here is the contents of my &lt;code&gt;OrdersController::chargeCard()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Order action
+ *
+ * @return null|\Stripe\Charge
+ */
+protected function chargeCard($amount)
+{
+    Stripe::setApiKey(Configure::read(&#39;Stripe.secretkey&#39;));
+    try {
+        $customer = Customer::create(array(
+            &#39;email&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeEmail&#39;),
+            &#39;card&#39;  =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeToken&#39;)
+        ));
+        return Charge::create(array(
+            &#39;customer&#39; =&amp;gt; $customer-&amp;gt;id,
+            &#39;amount&#39;   =&amp;gt; $amount,
+            &#39;currency&#39; =&amp;gt; &#39;usd&#39;
+        ));
+    } catch (CardError $e) {
+        $this-&amp;gt;log($e);
+        return null;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty straightforward. We need to create a customer in stripe and then charge the card. If we get any card authentication errors, we log it for inspection and don’t return the charge. My &lt;code&gt;OrdersController::createOrder()&lt;/code&gt; method is as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Order action
+ *
+ * @return null|\Stripe\Charge
+ */
+protected function createOrder($charge)
+{
+    $data = [
+        &#39;chargeid&#39; =&amp;gt; $charge-&amp;gt;id,
+        &#39;email&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeEmail&#39;),
+        &#39;shipping_name&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingName&#39;),
+        &#39;shipping_address_line_1&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressLine1&#39;),
+        &#39;shipping_address_zip&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressZip&#39;),
+        &#39;shipping_address_state&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressState&#39;),
+        &#39;shipping_address_city&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressCity&#39;),
+        &#39;shipping_address_country&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressCountry&#39;),
+        &#39;shipped&#39; =&amp;gt; false,
+    ];
+
+    $order = $this-&amp;gt;Orders-&amp;gt;newEntity($data);
+    if (!$this-&amp;gt;Orders-&amp;gt;save($order)) {
+        $this-&amp;gt;log($order-&amp;gt;errors());
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’re just taking the charge and the submitted data and saving it as an order.&lt;/p&gt;
+
+&lt;p&gt;Now we need to enable routing for this controller action. I created the &lt;code&gt;plugins/PhotoPostType/config/routes.php&lt;/code&gt; with the following contents:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+use Cake\Core\Configure;
+use Cake\Routing\Router;
+use Cake\Routing\Route\DashedRoute;
+
+$routeClass = Configure::read(&#39;PhotoPostType.Routes.routeClass&#39;);
+$routeClass = $routeClass ?: DashedRoute::class;
+
+$photoPostTypePrefix = Configure::read(&#39;PhotoPostType.Routes.prefix&#39;);
+$photoPostTypePrefix = $photoPostTypePrefix ?: &#39;/order&#39;;
+$photoPostTypePrefix = &#39;/&#39; . trim($photoPostTypePrefix, &quot;\t\n\r\0\x0B/&quot;);
+Router::plugin(&#39;PhotoPostType&#39;, [&#39;path&#39; =&amp;gt; $photoPostTypePrefix], function ($routes) use ($routeClass) {
+    $routes-&amp;gt;connect(
+        &#39;/&#39;,
+        [&#39;controller&#39; =&amp;gt; &#39;Orders&#39;, &#39;action&#39; =&amp;gt; &#39;order&#39;],
+        [&#39;id&#39; =&amp;gt; &#39;\d+&#39;, &#39;pass&#39; =&amp;gt; [&#39;id&#39;], &#39;routeClass&#39; =&amp;gt; $routeClass]
+    );
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We also need to load the routes for this plugin in our &lt;code&gt;config/bootstrap.php&lt;/code&gt;. Replace the line loading the &lt;code&gt;PhotoPostType&lt;/code&gt; plugin with the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load(&#39;PhotoPostType&#39;, [&#39;bootstrap&#39; =&amp;gt; true, &#39;routes&#39; =&amp;gt; true]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lastly, I added a bit of css to &lt;code&gt;plugins/DefaultTheme/webroot/css/style.css&lt;/code&gt; to show off our flash styling.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-css&quot;&gt;.message {
+    text-align: center;
+}
+.message.success {
+    background-color: lightgreen;
+}
+.message.error {
+    background-color: #D33C44;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now you can try it out on any user-facing post page. You should get a message like the following:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2016/12/21/sold.png&quot; alt=&quot;awh yis&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Commit your changes :)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json config/bootstrap.php plugins/DefaultTheme/webroot/css/style.css plugins/PhotoPostType/config/Migrations/20161222013607_CreateOrders.php plugins/PhotoPostType/config/routes.php plugins/PhotoPostType/src/Controller/OrdersController.php plugins/PhotoPostType/src/Model/Entity/Order.php plugins/PhotoPostType/src/Model/Table/OrdersTable.php plugins/PhotoPostType/tests/Fixture/OrdersFixture.php plugins/PhotoPostType/tests/TestCase/Model/Table/OrdersTableTest.php
+git commit -m &quot;Implement payment processing&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.21&quot;&gt;0.0.21&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Our CMS is pretty complete. We’ve got a few odds and ends to tie up - like showing off orders in the admin and notifying users of their order and when it’s shipped - but we’re done for today.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 21 Dec 2016 17:19:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/21/selling-photos/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/21/selling-photos/</guid>
+        
+        <category>payments</category>
+        
+        <category>stripe</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Sending Responsive Emails</title>
@@ -156,7 +476,7 @@ git commit -m &quot;Nicer html email layout&quot;
 
 &lt;h2 id=&quot;errata-from-previous-post&quot;&gt;Errata from previous post&lt;/h2&gt;
 
-&lt;p&gt;The connected routes in &lt;code&gt;config/routes.php&lt;/code&gt; for &lt;code&gt;/forgot-password&lt;/code&gt; and &lt;code&gt;/reset-password&lt;/code&gt; were incorrect and should be as follows&lt;/p&gt;
+&lt;p&gt;The connected routes in &lt;code&gt;config/routes.php&lt;/code&gt; for &lt;code&gt;/forgot-password&lt;/code&gt; and &lt;code&gt;/reset-password&lt;/code&gt; were incorrect and should be as follows:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/forgot-password&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgotPassword&#39;]);
 $routes-&amp;gt;connect(&#39;/reset-password/*&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;resetPassword&#39;]);
@@ -1794,291 +2114,6 @@ git commit -m &quot;Ensure users do not try to add a non-existent post type&quot
         <category>events</category>
         
         <category>viewblocks</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Unifying our admin dashboard views</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
-
-&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. In this case, there are a few bugfixes for some CakePHP plugins, so we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer update
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
-
-&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
-git commit -m &quot;Update unpinned dependencies&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;todays-todolist&quot;&gt;Today’s todolist&lt;/h2&gt;
-
-&lt;p&gt;We’ll take care of the following three items today.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The login screen looks different from the rest of the site.&lt;/li&gt;
-  &lt;li&gt;The &lt;code&gt;/users/edit&lt;/code&gt; page has the wrong look and wrong sidebar.&lt;/li&gt;
-  &lt;li&gt;The &lt;code&gt;/users/forgot-password&lt;/code&gt; and &lt;code&gt;/users/reset-password&lt;/code&gt; pages has the wrong look and wrong sidebar.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;using-crudview-for-the-login-page&quot;&gt;Using CrudView for the Login Page&lt;/h2&gt;
-
-&lt;p&gt;First, lets make sure that we are using &lt;code&gt;CrudView&lt;/code&gt; for the login action. I added the following property to my &lt;code&gt;UsersController&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * A list of actions where the CrudView.View
- * listener should be enabled. If an action is
- * in this list but `isAdmin` is false, the
- * action will still be rendered via CrudView.View
- *
- * @var array
- */
-protected $adminActions = [&#39;login&#39;];
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll want to delete the &lt;code&gt;src/Template/Users/login.ctp&lt;/code&gt; and &lt;code&gt;src/Template/Users/add.ctp&lt;/code&gt; files. This will force &lt;code&gt;CrudView&lt;/code&gt; to take control. Once that is done, we’ll also need to set a view for the action. CrudView does not currently come with a view for the login action, so we’ll repurpose the &lt;code&gt;CrudView.add.ctp&lt;/code&gt; template. I added the following to my &lt;code&gt;UsersListener::beforeHandle()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($event-&amp;gt;subject-&amp;gt;action === &#39;login&#39;) {
-    $this-&amp;gt;beforeHandleLogin($event);
-
-    return;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And finally, here is my &lt;code&gt;UsersListener::beforeHandleLogin()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Handle Login Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeHandleLogin(Event $event)
-{
-    $this-&amp;gt;_controller()-&amp;gt;set([
-        &#39;viewVar&#39; =&amp;gt; &#39;login&#39;,
-        &#39;login&#39; =&amp;gt; null,
-    ]);
-    $this-&amp;gt;_controller()-&amp;gt;viewBuilder()-&amp;gt;template(&#39;add&#39;);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.page_title&#39;, &#39;Login&#39;);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.fields&#39;, [
-        &#39;email&#39;,
-        &#39;password&#39;,
-    ]);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.viewblocks&#39;, [
-        &#39;actions&#39; =&amp;gt; [&#39;&#39; =&amp;gt; &#39;text&#39;],
-    ]);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.sidebar_navigation&#39;, false);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.disable_extra_buttons&#39;, true);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.submit_button_text&#39;, &#39;Login&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;All of these options are available via CrudView, but check out the docs if you have any questions about them. You should be able to see a &lt;code&gt;/users/login&lt;/code&gt; page with our normal CrudView styling now.&lt;/p&gt;
-
-&lt;p&gt;I’m committing my changes now:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;rm src/Template/Users/add.ctp src/Template/Users/login.ctp
-git rm src/Template/Users/add.ctp src/Template/Users/login.ctp
-git add src/Controller/UsersController.php src/Listener/UsersListener.php
-git commit -m &quot;Use CrudView to template out the login page&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;using-crudview-for-the-account-page&quot;&gt;Using CrudView for the Account Page&lt;/h2&gt;
-
-&lt;p&gt;This is going to be pretty similar to the login page. Let’s add &lt;code&gt;edit&lt;/code&gt; to the &lt;code&gt;UsersController::$adminActions&lt;/code&gt; property.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * A list of actions where the CrudView.View
- * listener should be enabled. If an action is
- * in this list but `isAdmin` is false, the
- * action will still be rendered via CrudView.View
- *
- * @var array
- */
-protected $adminActions = [
-    &#39;edit&#39;,
-    &#39;login&#39;
-];
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll want to delete the &lt;code&gt;src/Template/Users/edit.ctp&lt;/code&gt;. To customize the view, we can modify our &lt;code&gt;UsersListener::beforeHandleEdit()&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Handle Edit Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeHandleEdit(Event $event)
-{
-    $userId = $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;);
-    $event-&amp;gt;subject-&amp;gt;args = [$userId];
-
-    $this-&amp;gt;_action()-&amp;gt;saveOptions([&#39;validate&#39; =&amp;gt; &#39;account&#39;]);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.page_title&#39;, &#39;Profile&#39;);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.disable_extra_buttons&#39;, true);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.viewblocks&#39;, [
-        &#39;actions&#39; =&amp;gt; [&#39;&#39; =&amp;gt; &#39;text&#39;],
-    ]);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.fields&#39;, [
-        &#39;email&#39;,
-        &#39;password&#39; =&amp;gt; [
-            &#39;required&#39; =&amp;gt; false,
-        ],
-        &#39;confirm_password&#39; =&amp;gt; [
-            &#39;type&#39; =&amp;gt; &#39;password&#39;,
-        ],
-        &#39;avatar&#39; =&amp;gt; [
-            &#39;type&#39; =&amp;gt; &#39;file&#39;
-        ],
-    ]);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;ou should be able to see a &lt;code&gt;/users/edit&lt;/code&gt; page with our normal CrudView styling now. One thing that is missing is the profile image embed. That’s unfortunately non-trivial to insert into CrudView at the moment, so we are skipping that.&lt;/p&gt;
-
-&lt;p&gt;Commit!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;rm src/Template/Users/edit.ctp
-git rm src/Template/Users/edit.ctp
-git add src/Controller/UsersController.php src/Listener/UsersListener.php
-git commit -m &quot;Use CrudView to template out the edit page&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;using-crudview-for-the-password-reset-flow&quot;&gt;Using CrudView for the Password Reset Flow&lt;/h2&gt;
-
-&lt;p&gt;This is more or less a rehash of the above. Lets start by deleting the &lt;code&gt;src/Template/Users/forgot_password.ctp&lt;/code&gt; and &lt;code&gt;src/Template/Users/reset_password.ctp&lt;/code&gt; files. Next, update the &lt;code&gt;UsersController::$adminActions&lt;/code&gt; property to include these to actions:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * A list of actions where the CrudView.View
- * listener should be enabled. If an action is
- * in this list but `isAdmin` is false, the
- * action will still be rendered via CrudView.View
- *
- * @var array
- */
-protected $adminActions = [
-    &#39;edit&#39;,
-    &#39;login&#39;,
-    &#39;forgotPassword&#39;,
-    &#39;resetPassword&#39;,
-];
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;As always, we’ll need to update &lt;code&gt;UsersController::beforeHandle()&lt;/code&gt; with new sections for our specific actions:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($event-&amp;gt;subject-&amp;gt;action === &#39;forgotPassword&#39;) {
-    $this-&amp;gt;beforeHandleForgotPassword($event);
-
-    return;
-}
-if ($event-&amp;gt;subject-&amp;gt;action === &#39;resetPassword&#39;) {
-    $this-&amp;gt;beforeHandleResetPassword($event);
-
-    return;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lastly, here is the code for the above two methods.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Handle ForgotPassword Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeHandleForgotPassword(Event $event)
-{
-    $this-&amp;gt;_controller()-&amp;gt;set([
-        &#39;viewVar&#39; =&amp;gt; &#39;forgotPassword&#39;,
-        &#39;forgotPassword&#39; =&amp;gt; null,
-    ]);
-    $this-&amp;gt;_controller()-&amp;gt;viewBuilder()-&amp;gt;template(&#39;add&#39;);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.page_title&#39;, &#39;Forgot Password?&#39;);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.fields&#39;, [
-        &#39;email&#39;,
-    ]);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.viewblocks&#39;, [
-        &#39;actions&#39; =&amp;gt; [&#39;&#39; =&amp;gt; &#39;text&#39;],
-    ]);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.sidebar_navigation&#39;, false);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.disable_extra_buttons&#39;, true);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.submit_button_text&#39;, &#39;Send Password Reset Email&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Handle ResetPassword Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeHandleResetPassword(Event $event)
-{
-    $this-&amp;gt;_controller()-&amp;gt;set([
-        &#39;viewVar&#39; =&amp;gt; &#39;resetPassword&#39;,
-        &#39;resetPassword&#39; =&amp;gt; null,
-    ]);
-    $this-&amp;gt;_controller()-&amp;gt;viewBuilder()-&amp;gt;template(&#39;add&#39;);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.page_title&#39;, &#39;Enter a new password to reset your account&#39;);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.fields&#39;, [
-        &#39;password&#39;,
-    ]);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.viewblocks&#39;, [
-        &#39;actions&#39; =&amp;gt; [&#39;&#39; =&amp;gt; &#39;text&#39;],
-    ]);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.sidebar_navigation&#39;, false);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.disable_extra_buttons&#39;, true);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.submit_button_text&#39;, &#39;Reset Password&#39;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let’s commit, as we’re done with all our edits for today.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;rm src/Template/Users/forgot_password.ctp src/Template/Users/reset_password.ctp
-git rm src/Template/Users/forgot_password.ctp src/Template/Users/reset_password.ctp
-git add src/Controller/UsersController.php src/Listener/UsersListener.php
-git commit -m &quot;Use CrudView for password reset flow&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.11&quot;&gt;0.0.11&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Our users controller is now fully under the control of CrudView! We’ll take care of some weird ux issues when creating posts tomorrow.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Sun, 11 Dec 2016 10:51:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/11/unifying-our-admin-dashboard-views/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/11/unifying-our-admin-dashboard-views/</guid>
-        
-        <category>events</category>
-        
-        <category>crud-view</category>
         
         <category>cakeadvent-2016</category>
         
