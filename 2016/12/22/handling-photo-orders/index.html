@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Handling Photo Orders</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/22/handling-photo-orders/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 22 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="crud-view, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Handling Photo Orders" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/22/handling-photo-orders/" />
+    <meta property="og:description" content="Part 22 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Handling Photo Orders" />
+    <meta name="twitter:description" content="Part 22 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Handling Photo Orders » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Handling Photo Orders</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="routing-the-orders-admin-panel">Routing the orders admin panel</h2>
+<p>Before we can get to configuring our admin panel, we’ll need to be able to route it. For our <code>PhotoPostType</code>, we’ve hardcoded just a single route for viewing an order, but we want to now also properly route admin requests. Here is what I’ve modified the <code>plugins/PhotoPostType/config/routes.php</code> to:</p>
+<pre><code class="language-php">&lt;?php
+use Cake\Core\Configure;
+use Cake\Routing\RouteBuilder;
+use Cake\Routing\Router;
+use Cake\Routing\Route\DashedRoute;
+$routeClass = Configure::read('PhotoPostType.Routes.routeClass');
+$routeClass = $routeClass ?: DashedRoute::class;
+Router::plugin('PhotoPostType', ['path' =&gt; '/'], function ($routes) use ($routeClass) {
+    $photoPostTypePrefix = Configure::read('PhotoPostType.Routes.prefix');
+    $photoPostTypePrefix = $photoPostTypePrefix ?: '/order';
+    $photoPostTypePrefix = '/' . trim($photoPostTypePrefix, "\t\n\r\0\x0B/");
+    $routes-&gt;connect(
+        $photoPostTypePrefix,
+        ['controller' =&gt; 'Orders', 'action' =&gt; 'order'],
+        ['id' =&gt; '\d+', 'pass' =&gt; ['id'], 'routeClass' =&gt; $routeClass]
+    );
+    $routes-&gt;scope('/admin/orders', ['controller' =&gt; 'Orders'], function (RouteBuilder $routes) {
+          $routes-&gt;connect('/', ['action' =&gt; 'index']);
+          $routes-&gt;fallbacks();
+    });
+});
+</code></pre>
+<p>I’m now mounting the plugin under <code>/</code> and also scoping <code>/admin/orders</code> to our <code>PhotoPostType.OrdersController</code>. One other small change we’ll need to do is modify our <code>AppController::getUtilityNavigation()</code> method to scope all existing navigation elements to <code>plugin =&gt; null</code>. I’ve also added a single extra navigation element for logged in users:</p>
+<pre><code class="language-php">new \CrudView\Menu\MenuItem(
+    'Orders',
+    ['plugin' =&gt; 'PhotoPostType', 'controller' =&gt; 'Orders', 'action' =&gt; 'index']
+),
+</code></pre>
+<p>Not the nicest thing in the world, as now we’re crossing boundaries between plugins and the application, but this will do for now. We could alternatively use an event and bind to that event in <code>plugins/PhotoPostType/config/bootstrap.php</code>, but that seems like more trouble than it’s worth for now.</p>
+<p>Save your work:</p>
+<pre><code class="language-shell">git add plugins/PhotoPostType/config/routes.php src/Controller/AppController.php
+git commit -m "Route and link to OrdersController admin actions"
+</code></pre>
+<h2 id="enabling-crudview-for-the-orderscontroller">Enabling CrudView for the OrdersController</h2>
+<p>This is relatively simple. Since our <code>OrdersController</code> eventually inherits from the <code>AppController</code>, all we need to do is enable crud-view and allow access to it. I added the following property to my <code>OrdersController</code>:</p>
+<pre><code class="language-php">/**
+ * A list of actions where the CrudView.View
+ * listener should be enabled. If an action is
+ * in this list but `isAdmin` is false, the
+ * action will still be rendered via CrudView.View
+ *
+ * @var array
+ */
+protected $adminActions = ['index', 'delete'];
+</code></pre>
+<p>And next I’ve added the following <code>OrdersController::isAuthorized()</code> method:</p>
+<pre><code class="language-php">/**
+ * Check if the provided user is authorized for the request.
+ *
+ * @param array|\ArrayAccess|null $user The user to check the authorization of.
+ *   If empty the user fetched from storage will be used.
+ * @return bool True if $user is authorized, otherwise false
+ */
+public function isAuthorized($user = null)
+{
+    $action = $this-&gt;request-&gt;param('action');
+    if (in_array($action, $this-&gt;adminActions)) {
+        return true;
+    }
+    return parent::isAuthorized($user);
+}
+</code></pre>
+<p>This should allow me access to the <code>OrdersController</code>, which we will be shortly customizing via an <code>OrdersListener</code> located in <code>plugins/PhotoPostType/src/Listener/OrdersListener.php</code>. I’m going to bind that in our <code>OrdersController::initialize()</code> method:</p>
+<pre><code class="language-php">$this-&gt;Crud-&gt;addListener('Orders', 'PhotoPostType\Listener\OrdersListener');
+</code></pre>
+<p>And here is the skeleton for that class:</p>
+<pre><code class="language-php">&lt;?php
+namespace PhotoPostType\Listener;
+use Cake\Event\Event;
+use Crud\Listener\BaseListener;
+/**
+ * Orders Listener
+ */
+class OrdersListener extends BaseListener
+{
+    /**
+     * Callbacks definition
+     *
+     * @return array
+     */
+    public function implementedEvents()
+    {
+        return [
+            'Crud.beforeHandle' =&gt; 'beforeHandle',
+        ];
+    }
+    /**
+     * Before Handle
+     *
+     * @param \Cake\Event\Event $event Event
+     * @return void
+     */
+    public function beforeHandle(Event $event)
+    {
+    }
+}
+</code></pre>
+<p>I’m going to save my state before I get too carried away</p>
+<pre><code class="language-shell">git add plugins/PhotoPostType/src/Controller/OrdersController.php plugins/PhotoPostType/src/Listener/OrdersListener.php
+git commit -m "Enable CrudView for the OrdersController"
+</code></pre>
+<h2 id="customizing-our-index-page">Customizing our index page</h2>
+<p>Our index page is a bit special. Here is what I want to do:</p>
+<ul>
+  <li>Disable non-CrudView actions</li>
+  <li>Show a link to the <code>charge_id</code> on stripe</li>
+  <li>Show a single, unified element for the contact information</li>
+</ul>
+<p>For the first item, we’ll want to add the following to our <code>OrdersController::initialize()</code> method.</p>
+<pre><code class="language-php">$this-&gt;Crud-&gt;config('actions.add', null);
+$this-&gt;Crud-&gt;config('actions.edit', null);
+$this-&gt;Crud-&gt;config('actions.view', null);
+</code></pre>
+<p>This completely disables the actions, while also ensuring that we don’t show any references to them in CrudView.</p>
+<p>Next, we’ll need to add the following to our <code>OrdersListener::beforeHandle()</code>:</p>
+<pre><code class="language-php">if ($event-&gt;subject-&gt;action === 'index') {
+    $this-&gt;beforeHandleIndex($event);
+    return;
+}
+</code></pre>
+<p>And the corresponding <code>OrdersListener::beforeHandleIndex()</code> is as follows:</p>
+<pre><code class="language-php">/**
+ * Before Handle Index Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleIndex(Event $event)
+{
+    $this-&gt;_action()-&gt;config('scaffold.fields', [
+        'id',
+        'chargeid' =&gt; [
+            'formatter' =&gt; 'element',
+            'element' =&gt; 'PhotoPostType.crud-view/index-chargeid',
+        ],
+        'contact' =&gt; [
+            'formatter' =&gt; 'element',
+            'element' =&gt; 'PhotoPostType.crud-view/index-contact',
+        ],
+        'shipped' =&gt; [
+        ],
+        'created' =&gt; [
+        ],
+    ]);
+}
+</code></pre>
+<p>Previously, we used an inline anonymous function to format the page. This works okay, but in this case we’re going to be doing a bit more work, so using an element seems more appropriate. Here is the contents of my <code>plugins/PhotoPostType/src/Template/Element/crud-view/index-contact.ctp</code> template:</p>
+<pre><code class="language-php">&lt;?= implode("&lt;br&gt;", array_filter([
+    $context-&gt;get('shipping_name'),
+    $context-&gt;get('shipping_address_line_1'),
+    sprintf(
+        '%s, %s %s',
+        $context-&gt;get('shipping_address_city'),
+        $context-&gt;get('shipping_address_state'),
+        $context-&gt;get('shipping_address_zip')
+    ),
+    $context-&gt;get('shipping_address_country'),
+    $context-&gt;get('email'),
+]));
+</code></pre>
+<p>Pretty straightforward. I’m basically getting all the contact info and splatting it together in one element. The <code>$context</code> object is simply a reference to the entity being displayed.</p>
+<p>Our <code>plugins/PhotoPostType/src/Template/Element/crud-view/index-contact.ctp</code> template is a bit more complex:</p>
+<pre><code class="language-php">&lt;?php
+use Cake\Core\Configure;
+$mode = Configure::read('Stripe.mode');
+if ($mode === 'live') {
+    echo $this-&gt;Html-&gt;link($value, sprintf('https://dashboard.stripe.com/payments/'. $value));
+} else {
+    echo $this-&gt;Html-&gt;link($value, sprintf('https://dashboard.stripe.com/test/payments/'. $value));
+}
+</code></pre>
+<p>Depending upon the stripe mode, we link to either the live or the test payment. I’ve also added the following to my <code>config/.env.default</code> (and equivalent to <code>config/.env</code>) to handle that new <code>Configure</code> value.</p>
+<pre><code class="language-shell">export STRIPE_MODE=test
+</code></pre>
+<p>Assuming everything was configured properly, here is what that will look like:</p>
+<p><img src="/images/2016/12/22/dashboard.png" alt="dashboard confessional" /></p>
+<p>I’ll save my changes here.</p>
+<pre><code class="language-shell">git add config/.env.default plugins/PhotoPostType/src/Controller/OrdersController.php plugins/PhotoPostType/src/Listener/OrdersListener.php plugins/PhotoPostType/src/Template/Element/crud-view/index-chargeid.ctp plugins/PhotoPostType/src/Template/Element/crud-view/index-contact.ctp
+git commit -m "Customize the OrdersController::index() action"
+</code></pre>
+<h2 id="adding-bulk-actions">Adding bulk actions</h2>
+<p>Now that we have a custom admin panel, we’ll need to be able to mark things as shipped. We’ll be using the <code>Crud.Bulk/SetValue</code> action class, which allows us to bulk update records and set a specific value. First, lets map the action in the <code>OrdersController::initialize()</code> method:</p>
+<pre><code class="language-php">$this-&gt;Crud-&gt;mapAction('setShipped', [
+    'className' =&gt; 'Crud.Bulk/SetValue',
+    'field' =&gt; 'shipped',
+]);
+</code></pre>
+<p>We also need to add it to the list of allowed admin actions:</p>
+<pre><code class="language-php">/**
+ * A list of actions where the CrudView.View
+ * listener should be enabled. If an action is
+ * in this list but `isAdmin` is false, the
+ * action will still be rendered via CrudView.View
+ *
+ * @var array
+ */
+protected $adminActions = ['index', 'delete', 'setShipped'];
+</code></pre>
+<p>Finally, we’ll want to configure the action itself. I’d like to be able to set the value as 0 or 1 (mapping to true or false in our database). I also need to properly configure the status message. Start by adding the following to <code>OrdersListener::beforeHandle()</code>:</p>
+<pre><code class="language-php">if ($event-&gt;subject-&gt;action === 'setShipped') {
+    $this-&gt;beforeHandleSetShipped($event);
+    return;
+}
+</code></pre>
+<p>And the <code>OrdersListener::beforeHandleSetShipped()</code> method is as follows:</p>
+<pre><code class="language-php">/**
+ * Before Handle SetShipped Action
+ *
+ * @param \Cake\Event\Event $event Event
+ * @return void
+ */
+public function beforeHandleSetShipped(Event $event)
+{
+    $value = (int)$this-&gt;_request()-&gt;query('shipped');
+    if ($value !== 0 &amp;&amp; $value !== 1) {
+        throw new BadRequestException('Invalid ship status specified');
+    }
+    $verb = 'shipped';
+    if ($value === 0) {
+        $verb = 'unshipped';
+    }
+    $this-&gt;_action()-&gt;config('value', $value);
+    $this-&gt;_action()-&gt;config('messages.success.text', sprintf('Marked orders as %s!', $verb));
+    $this-&gt;_action()-&gt;config('messages.error.text', sprintf('Could not mark orders as %s!', $verb));
+}
+</code></pre>
+<p>Lastly, we need to actually link to the bulk actions. You can configure this by adding the next 4 lines to your <code>OrdersListener::beforeHandleIndex()</code>:</p>
+<pre><code class="language-php">$this-&gt;_action()-&gt;config('scaffold.bulk_actions', [
+    Router::url(['action' =&gt; 'setShipped', 'shipped' =&gt; '1']) =&gt; __('Mark as shipped'),
+    Router::url(['action' =&gt; 'setShipped', 'shipped' =&gt; '0']) =&gt; __('Mark as unshipped'),
+]);
+</code></pre>
+<p><img src="/images/2016/12/22/dashboard-bulk.png" alt="bulk dashboard confessional" /></p>
+<p>And we’re done!</p>
+<pre><code class="language-shell">git add plugins/PhotoPostType/src/Controller/OrdersController.php plugins/PhotoPostType/src/Listener/OrdersListener.php
+git commit -m "Add bulk actions for modifying shipping status"
+</code></pre>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.22">0.0.22</a>.</p>
+</blockquote>
+<p>We’re nearing the finish line. The only major items include notifying the primary user when a new order has come in, as well as notifying users when their items have been shipped. We could certainly add a contact form or about page to the frontend as well, though those can be homework exercises for you :)</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/22/handling-photo-orders/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-22 08:53:00 +0000">22 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 22</strong> of <strong>22</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+      <li><a href="/2016/12/20/sending-responsive-emails/">Sending Responsive Emails</a></li>
+      <li><a href="/2016/12/21/selling-photos/">Selling Photos</a></li>
+      <li>Handling Photo Orders</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/22/handling-photo-orders/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/22/handling-photo-orders/';
+        var disqus_title      = "CakeAdvent-2016: Handling Photo Orders";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>
