@@ -5,9 +5,314 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 23 Dec 2016 05:30:29 +0000</pubDate>
-    <lastBuildDate>Fri, 23 Dec 2016 05:30:29 +0000</lastBuildDate>
+    <pubDate>Sat, 24 Dec 2016 02:30:43 +0000</pubDate>
+    <lastBuildDate>Sat, 24 Dec 2016 02:30:43 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Order status notifications</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;order-mailer-for-email-notifications&quot;&gt;Order Mailer for email notifications&lt;/h2&gt;
+
+&lt;p&gt;First thing is we’ll need an OrderMailer to handle all the actual email sending. Here is mine:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace PhotoPostType\Mailer;
+
+use Cake\Core\Configure;
+use Cake\Mailer\Mailer;
+use Josegonzalez\MailPreview\Mailer\PreviewTrait;
+
+class OrderMailer extends Mailer
+{
+
+    use PreviewTrait;
+
+    /**
+     * Email sent on new order
+     *
+     * @param array $email User email
+     * @param string $token Token used for validation
+     * @return \Cake\Mailer\Mailer
+     */
+    public function newOrder($data)
+    {
+        $this-&amp;gt;loadModel(&#39;PhotoPostType.Orders&#39;);
+        $order = $this-&amp;gt;Orders-&amp;gt;get($data[&#39;order_id&#39;]);
+        return $this-&amp;gt;to(Configure::read(&#39;Primary.email&#39;))
+            -&amp;gt;subject(&#39;New Order&#39;)
+            -&amp;gt;template(&#39;PhotoPostType.new_order&#39;)
+            -&amp;gt;set($order)
+            -&amp;gt;emailFormat(&#39;html&#39;);
+    }
+
+    /**
+     * Email sent on order received
+     *
+     * @param array $email User email
+     * @param string $token Token used for validation
+     * @return \Cake\Mailer\Mailer
+     */
+    public function received($data)
+    {
+        $this-&amp;gt;loadModel(&#39;PhotoPostType.Orders&#39;);
+        $order = $this-&amp;gt;Orders-&amp;gt;get($data[&#39;order_id&#39;]);
+        return $this-&amp;gt;to($order-&amp;gt;email)
+            -&amp;gt;subject(&#39;Order Received!&#39;)
+            -&amp;gt;template(&#39;PhotoPostType.received&#39;)
+            -&amp;gt;set($order)
+            -&amp;gt;emailFormat(&#39;html&#39;);
+    }
+
+    /**
+     * Email sent on order shipped
+     *
+     * @param array $email User email
+     * @param string $token Token used for validation
+     * @return \Cake\Mailer\Mailer
+     */
+    public function shipped($data)
+    {
+        $this-&amp;gt;loadModel(&#39;PhotoPostType.Orders&#39;);
+        $order = $this-&amp;gt;Orders-&amp;gt;get($data[&#39;order_id&#39;]);
+        return $this-&amp;gt;to($order-&amp;gt;email)
+            -&amp;gt;subject(&#39;Order Shipped!&#39;)
+            -&amp;gt;template(&#39;PhotoPostType.shipped&#39;)
+            -&amp;gt;set($order)
+            -&amp;gt;emailFormat(&#39;html&#39;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’ve defined three different types of emails:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;newOrder&lt;/code&gt;: Sent to the email configured at &lt;code&gt;Primary.email&lt;/code&gt; when we get a new order&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;received&lt;/code&gt;: Sent to the orderer when we’ve received their order&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;shipped&lt;/code&gt;: Sent to the orderer when we’ve shipped their email&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I added the following to my &lt;code&gt;config/.env&lt;/code&gt; and &lt;code&gt;config/.env.default&lt;/code&gt; to configure the &lt;code&gt;Primary.email&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;export PRIMARY_EMAIL=&quot;example@example.com&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here are my html templates for each email, which I’ve placed in &lt;code&gt;plugins/PhotoPostType/Template/Email/html/&lt;/code&gt;. You can create equivalent text templates as well:&lt;/p&gt;
+
+&lt;h4 id=&quot;pluginsphotoposttypetemplateemailhtmlneworderctp&quot;&gt;&lt;code&gt;plugins/PhotoPostType/Template/Email/html/new_order.ctp&lt;/code&gt;&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h2&amp;gt;There was a new order&amp;lt;/h2&amp;gt;
+
+&amp;lt;p&amp;gt;
+    See the new order &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(&#39;here&#39;, \Cake\Routing\Router::url([
+        &#39;plugin&#39; =&amp;gt; &#39;PhotoPostType&#39;,
+        &#39;controller&#39; =&amp;gt; &#39;Orders&#39;,
+        &#39;action&#39; =&amp;gt; &#39;index&#39;,
+        $token
+    ], true)); ?&amp;gt;
+&amp;lt;/p&amp;gt;
+
+&amp;lt;p&amp;gt;
+    Order details:
+&amp;lt;/p&amp;gt;
+&amp;lt;dl&amp;gt;
+    &amp;lt;dt&amp;gt;name&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;name ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;address&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_line_1 ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;zip&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_zip ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;state&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_state ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;city&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_city ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;countrys&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_country ?&amp;gt;&amp;lt;/dd&amp;gt;
+&amp;lt;/dl&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&quot;pluginsphotoposttypetemplateemailhtmlreceivedctp&quot;&gt;&lt;code&gt;plugins/PhotoPostType/Template/Email/html/received.ctp&lt;/code&gt;&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h2&amp;gt;Your order was recieved&amp;lt;/h2&amp;gt;
+&amp;lt;p&amp;gt;
+    Thanks for your order! We will be shortly shipping out your order to the following address:
+&amp;lt;/p&amp;gt;
+&amp;lt;dl&amp;gt;
+    &amp;lt;dt&amp;gt;name&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;name ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;address&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_line_1 ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;zip&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_zip ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;state&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_state ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;city&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_city ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;countrys&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_country ?&amp;gt;&amp;lt;/dd&amp;gt;
+&amp;lt;/dl&amp;gt;
+&amp;lt;p&amp;gt;Thanks again, and enjoy!&amp;lt;/p&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&quot;pluginsphotoposttypetemplateemailhtmlshippedctp&quot;&gt;&lt;code&gt;plugins/PhotoPostType/Template/Email/html/shipped.ctp&lt;/code&gt;&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h2&amp;gt;Your order was shipped&amp;lt;/h2&amp;gt;
+&amp;lt;p&amp;gt;
+    Thanks for your order! Here are your order details:
+&amp;lt;/p&amp;gt;
+&amp;lt;dl&amp;gt;
+    &amp;lt;dt&amp;gt;name&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;name ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;address&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_line_1 ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;zip&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_zip ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;state&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_state ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;city&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_city ?&amp;gt;&amp;lt;/dd&amp;gt;
+
+    &amp;lt;dt&amp;gt;countrys&amp;lt;/dd&amp;gt;
+    &amp;lt;dd&amp;gt;&amp;lt;?= $order-&amp;gt;address_country ?&amp;gt;&amp;lt;/dd&amp;gt;
+&amp;lt;/dl&amp;gt;
+&amp;lt;p&amp;gt;Thanks again, and enjoy!&amp;lt;/p&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty straightforward. I’ll commit my changes now.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/.env.default plugins/PhotoPostType/src/Mailer/OrderMailer.php plugins/PhotoPostType/src/Template/Email/html/new_order.ctp plugins/PhotoPostType/src/Template/Email/html/received.ctp plugins/PhotoPostType/src/Template/Email/html/shipped.ctp
+git commit -m &quot;Create order status emails&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;shipping-emails&quot;&gt;Shipping Emails&lt;/h2&gt;
+
+&lt;p&gt;This one was a bit more difficult to figure out where it should go. I want to hook into CakePHP’s &lt;code&gt;Model.afterSave&lt;/code&gt; event as seamlessly as possible. We could add a new event handler to our &lt;code&gt;OrdersListener&lt;/code&gt; and bind it on the Model as well, but that seems icky. I’m going to instead use model behaviors, which are purpose-built to handle all table events. The following is my &lt;code&gt;OrderNotificationBehavior&lt;/code&gt;, located at &lt;code&gt;plugins/PhotoPostType/src/Model/Behavior/OrderNotificationBehavior.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+namespace PhotoPostType\Table\Behavior;
+
+use Cake\Datasource\EntityInterface;
+use Cake\Event\Event;
+use Cake\ORM\Behavior;
+use Josegonzalez\CakeQueuesadilla\Traits;
+
+class OrderNotificationBehavior extends Behavior
+{
+    use QueueTrait;
+
+    public function afterSave(Event $event, EntityInterface $entity)
+    {
+        if ($entity-&amp;gt;isNew()) {
+            $this-&amp;gt;push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
+                &#39;action&#39; =&amp;gt; &#39;received&#39;,
+                &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
+                &#39;data&#39; =&amp;gt; [
+                    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
+
+                    &#39;email&#39; =&amp;gt; $entity-&amp;gt;email,
+                    &#39;name&#39; =&amp;gt; $entity-&amp;gt;shipping_name,
+                    &#39;address_line_1&#39; =&amp;gt; $entity-&amp;gt;shipping_address_line_1,
+                    &#39;address_zip&#39; =&amp;gt; $entity-&amp;gt;shipping_address_zip,
+                    &#39;address_state&#39; =&amp;gt; $entity-&amp;gt;shipping_address_state,
+                    &#39;address_city&#39; =&amp;gt; $entity-&amp;gt;shipping_address_city,
+                    &#39;address_country&#39; =&amp;gt; $entity-&amp;gt;shipping_address_country,
+                ]
+            ]);
+
+            $this-&amp;gt;push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
+                &#39;action&#39; =&amp;gt; &#39;newOrder&#39;,
+                &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
+                &#39;data&#39; =&amp;gt; [;
+                    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
+                ],
+            ]);
+        } elseif ($entity-&amp;gt;shipped) {
+            $this-&amp;gt;push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
+                &#39;action&#39; =&amp;gt; &#39;shipped&#39;,
+                &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
+            ]);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It’s pretty straightforward. I am reusing the &lt;code&gt;MailerJob&lt;/code&gt; to send the emails in the background - awh yis - and sending all three emails depending upon whether:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The order was just created&lt;/li&gt;
+  &lt;li&gt;The order was shipped&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The &lt;code&gt;push&lt;/code&gt; method comes from our &lt;code&gt;QueueTrait&lt;/code&gt;, which helpfully uses the default queue handler to push jobs.&lt;/p&gt;
+
+&lt;p&gt;Next, we’ll link it up to our &lt;code&gt;PhotoPostType.Orders::initialize()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;OrderNotificationBehavior&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we’re done!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git commit plugins/PhotoPostType/src/Model/Behavior/OrderNotificationBehavior.php plugins/PhotoPostType/src/Model/Table/OrdersTable.php
+git commit -m &quot;Send emails when the status of the order changes&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;homework-time&quot;&gt;Homework time&lt;/h2&gt;
+
+&lt;p&gt;You’ll notice that the CMS user has no idea what was actually ordered - they’d need to guess this from the charge id in &lt;code&gt;Stripe&lt;/code&gt;. This kinda bites, so your task is to:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Track the post id that is being purchased.&lt;/li&gt;
+  &lt;li&gt;Save that relation to the &lt;code&gt;orders&lt;/code&gt; table.&lt;/li&gt;
+  &lt;li&gt;Display a link to what is being purchased on the &lt;code&gt;/admin/orders&lt;/code&gt; page.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.23&quot;&gt;0.0.23&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;It’s been almost a month, but our CMS is rounding to a close. Our next task is to actually place it online somewhere so our client can view it and suggest any changes. Ideally this happens earlier in the process, but we’ve only just completed the initial functionality, so it’s a reasonable compromise.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 23 Dec 2016 08:30:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/23/order-status-notifications/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/23/order-status-notifications/</guid>
+        
+        <category>emails</category>
+        
+        <category>mailers</category>
+        
+        <category>orders</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Handling Photo Orders</title>
@@ -2099,177 +2404,6 @@ git commit -m &quot;Add default photo templates&quot;
         <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/14/photo-post-types/</guid>
         
         <category>uploads</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Refactoring Post Types</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;updating-plugins&quot;&gt;Updating Plugins&lt;/h2&gt;
-
-&lt;p&gt;Before we continue, lets be sure we’ve updated all our plugins. I like to do this each day so that I can get any bugfixes that come out for libraries my application depends upon. If there are any bugfixes for dependencies, we’ll grab those with the following &lt;code&gt;composer&lt;/code&gt; command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;composer update
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Typically you would run tests at this stage, but since we have &lt;em&gt;yet&lt;/em&gt; to write any, that isn’t necessary.&lt;/p&gt;
-
-&lt;p&gt;Let’s commit any updates:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.lock
-git commit -m &quot;Update unpinned dependencies&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You should always verify your application still works after upgrading dependencies.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;duplicative-logic&quot;&gt;Duplicative Logic&lt;/h2&gt;
-
-&lt;p&gt;In the process of adding a new post type, I noticed that there is a bit of duplication between the &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; and the &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt; method. Specifically, we’re not even using the &lt;code&gt;_execute()&lt;/code&gt; logic in our save. I’m going to refactor it with the following goals:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Save logic belongs with Crud, so it will be removed from both the &lt;code&gt;PostsListener&lt;/code&gt; and &lt;code&gt;AbstractPostType&lt;/code&gt; classes.&lt;/li&gt;
-  &lt;li&gt;Extra data from the request should be injected at the &lt;code&gt;PostsListener&lt;/code&gt; level.&lt;/li&gt;
-  &lt;li&gt;The data that we’ll actually save should be returned by the &lt;code&gt;AbstractPostType::execute()&lt;/code&gt; method.&lt;/li&gt;
-  &lt;li&gt;We should be able to lean on our &lt;code&gt;PostType&lt;/code&gt; validation rules as much as possible.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;dropping-extra-code-in-postslistenerbeforesave&quot;&gt;Dropping extra code in &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt;&lt;/h3&gt;
-
-&lt;p&gt;This is the &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Save
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeSave(Event $event)
-{
-    $type = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type;
-    if (empty($type)) {
-        $passedArgs = $this-&amp;gt;_request()-&amp;gt;param(&#39;pass&#39;);
-        $type = $passedArgs[0];
-    }
-
-    $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;type = $type;
-
-    $data = [
-        &#39;user_id&#39; =&amp;gt; $this-&amp;gt;_controller()-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;),
-        &#39;type&#39; =&amp;gt; $type,
-    ] + $this-&amp;gt;_request()-&amp;gt;data() + [&#39;published_date&#39; =&amp;gt; Time::now()];
-    $postType = $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;getPostType();
-    $data = $postType-&amp;gt;execute($data);
-
-    $PostsTable = TableRegistry::get(&#39;Posts&#39;);
-    $PostsTable-&amp;gt;patchEntity($event-&amp;gt;subject-&amp;gt;entity, $data);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In it, you’ll see I can still inject data from the request - &lt;code&gt;user_id&lt;/code&gt;, &lt;code&gt;type&lt;/code&gt;, &lt;code&gt;published_date&lt;/code&gt; - but also get the “real” data from the specific &lt;code&gt;PostType::execute()&lt;/code&gt; method. As it’s the &lt;code&gt;Crud.beforeSave&lt;/code&gt; event, we don’t actually need to save data, and just patching it onto the event’s entity is enough.&lt;/p&gt;
-
-&lt;h3 id=&quot;restructuring-abstractposttypeexecute&quot;&gt;Restructuring &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;&lt;/h3&gt;
-
-&lt;p&gt;This is my new &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function _execute(array $data)
-{
-    if (empty($data[&#39;post_attributes&#39;])) {
-        $data[&#39;post_attributes&#39;] = [];
-    }
-
-    $PostsTable = TableRegistry::get(&#39;Posts&#39;);
-    $AttributesTable = TableRegistry::get(&#39;PostAttributes&#39;);
-    $postAttributes = $data[&#39;post_attributes&#39;];
-
-    $postColumns = $PostsTable-&amp;gt;schema()-&amp;gt;columns();
-    $validColumns = $this-&amp;gt;schema()-&amp;gt;fields();
-    foreach ($data as $key =&amp;gt; $value) {
-        if (in_array($key, $postColumns)) {
-            continue;
-        }
-
-        unset($data[$key]);
-        if (!in_array($key, $validColumns)) {
-            continue;
-        }
-        $postAttributes[] = [
-            &#39;name&#39; =&amp;gt; $key,
-            &#39;value&#39; =&amp;gt; $value,
-        ];
-    }
-
-    $data[&#39;post_attributes&#39;] = $postAttributes;
-
-    return $data;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A bit more going on here:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;We’re assuming there will &lt;em&gt;always&lt;/em&gt; be at least an empty set of &lt;code&gt;post_attributes&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;If a key is both not a valid post column and not a valid post-type field, then we drop it.&lt;/li&gt;
-  &lt;li&gt;We’re no longer creating a &lt;code&gt;PostAttribute&lt;/code&gt; Entity, and instead allowing the &lt;code&gt;PostsTable-&amp;gt;patchEntity()&lt;/code&gt; call in the &lt;code&gt;PostsListener::beforeSave()&lt;/code&gt; to properly martial the data.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;With these two changes in place, you can test saving a post and everything should be just fine. Let’s commit:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/PostType/AbstractPostType.php
-git commit -m &quot;Clean up post marshalling and saving&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;allowing-post-data-modification&quot;&gt;Allowing Post Data Modification&lt;/h3&gt;
-
-&lt;p&gt;In our upcoming post type - the PhotoPostType - we’ll need to save the file to disk and also ensure we track a &lt;code&gt;photo_path&lt;/code&gt; that can be used to display the image. This is a bit more logic than our automated system will handle, so we’ll need an extra function call to perform these modifications. I’ve added the following method to &lt;code&gt;AbstractPostType&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function transformData($data)
-{
-    return $data;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;By default, my &lt;code&gt;AbstractPostType::transformData()&lt;/code&gt; is a no-op. And I call it &lt;em&gt;right&lt;/em&gt; after I set a default for &lt;code&gt;post_attributes&lt;/code&gt; in &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$data = $this-&amp;gt;transformData($data);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Why can’t I just depend upon the UploadBehavior to do this logic for me? Many behaviors end up changing where things are stored in the &lt;code&gt;Table.beforeSave&lt;/code&gt; event, which happens &lt;em&gt;after&lt;/em&gt; the &lt;code&gt;Crud.beforeSave&lt;/code&gt; event. This means that we’d end up trashing the upload data before the &lt;code&gt;UploadBehavior&lt;/code&gt; can handle it. As well, that behavior doesn’t know anything about our weird &lt;code&gt;post_attributes&lt;/code&gt; system, so we’d need to handle the logic on our own.&lt;/p&gt;
-
-&lt;p&gt;I’ll save my changes for now, and get to add a custom &lt;code&gt;PhotoPostType&lt;/code&gt; tomorrow.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/PostType/AbstractPostType.php
-git commit -m &quot;Allow post types to transform the data before it is further marshalled&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.13&quot;&gt;0.0.13&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;A bit of light refactoring is always useful to get your application priorities in order. In this case, it was absolutely necessary in order to figure out where exactly we’d need to hook in for our custom photo type.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Tue, 13 Dec 2016 12:40:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/13/refactoring-post-types/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/13/refactoring-post-types/</guid>
-        
-        <category>refactoring</category>
         
         <category>cakeadvent-2016</category>
         

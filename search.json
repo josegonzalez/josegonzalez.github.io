@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Order status notifications",
+    "url": "/2016/12/23/order-status-notifications/",
+    "description": "Part 23 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["build","cms","help","notifications","order","part","personal","posts","series","status","will"]
+  },
+  {
+    "type": "post",
     "title": "Handling Photo Orders",
     "url": "/2016/12/22/handling-photo-orders/",
     "description": "Part 22 of a series of posts that will help you build out a personal CMS",
@@ -1894,6 +1901,18 @@
     "title": "email-preview",
     "url": "/tags/email-preview/",
     "tokens": ["email","preview"]
+  },
+  {
+    "type": "tag",
+    "title": "mailers",
+    "url": "/tags/mailers/",
+    "tokens": ["mailers"]
+  },
+  {
+    "type": "tag",
+    "title": "orders",
+    "url": "/tags/orders/",
+    "tokens": ["orders"]
   },
   {
     "type": "null",

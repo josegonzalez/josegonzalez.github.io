@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-12-23T05:30:29+00:00</updated>
+ <updated>2016-12-24T02:30:43+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Order status notifications]]></title>
+   <link href="http://josediazgonzalez.com/2016/12/23/order-status-notifications/"/>
+   <updated>2016-12-23T08:30:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2016/12/23/order-status-notifications/</id>
+   <content type="html"><![CDATA[Part 23 of a series of posts that will help you build out a personal CMS]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Handling Photo Orders]]></title>
