@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Deploying our application",
+    "url": "/2016/12/24/deploying-our-application/",
+    "description": "Part 24 of a series of posts that will help you build out a personal CMS",
+    "tokens": ["application","build","cms","deploying","help","part","personal","posts","series","will"]
+  },
+  {
+    "type": "post",
     "title": "Order status notifications",
     "url": "/2016/12/23/order-status-notifications/",
     "description": "Part 23 of a series of posts that will help you build out a personal CMS",

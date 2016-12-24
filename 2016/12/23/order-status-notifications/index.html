@@ -198,11 +198,11 @@ git commit -m "Create order status emails"
 <h2 id="shipping-emails">Shipping Emails</h2>
 <p>This one was a bit more difficult to figure out where it should go. I want to hook into CakePHP’s <code>Model.afterSave</code> event as seamlessly as possible. We could add a new event handler to our <code>OrdersListener</code> and bind it on the Model as well, but that seems icky. I’m going to instead use model behaviors, which are purpose-built to handle all table events. The following is my <code>OrderNotificationBehavior</code>, located at <code>plugins/PhotoPostType/src/Model/Behavior/OrderNotificationBehavior.php</code>:</p>
 <pre><code class="language-php">&lt;?php
-namespace PhotoPostType\Table\Behavior;
+namespace PhotoPostType\Model\Behavior;
 use Cake\Datasource\EntityInterface;
 use Cake\Event\Event;
 use Cake\ORM\Behavior;
-use Josegonzalez\CakeQueuesadilla\Traits;
+use Josegonzalez\CakeQueuesadilla\Traits\QueueTrait;
 class OrderNotificationBehavior extends Behavior
 {
     use QueueTrait;
@@ -213,7 +213,7 @@ class OrderNotificationBehavior extends Behavior
                 'action' =&gt; 'received',
                 'mailer' =&gt; 'PhotoPostType.Orders',
                 'data' =&gt; [
-                    'order_id' =&gt; $entity-&gt;id
+                    'order_id' =&gt; $entity-&gt;id,
                     'email' =&gt; $entity-&gt;email,
                     'name' =&gt; $entity-&gt;shipping_name,
                     'address_line_1' =&gt; $entity-&gt;shipping_address_line_1,
@@ -226,7 +226,7 @@ class OrderNotificationBehavior extends Behavior
             $this-&gt;push(['\App\Job\MailerJob', 'execute'], [
                 'action' =&gt; 'newOrder',
                 'mailer' =&gt; 'PhotoPostType.Orders',
-                'data' =&gt; [;
+                'data' =&gt; [
                     'order_id' =&gt; $entity-&gt;id
                 ],
             ]);
@@ -234,6 +234,9 @@ class OrderNotificationBehavior extends Behavior
             $this-&gt;push(['\App\Job\MailerJob', 'execute'], [
                 'action' =&gt; 'shipped',
                 'mailer' =&gt; 'PhotoPostType.Orders',
+                'data' =&gt; [
+                    'order_id' =&gt; $entity-&gt;id
+                ],
             ]);
         }
     }
@@ -281,7 +284,7 @@ git commit -m "Send emails when the status of the order changes"
     <aside class="sidebar widget widget_categories widget_search">
             <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
 <div class="series-note">
-    <p>This entry is <strong>part 23</strong> of <strong>23</strong> in the series "CakeAdvent 2016".</p>
+    <p>This entry is <strong>part 23</strong> of <strong>24</strong> in the series "CakeAdvent 2016".</p>
     <ol>
       <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
       <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
@@ -306,6 +309,7 @@ git commit -m "Send emails when the status of the order changes"
       <li><a href="/2016/12/21/selling-photos/">Selling Photos</a></li>
       <li><a href="/2016/12/22/handling-photo-orders/">Handling Photo Orders</a></li>
       <li>Order status notifications</li>
+      <li><a href="/2016/12/24/deploying-our-application/">Deploying our application</a></li>
     </ol>
 </div>
 <h3 class="widget-title">Categories</h3>

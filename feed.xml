@@ -5,9 +5,238 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 24 Dec 2016 02:30:43 +0000</pubDate>
-    <lastBuildDate>Sat, 24 Dec 2016 02:30:43 +0000</lastBuildDate>
+    <pubDate>Sat, 24 Dec 2016 23:13:03 +0000</pubDate>
+    <lastBuildDate>Sat, 24 Dec 2016 23:13:03 +0000</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Deploying our application</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;errata-from-previous-post&quot;&gt;Errata from previous post&lt;/h2&gt;
+
+&lt;p&gt;Looks like I should run the code before committing it. Here are a few issues with the last post:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;The OrderNotificationBehavior was attached improperly. It should be as follows:&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;PhotoPostType.OrderNotification&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;The namespace for &lt;code&gt;OrderNotificationBehavior&lt;/code&gt; should be &lt;code&gt;namespace PhotoPostType\Model\Behavior;&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;The &lt;code&gt;use&lt;/code&gt; statement for &lt;code&gt;QueueTrait&lt;/code&gt; should be &lt;code&gt;use Josegonzalez\CakeQueuesadilla\Traits\QueueTrait;&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Missing a comma on line 20 of &lt;code&gt;OrderNotificationBehavior&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Extra semicolon around line 34 of &lt;code&gt;OrderNotificationBehavior&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Missing data from the &lt;code&gt;shipped&lt;/code&gt; MailerJob enqueue in &lt;code&gt;OrderNotificationBehavior&lt;/code&gt;. It should be:&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;data&#39; =&amp;gt; [
+    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
+],
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
+
+&lt;h2 id=&quot;creating-a-heroku-application&quot;&gt;Creating a heroku application&lt;/h2&gt;
+
+&lt;p&gt;First, you’ll want to install the &lt;a href=&quot;https://devcenter.heroku.com/articles/heroku-cli&quot;&gt;heroku cli&lt;/a&gt;. This will be used to orchestrate our application on heroku.&lt;/p&gt;
+
+&lt;p&gt;In the app repository, I ran the following to create a new heroku app:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;heroku create
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There is a bit of configuration we need to set in order to get our app fully working in heroku. First, lets ensure our &lt;code&gt;config/.env.default&lt;/code&gt; does not override our environment variables by setting an application name:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;heroku config:set APP_NAME=calico
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we’ll disable debug, as otherwise deploying will have errors regarding DebugKit not being installed. On heroku, packages in our composer.json &lt;code&gt;require-dev&lt;/code&gt; section are not installed, so skipping this will mean our &lt;code&gt;config/bootstrap.php&lt;/code&gt; will attempt to load a non-existent plugin.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;heroku config:set DEBUG=false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In order to send email, you’ll probably want to configure your &lt;code&gt;EMAIL_TRANSPORT_DEFAULT_URL&lt;/code&gt; env var as well. I’ve set mine to smtp settings from a Gmail account, though if you want to use a custom email transport for an email service, you are welcome to do that as well. Don’t forget to set a primary email!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;heroku config:set EMAIL_TRANSPORT_DEFAULT_URL=&quot;mail://user:secret@localhost:25/?client=null&amp;amp;timeout=30&amp;amp;tls=null&quot;
+heroku config:set PRIMARY_EMAIL=&quot;example@example.com&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’ll also want to configure stripe properly. I’ll add the following to my &lt;code&gt;config/app.php&lt;/code&gt; and &lt;code&gt;config/app.default.php&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
+ * Configures Stripe
+ */
+&#39;Stripe&#39; =&amp;gt; [
+    &#39;publishablekey&#39; =&amp;gt; env(&#39;STRIPE_PUBLISHABLEKEY&#39;, &#39;pk_test_1234&#39;),
+    &#39;secretkey&#39; =&amp;gt; env(&#39;STRIPE_SECRETKEY&#39;, &#39;sk_test_abcd&#39;),
+    &#39;mode&#39; =&amp;gt; env(&#39;STRIPE_MODE&#39;, &#39;test&#39;)
+],
+
+/**
+ * Sets primary config for our app (email, etc.)
+ */
+&#39;Primary&#39; =&amp;gt; [
+    &#39;email&#39; =&amp;gt; env(&#39;PRIMARY_EMAIL&#39;, &#39;example@example.com&#39;),
+],
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And we can set the env vars like normal:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;heroku config:set STRIPE_PUBLISHABLEKEY=pk_test_1234
+heroku config:set STRIPE_SECRETKEY=sk_test_abcd
+heroku config:set STRIPE_MODE=test
+heroku config:set PRIMARY_EMAIL=&quot;example@example.com&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Commit!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/app.default.php
+git commit -m &quot;Ensure we read env vars for stripe and primary email configuration&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’ll configure a database, queuing, and our cache layer using some heroku addons for postgres and redis:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;heroku addons:create heroku-postgresql:hobby-dev
+heroku addons:create heroku-redis:hobby-dev
+
+APP_NAME=&quot;$(heroku config:get APP_NAME)&quot;
+DATABASE_URL=&quot;$(heroku config:get DATABASE_URL)&quot;
+REDIS_URL=&quot;$(heroku config:get REDIS_URL)&quot;
+heroku config:set QUEUESADILLA_DEFAULT_URL=&quot;${DATABASE_URL}&quot;
+heroku config:set CACHE_DEFAULT_URL=&quot;${REDIS_URL}?prefix=${APP_NAME}_&quot;
+heroku config:set CACHE_CAKECORE_URL=&quot;${REDIS_URL}?prefix=${APP_NAME}_cake_core_&quot;
+heroku config:set CACHE_CAKEMODEL_URL=&quot;${REDIS_URL}?prefix=${APP_NAME}_cake_model_&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One thing that needs to be done is we need to ensure we build assets in heroku, or our admin won’t be able to render assets. I ran the following command locally:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;mkdir webroot/cache_css webroot/cache_js
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then I added those directories to my &lt;code&gt;.gitignore&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;/webroot/cache_css
+/webroot/cache_js
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And finally, I added the following to the application’s &lt;code&gt;composer.json&lt;/code&gt; in &lt;code&gt;scripts.compile&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-json&quot;&gt;&quot;mkdir webroot/cache_css webroot/cache_js&quot;,
+&quot;bin/cake asset_compress build&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And I’ll commit these changes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add .gitignore composer.json
+git commit -m &quot;Build assets on deploy&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, we’ll need to square away our logging setup.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;heroku config:set LOG_DEBUG_URL=&quot;syslog://logs?levels[]=notice&amp;amp;levels[]=info&amp;amp;levels[]=debug&amp;amp;file=debug&quot;
+heroku config:set LOG_ERROR_URL=&quot;syslog://logs?levels[]=warning&amp;amp;levels[]=error&amp;amp;levels[]=critical&amp;amp;levels[]=alert&amp;amp;levels[]=emergency&amp;amp;file=error&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now push your code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git push heroku master
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You’ll see a lot of build output, but once it is done, you can type &lt;code&gt;heroku open&lt;/code&gt; to open your site in the browser.&lt;/p&gt;
+
+&lt;h2 id=&quot;background-workers&quot;&gt;Background workers&lt;/h2&gt;
+
+&lt;p&gt;You can add background queue workers by adding the following to your &lt;code&gt;Procfile&lt;/code&gt; if it does not already exist:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-yaml&quot;&gt;worker: bin/cake queuesadilla
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then commit and push the change:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add Procfile
+git commit -m &quot;Allow running a background worker&quot;
+git push heroku master
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To start a worker, you’ll need to scale it up:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;heroku ps:scale worker=1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;logging-in&quot;&gt;Logging in&lt;/h2&gt;
+
+&lt;p&gt;You’ll need to create a user to login as. To do so, you can start a new heroku dyno:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;heroku run bash
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And then run our helper &lt;code&gt;UserShell&lt;/code&gt; to create the first user:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake user --username-field email
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;homework-time-uploading-images&quot;&gt;Homework Time: Uploading images&lt;/h2&gt;
+
+&lt;p&gt;This will require a bit of reworking. Firstly, data is not persisted, so we need to store it on an external filesystem. I prefer &lt;a href=&quot;http://flysystem.thephpleague.com/adapter/aws-s3-v3/&quot;&gt;AWS S3&lt;/a&gt; for storing static files. Fortunately, flysystem supports quite adapters for different storage engines, so you can use whatever you’d like.&lt;/p&gt;
+
+&lt;p&gt;There are two places in the codebase you’ll need to edit:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;UsersTable&lt;/code&gt;: The &lt;code&gt;Josegonzalez/Upload&lt;/code&gt; behavior can be configured to use any adapter. Documentation &lt;a href=&quot;https://cakephp-upload.readthedocs.io/en/latest/configuration.html&quot;&gt;here&lt;/a&gt; on that.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;PhotoPostType&lt;/code&gt;: The adapter configured for upload is the &lt;code&gt;Local&lt;/code&gt; adapter. Use whichever one you feel most comfortable.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I won’t be making these changes in my version, but in a future release of my client’s CMS, these two should be configurable :)&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.24&quot;&gt;0.0.24&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;And that’s a rap! We’ve created a fully-functioning CMS with:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Image uploading&lt;/li&gt;
+  &lt;li&gt;Custom theme support&lt;/li&gt;
+  &lt;li&gt;CrudView-generated admin dashboard&lt;/li&gt;
+  &lt;li&gt;User authentication&lt;/li&gt;
+  &lt;li&gt;Password reset flows&lt;/li&gt;
+  &lt;li&gt;Email sending and previews&lt;/li&gt;
+  &lt;li&gt;Background queues&lt;/li&gt;
+  &lt;li&gt;Simple ecommerce functionality&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Lots of stuff here for really not much code, and it was all thanks to the power of CakePHP.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar.&lt;/p&gt;
+
+&lt;p&gt;Hope you all had as much fun as I did with this year’s CakeAdvent Calendar. Until next post, take care and happy holidays!&lt;/p&gt;
+</description>
+        <pubDate>Sat, 24 Dec 2016 05:04:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/24/deploying-our-application/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/24/deploying-our-application/</guid>
+        
+        <category>deployment</category>
+        
+        <category>heroku</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
     
       <item>
         <title>Order status notifications</title>
@@ -208,12 +437,12 @@ git commit -m &quot;Create order status emails&quot;
 &lt;p&gt;This one was a bit more difficult to figure out where it should go. I want to hook into CakePHP’s &lt;code&gt;Model.afterSave&lt;/code&gt; event as seamlessly as possible. We could add a new event handler to our &lt;code&gt;OrdersListener&lt;/code&gt; and bind it on the Model as well, but that seems icky. I’m going to instead use model behaviors, which are purpose-built to handle all table events. The following is my &lt;code&gt;OrderNotificationBehavior&lt;/code&gt;, located at &lt;code&gt;plugins/PhotoPostType/src/Model/Behavior/OrderNotificationBehavior.php&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace PhotoPostType\Table\Behavior;
+namespace PhotoPostType\Model\Behavior;
 
 use Cake\Datasource\EntityInterface;
 use Cake\Event\Event;
 use Cake\ORM\Behavior;
-use Josegonzalez\CakeQueuesadilla\Traits;
+use Josegonzalez\CakeQueuesadilla\Traits\QueueTrait;
 
 class OrderNotificationBehavior extends Behavior
 {
@@ -226,8 +455,7 @@ class OrderNotificationBehavior extends Behavior
                 &#39;action&#39; =&amp;gt; &#39;received&#39;,
                 &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
                 &#39;data&#39; =&amp;gt; [
-                    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
-
+                    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id,
                     &#39;email&#39; =&amp;gt; $entity-&amp;gt;email,
                     &#39;name&#39; =&amp;gt; $entity-&amp;gt;shipping_name,
                     &#39;address_line_1&#39; =&amp;gt; $entity-&amp;gt;shipping_address_line_1,
@@ -241,7 +469,7 @@ class OrderNotificationBehavior extends Behavior
             $this-&amp;gt;push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
                 &#39;action&#39; =&amp;gt; &#39;newOrder&#39;,
                 &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
-                &#39;data&#39; =&amp;gt; [;
+                &#39;data&#39; =&amp;gt; [
                     &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
                 ],
             ]);
@@ -249,6 +477,9 @@ class OrderNotificationBehavior extends Behavior
             $this-&amp;gt;push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
                 &#39;action&#39; =&amp;gt; &#39;shipped&#39;,
                 &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
+                &#39;data&#39; =&amp;gt; [
+                    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
+                ],
             ]);
         }
     }
@@ -2167,243 +2398,6 @@ $this-&amp;gt;Paginator-&amp;gt;templates([
         <category>themes</category>
         
         <category>views</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Photo Post Types</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;scaffolding-the-photoposttype-plugin&quot;&gt;Scaffolding the PhotoPostType plugin&lt;/h2&gt;
-
-&lt;p&gt;For our photo posts, here are the extra fields we are tracking:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;photo&lt;/code&gt;: The name the user used for the image being uploaded&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;photo_dir&lt;/code&gt;: Path on disk - relative to www_root - where the file will be stored&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;photo_path&lt;/code&gt;: Path on disk - relative to www_root - where the file will be stored &lt;em&gt;including&lt;/em&gt; a sanitized filename&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We’ll also want to validate that our photo is a valid image before attempting to upload it. Finally, we need to upload the image before saving the post itself. Let’s start by baking a &lt;code&gt;PhotoPostType&lt;/code&gt; plugin, which should also update our &lt;code&gt;composer.json&lt;/code&gt; to update code load paths.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake plugin PhotoPostType -f
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll create a &lt;code&gt;plugins/PhotoPostType/config/bootstrap.php&lt;/code&gt; to load our plugin post type.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Event\Event;
-use Cake\Event\EventManager;
-
-EventManager::instance()-&amp;gt;on(&#39;Posts.PostTypes.get&#39;, function (Event $event) {
-  // The key is the Plugin name and the class
-  // The value is what you want to display in the ui
-  $event-&amp;gt;subject-&amp;gt;postTypes[&#39;PhotoPostType.PhotoPostType&#39;] = &#39;blog&#39;;
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;You can remove the &lt;code&gt;plugins/PhotoPostType/config/routes.php&lt;/code&gt; file as we wont need it&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We’ll want to ensure that the bootstrap file is loaded for this plugin, so check to ensure that your &lt;code&gt;config/bootstrap.php&lt;/code&gt; has the following &lt;code&gt;Plugin::load&lt;/code&gt; line (update it if need be):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load(&#39;PhotoPostType&#39;, [&#39;bootstrap&#39; =&amp;gt; true, &#39;routes&#39; =&amp;gt; false]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Remember to save your work!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json config/bootstrap.php plugins/PhotoPostType
-git commit -m &quot;Scaffold the PhotoPostType plugin&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;photoposttype-form-fields-and-validation&quot;&gt;PhotoPostType form fields and validation&lt;/h2&gt;
-
-&lt;p&gt;We will now need the &lt;code&gt;PostType&lt;/code&gt; class that contains the code for our form. Here are the initial contents of &lt;code&gt;plugins/PhotoPostType/PostType/PhotoPostType.php&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace PhotoPostType\PostType;
-
-use App\PostType\AbstractPostType;
-use Cake\Form\Schema;
-use Cake\Validation\Validator;
-
-class PhotoPostType extends AbstractPostType
-{
-    protected function _buildSchema(Schema $schema)
-    {
-        $schema = parent::_buildSchema($schema);
-        $schema-&amp;gt;addField(&#39;photo&#39;, [&#39;type&#39; =&amp;gt; &#39;file&#39;]);
-        $schema-&amp;gt;addField(&#39;photo_dir&#39;, [&#39;type&#39; =&amp;gt; &#39;hidden&#39;]);
-        $schema-&amp;gt;addField(&#39;photo_path&#39;, [&#39;type&#39; =&amp;gt; &#39;hidden&#39;]);
-        return $schema;
-    }
-
-    protected function _buildValidator(Validator $validator)
-    {
-        $validator = parent::_buildValidator($validator);
-        $validator-&amp;gt;add(&#39;photo&#39;, &#39;valid-image&#39;, [
-            &#39;rule&#39; =&amp;gt; [&#39;uploadedFile&#39;, [
-                &#39;types&#39; =&amp;gt; [
-                    &#39;image/bmp&#39;,
-                    &#39;image/gif&#39;,
-                    &#39;image/jpeg&#39;,
-                    &#39;image/pjpeg&#39;,
-                    &#39;image/png&#39;,
-                    &#39;image/x-windows-bmp&#39;,
-                    &#39;image/x-png&#39;,
-                ],
-                &#39;optional&#39; =&amp;gt; true,
-            ]],
-            &#39;message&#39; =&amp;gt; &#39;The uploaded photo was not a valid image&#39;
-        ]);
-        return $validator;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty simple. We’re adding a few fields for the form - two of which are hidden - and then adding a validation rule to allow &lt;em&gt;only&lt;/em&gt; images. Seems pretty straightforward. I’ll also commit my changes here.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/PhotoPostType/src/PostType/PhotoPostType.php
-git commit -m &quot;Initial form display for photo post types&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;handling-file-uploads&quot;&gt;Handling file uploads&lt;/h3&gt;
-
-&lt;p&gt;We’re going to need to actually write the files to disk. To do this, I’m going to use the wonderful &lt;a href=&quot;http://flysystem.thephpleague.com/&quot;&gt;League/Flysystem&lt;/a&gt; library. This will abstract actual file writing for me, and also potentially allow me to upload images to non-local storage.&lt;/p&gt;
-
-&lt;p&gt;All the file upload logic begins in our &lt;code&gt;PhotoPostType::transformData()&lt;/code&gt; method. Here is the body of that method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function transformData($data)
-{
-    $photoExtension = pathinfo($data[&#39;photo&#39;][&#39;name&#39;], PATHINFO_EXTENSION);
-    $photoDirectory  = &#39;files/Posts/photo/&#39; . uniqid();
-    $photoFilename = uniqid() . &#39;.&#39; . $photoExtension;
-    $photoPath $photoDirectory . &#39;/&#39; . $photoFilename
-    $postAttributes = [
-        [&#39;name&#39; =&amp;gt; &#39;photo_dir&#39;, &#39;value&#39; =&amp;gt; $photoDirectory],
-        [&#39;name&#39; =&amp;gt; &#39;photo&#39;, &#39;value&#39; =&amp;gt; $data[&#39;photo&#39;][&#39;name&#39;]],
-        [&#39;name&#39; =&amp;gt; &#39;photo_path&#39;, &#39;value&#39; =&amp;gt; $photoPath],
-    ];
-
-    $success = $this-&amp;gt;writeFile($data[&#39;photo&#39;], $photoPath);
-    unset($data[&#39;photo&#39;], $data[&#39;photo_dir&#39;], $data[&#39;photo_path&#39;] $data[&#39;post_attributes&#39;]);
-    if (!$success) {
-        return $data;
-    }
-
-    $data[&#39;post_attributes&#39;] = $postAttributes;
-
-    return $data;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let’s walk through this:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;I get the photo extension using the &lt;code&gt;pathinfo&lt;/code&gt; method. This might fail if there was no original extension on the uploaded file, so in a future revision, we’ll want to properly detect the mimetype and remap the extension, but this is good for now.&lt;/li&gt;
-  &lt;li&gt;I’m using &lt;code&gt;uniqid&lt;/code&gt; to get a filepath on disk. I won’t currently be handling vacuuming old file uploads, so we want to ensure we don’t overwrite existing files. A good alternative would be to use &lt;code&gt;Text::uuid()&lt;/code&gt;, but I don’t expect any issues for my use case.&lt;/li&gt;
-  &lt;li&gt;We’ll need to write the file to disk, and that logic is shown elsewhere.&lt;/li&gt;
-  &lt;li&gt;If the file is saved successfully, we add the extra post attributes, and otherwise just return as is. We would be better suited in handling this error, but I’ll leave that up to the reader.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;What does file uploading look like? First, add the following &lt;code&gt;use&lt;/code&gt; calls to the top of the class for classes that will be, well, used by our file uploading mechanism:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use League\Flysystem\Adapter\Local;
-use League\Flysystem\AdapterInterface;
-use League\Flysystem\FileNotFoundException;
-use League\Flysystem\Filesystem;
-use League\Flysystem\FilesystemInterface;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Here is the &lt;code&gt;PhotoPostType::writeFile()&lt;/code&gt; method (and related helper methods):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function writeFile(array $filedata, $filepath)
-{
-    $success = false;
-    $stream = @fopen($filedata[&#39;tmp_name&#39;], &#39;r&#39;);
-    if ($stream === false) {
-        return $success;
-    }
-
-    $filesystem = $this-&amp;gt;filesystem();
-    $success = $filesystem-&amp;gt;writeStream($filepath, $stream);
-    fclose($stream);
-
-    return $success;
-}
-
-protected function filesystem()
-{
-    $adapter = new Local(WWW_ROOT);
-    $filesystem = new Filesystem($adapter, [
-        &#39;visibility&#39; =&amp;gt; AdapterInterface::VISIBILITY_PUBLIC
-    ]);
-
-    return $filesystem;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A bit to go through, but a pretty-straightforward read I think. Some implementation notes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;I typically use streams for writing to flysystem. You can also write content directly, but as the file already exists locally, using a file stream is the most natural.&lt;/li&gt;
-  &lt;li&gt;If we can’t open the temp file, we fail the write.&lt;/li&gt;
-  &lt;li&gt;I’ve used an extra method to get the &lt;code&gt;Filesystem&lt;/code&gt; object, which will allow me to mock the filesystem for tests.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Neat! Let’s save our progress.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/PhotoPostType/src/PostType/PhotoPostType.php
-git commit -m &quot;Handle file uploads for the photo post type&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;displaying-photos-in-the-frontend&quot;&gt;Displaying Photos in the frontend&lt;/h3&gt;
-
-&lt;p&gt;Our default &lt;code&gt;src/Template/Element/post_type/photo-index.ctp&lt;/code&gt; and &lt;code&gt;src/Template/Element/post_type/photo-view.ctp&lt;/code&gt; template files are pretty trivial. I’m simply going to show the post type and then a link to the image in each:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h3&amp;gt;&amp;lt;?= $post-&amp;gt;get(&#39;title&#39;) ?&amp;gt;&amp;lt;/h3&amp;gt;
-&amp;lt;div&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;image(&#39;../&#39; . $post-&amp;gt;get(&#39;photo_path&#39;)) ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Here is what it looks like (using my favorite picture of &lt;a href=&quot;https://twitter.com/grmpyprogrammer&quot;&gt;Chris Hartjes&lt;/a&gt;):&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/2016/12/14/baby-upload.png&quot; alt=&quot;baby image&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Remember to commit your new files.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/PhotoPostType/src/Template/Element/post_type/photo-index.ctp plugins/PhotoPostType/src/Template/Element/post_type/photo-view.ctp
-git commit -m &quot;Add default photo templates&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.14&quot;&gt;0.0.14&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We now have our custom photo post type, and it’s pretty bad-ass. While the admin ui could use some work - how do you know you’ve already uploaded an image? - we’re pretty far along.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Wed, 14 Dec 2016 01:37:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/14/photo-post-types/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/14/photo-post-types/</guid>
-        
-        <category>uploads</category>
         
         <category>cakeadvent-2016</category>
         

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>CakeAdvent-2016: Deploying our application</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2016/12/24/deploying-our-application/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="Part 24 of a series of posts that will help you build out a personal CMS" />
+    <meta name="keywords" content="deployment, heroku, cakeadvent-2016, cakephp" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="CakeAdvent-2016: Deploying our application" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2016/12/24/deploying-our-application/" />
+    <meta property="og:description" content="Part 24 of a series of posts that will help you build out a personal CMS" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="CakeAdvent-2016: Deploying our application" />
+    <meta name="twitter:description" content="Part 24 of a series of posts that will help you build out a personal CMS" />
+    <link rel="alternate" type="application/rss+xml" title="Deploying our application » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Deploying our application</h2>
+    <div class="post-content">
+        <p>A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.</p>
+<blockquote>
+  <p>For the lazy, the codebase we’ll be working on will be available on <a href="https://github.com/josegonzalez/cakeadvent-2016">GitHub</a>. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!</p>
+</blockquote>
+<h2 id="errata-from-previous-post">Errata from previous post</h2>
+<p>Looks like I should run the code before committing it. Here are a few issues with the last post:</p>
+<ul>
+  <li>
+    <p>The OrderNotificationBehavior was attached improperly. It should be as follows:</p>
+    <pre><code class="language-php">$this-&gt;addBehavior('PhotoPostType.OrderNotification');
+</code></pre>
+  </li>
+  <li>The namespace for <code>OrderNotificationBehavior</code> should be <code>namespace PhotoPostType\Model\Behavior;</code>.</li>
+  <li>The <code>use</code> statement for <code>QueueTrait</code> should be <code>use Josegonzalez\CakeQueuesadilla\Traits\QueueTrait;</code>.</li>
+  <li>Missing a comma on line 20 of <code>OrderNotificationBehavior</code>.</li>
+  <li>Extra semicolon around line 34 of <code>OrderNotificationBehavior</code></li>
+  <li>
+    <p>Missing data from the <code>shipped</code> MailerJob enqueue in <code>OrderNotificationBehavior</code>. It should be:</p>
+    <pre><code class="language-php">'data' =&gt; [
+    'order_id' =&gt; $entity-&gt;id
+],
+</code></pre>
+  </li>
+</ul>
+<p>Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.</p>
+<h2 id="creating-a-heroku-application">Creating a heroku application</h2>
+<p>First, you’ll want to install the <a href="https://devcenter.heroku.com/articles/heroku-cli">heroku cli</a>. This will be used to orchestrate our application on heroku.</p>
+<p>In the app repository, I ran the following to create a new heroku app:</p>
+<pre><code class="language-shell">heroku create
+</code></pre>
+<p>There is a bit of configuration we need to set in order to get our app fully working in heroku. First, lets ensure our <code>config/.env.default</code> does not override our environment variables by setting an application name:</p>
+<pre><code class="language-shell">heroku config:set APP_NAME=calico
+</code></pre>
+<p>Next, we’ll disable debug, as otherwise deploying will have errors regarding DebugKit not being installed. On heroku, packages in our composer.json <code>require-dev</code> section are not installed, so skipping this will mean our <code>config/bootstrap.php</code> will attempt to load a non-existent plugin.</p>
+<pre><code class="language-shell">heroku config:set DEBUG=false
+</code></pre>
+<p>In order to send email, you’ll probably want to configure your <code>EMAIL_TRANSPORT_DEFAULT_URL</code> env var as well. I’ve set mine to smtp settings from a Gmail account, though if you want to use a custom email transport for an email service, you are welcome to do that as well. Don’t forget to set a primary email!</p>
+<pre><code class="language-shell">heroku config:set EMAIL_TRANSPORT_DEFAULT_URL="mail://user:secret@localhost:25/?client=null&amp;timeout=30&amp;tls=null"
+heroku config:set PRIMARY_EMAIL="example@example.com"
+</code></pre>
+<p>We’ll also want to configure stripe properly. I’ll add the following to my <code>config/app.php</code> and <code>config/app.default.php</code>:</p>
+<pre><code class="language-php">/**
+ * Configures Stripe
+ */
+'Stripe' =&gt; [
+    'publishablekey' =&gt; env('STRIPE_PUBLISHABLEKEY', 'pk_test_1234'),
+    'secretkey' =&gt; env('STRIPE_SECRETKEY', 'sk_test_abcd'),
+    'mode' =&gt; env('STRIPE_MODE', 'test')
+],
+/**
+ * Sets primary config for our app (email, etc.)
+ */
+'Primary' =&gt; [
+    'email' =&gt; env('PRIMARY_EMAIL', 'example@example.com'),
+],
+</code></pre>
+<p>And we can set the env vars like normal:</p>
+<pre><code class="language-shell">heroku config:set STRIPE_PUBLISHABLEKEY=pk_test_1234
+heroku config:set STRIPE_SECRETKEY=sk_test_abcd
+heroku config:set STRIPE_MODE=test
+heroku config:set PRIMARY_EMAIL="example@example.com"
+</code></pre>
+<p>Commit!</p>
+<pre><code class="language-shell">git add config/app.default.php
+git commit -m "Ensure we read env vars for stripe and primary email configuration"
+</code></pre>
+<p>I’ll configure a database, queuing, and our cache layer using some heroku addons for postgres and redis:</p>
+<pre><code class="language-shell">heroku addons:create heroku-postgresql:hobby-dev
+heroku addons:create heroku-redis:hobby-dev
+APP_NAME="$(heroku config:get APP_NAME)"
+DATABASE_URL="$(heroku config:get DATABASE_URL)"
+REDIS_URL="$(heroku config:get REDIS_URL)"
+heroku config:set QUEUESADILLA_DEFAULT_URL="${DATABASE_URL}"
+heroku config:set CACHE_DEFAULT_URL="${REDIS_URL}?prefix=${APP_NAME}_"
+heroku config:set CACHE_CAKECORE_URL="${REDIS_URL}?prefix=${APP_NAME}_cake_core_"
+heroku config:set CACHE_CAKEMODEL_URL="${REDIS_URL}?prefix=${APP_NAME}_cake_model_"
+</code></pre>
+<p>One thing that needs to be done is we need to ensure we build assets in heroku, or our admin won’t be able to render assets. I ran the following command locally:</p>
+<pre><code class="language-shell">mkdir webroot/cache_css webroot/cache_js
+</code></pre>
+<p>Then I added those directories to my <code>.gitignore</code>:</p>
+<pre><code class="language-shell">/webroot/cache_css
+/webroot/cache_js
+</code></pre>
+<p>And finally, I added the following to the application’s <code>composer.json</code> in <code>scripts.compile</code>:</p>
+<pre><code class="language-json">"mkdir webroot/cache_css webroot/cache_js",
+"bin/cake asset_compress build"
+</code></pre>
+<p>And I’ll commit these changes:</p>
+<pre><code class="language-shell">git add .gitignore composer.json
+git commit -m "Build assets on deploy"
+</code></pre>
+<p>Finally, we’ll need to square away our logging setup.</p>
+<pre><code class="language-shell">heroku config:set LOG_DEBUG_URL="syslog://logs?levels[]=notice&amp;levels[]=info&amp;levels[]=debug&amp;file=debug"
+heroku config:set LOG_ERROR_URL="syslog://logs?levels[]=warning&amp;levels[]=error&amp;levels[]=critical&amp;levels[]=alert&amp;levels[]=emergency&amp;file=error"
+</code></pre>
+<p>Now push your code:</p>
+<pre><code class="language-shell">git push heroku master
+</code></pre>
+<p>You’ll see a lot of build output, but once it is done, you can type <code>heroku open</code> to open your site in the browser.</p>
+<h2 id="background-workers">Background workers</h2>
+<p>You can add background queue workers by adding the following to your <code>Procfile</code> if it does not already exist:</p>
+<pre><code class="language-yaml">worker: bin/cake queuesadilla
+</code></pre>
+<p>Then commit and push the change:</p>
+<pre><code class="language-shell">git add Procfile
+git commit -m "Allow running a background worker"
+git push heroku master
+</code></pre>
+<p>To start a worker, you’ll need to scale it up:</p>
+<pre><code class="language-shell">heroku ps:scale worker=1
+</code></pre>
+<h2 id="logging-in">Logging in</h2>
+<p>You’ll need to create a user to login as. To do so, you can start a new heroku dyno:</p>
+<pre><code class="language-php">heroku run bash
+</code></pre>
+<p>And then run our helper <code>UserShell</code> to create the first user:</p>
+<pre><code class="language-shell">bin/cake user --username-field email
+</code></pre>
+<h2 id="homework-time-uploading-images">Homework Time: Uploading images</h2>
+<p>This will require a bit of reworking. Firstly, data is not persisted, so we need to store it on an external filesystem. I prefer <a href="http://flysystem.thephpleague.com/adapter/aws-s3-v3/">AWS S3</a> for storing static files. Fortunately, flysystem supports quite adapters for different storage engines, so you can use whatever you’d like.</p>
+<p>There are two places in the codebase you’ll need to edit:</p>
+<ul>
+  <li><code>UsersTable</code>: The <code>Josegonzalez/Upload</code> behavior can be configured to use any adapter. Documentation <a href="https://cakephp-upload.readthedocs.io/en/latest/configuration.html">here</a> on that.</li>
+  <li><code>PhotoPostType</code>: The adapter configured for upload is the <code>Local</code> adapter. Use whichever one you feel most comfortable.</li>
+</ul>
+<p>I won’t be making these changes in my version, but in a future release of my client’s CMS, these two should be configurable :)</p>
+<hr />
+<blockquote>
+  <p>For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as <a href="https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.24">0.0.24</a>.</p>
+</blockquote>
+<p>And that’s a rap! We’ve created a fully-functioning CMS with:</p>
+<ul>
+  <li>Image uploading</li>
+  <li>Custom theme support</li>
+  <li>CrudView-generated admin dashboard</li>
+  <li>User authentication</li>
+  <li>Password reset flows</li>
+  <li>Email sending and previews</li>
+  <li>Background queues</li>
+  <li>Simple ecommerce functionality</li>
+</ul>
+<p>Lots of stuff here for really not much code, and it was all thanks to the power of CakePHP.</p>
+<p>Be sure to follow along via twitter on <a href="https://twitter.com/savant">@savant</a>. If you’d like to subscribe to this blog, you may follow the <a href="/atom.xml">rss feed here</a>. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar.</p>
+<p>Hope you all had as much fun as I did with this year’s CakeAdvent Calendar. Until next post, take care and happy holidays!</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/cakephp" title="View all posts in cakephp" rel="category">cakephp</a> on <a href="http://josediazgonzalez.com/2016/12/24/deploying-our-application/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2016-12-24 05:04:00 +0000">24 Dec 2016</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+<div class="series-note">
+    <p>This entry is <strong>part 24</strong> of <strong>24</strong> in the series "CakeAdvent 2016".</p>
+    <ol>
+      <li><a href="/2016/12/01/creating-a-microblogging-platform/">Creating a microblogging platform</a></li>
+      <li><a href="/2016/12/02/user-authentication-in-cakephp/">User Authentication in CakePHP</a></li>
+      <li><a href="/2016/12/03/password-resets-and-email/">Password Resets and Email</a></li>
+      <li><a href="/2016/12/04/file-uploading-and-account-management/">File Uploading and Account Management</a></li>
+      <li><a href="/2016/12/05/preparing-our-posts-admin/">Preparing our Posts Admin</a></li>
+      <li><a href="/2016/12/06/customizing-the-posts-crudview-dashboard/">Customizing the Posts Dashboard with CrudView</a></li>
+      <li><a href="/2016/12/07/custom-post-types/">Custom Post Types</a></li>
+      <li><a href="/2016/12/08/displaying-custom-post-type-forms/">Displaying Custom Post Type Forms</a></li>
+      <li><a href="/2016/12/09/saving-custom-post-types/">Saving Custom Post Types</a></li>
+      <li><a href="/2016/12/10/making-the-ui-usable/">Making the UI usable</a></li>
+      <li><a href="/2016/12/11/unifying-our-admin-dashboard-views/">Unifying our admin dashboard views</a></li>
+      <li><a href="/2016/12/12/error-handling-new-posts/">Error Handling new Posts</a></li>
+      <li><a href="/2016/12/13/refactoring-post-types/">Refactoring Post Types</a></li>
+      <li><a href="/2016/12/14/photo-post-types/">Photo Post Types</a></li>
+      <li><a href="/2016/12/15/theming-our-cms/">Theming our CMS</a></li>
+      <li><a href="/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/">Ensuring Posts properly handle custom urls</a></li>
+      <li><a href="/2016/12/17/routing-blog-posts-to-custom-urls/">Routing Blog Posts to custom urls</a></li>
+      <li><a href="/2016/12/18/queuing-up-emails/">Queuing up emails</a></li>
+      <li><a href="/2016/12/19/admin-cleanup/">Cosmetic Admin Cleanup</a></li>
+      <li><a href="/2016/12/20/sending-responsive-emails/">Sending Responsive Emails</a></li>
+      <li><a href="/2016/12/21/selling-photos/">Selling Photos</a></li>
+      <li><a href="/2016/12/22/handling-photo-orders/">Handling Photo Orders</a></li>
+      <li><a href="/2016/12/23/order-status-notifications/">Order status notifications</a></li>
+      <li>Deploying our application</li>
+    </ol>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2016/12/24/deploying-our-application/';
+        var disqus_url        = 'http://josediazgonzalez.com/2016/12/24/deploying-our-application/';
+        var disqus_title      = "CakeAdvent-2016: Deploying our application";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>
