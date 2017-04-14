@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2016-12-24T23:13:03+00:00</updated>
+ <updated>2017-04-14T21:06:29+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Why CakeFest does not currently have a Diversity Scholarship]]></title>
+   <link href="http://josediazgonzalez.com/2017/04/14/why-cakefest-does-not-currently-have-a-diversity-scholarship/"/>
+   <updated>2017-04-14T13:51:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2017/04/14/why-cakefest-does-not-currently-have-a-diversity-scholarship/</id>
+   <content type="html"><![CDATA[]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Deploying our application]]></title>

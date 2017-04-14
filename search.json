@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Why CakeFest does not currently have a Diversity Scholarship",
+    "url": "/2017/04/14/why-cakefest-does-not-currently-have-a-diversity-scholarship/",
+    "description": "",
+    "tokens": ["cakefest","currently","diversity","scholarship"]
+  },
+  {
+    "type": "post",
     "title": "Deploying our application",
     "url": "/2016/12/24/deploying-our-application/",
     "description": "Part 24 of a series of posts that will help you build out a personal CMS",
