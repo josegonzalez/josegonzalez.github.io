@@ -5,9 +5,9 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 14 Apr 2017 21:09:38 +0000</pubDate>
-    <lastBuildDate>Fri, 14 Apr 2017 21:09:38 +0000</lastBuildDate>
-    <generator>Jekyll v3.0.1</generator>
+    <pubDate>Sat, 16 Mar 2019 23:07:07 +0000</pubDate>
+    <lastBuildDate>Sat, 16 Mar 2019 23:07:07 +0000</lastBuildDate>
+    <generator>Jekyll v3.8.5</generator>
     
       <item>
         <title>Why CakeFest does not (currently) have a Diversity Scholarship</title>
@@ -193,7 +193,7 @@
   &lt;li&gt;
     &lt;p&gt;The OrderNotificationBehavior was attached improperly. It should be as follows:&lt;/p&gt;
 
-    &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;PhotoPostType.OrderNotification&#39;);
+    &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior('PhotoPostType.OrderNotification');
 &lt;/code&gt;&lt;/pre&gt;
   &lt;/li&gt;
   &lt;li&gt;The namespace for &lt;code&gt;OrderNotificationBehavior&lt;/code&gt; should be &lt;code&gt;namespace PhotoPostType\Model\Behavior;&lt;/code&gt;.&lt;/li&gt;
@@ -203,8 +203,8 @@
   &lt;li&gt;
     &lt;p&gt;Missing data from the &lt;code&gt;shipped&lt;/code&gt; MailerJob enqueue in &lt;code&gt;OrderNotificationBehavior&lt;/code&gt;. It should be:&lt;/p&gt;
 
-    &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;data&#39; =&amp;gt; [
-    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
+    &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;'data' =&amp;gt; [
+    'order_id' =&amp;gt; $entity-&amp;gt;id
 ],
 &lt;/code&gt;&lt;/pre&gt;
   &lt;/li&gt;
@@ -242,17 +242,17 @@ heroku config:set PRIMARY_EMAIL=&quot;example@example.com&quot;
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
  * Configures Stripe
  */
-&#39;Stripe&#39; =&amp;gt; [
-    &#39;publishablekey&#39; =&amp;gt; env(&#39;STRIPE_PUBLISHABLEKEY&#39;, &#39;pk_test_1234&#39;),
-    &#39;secretkey&#39; =&amp;gt; env(&#39;STRIPE_SECRETKEY&#39;, &#39;sk_test_abcd&#39;),
-    &#39;mode&#39; =&amp;gt; env(&#39;STRIPE_MODE&#39;, &#39;test&#39;)
+'Stripe' =&amp;gt; [
+    'publishablekey' =&amp;gt; env('STRIPE_PUBLISHABLEKEY', 'pk_test_1234'),
+    'secretkey' =&amp;gt; env('STRIPE_SECRETKEY', 'sk_test_abcd'),
+    'mode' =&amp;gt; env('STRIPE_MODE', 'test')
 ],
 
 /**
  * Sets primary config for our app (email, etc.)
  */
-&#39;Primary&#39; =&amp;gt; [
-    &#39;email&#39; =&amp;gt; env(&#39;PRIMARY_EMAIL&#39;, &#39;example@example.com&#39;),
+'Primary' =&amp;gt; [
+    'email' =&amp;gt; env('PRIMARY_EMAIL', 'example@example.com'),
 ],
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -439,13 +439,13 @@ class OrderMailer extends Mailer
      */
     public function newOrder($data)
     {
-        $this-&amp;gt;loadModel(&#39;PhotoPostType.Orders&#39;);
-        $order = $this-&amp;gt;Orders-&amp;gt;get($data[&#39;order_id&#39;]);
-        return $this-&amp;gt;to(Configure::read(&#39;Primary.email&#39;))
-            -&amp;gt;subject(&#39;New Order&#39;)
-            -&amp;gt;template(&#39;PhotoPostType.new_order&#39;)
+        $this-&amp;gt;loadModel('PhotoPostType.Orders');
+        $order = $this-&amp;gt;Orders-&amp;gt;get($data['order_id']);
+        return $this-&amp;gt;to(Configure::read('Primary.email'))
+            -&amp;gt;subject('New Order')
+            -&amp;gt;template('PhotoPostType.new_order')
             -&amp;gt;set($order)
-            -&amp;gt;emailFormat(&#39;html&#39;);
+            -&amp;gt;emailFormat('html');
     }
 
     /**
@@ -457,13 +457,13 @@ class OrderMailer extends Mailer
      */
     public function received($data)
     {
-        $this-&amp;gt;loadModel(&#39;PhotoPostType.Orders&#39;);
-        $order = $this-&amp;gt;Orders-&amp;gt;get($data[&#39;order_id&#39;]);
+        $this-&amp;gt;loadModel('PhotoPostType.Orders');
+        $order = $this-&amp;gt;Orders-&amp;gt;get($data['order_id']);
         return $this-&amp;gt;to($order-&amp;gt;email)
-            -&amp;gt;subject(&#39;Order Received!&#39;)
-            -&amp;gt;template(&#39;PhotoPostType.received&#39;)
+            -&amp;gt;subject('Order Received!')
+            -&amp;gt;template('PhotoPostType.received')
             -&amp;gt;set($order)
-            -&amp;gt;emailFormat(&#39;html&#39;);
+            -&amp;gt;emailFormat('html');
     }
 
     /**
@@ -475,13 +475,13 @@ class OrderMailer extends Mailer
      */
     public function shipped($data)
     {
-        $this-&amp;gt;loadModel(&#39;PhotoPostType.Orders&#39;);
-        $order = $this-&amp;gt;Orders-&amp;gt;get($data[&#39;order_id&#39;]);
+        $this-&amp;gt;loadModel('PhotoPostType.Orders');
+        $order = $this-&amp;gt;Orders-&amp;gt;get($data['order_id']);
         return $this-&amp;gt;to($order-&amp;gt;email)
-            -&amp;gt;subject(&#39;Order Shipped!&#39;)
-            -&amp;gt;template(&#39;PhotoPostType.shipped&#39;)
+            -&amp;gt;subject('Order Shipped!')
+            -&amp;gt;template('PhotoPostType.shipped')
             -&amp;gt;set($order)
-            -&amp;gt;emailFormat(&#39;html&#39;);
+            -&amp;gt;emailFormat('html');
     }
 }
 &lt;/code&gt;&lt;/pre&gt;
@@ -501,15 +501,15 @@ class OrderMailer extends Mailer
 
 &lt;p&gt;Here are my html templates for each email, which I’ve placed in &lt;code&gt;plugins/PhotoPostType/Template/Email/html/&lt;/code&gt;. You can create equivalent text templates as well:&lt;/p&gt;
 
-&lt;h4 id=&quot;pluginsphotoposttypetemplateemailhtmlneworderctp&quot;&gt;&lt;code&gt;plugins/PhotoPostType/Template/Email/html/new_order.ctp&lt;/code&gt;&lt;/h4&gt;
+&lt;h4 id=&quot;pluginsphotoposttypetemplateemailhtmlnew_orderctp&quot;&gt;&lt;code&gt;plugins/PhotoPostType/Template/Email/html/new_order.ctp&lt;/code&gt;&lt;/h4&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h2&amp;gt;There was a new order&amp;lt;/h2&amp;gt;
 
 &amp;lt;p&amp;gt;
-    See the new order &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link(&#39;here&#39;, \Cake\Routing\Router::url([
-        &#39;plugin&#39; =&amp;gt; &#39;PhotoPostType&#39;,
-        &#39;controller&#39; =&amp;gt; &#39;Orders&#39;,
-        &#39;action&#39; =&amp;gt; &#39;index&#39;,
+    See the new order &amp;lt;?= $this-&amp;gt;Html-&amp;gt;link('here', \Cake\Routing\Router::url([
+        'plugin' =&amp;gt; 'PhotoPostType',
+        'controller' =&amp;gt; 'Orders',
+        'action' =&amp;gt; 'index',
         $token
     ], true)); ?&amp;gt;
 &amp;lt;/p&amp;gt;
@@ -619,34 +619,34 @@ class OrderNotificationBehavior extends Behavior
     public function afterSave(Event $event, EntityInterface $entity)
     {
         if ($entity-&amp;gt;isNew()) {
-            $this-&amp;gt;push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
-                &#39;action&#39; =&amp;gt; &#39;received&#39;,
-                &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
-                &#39;data&#39; =&amp;gt; [
-                    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id,
-                    &#39;email&#39; =&amp;gt; $entity-&amp;gt;email,
-                    &#39;name&#39; =&amp;gt; $entity-&amp;gt;shipping_name,
-                    &#39;address_line_1&#39; =&amp;gt; $entity-&amp;gt;shipping_address_line_1,
-                    &#39;address_zip&#39; =&amp;gt; $entity-&amp;gt;shipping_address_zip,
-                    &#39;address_state&#39; =&amp;gt; $entity-&amp;gt;shipping_address_state,
-                    &#39;address_city&#39; =&amp;gt; $entity-&amp;gt;shipping_address_city,
-                    &#39;address_country&#39; =&amp;gt; $entity-&amp;gt;shipping_address_country,
+            $this-&amp;gt;push(['\App\Job\MailerJob', 'execute'], [
+                'action' =&amp;gt; 'received',
+                'mailer' =&amp;gt; 'PhotoPostType.Orders',
+                'data' =&amp;gt; [
+                    'order_id' =&amp;gt; $entity-&amp;gt;id,
+                    'email' =&amp;gt; $entity-&amp;gt;email,
+                    'name' =&amp;gt; $entity-&amp;gt;shipping_name,
+                    'address_line_1' =&amp;gt; $entity-&amp;gt;shipping_address_line_1,
+                    'address_zip' =&amp;gt; $entity-&amp;gt;shipping_address_zip,
+                    'address_state' =&amp;gt; $entity-&amp;gt;shipping_address_state,
+                    'address_city' =&amp;gt; $entity-&amp;gt;shipping_address_city,
+                    'address_country' =&amp;gt; $entity-&amp;gt;shipping_address_country,
                 ]
             ]);
 
-            $this-&amp;gt;push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
-                &#39;action&#39; =&amp;gt; &#39;newOrder&#39;,
-                &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
-                &#39;data&#39; =&amp;gt; [
-                    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
+            $this-&amp;gt;push(['\App\Job\MailerJob', 'execute'], [
+                'action' =&amp;gt; 'newOrder',
+                'mailer' =&amp;gt; 'PhotoPostType.Orders',
+                'data' =&amp;gt; [
+                    'order_id' =&amp;gt; $entity-&amp;gt;id
                 ],
             ]);
         } elseif ($entity-&amp;gt;shipped) {
-            $this-&amp;gt;push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
-                &#39;action&#39; =&amp;gt; &#39;shipped&#39;,
-                &#39;mailer&#39; =&amp;gt; &#39;PhotoPostType.Orders&#39;,
-                &#39;data&#39; =&amp;gt; [
-                    &#39;order_id&#39; =&amp;gt; $entity-&amp;gt;id
+            $this-&amp;gt;push(['\App\Job\MailerJob', 'execute'], [
+                'action' =&amp;gt; 'shipped',
+                'mailer' =&amp;gt; 'PhotoPostType.Orders',
+                'data' =&amp;gt; [
+                    'order_id' =&amp;gt; $entity-&amp;gt;id
                 ],
             ]);
         }
@@ -665,7 +665,7 @@ class OrderNotificationBehavior extends Behavior
 
 &lt;p&gt;Next, we’ll link it up to our &lt;code&gt;PhotoPostType.Orders::initialize()&lt;/code&gt; method:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior(&#39;OrderNotificationBehavior&#39;);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;addBehavior('OrderNotificationBehavior');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And we’re done!&lt;/p&gt;
@@ -731,21 +731,21 @@ use Cake\Routing\RouteBuilder;
 use Cake\Routing\Router;
 use Cake\Routing\Route\DashedRoute;
 
-$routeClass = Configure::read(&#39;PhotoPostType.Routes.routeClass&#39;);
+$routeClass = Configure::read('PhotoPostType.Routes.routeClass');
 $routeClass = $routeClass ?: DashedRoute::class;
 
-Router::plugin(&#39;PhotoPostType&#39;, [&#39;path&#39; =&amp;gt; &#39;/&#39;], function ($routes) use ($routeClass) {
-    $photoPostTypePrefix = Configure::read(&#39;PhotoPostType.Routes.prefix&#39;);
-    $photoPostTypePrefix = $photoPostTypePrefix ?: &#39;/order&#39;;
-    $photoPostTypePrefix = &#39;/&#39; . trim($photoPostTypePrefix, &quot;\t\n\r\0\x0B/&quot;);
+Router::plugin('PhotoPostType', ['path' =&amp;gt; '/'], function ($routes) use ($routeClass) {
+    $photoPostTypePrefix = Configure::read('PhotoPostType.Routes.prefix');
+    $photoPostTypePrefix = $photoPostTypePrefix ?: '/order';
+    $photoPostTypePrefix = '/' . trim($photoPostTypePrefix, &quot;\t\n\r\0\x0B/&quot;);
 
     $routes-&amp;gt;connect(
         $photoPostTypePrefix,
-        [&#39;controller&#39; =&amp;gt; &#39;Orders&#39;, &#39;action&#39; =&amp;gt; &#39;order&#39;],
-        [&#39;id&#39; =&amp;gt; &#39;\d+&#39;, &#39;pass&#39; =&amp;gt; [&#39;id&#39;], &#39;routeClass&#39; =&amp;gt; $routeClass]
+        ['controller' =&amp;gt; 'Orders', 'action' =&amp;gt; 'order'],
+        ['id' =&amp;gt; '\d+', 'pass' =&amp;gt; ['id'], 'routeClass' =&amp;gt; $routeClass]
     );
-    $routes-&amp;gt;scope(&#39;/admin/orders&#39;, [&#39;controller&#39; =&amp;gt; &#39;Orders&#39;], function (RouteBuilder $routes) {
-          $routes-&amp;gt;connect(&#39;/&#39;, [&#39;action&#39; =&amp;gt; &#39;index&#39;]);
+    $routes-&amp;gt;scope('/admin/orders', ['controller' =&amp;gt; 'Orders'], function (RouteBuilder $routes) {
+          $routes-&amp;gt;connect('/', ['action' =&amp;gt; 'index']);
           $routes-&amp;gt;fallbacks();
     });
 });
@@ -754,8 +754,8 @@ Router::plugin(&#39;PhotoPostType&#39;, [&#39;path&#39; =&amp;gt; &#39;/&#39;], 
 &lt;p&gt;I’m now mounting the plugin under &lt;code&gt;/&lt;/code&gt; and also scoping &lt;code&gt;/admin/orders&lt;/code&gt; to our &lt;code&gt;PhotoPostType.OrdersController&lt;/code&gt;. One other small change we’ll need to do is modify our &lt;code&gt;AppController::getUtilityNavigation()&lt;/code&gt; method to scope all existing navigation elements to &lt;code&gt;plugin =&amp;gt; null&lt;/code&gt;. I’ve also added a single extra navigation element for logged in users:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;new \CrudView\Menu\MenuItem(
-    &#39;Orders&#39;,
-    [&#39;plugin&#39; =&amp;gt; &#39;PhotoPostType&#39;, &#39;controller&#39; =&amp;gt; &#39;Orders&#39;, &#39;action&#39; =&amp;gt; &#39;index&#39;]
+    'Orders',
+    ['plugin' =&amp;gt; 'PhotoPostType', 'controller' =&amp;gt; 'Orders', 'action' =&amp;gt; 'index']
 ),
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -779,7 +779,7 @@ git commit -m &quot;Route and link to OrdersController admin actions&quot;
  *
  * @var array
  */
-protected $adminActions = [&#39;index&#39;, &#39;delete&#39;];
+protected $adminActions = ['index', 'delete'];
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And next I’ve added the following &lt;code&gt;OrdersController::isAuthorized()&lt;/code&gt; method:&lt;/p&gt;
@@ -793,7 +793,7 @@ protected $adminActions = [&#39;index&#39;, &#39;delete&#39;];
  */
 public function isAuthorized($user = null)
 {
-    $action = $this-&amp;gt;request-&amp;gt;param(&#39;action&#39;);
+    $action = $this-&amp;gt;request-&amp;gt;param('action');
     if (in_array($action, $this-&amp;gt;adminActions)) {
         return true;
     }
@@ -803,7 +803,7 @@ public function isAuthorized($user = null)
 
 &lt;p&gt;This should allow me access to the &lt;code&gt;OrdersController&lt;/code&gt;, which we will be shortly customizing via an &lt;code&gt;OrdersListener&lt;/code&gt; located in &lt;code&gt;plugins/PhotoPostType/src/Listener/OrdersListener.php&lt;/code&gt;. I’m going to bind that in our &lt;code&gt;OrdersController::initialize()&lt;/code&gt; method:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;addListener(&#39;Orders&#39;, &#39;PhotoPostType\Listener\OrdersListener&#39;);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;addListener('Orders', 'PhotoPostType\Listener\OrdersListener');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And here is the skeleton for that class:&lt;/p&gt;
@@ -827,7 +827,7 @@ class OrdersListener extends BaseListener
     public function implementedEvents()
     {
         return [
-            &#39;Crud.beforeHandle&#39; =&amp;gt; &#39;beforeHandle&#39;,
+            'Crud.beforeHandle' =&amp;gt; 'beforeHandle',
         ];
     }
 
@@ -861,16 +861,16 @@ git commit -m &quot;Enable CrudView for the OrdersController&quot;
 
 &lt;p&gt;For the first item, we’ll want to add the following to our &lt;code&gt;OrdersController::initialize()&lt;/code&gt; method.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;config(&#39;actions.add&#39;, null);
-$this-&amp;gt;Crud-&amp;gt;config(&#39;actions.edit&#39;, null);
-$this-&amp;gt;Crud-&amp;gt;config(&#39;actions.view&#39;, null);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;config('actions.add', null);
+$this-&amp;gt;Crud-&amp;gt;config('actions.edit', null);
+$this-&amp;gt;Crud-&amp;gt;config('actions.view', null);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This completely disables the actions, while also ensuring that we don’t show any references to them in CrudView.&lt;/p&gt;
 
 &lt;p&gt;Next, we’ll need to add the following to our &lt;code&gt;OrdersListener::beforeHandle()&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($event-&amp;gt;subject-&amp;gt;action === &#39;index&#39;) {
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($event-&amp;gt;subject-&amp;gt;action === 'index') {
     $this-&amp;gt;beforeHandleIndex($event);
 
     return;
@@ -887,19 +887,19 @@ $this-&amp;gt;Crud-&amp;gt;config(&#39;actions.view&#39;, null);
  */
 public function beforeHandleIndex(Event $event)
 {
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.fields&#39;, [
-        &#39;id&#39;,
-        &#39;chargeid&#39; =&amp;gt; [
-            &#39;formatter&#39; =&amp;gt; &#39;element&#39;,
-            &#39;element&#39; =&amp;gt; &#39;PhotoPostType.crud-view/index-chargeid&#39;,
+    $this-&amp;gt;_action()-&amp;gt;config('scaffold.fields', [
+        'id',
+        'chargeid' =&amp;gt; [
+            'formatter' =&amp;gt; 'element',
+            'element' =&amp;gt; 'PhotoPostType.crud-view/index-chargeid',
         ],
-        &#39;contact&#39; =&amp;gt; [
-            &#39;formatter&#39; =&amp;gt; &#39;element&#39;,
-            &#39;element&#39; =&amp;gt; &#39;PhotoPostType.crud-view/index-contact&#39;,
+        'contact' =&amp;gt; [
+            'formatter' =&amp;gt; 'element',
+            'element' =&amp;gt; 'PhotoPostType.crud-view/index-contact',
         ],
-        &#39;shipped&#39; =&amp;gt; [
+        'shipped' =&amp;gt; [
         ],
-        &#39;created&#39; =&amp;gt; [
+        'created' =&amp;gt; [
         ],
     ]);
 }
@@ -908,16 +908,16 @@ public function beforeHandleIndex(Event $event)
 &lt;p&gt;Previously, we used an inline anonymous function to format the page. This works okay, but in this case we’re going to be doing a bit more work, so using an element seems more appropriate. Here is the contents of my &lt;code&gt;plugins/PhotoPostType/src/Template/Element/crud-view/index-contact.ctp&lt;/code&gt; template:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= implode(&quot;&amp;lt;br&amp;gt;&quot;, array_filter([
-    $context-&amp;gt;get(&#39;shipping_name&#39;),
-    $context-&amp;gt;get(&#39;shipping_address_line_1&#39;),
+    $context-&amp;gt;get('shipping_name'),
+    $context-&amp;gt;get('shipping_address_line_1'),
     sprintf(
-        &#39;%s, %s %s&#39;,
-        $context-&amp;gt;get(&#39;shipping_address_city&#39;),
-        $context-&amp;gt;get(&#39;shipping_address_state&#39;),
-        $context-&amp;gt;get(&#39;shipping_address_zip&#39;)
+        '%s, %s %s',
+        $context-&amp;gt;get('shipping_address_city'),
+        $context-&amp;gt;get('shipping_address_state'),
+        $context-&amp;gt;get('shipping_address_zip')
     ),
-    $context-&amp;gt;get(&#39;shipping_address_country&#39;),
-    $context-&amp;gt;get(&#39;email&#39;),
+    $context-&amp;gt;get('shipping_address_country'),
+    $context-&amp;gt;get('email'),
 ]));
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -928,11 +928,11 @@ public function beforeHandleIndex(Event $event)
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
 use Cake\Core\Configure;
 
-$mode = Configure::read(&#39;Stripe.mode&#39;);
-if ($mode === &#39;live&#39;) {
-    echo $this-&amp;gt;Html-&amp;gt;link($value, sprintf(&#39;https://dashboard.stripe.com/payments/&#39;. $value));
+$mode = Configure::read('Stripe.mode');
+if ($mode === 'live') {
+    echo $this-&amp;gt;Html-&amp;gt;link($value, sprintf('https://dashboard.stripe.com/payments/'. $value));
 } else {
-    echo $this-&amp;gt;Html-&amp;gt;link($value, sprintf(&#39;https://dashboard.stripe.com/test/payments/&#39;. $value));
+    echo $this-&amp;gt;Html-&amp;gt;link($value, sprintf('https://dashboard.stripe.com/test/payments/'. $value));
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -955,9 +955,9 @@ git commit -m &quot;Customize the OrdersController::index() action&quot;
 
 &lt;p&gt;Now that we have a custom admin panel, we’ll need to be able to mark things as shipped. We’ll be using the &lt;code&gt;Crud.Bulk/SetValue&lt;/code&gt; action class, which allows us to bulk update records and set a specific value. First, lets map the action in the &lt;code&gt;OrdersController::initialize()&lt;/code&gt; method:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;mapAction(&#39;setShipped&#39;, [
-    &#39;className&#39; =&amp;gt; &#39;Crud.Bulk/SetValue&#39;,
-    &#39;field&#39; =&amp;gt; &#39;shipped&#39;,
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;mapAction('setShipped', [
+    'className' =&amp;gt; 'Crud.Bulk/SetValue',
+    'field' =&amp;gt; 'shipped',
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -971,12 +971,12 @@ git commit -m &quot;Customize the OrdersController::index() action&quot;
  *
  * @var array
  */
-protected $adminActions = [&#39;index&#39;, &#39;delete&#39;, &#39;setShipped&#39;];
+protected $adminActions = ['index', 'delete', 'setShipped'];
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Finally, we’ll want to configure the action itself. I’d like to be able to set the value as 0 or 1 (mapping to true or false in our database). I also need to properly configure the status message. Start by adding the following to &lt;code&gt;OrdersListener::beforeHandle()&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($event-&amp;gt;subject-&amp;gt;action === &#39;setShipped&#39;) {
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($event-&amp;gt;subject-&amp;gt;action === 'setShipped') {
     $this-&amp;gt;beforeHandleSetShipped($event);
 
     return;
@@ -993,27 +993,27 @@ protected $adminActions = [&#39;index&#39;, &#39;delete&#39;, &#39;setShipped&#3
  */
 public function beforeHandleSetShipped(Event $event)
 {
-    $value = (int)$this-&amp;gt;_request()-&amp;gt;query(&#39;shipped&#39;);
+    $value = (int)$this-&amp;gt;_request()-&amp;gt;query('shipped');
     if ($value !== 0 &amp;amp;&amp;amp; $value !== 1) {
-        throw new BadRequestException(&#39;Invalid ship status specified&#39;);
+        throw new BadRequestException('Invalid ship status specified');
     }
 
-    $verb = &#39;shipped&#39;;
+    $verb = 'shipped';
     if ($value === 0) {
-        $verb = &#39;unshipped&#39;;
+        $verb = 'unshipped';
     }
 
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;value&#39;, $value);
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;messages.success.text&#39;, sprintf(&#39;Marked orders as %s!&#39;, $verb));
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;messages.error.text&#39;, sprintf(&#39;Could not mark orders as %s!&#39;, $verb));
+    $this-&amp;gt;_action()-&amp;gt;config('value', $value);
+    $this-&amp;gt;_action()-&amp;gt;config('messages.success.text', sprintf('Marked orders as %s!', $verb));
+    $this-&amp;gt;_action()-&amp;gt;config('messages.error.text', sprintf('Could not mark orders as %s!', $verb));
 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Lastly, we need to actually link to the bulk actions. You can configure this by adding the next 4 lines to your &lt;code&gt;OrdersListener::beforeHandleIndex()&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.bulk_actions&#39;, [
-    Router::url([&#39;action&#39; =&amp;gt; &#39;setShipped&#39;, &#39;shipped&#39; =&amp;gt; &#39;1&#39;]) =&amp;gt; __(&#39;Mark as shipped&#39;),
-    Router::url([&#39;action&#39; =&amp;gt; &#39;setShipped&#39;, &#39;shipped&#39; =&amp;gt; &#39;0&#39;]) =&amp;gt; __(&#39;Mark as unshipped&#39;),
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_action()-&amp;gt;config('scaffold.bulk_actions', [
+    Router::url(['action' =&amp;gt; 'setShipped', 'shipped' =&amp;gt; '1']) =&amp;gt; __('Mark as shipped'),
+    Router::url(['action' =&amp;gt; 'setShipped', 'shipped' =&amp;gt; '0']) =&amp;gt; __('Mark as unshipped'),
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1068,14 +1068,14 @@ git commit -m &quot;Add bulk actions for modifying shipping status&quot;
 
 &lt;p&gt;Rather than making a whole new post type, we’re going to repurpose the existing Photo Post Type. First, lets add a &lt;code&gt;price&lt;/code&gt; field to our &lt;code&gt;PhotoPostType::_buildSchema()&lt;/code&gt; method.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$schema-&amp;gt;addField(&#39;price&#39;, [&#39;type&#39; =&amp;gt; &#39;text&#39;]);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$schema-&amp;gt;addField('price', ['type' =&amp;gt; 'text']);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;We also want to validate that any prices are positive numbers (we’re only allowing whole dollar amounts). I added the following to my &lt;code&gt;PhotoPostType::_buildValidator()&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;allowEmpty(&#39;price&#39;);
-$validator-&amp;gt;add(&#39;price&#39;, &#39;numeric&#39;, [
-    &#39;rule&#39; =&amp;gt; [&#39;naturalNumber&#39;, true]
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;allowEmpty('price');
+$validator-&amp;gt;add('price', 'numeric', [
+    'rule' =&amp;gt; ['naturalNumber', true]
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1095,19 +1095,19 @@ git commit -m &quot;Enable photo pricing&quot;
 &lt;p&gt;In order to simplify our integration, we’ll be using their &lt;code&gt;checkout&lt;/code&gt; product. I created the element &lt;code&gt;src/Template/Element/stripe.ctp&lt;/code&gt; in order to contain the client-side portion of the integration:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-if (empty($post-&amp;gt;get(&#39;price&#39;))) {
+if (empty($post-&amp;gt;get('price'))) {
     return;
 }
 ?&amp;gt;
 
 &amp;lt;div style=&quot;text-align:center;&quot;&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create(null, [&#39;class&#39; =&amp;gt; &#39;payment-form&#39;, &#39;url&#39; =&amp;gt; [&#39;plugin&#39; =&amp;gt; &#39;PhotoPostType&#39;, &#39;controller&#39; =&amp;gt; &#39;Orders&#39;, &#39;action&#39; =&amp;gt; &#39;order&#39;, &#39;id&#39; =&amp;gt; $post-&amp;gt;get(&#39;id&#39;)]]); ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Form-&amp;gt;create(null, ['class' =&amp;gt; 'payment-form', 'url' =&amp;gt; ['plugin' =&amp;gt; 'PhotoPostType', 'controller' =&amp;gt; 'Orders', 'action' =&amp;gt; 'order', 'id' =&amp;gt; $post-&amp;gt;get('id')]]); ?&amp;gt;
         &amp;lt;script
             src=&quot;https://checkout.stripe.com/checkout.js&quot; class=&quot;stripe-button&quot;
-            data-key=&quot;&amp;lt;?= \Cake\Core\Configure::read(&#39;Stripe.publishablekey&#39;) ?&amp;gt;&quot;
+            data-key=&quot;&amp;lt;?= \Cake\Core\Configure::read('Stripe.publishablekey') ?&amp;gt;&quot;
             data-amount=&quot;&amp;lt;?= $post-&amp;gt;getPriceInCents() ?&amp;gt;&quot;
-            data-name=&quot;&amp;lt;?= \Cake\Core\Configure::read(&#39;App.name&#39;) ?&amp;gt;&quot;
-            data-description=&quot;&amp;lt;?= $post-&amp;gt;get(&#39;title&#39;) ?&amp;gt;&quot;
+            data-name=&quot;&amp;lt;?= \Cake\Core\Configure::read('App.name') ?&amp;gt;&quot;
+            data-description=&quot;&amp;lt;?= $post-&amp;gt;get('title') ?&amp;gt;&quot;
             data-image=&quot;https://stripe.com/img/documentation/checkout/marketplace.png&quot;
             data-locale=&quot;auto&quot;
             data-zip-code=&quot;true&quot;
@@ -1127,14 +1127,14 @@ export STRIPE_SECRETKEY=sk_test_abcd
 
 &lt;p&gt;You can include this element in your &lt;code&gt;photo-view.ctp&lt;/code&gt; files like so:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;element(&#39;stripe&#39;, [&#39;post&#39; =&amp;gt; $post]); ?&amp;gt;
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?= $this-&amp;gt;element('stripe', ['post' =&amp;gt; $post]); ?&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;One tricky thing about stripe is that the amount it accepts is a number in cents, not whole dollars, so we need to add the following to our &lt;code&gt;PhotoPostType&lt;/code&gt; class to make the conversion:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function getPriceInCents()
 {
-    $price = $this-&amp;gt;get(&#39;price&#39;);
+    $price = $this-&amp;gt;get('price');
     if (empty($price)) {
         return 0;
     }
@@ -1190,14 +1190,14 @@ class OrdersController extends AppController
      *
      * Use this method to add common initialization code like loading components.
      *
-     * e.g. `$this-&amp;gt;loadComponent(&#39;Security&#39;);`
+     * e.g. `$this-&amp;gt;loadComponent('Security');`
      *
      * @return void
      */
     public function initialize()
     {
         parent::initialize();
-        $this-&amp;gt;Auth-&amp;gt;allow(&#39;order&#39;);
+        $this-&amp;gt;Auth-&amp;gt;allow('order');
     }
 
     /**
@@ -1207,22 +1207,22 @@ class OrdersController extends AppController
      */
     public function order()
     {
-        $this-&amp;gt;loadModel(&#39;Posts&#39;);
+        $this-&amp;gt;loadModel('Posts');
         $post = $this-&amp;gt;Posts-&amp;gt;find()
-                           -&amp;gt;where([&#39;id&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;query(&#39;id&#39;)])
-                           -&amp;gt;contain(&#39;PostAttributes&#39;)
+                           -&amp;gt;where(['id' =&amp;gt; $this-&amp;gt;request-&amp;gt;query('id')])
+                           -&amp;gt;contain('PostAttributes')
                            -&amp;gt;first()
                            -&amp;gt;getPostType();
 
         $charge = $this-&amp;gt;chargeCard($post-&amp;gt;getPriceInCents());
         if (empty($charge)) {
-            $this-&amp;gt;Flash-&amp;gt;error(__(&#39;Your card was declined&#39;));
-            return $this-&amp;gt;redirect($this-&amp;gt;referer(&#39;/&#39;, true));
+            $this-&amp;gt;Flash-&amp;gt;error(__('Your card was declined'));
+            return $this-&amp;gt;redirect($this-&amp;gt;referer('/', true));
         }
 
         $this-&amp;gt;createOrder($charge);
-        $this-&amp;gt;Flash-&amp;gt;success(__(&#39;Order placed! Check your email for more details :)&#39;));
-        return $this-&amp;gt;redirect($this-&amp;gt;referer(&#39;/&#39;, true));
+        $this-&amp;gt;Flash-&amp;gt;success(__('Order placed! Check your email for more details :)'));
+        return $this-&amp;gt;redirect($this-&amp;gt;referer('/', true));
     }
 }
 &lt;/code&gt;&lt;/pre&gt;
@@ -1245,16 +1245,16 @@ class OrdersController extends AppController
  */
 protected function chargeCard($amount)
 {
-    Stripe::setApiKey(Configure::read(&#39;Stripe.secretkey&#39;));
+    Stripe::setApiKey(Configure::read('Stripe.secretkey'));
     try {
         $customer = Customer::create(array(
-            &#39;email&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeEmail&#39;),
-            &#39;card&#39;  =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeToken&#39;)
+            'email' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeEmail'),
+            'card'  =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeToken')
         ));
         return Charge::create(array(
-            &#39;customer&#39; =&amp;gt; $customer-&amp;gt;id,
-            &#39;amount&#39;   =&amp;gt; $amount,
-            &#39;currency&#39; =&amp;gt; &#39;usd&#39;
+            'customer' =&amp;gt; $customer-&amp;gt;id,
+            'amount'   =&amp;gt; $amount,
+            'currency' =&amp;gt; 'usd'
         ));
     } catch (CardError $e) {
         $this-&amp;gt;log($e);
@@ -1273,15 +1273,15 @@ protected function chargeCard($amount)
 protected function createOrder($charge)
 {
     $data = [
-        &#39;chargeid&#39; =&amp;gt; $charge-&amp;gt;id,
-        &#39;email&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeEmail&#39;),
-        &#39;shipping_name&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingName&#39;),
-        &#39;shipping_address_line_1&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressLine1&#39;),
-        &#39;shipping_address_zip&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressZip&#39;),
-        &#39;shipping_address_state&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressState&#39;),
-        &#39;shipping_address_city&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressCity&#39;),
-        &#39;shipping_address_country&#39; =&amp;gt; $this-&amp;gt;request-&amp;gt;data(&#39;stripeShippingAddressCountry&#39;),
-        &#39;shipped&#39; =&amp;gt; false,
+        'chargeid' =&amp;gt; $charge-&amp;gt;id,
+        'email' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeEmail'),
+        'shipping_name' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeShippingName'),
+        'shipping_address_line_1' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeShippingAddressLine1'),
+        'shipping_address_zip' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeShippingAddressZip'),
+        'shipping_address_state' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeShippingAddressState'),
+        'shipping_address_city' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeShippingAddressCity'),
+        'shipping_address_country' =&amp;gt; $this-&amp;gt;request-&amp;gt;data('stripeShippingAddressCountry'),
+        'shipped' =&amp;gt; false,
     ];
 
     $order = $this-&amp;gt;Orders-&amp;gt;newEntity($data);
@@ -1300,24 +1300,24 @@ use Cake\Core\Configure;
 use Cake\Routing\Router;
 use Cake\Routing\Route\DashedRoute;
 
-$routeClass = Configure::read(&#39;PhotoPostType.Routes.routeClass&#39;);
+$routeClass = Configure::read('PhotoPostType.Routes.routeClass');
 $routeClass = $routeClass ?: DashedRoute::class;
 
-$photoPostTypePrefix = Configure::read(&#39;PhotoPostType.Routes.prefix&#39;);
-$photoPostTypePrefix = $photoPostTypePrefix ?: &#39;/order&#39;;
-$photoPostTypePrefix = &#39;/&#39; . trim($photoPostTypePrefix, &quot;\t\n\r\0\x0B/&quot;);
-Router::plugin(&#39;PhotoPostType&#39;, [&#39;path&#39; =&amp;gt; $photoPostTypePrefix], function ($routes) use ($routeClass) {
+$photoPostTypePrefix = Configure::read('PhotoPostType.Routes.prefix');
+$photoPostTypePrefix = $photoPostTypePrefix ?: '/order';
+$photoPostTypePrefix = '/' . trim($photoPostTypePrefix, &quot;\t\n\r\0\x0B/&quot;);
+Router::plugin('PhotoPostType', ['path' =&amp;gt; $photoPostTypePrefix], function ($routes) use ($routeClass) {
     $routes-&amp;gt;connect(
-        &#39;/&#39;,
-        [&#39;controller&#39; =&amp;gt; &#39;Orders&#39;, &#39;action&#39; =&amp;gt; &#39;order&#39;],
-        [&#39;id&#39; =&amp;gt; &#39;\d+&#39;, &#39;pass&#39; =&amp;gt; [&#39;id&#39;], &#39;routeClass&#39; =&amp;gt; $routeClass]
+        '/',
+        ['controller' =&amp;gt; 'Orders', 'action' =&amp;gt; 'order'],
+        ['id' =&amp;gt; '\d+', 'pass' =&amp;gt; ['id'], 'routeClass' =&amp;gt; $routeClass]
     );
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;We also need to load the routes for this plugin in our &lt;code&gt;config/bootstrap.php&lt;/code&gt;. Replace the line loading the &lt;code&gt;PhotoPostType&lt;/code&gt; plugin with the following:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load(&#39;PhotoPostType&#39;, [&#39;bootstrap&#39; =&amp;gt; true, &#39;routes&#39; =&amp;gt; true]);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;Plugin::load('PhotoPostType', ['bootstrap' =&amp;gt; true, 'routes' =&amp;gt; true]);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Lastly, I added a bit of css to &lt;code&gt;plugins/DefaultTheme/webroot/css/style.css&lt;/code&gt; to show off our flash styling.&lt;/p&gt;
@@ -1421,10 +1421,10 @@ class UserMailPreview extends MailPreview
 {
     public function forgotPassword()
     {
-        return $this-&amp;gt;getMailer(&#39;User&#39;)
-                    -&amp;gt;preview(&#39;forgotPassword&#39;, [
-                        &#39;example@example.com&#39;,
-                        &#39;some-test-token&#39;
+        return $this-&amp;gt;getMailer('User')
+                    -&amp;gt;preview('forgotPassword', [
+                        'example@example.com',
+                        'some-test-token'
                     ]);
     }
 }
@@ -1434,12 +1434,12 @@ class UserMailPreview extends MailPreview
 
 &lt;p&gt;In order to display the previews, we’ll need to allow the actions if the controller is the &lt;code&gt;MailPreviewController&lt;/code&gt;. I added the following to my &lt;code&gt;AppController::initialize()&lt;/code&gt; method:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;request-&amp;gt;params[&#39;controller&#39;] == &#39;MailPreview&#39;) {
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;request-&amp;gt;params['controller'] == 'MailPreview') {
     $this-&amp;gt;Auth-&amp;gt;allow();
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;If you browse to &lt;code&gt;/mail-preview&lt;/code&gt;, you will see a list of your mailers and the emails they contain. If you click on one, you’ll get a weird routing error. Why? Because we are in a plugin, all urls are scoped to this plugin, and since the urls in question are not mapped, boom goes the email. Fix that by adding &lt;code&gt;&#39;plugin&#39; =&amp;gt; null&lt;/code&gt; to the urls in your &lt;code&gt;forgot_password.ctp&lt;/code&gt; templates, and you should see the following in your browser:&lt;/p&gt;
+&lt;p&gt;If you browse to &lt;code&gt;/mail-preview&lt;/code&gt;, you will see a list of your mailers and the emails they contain. If you click on one, you’ll get a weird routing error. Why? Because we are in a plugin, all urls are scoped to this plugin, and since the urls in question are not mapped, boom goes the email. Fix that by adding &lt;code&gt;'plugin' =&amp;gt; null&lt;/code&gt; to the urls in your &lt;code&gt;forgot_password.ctp&lt;/code&gt; templates, and you should see the following in your browser:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/2016/12/20/email-preview.png&quot; alt=&quot;email preview&quot; /&gt;&lt;/p&gt;
 
@@ -1458,8 +1458,8 @@ git commit -m &quot;Setup email previews&quot;
 &lt;p&gt;I more or less am going to grab the layout template from &lt;a href=&quot;https://github.com/leemunroe/responsive-html-email-template&quot;&gt;leemunroe/responsive-html-email-template&lt;/a&gt; with a few minor tweaks:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Replaced the &lt;code&gt;&amp;lt;title&amp;gt;&lt;/code&gt; element contents with &lt;code&gt;&amp;lt;?= $this-&amp;gt;fetch(&#39;title&#39;) ?&amp;gt;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Replaced the body with &lt;code&gt;&amp;lt;?= $this-&amp;gt;fetch(&#39;content&#39;) ?&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Replaced the &lt;code&gt;&amp;lt;title&amp;gt;&lt;/code&gt; element contents with &lt;code&gt;&amp;lt;?= $this-&amp;gt;fetch('title') ?&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Replaced the body with &lt;code&gt;&amp;lt;?= $this-&amp;gt;fetch('content') ?&amp;gt;&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;You can modify the email otherwise however you see fit. I placed mine in &lt;code&gt;src/Template/Layout/Email/html/default.ctp&lt;/code&gt;. In order to load this layout, I removed &lt;code&gt;-&amp;gt;layout(false)&lt;/code&gt; from my &lt;code&gt;UserMailer::forgotPassword()&lt;/code&gt; method.&lt;/p&gt;
@@ -1519,8 +1519,8 @@ git commit -m &quot;Nicer html email layout&quot;
 
 &lt;p&gt;The connected routes in &lt;code&gt;config/routes.php&lt;/code&gt; for &lt;code&gt;/forgot-password&lt;/code&gt; and &lt;code&gt;/reset-password&lt;/code&gt; were incorrect and should be as follows:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(&#39;/forgot-password&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgotPassword&#39;]);
-$routes-&amp;gt;connect(&#39;/reset-password/*&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;resetPassword&#39;]);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect('/forgot-password', ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'forgotPassword']);
+$routes-&amp;gt;connect('/reset-password/*', ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'resetPassword']);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Thanks to those who’ve pointed out my derps. These fixes are available as the first commit in the current release.&lt;/p&gt;
@@ -1552,16 +1552,16 @@ protected function getUtilityNavigation()
 {
     return [
         new \CrudView\Menu\MenuItem(
-            &#39;Posts&#39;,
-            [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;index&#39;]
+            'Posts',
+            ['controller' =&amp;gt; 'Posts', 'action' =&amp;gt; 'index']
         ),
         new \CrudView\Menu\MenuItem(
-            &#39;Profile&#39;,
-            [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;edit&#39;]
+            'Profile',
+            ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'edit']
         ),
         new \CrudView\Menu\MenuItem(
-            &#39;Log Out&#39;,
-            [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;logout&#39;]
+            'Log Out',
+            ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'logout']
         )
     ];
 }
@@ -1569,7 +1569,7 @@ protected function getUtilityNavigation()
 
 &lt;p&gt;Next, we can update our &lt;code&gt;AppController::beforeFilter()&lt;/code&gt; to remove the &lt;code&gt;scaffold.sidebar_navigation&lt;/code&gt; and &lt;code&gt;scaffold.tables_blacklist&lt;/code&gt; configuration, replacing it with&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.utility_navigation&#39;, $this-&amp;gt;getUtilityNavigation());
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config('scaffold.utility_navigation', $this-&amp;gt;getUtilityNavigation());
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This will move our navigation to the top, but will also re-enable the default sidebar. Let’s fix that next. For now, commit our changes:&lt;/p&gt;
@@ -1582,7 +1582,7 @@ git commit -m &quot;Move sidebar navigation to header&quot;
 
 &lt;p&gt;This is pretty simple. We’ve already done this for a few actions in the &lt;code&gt;UsersController&lt;/code&gt;, but we’ll want to do this more globally. Add the following line to your &lt;code&gt;AppController::beforeFilter()&lt;/code&gt;, in the block checking if &lt;code&gt;Crud::isActionMapped()&lt;/code&gt;.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config(&#39;scaffold.sidebar_navigation&#39;, false);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Crud-&amp;gt;action()-&amp;gt;config('scaffold.sidebar_navigation', false);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now your entire page layout should be taken up by the contents of the view, sans sidebar.&lt;/p&gt;
@@ -1605,15 +1605,15 @@ git commit -m &quot;Disable the sidebar navigation completely&quot;
 
 &lt;p&gt;We should almost certainly not be showing the “Posts”, “Profile”, and “Log Out” utility navigation links to logged out users. Instead, lets show a link to login and start the forgot password flow to logged out users. I added the following to the beginning of my &lt;code&gt;AppController::getUtilityNavigation()&lt;/code&gt; method:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;Auth-&amp;gt;user(&#39;id&#39;) === null) {
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;Auth-&amp;gt;user('id') === null) {
     return [
         new \CrudView\Menu\MenuItem(
-            &#39;Forgot Password?&#39;,
-            [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgotPassword&#39;]
+            'Forgot Password?',
+            ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'forgotPassword']
         ),
         new \CrudView\Menu\MenuItem(
-            &#39;Login&#39;,
-            [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;login&#39;]
+            'Login',
+            ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'login']
         ),
     ];
 }
@@ -1636,31 +1636,31 @@ git commit -m &quot;Show alternative utility navigation to logged out users&quot
  */
 protected function loadAuthComponent()
 {
-    $this-&amp;gt;loadComponent(&#39;Auth&#39;, [
-        &#39;authorize&#39; =&amp;gt; [&#39;Controller&#39;],
-        &#39;loginAction&#39; =&amp;gt; [
-            &#39;plugin&#39; =&amp;gt; null,
-            &#39;prefix&#39; =&amp;gt; false,
-            &#39;controller&#39; =&amp;gt; &#39;Users&#39;,
-            &#39;action&#39; =&amp;gt; &#39;login&#39;
+    $this-&amp;gt;loadComponent('Auth', [
+        'authorize' =&amp;gt; ['Controller'],
+        'loginAction' =&amp;gt; [
+            'plugin' =&amp;gt; null,
+            'prefix' =&amp;gt; false,
+            'controller' =&amp;gt; 'Users',
+            'action' =&amp;gt; 'login'
         ],
-        &#39;loginRedirect&#39; =&amp;gt; [
-            &#39;plugin&#39; =&amp;gt; null,
-            &#39;prefix&#39; =&amp;gt; false,
-            &#39;controller&#39; =&amp;gt; &#39;Posts&#39;,
-            &#39;action&#39; =&amp;gt; &#39;index&#39;,
+        'loginRedirect' =&amp;gt; [
+            'plugin' =&amp;gt; null,
+            'prefix' =&amp;gt; false,
+            'controller' =&amp;gt; 'Posts',
+            'action' =&amp;gt; 'index',
         ],
-        &#39;logoutRedirect&#39; =&amp;gt; [
-            &#39;plugin&#39; =&amp;gt; null,
-            &#39;prefix&#39; =&amp;gt; false,
-            &#39;controller&#39; =&amp;gt; &#39;Users&#39;,
-            &#39;action&#39; =&amp;gt; &#39;login&#39;,
+        'logoutRedirect' =&amp;gt; [
+            'plugin' =&amp;gt; null,
+            'prefix' =&amp;gt; false,
+            'controller' =&amp;gt; 'Users',
+            'action' =&amp;gt; 'login',
         ],
-        &#39;authenticate&#39; =&amp;gt; [
-            &#39;all&#39; =&amp;gt; [
-                &#39;fields&#39; =&amp;gt; [&#39;username&#39; =&amp;gt; &#39;email&#39;, &#39;password&#39; =&amp;gt; &#39;password&#39;],
+        'authenticate' =&amp;gt; [
+            'all' =&amp;gt; [
+                'fields' =&amp;gt; ['username' =&amp;gt; 'email', 'password' =&amp;gt; 'password'],
             ],
-            &#39;Form&#39;,
+            'Form',
         ]
     ]);
 }
@@ -1676,8 +1676,8 @@ git commit -m &quot;Properly redirect users on login/logout&quot;
 
 &lt;p&gt;The &lt;code&gt;scaffold.actions_blacklist&lt;/code&gt; Crud config option can be used to remove an action from being linked to. We’ll add the following to our &lt;code&gt;PostsListener::beforeHandleIndex()&lt;/code&gt; method:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.actions_blacklist&#39;, [
-    &#39;view&#39;,
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;_action()-&amp;gt;config('scaffold.actions_blacklist', [
+    'view',
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1699,15 +1699,15 @@ git commit -m &quot;Disable the view action link&quot;
  */
 public function beforeHandleEdit(Event $event)
 {
-    $this-&amp;gt;_action()-&amp;gt;config(&#39;scaffold.actions_blacklist&#39;, [
-        &#39;home&#39;,
+    $this-&amp;gt;_action()-&amp;gt;config('scaffold.actions_blacklist', [
+        'home',
     ]);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;We’ll need to add the following to &lt;code&gt;PostsListener::beforeHandle()&lt;/code&gt; in order to trigger this as well:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;_request()-&amp;gt;action === &#39;edit&#39;) {
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;if ($this-&amp;gt;_request()-&amp;gt;action === 'edit') {
     $this-&amp;gt;beforeHandleEdit($event);
 
     return;
@@ -1787,17 +1787,17 @@ class MailerJob
 
     public function execute(JobContainer $job)
     {
-        $mailer = $job-&amp;gt;data(&#39;mailer&#39;);
-        $action = $job-&amp;gt;data(&#39;action&#39;);
-        $data = $job-&amp;gt;data(&#39;data&#39;, []);
+        $mailer = $job-&amp;gt;data('mailer');
+        $action = $job-&amp;gt;data('action');
+        $data = $job-&amp;gt;data('data', []);
 
         if (empty($mailer)) {
-            $this-&amp;gt;log(&#39;Missing mailer in job config&#39;);
+            $this-&amp;gt;log('Missing mailer in job config');
             return;
         }
 
         if (empty($action)) {
-            $this-&amp;gt;log(&#39;Missing action in job config&#39;);
+            $this-&amp;gt;log('Missing action in job config');
             return;
         }
 
@@ -1833,7 +1833,7 @@ class MailerJob
  * @var array
  */
 protected $_defaultConfig = [
-    &#39;mailer&#39; =&amp;gt; &#39;User&#39;,
+    'mailer' =&amp;gt; 'User',
 ];
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1859,12 +1859,12 @@ public function afterForgotPassword(Event $event)
     $table = TableRegistry::get($this-&amp;gt;_controller()-&amp;gt;modelClass);
     $token = $table-&amp;gt;tokenize($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;id);
 
-    Queue::push([&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;], [
-        &#39;action&#39; =&amp;gt; &#39;forgotPassword&#39;,
-        &#39;mailer&#39; =&amp;gt; &#39;User&#39;,
-        &#39;data&#39; =&amp;gt; [
-            &#39;email&#39; =&amp;gt; $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;email,
-            &#39;token&#39; =&amp;gt; $token,
+    Queue::push(['\App\Job\MailerJob', 'execute'], [
+        'action' =&amp;gt; 'forgotPassword',
+        'mailer' =&amp;gt; 'User',
+        'data' =&amp;gt; [
+            'email' =&amp;gt; $event-&amp;gt;subject-&amp;gt;entity-&amp;gt;email,
+            'token' =&amp;gt; $token,
         ]
     ]);
 }
@@ -1874,7 +1874,7 @@ public function afterForgotPassword(Event $event)
 
 &lt;ul&gt;
   &lt;li&gt;&lt;code&gt;Queue::push()&lt;/code&gt; takes two arguments, a callable and data for the job.&lt;/li&gt;
-  &lt;li&gt;Our callable should include the fully-namespaced class name and the function being invoked, so &lt;code&gt;[&#39;\App\Job\MailerJob&#39;, &#39;execute&#39;]&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Our callable should include the fully-namespaced class name and the function being invoked, so &lt;code&gt;['\App\Job\MailerJob', 'execute']&lt;/code&gt;.&lt;/li&gt;
   &lt;li&gt;Our &lt;code&gt;MailerJob&lt;/code&gt; requires an &lt;code&gt;action&lt;/code&gt; and a &lt;code&gt;mailer&lt;/code&gt; to be specified, so we pass those in as data, and also send in the user’s email&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -1890,19 +1890,19 @@ public function afterForgotPassword(Event $event)
 public function forgotPassword($email, $token)
 {
     return $this-&amp;gt;to($email)
-        -&amp;gt;subject(&#39;Reset your password&#39;)
-        -&amp;gt;template(&#39;forgot_password&#39;)
+        -&amp;gt;subject('Reset your password')
+        -&amp;gt;template('forgot_password')
         -&amp;gt;layout(false)
         -&amp;gt;set([
-            &#39;token&#39; =&amp;gt; $token,
+            'token' =&amp;gt; $token,
         ])
-        -&amp;gt;emailFormat(&#39;html&#39;);
+        -&amp;gt;emailFormat('html');
 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Before testing this, one thing that we’ll need to do is make sure that we have specified a full base url for all environments. CakePHP will normally retrieve this from the current request, but cannot do so in a CLI environment. As such, we’ll need to add the following to &lt;code&gt;line 17&lt;/code&gt; of our &lt;code&gt;config/env.php&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;App.fullbaseurl&#39; =&amp;gt; &#39;App.fullBaseUrl&#39;,
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;'App.fullbaseurl' =&amp;gt; 'App.fullBaseUrl',
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now we can set the &lt;code&gt;APP_FULLBASEURL&lt;/code&gt; environment variable and have it properly scope all of our urls.&lt;/p&gt;
@@ -1978,20 +1978,20 @@ use Cake\Routing\Route\DashedRoute;
 
 Router::defaultRouteClass(DashedRoute::class);
 
-Router::scope(&#39;/&#39;, function (RouteBuilder $routes) {
-    $routes-&amp;gt;connect(&#39;/&#39;, [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;home&#39;]);
-    $routes-&amp;gt;connect(&#39;/login&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;login&#39;]);
-    $routes-&amp;gt;connect(&#39;/logout&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;logout&#39;]);
-    $routes-&amp;gt;connect(&#39;/forgot-password&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgot-password&#39;]);
-    $routes-&amp;gt;connect(&#39;/reset-password/*&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;forgot-password&#39;]);
+Router::scope('/', function (RouteBuilder $routes) {
+    $routes-&amp;gt;connect('/', ['controller' =&amp;gt; 'Posts', 'action' =&amp;gt; 'home']);
+    $routes-&amp;gt;connect('/login', ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'login']);
+    $routes-&amp;gt;connect('/logout', ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'logout']);
+    $routes-&amp;gt;connect('/forgot-password', ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'forgot-password']);
+    $routes-&amp;gt;connect('/reset-password/*', ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'forgot-password']);
 });
 
-Router::scope(&#39;/admin&#39;, function (RouteBuilder $routes) {
-    $routes-&amp;gt;scope(&#39;/posts&#39;, [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;], function (RouteBuilder $routes) {
-        $routes-&amp;gt;connect(&#39;/&#39;, [&#39;action&#39; =&amp;gt; &#39;index&#39;]);
+Router::scope('/admin', function (RouteBuilder $routes) {
+    $routes-&amp;gt;scope('/posts', ['controller' =&amp;gt; 'Posts'], function (RouteBuilder $routes) {
+        $routes-&amp;gt;connect('/', ['action' =&amp;gt; 'index']);
         $routes-&amp;gt;fallbacks();
     });
-    $routes-&amp;gt;connect(&#39;/profile&#39;, [&#39;controller&#39; =&amp;gt; &#39;Users&#39;, &#39;action&#39; =&amp;gt; &#39;edit&#39;]);
+    $routes-&amp;gt;connect('/profile', ['controller' =&amp;gt; 'Users', 'action' =&amp;gt; 'edit']);
 });
 
 Plugin::routes();
@@ -2031,9 +2031,9 @@ git commit -m &quot;Specify all hardcoded app routes&quot;
 &lt;p&gt;In order to match our catch-all route, we’ll need a &lt;code&gt;PostRoute&lt;/code&gt;. Lets first connect the route in our &lt;code&gt;config/routes.php&lt;/code&gt; under the &lt;code&gt;/&lt;/code&gt; scope:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(
-    &#39;/:url&#39;,
-    [&#39;controller&#39; =&amp;gt; &#39;Posts&#39;, &#39;action&#39; =&amp;gt; &#39;view&#39;],
-    [&#39;routeClass&#39; =&amp;gt; &#39;PostRoute&#39;]
+    '/:url',
+    ['controller' =&amp;gt; 'Posts', 'action' =&amp;gt; 'view'],
+    ['routeClass' =&amp;gt; 'PostRoute']
 );
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -2047,20 +2047,20 @@ use Cake\Routing\Route\Route;
 
 class PostRoute extends Route
 {
-    public function parse($url, $method = &#39;&#39;)
+    public function parse($url, $method = '')
     {
         $params = parent::parse($url, $method);
         if (empty($params)) {
             return false;
         }
 
-        $PostsTable = TableRegistry::get(&#39;Posts&#39;);
-        $post = $PostsTable-&amp;gt;find()-&amp;gt;where([&#39;url&#39; =&amp;gt; &#39;/&#39; . $params[&#39;url&#39;]])-&amp;gt;first();
+        $PostsTable = TableRegistry::get('Posts');
+        $post = $PostsTable-&amp;gt;find()-&amp;gt;where(['url' =&amp;gt; '/' . $params['url']])-&amp;gt;first();
         if (empty($post)) {
             return false;
         }
 
-        $params[&#39;pass&#39;] = [$post-&amp;gt;id];
+        $params['pass'] = [$post-&amp;gt;id];
         return $params;
     }
 }
@@ -2070,12 +2070,12 @@ class PostRoute extends Route
 
 &lt;p&gt;Next, we need to modify our &lt;code&gt;PostsController::initialize()&lt;/code&gt; method to allow access to the &lt;code&gt;PostsController::view()&lt;/code&gt; action:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Auth-&amp;gt;allow([&#39;home&#39;, &#39;view&#39;]);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Auth-&amp;gt;allow(['home', 'view']);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now that this is set, we can use the &lt;code&gt;Crud.beforeFind&lt;/code&gt; event to modify the finder to return related post data from the &lt;code&gt;post_attributes&lt;/code&gt; database table. Add the following to your &lt;code&gt;PostsListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&#39;Crud.beforeFind&#39; =&amp;gt; &#39;beforeFind&#39;,
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;'Crud.beforeFind' =&amp;gt; 'beforeFind',
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And here is the logic for the new &lt;code&gt;PostsListener::beforeFind()&lt;/code&gt; and friends:&lt;/p&gt;
@@ -2088,7 +2088,7 @@ class PostRoute extends Route
  */
 public function beforeFind(Event $event)
 {
-    if ($this-&amp;gt;_request()-&amp;gt;action === &#39;view&#39;) {
+    if ($this-&amp;gt;_request()-&amp;gt;action === 'view') {
         $this-&amp;gt;beforeFindView($event);
 
         return;
@@ -2103,7 +2103,7 @@ public function beforeFind(Event $event)
  */
 public function beforeFindView(Event $event)
 {
-    $event-&amp;gt;subject-&amp;gt;query-&amp;gt;contain([&#39;PostAttributes&#39;]);
+    $event-&amp;gt;subject-&amp;gt;query-&amp;gt;contain(['PostAttributes']);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -2111,7 +2111,7 @@ public function beforeFindView(Event $event)
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;posts index large-12 medium-12 columns content&quot;&amp;gt;
     &amp;lt;?php $postType = $post-&amp;gt;getPostType(); ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;element($postType-&amp;gt;viewTemplate(), [&#39;post&#39; =&amp;gt; $postType]); ?&amp;gt;
+    &amp;lt;?= $this-&amp;gt;element($postType-&amp;gt;viewTemplate(), ['post' =&amp;gt; $postType]); ?&amp;gt;
 &amp;lt;/div&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -2121,7 +2121,7 @@ public function beforeFindView(Event $event)
     &amp;lt;ul class=&quot;post-list&quot;&amp;gt;
         &amp;lt;li&amp;gt;
             &amp;lt;?php $postType = $post-&amp;gt;getPostType(); ?&amp;gt;
-            &amp;lt;?= $this-&amp;gt;element($postType-&amp;gt;viewTemplate(), [&#39;post&#39; =&amp;gt; $postType]); ?&amp;gt;
+            &amp;lt;?= $this-&amp;gt;element($postType-&amp;gt;viewTemplate(), ['post' =&amp;gt; $postType]); ?&amp;gt;
         &amp;lt;/li&amp;gt;
     &amp;lt;/ul&amp;gt;
 &amp;lt;/div&amp;gt;
@@ -2198,8 +2198,8 @@ git commit -m &quot;Implement custom routing for blog posts&quot;
  */
 public function buildRules(RulesChecker $rules)
 {
-    $rules-&amp;gt;add($rules-&amp;gt;existsIn([&#39;user_id&#39;], &#39;Users&#39;));
-    $rules-&amp;gt;add($rules-&amp;gt;isUnique([&#39;url&#39;]));
+    $rules-&amp;gt;add($rules-&amp;gt;existsIn(['user_id'], 'Users'));
+    $rules-&amp;gt;add($rules-&amp;gt;isUnique(['url']));
 
     return $rules;
 }
@@ -2215,7 +2215,7 @@ git commit -m &quot;Force the url field to be unique&quot;
 
 &lt;p&gt;First, we’ll need to allow fields to be “empty” in the form. Remove the following from &lt;code&gt;AbstractPostType::_buildValidator()&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;notEmpty(&#39;url&#39;, &#39;Please fill this field&#39;);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;notEmpty('url', 'Please fill this field');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Next, lets generate the url when empty! I’ve added the following class to our use statements at the top of my &lt;code&gt;AbstractPostType&lt;/code&gt; class:&lt;/p&gt;
@@ -2225,19 +2225,19 @@ git commit -m &quot;Force the url field to be unique&quot;
 
 &lt;p&gt;Right after we call &lt;code&gt;AbstractPostType::transformData()&lt;/code&gt; inside of &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;, I call the following:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$data[&#39;url&#39;] = $this-&amp;gt;ensureUrl($data);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$data['url'] = $this-&amp;gt;ensureUrl($data);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;And here is the body of &lt;code&gt;AbstractPostType::ensureUrl()&lt;/code&gt;.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function ensureUrl(array $data)
 {
-    $url = trim(Hash::get($data, &#39;url&#39;, &#39;&#39;), &#39;/&#39;);
+    $url = trim(Hash::get($data, 'url', ''), '/');
     if (strlen($url) !== 0) {
         return $url;
     }
 
-    return Hash::get($data, &#39;title&#39;, &#39;&#39;);
+    return Hash::get($data, 'title', '');
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -2262,15 +2262,15 @@ trait UrlSettingTrait
     public function _setUrl($url)
     {
         if (strlen($url) === 0) {
-            return &#39;&#39;;
+            return '';
         }
 
         $url = Text::slug($url, [
-            &#39;lowercase&#39; =&amp;gt; true,
-            &#39;replacement&#39; =&amp;gt; &#39;-&#39;,
+            'lowercase' =&amp;gt; true,
+            'replacement' =&amp;gt; '-',
         ]);
-        $url = &#39;/&#39; . trim($url, &#39;/&#39;);
-        if ($url === &#39;/&#39;) {
+        $url = '/' . trim($url, '/');
+        if ($url === '/') {
             $url = null;
         }
 
@@ -2306,13 +2306,13 @@ git commit -m &quot;Automatically generate urls from the title field&quot;
 
 &lt;p&gt;I’ll add the following to my &lt;code&gt;PostsTable::validationDefault()&lt;/code&gt; method:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add(&#39;url&#39;, &#39;notInList&#39;, [
-    &#39;rule&#39; =&amp;gt; function ($value, $context) {
-        $list = [&#39;/&#39;, &#39;/about&#39;, &#39;/home&#39;, &#39;/contact&#39;, &#39;/login&#39;, &#39;/logout&#39;, &#39;/forgot-password&#39;];
-        $list = array_map(&#39;strval&#39;, $list);
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add('url', 'notInList', [
+    'rule' =&amp;gt; function ($value, $context) {
+        $list = ['/', '/about', '/home', '/contact', '/login', '/logout', '/forgot-password'];
+        $list = array_map('strval', $list);
         return !in_array((string)$value, $list, true);
     },
-    &#39;message&#39; =&amp;gt; &#39;Reserved urls cannot be specified&#39;,
+    'message' =&amp;gt; 'Reserved urls cannot be specified',
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -2332,8 +2332,8 @@ git commit -m &quot;Automatically generate urls from the title field&quot;
 
 &lt;p&gt;We’ll use another custom validation rule for this.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add(&#39;url&#39;, &#39;withoutPrefix&#39;, [
-    &#39;rule&#39; =&amp;gt; function ($value, $context) {
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add('url', 'withoutPrefix', [
+    'rule' =&amp;gt; function ($value, $context) {
         if (preg_match(&quot;/^\/(admin|reset-password|verify)/&quot;, $value)) {
             return false;
         }
@@ -2342,7 +2342,7 @@ git commit -m &quot;Automatically generate urls from the title field&quot;
         }
         return true;
     },
-    &#39;message&#39; =&amp;gt; &#39;Urls cannot start with &quot;/admin&quot;, &quot;/reset-password&quot;, or &quot;/verify&quot;&#39;,
+    'message' =&amp;gt; 'Urls cannot start with &quot;/admin&quot;, &quot;/reset-password&quot;, or &quot;/verify&quot;',
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
