@@ -92,7 +92,7 @@ git commit -m "Implement DefaultTheme"
 <h3 id="custom-helper-templates">Custom Helper Templates</h3>
 <p>In CakePHP 3, all helpers output html fragments based on a simple templating language. It uses string fragments to specify what the “template” should be for an html element, such as a <code>link</code> or <code>image</code> tag. It’s used throughout CakePHP, which is good as in our case, we’re going to modify what pagination looks like.</p>
 <blockquote>
-  <p>Templates use  style placeholders. It is important to not add any spaces around the  or the replacements will not work.</p>
+  <p>Templates use <code>{{var}}</code> style placeholders. It is important to not add any spaces around the <code>{{}}</code> or the replacements will not work.</p>
 </blockquote>
 <p>Here is what I’ve placed in my theme’s <code>home.ctp</code> to customize what the <code>PaginatorHelper</code> uses for building next/previous links:</p>
 <pre><code class="language-php">&lt;?php

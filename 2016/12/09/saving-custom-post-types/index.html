@@ -171,7 +171,7 @@ public function beforeSave(Event $event)
 <pre><code class="language-shell">git add src/Listener/PostsListener.php
 git commit -m "Set the user_id to the currently authenticated user"
 </code></pre>
-<h2 id="saving-extra-fields-in-the-postattributes-table">Saving extra fields in the post_attributes table</h2>
+<h2 id="saving-extra-fields-in-the-post_attributes-table">Saving extra fields in the post_attributes table</h2>
 <p>Since we have a few extra fields, they all need to be saved as <code>post_attributes</code>. The easiest way is to hook into our new <code>PostsListener::beforeSave()</code> method and massage the entity. We’ll modify our <code>PostsListener::beforeSave()</code> to look like the following:</p>
 <pre><code class="language-php">/**
  * Before Save

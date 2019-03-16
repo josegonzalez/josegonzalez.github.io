@@ -124,7 +124,7 @@ protected function beforeFilter(\Cake\Event\Event $event)
 </code></pre>
 <p>Components are “owned” by a <code>Cake\Controller\ComponentRegistry</code>, which keeps track of both loaded components and the controller upon which they are loaded, amongst other things.</p>
 <blockquote>
-  <p>Semi-related, ComponentRegistry, TableRegistry, etc. are all simply <a href="http://en.wikipedia.org/wiki/Service_locator_pattern">service locators</a>, and all use some form of dependency injection on the objects they build. Yes, CakePHP has those things you thought it didn’t, we’re just very good at hiding them from you :P<br />
+  <p>Semi-related, ComponentRegistry, TableRegistry, etc. are all simply <a href="http://en.wikipedia.org/wiki/Service_locator_pattern">service locators</a>, and all use some form of dependency injection on the objects they build. Yes, CakePHP has those things you thought it didn’t, we’re just very good at hiding them from you :P
 If you’d like to use a similar pattern in your applications, you can extend the <code>Cake\Core\ObjectRegistry</code> class. I personally use this for stuff like custom payment classes, or things where there are multiple implementations and constructing them can be a pita.</p>
 </blockquote>
 <p>Back on topic, once I have an entity, I also like to set the canonical url for a given page. For instance, sometimes my page has querystring values that I’d like search engines to ignore. Maybe they were affiliate parameters, or things that updated filters. In any case, it’s a good idea to set a <code>rel=canonical</code> meta tag:</p>

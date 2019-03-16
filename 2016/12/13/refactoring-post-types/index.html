@@ -95,7 +95,7 @@ public function beforeSave(Event $event)
 }
 </code></pre>
 <p>In it, you’ll see I can still inject data from the request - <code>user_id</code>, <code>type</code>, <code>published_date</code> - but also get the “real” data from the specific <code>PostType::execute()</code> method. As it’s the <code>Crud.beforeSave</code> event, we don’t actually need to save data, and just patching it onto the event’s entity is enough.</p>
-<h3 id="restructuring-abstractposttypeexecute">Restructuring <code>AbstractPostType::_execute()</code></h3>
+<h3 id="restructuring-abstractposttype_execute">Restructuring <code>AbstractPostType::_execute()</code></h3>
 <p>This is my new <code>AbstractPostType::_execute()</code> method:</p>
 <pre><code class="language-php">protected function _execute(array $data)
 {

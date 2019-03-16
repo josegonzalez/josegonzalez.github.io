@@ -106,14 +106,14 @@ class UsersTable extends Table
 </code></pre>
 <p>Lastly, any forms where you will upload files will need to be modified with the following changes:</p>
 <ul>
-  <li><code>Form::create</code> must be of type file:<br />
-  <code>
-  &lt;?= $this-&gt;Form-&gt;create($user, ['type' =&gt; file]) ?&gt;
- </code></li>
-  <li><code>Form::input</code> for the field must be of type file:<br />
-  <code>
-  &lt;?= echo $this-&gt;Form-&gt;input('photo', ['type' =&gt; 'file']); ?&gt;
- </code></li>
+  <li><code>Form::create</code> must be of type file:
+    <pre><code>  &lt;?= $this-&gt;Form-&gt;create($user, ['type' =&gt; file]) ?&gt;
+</code></pre>
+  </li>
+  <li><code>Form::input</code> for the field must be of type file:
+    <pre><code>  &lt;?= echo $this-&gt;Form-&gt;input('photo', ['type' =&gt; 'file']); ?&gt;
+</code></pre>
+  </li>
   <li>You should hide/remove the extra fields. In particular, the plugin is automatically configured to use the <code>dir</code>, <code>type</code>, and <code>size</code> fields. These are configurable, but keep this in mind.</li>
 </ul>
 <p>Pretty basic. It will upload anything to the path <code>webroot/files/Users/photo/ID</code>, and save metadata about the file to the <code>photo</code> field. We still have a few of the same config options, with many of the same defaults. For instance, we may wish to change the upload path to be outside of <code>webroot</code>:</p>

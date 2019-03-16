@@ -118,7 +118,7 @@ end
 <p>The <code>Template</code> resource allows you to template out files by passing it variables.</p>
 <h3 id="back-to-the-loops">Back to the Loops</h3>
 <p>So in my loop, I do the following:</p>
-<h4 id="create-a-directory-in-the-servers-production-directory-for-the-given-staticapp">Create a directory in the servers production directory for the given static_app</h4>
+<h4 id="create-a-directory-in-the-servers-production-directory-for-the-given-static_app">Create a directory in the servers production directory for the given static_app</h4>
 <pre><code class="language-ruby">directory "#{node[:server][:production][:dir]}/#{hostname}/#{base}" do
   owner "deploy"
   group "deploy"
@@ -133,7 +133,7 @@ end
   group "deploy"
 end
 </code></pre>
-<h4 id="use-a-custom-defined-resource-to-tell-nginx-to-turn-on-this-staticapp">Use a custom defined Resource to tell nginx to turn on this static_app</h4>
+<h4 id="use-a-custom-defined-resource-to-tell-nginx-to-turn-on-this-static_app">Use a custom defined Resource to tell nginx to turn on this static_app</h4>
 <pre><code class="language-ruby">nginx_up "#{node[:nginx][:dir]}/sites-available/#{hostname}.#{base}" do
   hostname "#{base}.#{hostname}"
   variables(info)

@@ -278,11 +278,13 @@ git commit -m "Enable avatar uploads"
 </code></pre>
 <h2 id="validating-image-uploads">Validating image uploads</h2>
 <blockquote>
-  <p>The following are only <em>some</em> of the things you can do to validate that images uploaded are, in fact, images. I would recommend you also:<br />
-- resize the images to remove extra metadata that you may not wish to show<br />
-- only display images that have been sanitized<br />
-- use the <a href="http://cloudinary.com/blog/how_to_detect_and_prevent_malware_infected_user_uploads">metascan</a> tool to verify the validity of uploads before referencing them on your site.<br />
-This list is also by no means exhaustive, and as security is an important subject, I defer to the experts. Please keep this in mind!</p>
+  <p>The following are only <em>some</em> of the things you can do to validate that images uploaded are, in fact, images. I would recommend you also:</p>
+  <ul>
+    <li>resize the images to remove extra metadata that you may not wish to show</li>
+    <li>only display images that have been sanitized</li>
+    <li>use the <a href="http://cloudinary.com/blog/how_to_detect_and_prevent_malware_infected_user_uploads">metascan</a> tool to verify the validity of uploads before referencing them on your site.
+This list is also by no means exhaustive, and as security is an important subject, I defer to the experts. Please keep this in mind!</li>
+  </ul>
 </blockquote>
 <p>Before allowing just <em>any</em> file uploads, lets be sure that they are indeed images. I’d also like to ensure we’re not allowing a save to occur when the image upload fails for whatever reason. This will ensure we surface the errors to the users before the UploadBehavior gets to it. The following should be added to your <code>AccountValidationTrait::validationAccount()</code> method:</p>
 <pre><code class="language-php">$validator-&gt;allowEmpty('avatar');
