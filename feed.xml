@@ -5,177 +5,9 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 16 Mar 2019 23:07:07 +0000</pubDate>
-    <lastBuildDate>Sat, 16 Mar 2019 23:07:07 +0000</lastBuildDate>
+    <pubDate>Thu, 14 Nov 2019 11:04:17 +0000</pubDate>
+    <lastBuildDate>Thu, 14 Nov 2019 11:04:17 +0000</lastBuildDate>
     <generator>Jekyll v3.8.5</generator>
-    
-      <item>
-        <title>Why CakeFest does not (currently) have a Diversity Scholarship</title>
-        <description>&lt;p&gt;This is a response to the allegation that the CakePHP organization does not wish to promote diversity within it’s userbase.&lt;/p&gt;
-
-&lt;h2 id=&quot;first-some-stats&quot;&gt;First, some stats&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;27 Core Developers. Not all active, not including doc translation teams&lt;/li&gt;
-  &lt;li&gt;5-6 continents, dozens of timezones&lt;/li&gt;
-  &lt;li&gt;We do not ask for race or gender of team members&lt;/li&gt;
-  &lt;li&gt;All unpaid&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Do we have a paucity of Women/POC/LGBTQ members on the core team? Yes, we do.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;IIRC we’ve had trans members in the past (one is currently inactive) but we can certainly do better.&lt;/li&gt;
-  &lt;li&gt;At the moment, our only active female contributor is our community organizer - she does a tremendous job of it.&lt;/li&gt;
-  &lt;li&gt;Our team is pretty diverse ethnically, though we I think we can do better with contributors from Africa, the Middle East, and Asia.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;No, I don’t make it a habit to ask whether someone considers themselves LGBTQ. That’s their decision to share, not mine, and doesn’t have any real bearing on whether their contributions have merit. Meritocracy is a separate issue, and I’m happy to discuss my (probably incorrect) thoughts on it, but that will have to wait for another day.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;how-to-join-the-cakephp-core-team&quot;&gt;How to Join the CakePHP Core Team&lt;/h2&gt;
-
-&lt;p&gt;Things you can do that make you eligible:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Contribute to documentation: We have a ton of active doc translation teams, and this is the easiest way to get onto our core team. Simply start and continue to contribute docs. There isn’t a magic bar to when we do a core invite, though we’ll give you commit access after you’ve proven that you’re here to stay.&lt;/li&gt;
-  &lt;li&gt;Write something useful for the community: Whether its a useful tutorial site, a widely used utility, or a ton of plugins/integration code, this is a way to give back while still owning your own code.&lt;/li&gt;
-  &lt;li&gt;Be active in support channels: We have a ton of users asking questions, you may know many of the answers. IRC/Slack are easiest, as they have most visibility with the core teams, but we would support anyone who wants to provide support otherwise.&lt;/li&gt;
-  &lt;li&gt;Design work: OSS projects are always looking for work.&lt;/li&gt;
-  &lt;li&gt;Contribute code to the core or related projects: Many have entered this way, and I doubt this will cease to be a way to get commit bit.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;There are, of course, others, but this is just some context into the various ways we get users contributing.&lt;/p&gt;
-
-&lt;h2 id=&quot;cakefest-conference&quot;&gt;CakeFest Conference&lt;/h2&gt;
-
-&lt;p&gt;Every year, about 100-150 people attend the conference. We intentionally keep the conference small in order to ensure we can:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Provide quality instruction during the workshops&lt;/li&gt;
-  &lt;li&gt;Have Core Developers speak with as many of the attendees as possible&lt;/li&gt;
-  &lt;li&gt;Ensure our conference costs do not overrun the amount of money we take in via ticket sales and sponsorship.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;how-does-the-conference-make-money&quot;&gt;How does the conference make money&lt;/h3&gt;
-
-&lt;p&gt;We charge for tickets, the majority of purchases coming before Early Bird, so they are lower in price.&lt;/p&gt;
-
-&lt;p&gt;We also take sponsorships from companies in the development community, though many companies have budgets that need to be pre-approved, and thus sometimes we apply too late for some to be able to contribute. The majority of the funding ends up coming from one or two Gold sponsors.&lt;/p&gt;
-
-&lt;p&gt;We do not publish what CakeFest costs are, nor the budget, but I can promise you that - because of our ticket prices - its very rare that it makes any money. No one is getting rich off of it, despite what feelings about conference organizing you may have.&lt;/p&gt;
-
-&lt;p&gt;Our alternative is, of course, to raise ticket prices, but we believe that it is better for our userbase to be able to afford the conference and resulting travel expenses than to make a quick buck.&lt;/p&gt;
-
-&lt;h3 id=&quot;who-pays-for-cakephp&quot;&gt;Who pays for CakePHP&lt;/h3&gt;
-
-&lt;p&gt;Aside from sponsors and ticket sales, CakeDC has traditionally footed the bill for any overages - and in some cases they are quite high - with individual core members contributing money out of pocket for certain things.&lt;/p&gt;
-
-&lt;p&gt;We also occasionally have core members or speakers pay for things out of their pocket or a company per diem. These usually cover small group events, offsite lunch/dinners. This is generally appreciated but not required of anyone.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;I personally gave $1k of my money for the SF conference to cover a group event, after which I had trouble finding money to pay for a hostel I was staying at during the rest of my stay in SF. Derp.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;core-team-attendance&quot;&gt;Core Team Attendance&lt;/h3&gt;
-
-&lt;p&gt;Conference attendance is awesome, and we wish everyone could attend. More than three-quarters of the core team is unable to attend at any given CakeFest, due to a variety of issues:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Visa Requirements for certain countries: If its in a country not friendly to your place of citizenship, this can be an issue.&lt;/li&gt;
-  &lt;li&gt;Timing and other commitments: Some people have children and cannot take off, or it conflicts with other arrangements.&lt;/li&gt;
-  &lt;li&gt;Money: We try to reimburse certain things (flights) and schedule others (hotel), but cannot in all cases.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We still have a few core team members who have never attended a single CakeFest. My hope is that we can figure out how to move CakeFest to a locale they can afford to travel to.&lt;/p&gt;
-
-&lt;h3 id=&quot;speaker-diversity&quot;&gt;Speaker Diversity&lt;/h3&gt;
-
-&lt;p&gt;I wish I could say the numbers here were good. From what I hear about other conferences, hey seem to be on par with general PHP conference diversity numbers.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;We normally have 1 or 2 Women speakers.&lt;/li&gt;
-  &lt;li&gt;Half or more of our speakers are POC, with at least half of those being non-core.&lt;/li&gt;
-  &lt;li&gt;As far as I can tell - again, I don’t make a habit of asking - it is rare that we have an LGBTQ speaker.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Those numbers are pretty similar over all scheduled CakeFests.&lt;/p&gt;
-
-&lt;p&gt;All talks are chosen without speaker names by the core team. The only ones that know potential speaker names/details are Larry Masters (Project Lead) and Megan Lalk (Community Manager). Though I was reasonably involved in planning, this year I did not know speaker names in advance.&lt;/p&gt;
-
-&lt;p&gt;In the event of a tie between a core and non-core speaker, Larry and Megan will err on the side of the non-core speaker. We also make certain exceptions for new speakers and those who fall into groups that don’t traditionally speak in our conferences (Women/PoC/LGBTQ). We always err on the side of diversity, which usually is pretty easy as those speakers usually submit great talk topics.&lt;/p&gt;
-
-&lt;h3 id=&quot;attendee-diversity&quot;&gt;Attendee Diversity&lt;/h3&gt;
-
-&lt;p&gt;This is pretty abysmal IMO. We do reasonably well with PoC, but very poorly with Women/LGBTQ. I don’t have exact numbers - see above where I don’t ask about sexual orientation - but my recollection is we generally have 1-2 Women attend, and 1-2 LGBTQ community members attend.&lt;/p&gt;
-
-&lt;p&gt;I think we can do better.&lt;/p&gt;
-
-&lt;p&gt;Larry Masters and myself have already started the ball rolling in this direction, though it’s slow going because of life/work commitments. I’ve been in contact with Larry about several initiatives in both the PHP and general development community, including those that we can directly financially contribute to.&lt;/p&gt;
-
-&lt;p&gt;As an aside, we also backed off from certain organizations because of issues raised - by those previously affiliated or working with said orgs - with how those funds might be used.&lt;/p&gt;
-
-&lt;h3 id=&quot;scholarships&quot;&gt;Scholarships&lt;/h3&gt;
-
-&lt;p&gt;We’ve never done a full scholarship - conference/travel/hotel - but we have done partial scholarships that include conference/workshop tickets. This was pretty successful when we previously had it in NYC, and we gave students at the University hosting the event free access to everything in the event.&lt;/p&gt;
-
-&lt;p&gt;This is something I think we can pretty easily do on an as needed basis, and works incredibly well for enriching the local community. It’s something I looked into this year but as I do not live in NYC, it is harder to get in touch with good local organizations. Suggestions welcome, as I think we can still do something in this realm.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For what it’s worth, I believe more than half of the students attending that year under our partial scholarship were Women/PoC/LGBTQ.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h4 id=&quot;funding-scholarships&quot;&gt;Funding Scholarships&lt;/h4&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;This section is more of a rant than anything else, as it was a public, personal attack on whether or not I care about the issue.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I’ll also quickly touch on the idea that I/anyone could have saved $10 every day over the past year to help personally sponsor a full scholarship to CakeFest.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;I’m historically pretty terrible with money, and between moving, medical expenses, living expenses, and subletting my old apartment at a loss, I actually don’t have much money to spare at the moment. Not that it’s anyone’s business, but I previously planned to purchase a (very cheap) car for my mother - hers is failboating left and right - but had to use that for unforeseen expenses that came up. Yeah, I could have saved $10 every day, but not this year.&lt;/li&gt;
-  &lt;li&gt;CakePHP - the organization - has no money.
-    &lt;ul&gt;
-      &lt;li&gt;Server costs are paid for by Rackspace.&lt;/li&gt;
-      &lt;li&gt;Server maintenance is performed by me (for free).&lt;/li&gt;
-      &lt;li&gt;Application development is provided by CakeDC, who pays their developers to work on OSS for CakePHP.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;CakePHP - the core team - is a diverse group of people who have their own financial worries. Some are reasonably well off, and others are not. Whether they donate money is up to them. Setting up a non-profit that can take donations for the purposes of funding a scholarship is not free (time or money) and as we are all volunteers, it’s unlikely that any of us will take the initiative to set something up and ensure it remains viable.&lt;/li&gt;
-  &lt;li&gt;CakeDC - a company who funds a lot of CakePHP initiatives - already donates quite a bit to the well-being of the CakePHP project. As much as I’d love them to setup a scholarship, I’d also love for their developers to continue to get a paycheck for their OSS work.
-    &lt;ul&gt;
-      &lt;li&gt;All training income from CakeDC goes to funding CakeFest.&lt;/li&gt;
-      &lt;li&gt;CakeDC employees are paid to contribute OSS to cakephp/cakephp, personal projects, and CakeDC OSS.&lt;/li&gt;
-      &lt;li&gt;CakeDC employees are paid to develop certain CakePHP-related sites.&lt;/li&gt;
-      &lt;li&gt;CakeDC pays for ongoing design work (most of which was previously done by the awesome Story family)&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;In short, there isn’t really all that much extra money to fund this sort of thing easily. There is also the overhead of properly administrating any funds, and ensuring that such funding continues to grow. I believe there are other organizations that are better equipped to handle such responsibilities - BlackGirlsCode, PHPWomen, etc. - and will try and help any such organizations who wish to engage the CakePHP community/CakeFest as best we can.&lt;/p&gt;
-
-&lt;h2 id=&quot;going-forward&quot;&gt;Going Forward&lt;/h2&gt;
-
-&lt;p&gt;Ideally we have some form of publicized scholarship. I think we’ll spend some time after this CakeFest planning out what that looks like. I already have a few ideas that seemed to be well-received, so my guess is they’ll be in full swing next year.&lt;/p&gt;
-
-&lt;p&gt;I don’t think a full-ride scholarship will be viable unless there are private donations. Any who wish to fund such operations, please feel free to contact me or our community organizer, &lt;a href=&quot;https://www.cakedc.com/team/MeganKleyweg&quot;&gt;Megan Lalk&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Thanks for supporting the CakePHP community and it’s developers. Working on CakePHP is labor of love, so while we try to do quite a bit to help our communities, it’s not always possible without your continued help and support.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 14 Apr 2017 13:51:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2017/04/14/why-cakefest-does-not-currently-have-a-diversity-scholarship/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2017/04/14/why-cakefest-does-not-currently-have-a-diversity-scholarship/</guid>
-        
-        <category>cakephp</category>
-        
-        <category>cakefest</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
     
       <item>
         <title>Deploying our application</title>
@@ -2408,6 +2240,164 @@ git commit -m &quot;Persist validation errors when saving forms&quot;
         <category>application-rules</category>
         
         <category>validation</category>
+        
+        <category>cakeadvent-2016</category>
+        
+        <category>cakephp</category>
+        
+        
+        <category>cakephp</category>
+        
+      </item>
+    
+      <item>
+        <title>Theming our CMS</title>
+        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;setting-up-a-theme&quot;&gt;Setting up a Theme&lt;/h2&gt;
+
+&lt;p&gt;As much as I love the default CakePHP css, I’d like the default installation to look a bit different. To do so, I’ll distribute a custom theme with the Cms called &lt;code&gt;DefaultTheme&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In CakePHP 3, themes are distributed as plugins. This makes it pretty easy to create an installer or similar for your themes, as well as scaffold them :)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake plugin DefaultTheme -f
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’ve scaffolded a theme, but we’ll want to modify a few things:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;You remove the &lt;code&gt;plugins/DefaultTheme/config/routes.php&lt;/code&gt; file as we wont need it&lt;/li&gt;
+  &lt;li&gt;Remove &lt;code&gt;plugins/DefaultTheme/src&lt;/code&gt; as we won’t be using the AppController that is created&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Modify your &lt;code&gt;config/bootstrap.php&lt;/code&gt; to &lt;em&gt;not&lt;/em&gt; load the plugin’s bootstrap or routes. It should look like so:&lt;/p&gt;
+
+    &lt;p&gt;Plugin::load(‘DefaultTheme’);&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To load a theme, we’ll modify our &lt;code&gt;AppView&lt;/code&gt; - located in &lt;code&gt;src/View/AppView.php&lt;/code&gt; - to be the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize()
+{
+    $this-&amp;gt;theme('DefaultTheme');
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let’s save our work and move on:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json config/bootstrap.php plugins/DefaultTheme src/View/AppView.php
+git commit -m &quot;Add a dummy DefaultTheme&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;cakephp-theme-internals&quot;&gt;CakePHP Theme internals&lt;/h2&gt;
+
+&lt;p&gt;CakePHP themes are a bit weird. Here are some general guidelines:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Using a theme will inject it’s template files into the cake template search paths &lt;em&gt;first&lt;/em&gt;. If a file is not found in a theme, it will default to any other search paths (so the main &lt;code&gt;src/Template&lt;/code&gt; dir, or other plugins).&lt;/li&gt;
+  &lt;li&gt;General template files, elements, and layouts can all be overriden from a theme.&lt;/li&gt;
+  &lt;li&gt;Assets referenced from a theme will be loaded from that theme. If they aren’t found, CakePHP will try and load them from the main repo.&lt;/li&gt;
+  &lt;li&gt;Assets - css, images, javascript files - will be proxied via PHP unless you symlink the theme’s webroot directory into place.&lt;/li&gt;
+  &lt;li&gt;There is no way to override a file provided by a theme.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I’m not going to include all of my theme code, but I will show some interesting bits.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The theme is based on the &lt;a href=&quot;https://github.com/bencentra/centrarium&quot;&gt;Centrarium Jekyll Theme&lt;/a&gt;, and uses a logo by Kassy from &lt;a href=&quot;https://www.sketchport.com/drawing/1782016/camera&quot;&gt;sketchport&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I’ll commit my theme so you can take a look at the changes.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/DefaultTheme
+git commit -m &quot;Implement DefaultTheme&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;custom-helper-templates&quot;&gt;Custom Helper Templates&lt;/h3&gt;
+
+&lt;p&gt;In CakePHP 3, all helpers output html fragments based on a simple templating language. It uses string fragments to specify what the “template” should be for an html element, such as a &lt;code&gt;link&lt;/code&gt; or &lt;code&gt;image&lt;/code&gt; tag. It’s used throughout CakePHP, which is good as in our case, we’re going to modify what pagination looks like.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Templates use &lt;code&gt;{{var}}&lt;/code&gt; style placeholders. It is important to not add any spaces around the &lt;code&gt;{{}}&lt;/code&gt; or the replacements will not work.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Here is what I’ve placed in my theme’s &lt;code&gt;home.ctp&lt;/code&gt; to customize what the &lt;code&gt;PaginatorHelper&lt;/code&gt; uses for building next/previous links:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
+$this-&amp;gt;Paginator-&amp;gt;templates([
+    'nextDisabled' =&amp;gt; implode(' ', [
+        '&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;',
+            '&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;',
+            '&amp;lt;i class=&quot;fa fa-angle-double-right fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;',
+        '&amp;lt;/span&amp;gt;',
+    ]),
+    'nextActive' =&amp;gt; implode(' ', [
+        '&amp;lt;a rel=&quot;prev&quot; href=&quot;&quot;&amp;gt;',
+            '&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;',
+                '&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;',
+                '&amp;lt;i class=&quot;fa fa-angle-double-right fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;',
+            '&amp;lt;/span&amp;gt;',
+        '&amp;lt;/a&amp;gt;',
+    ]),
+    'prevDisabled' =&amp;gt; implode(' ', [
+        '&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;',
+            '&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;',
+            '&amp;lt;i class=&quot;fa fa-angle-double-left fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;',
+        '&amp;lt;/span&amp;gt;',
+    ]),
+    'prevActive' =&amp;gt; implode(' ', [
+        '&amp;lt;a rel=&quot;prev&quot; href=&quot;&quot;&amp;gt;',
+            '&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;',
+                '&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;',
+                '&amp;lt;i class=&quot;fa fa-angle-double-left fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;',
+            '&amp;lt;/span&amp;gt;',
+        '&amp;lt;/a&amp;gt;',
+    ]),
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also customize templates for the &lt;code&gt;FormHelper&lt;/code&gt; and &lt;code&gt;HtmlHelper&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;custom-theme-elements&quot;&gt;Custom Theme Elements&lt;/h3&gt;
+
+&lt;p&gt;I’ve overriden what the post types will display as in my theme. If I hadn’t, we’d be using the default elements from the respective post type plugin. Here is what my &lt;code&gt;plugins/DefaultTheme/src/Template/Element/post_type/photo-index.ctp&lt;/code&gt; looks like:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h2&amp;gt;&amp;lt;?= $this-&amp;gt;Html-&amp;gt;link($post-&amp;gt;get('title'), $post-&amp;gt;get('url')) ?&amp;gt;&amp;lt;/h2&amp;gt;
+&amp;lt;section class=&quot;post-meta&quot;&amp;gt;
+    &amp;lt;div class=&quot;post-date&quot;&amp;gt;&amp;lt;?= $this-&amp;gt;Time-&amp;gt;nice($post-&amp;gt;get('published_date')) ?&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/section&amp;gt;
+&amp;lt;section class=&quot;post-excerpt&quot; itemprop=&quot;description&quot;&amp;gt;
+    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;image('../' . $post-&amp;gt;get('photo_path')) ?&amp;gt;
+&amp;lt;/section&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that my image link works as normal, and displays the original post image as desired.&lt;/p&gt;
+
+&lt;h3 id=&quot;theme-links&quot;&gt;Theme Links&lt;/h3&gt;
+
+&lt;p&gt;One thing I’m doing in my theme is linking to custom pages, such as &lt;code&gt;/about&lt;/code&gt;, and also using the post urls as links. These aren’t currently routed by the CMS, so we’ll want to handle that next.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.15&quot;&gt;0.0.15&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The frontend of our site is in decent shape, though now we have some routing work to do. None of our custom post types have their own user-reachable urls, so in our next post, we’ll update the CakePHP routing to understand our routing schema.&lt;/p&gt;
+
+&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 15 Dec 2016 03:20:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2016/12/15/theming-our-cms/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/15/theming-our-cms/</guid>
+        
+        <category>themes</category>
+        
+        <category>views</category>
         
         <category>cakeadvent-2016</category>
         
