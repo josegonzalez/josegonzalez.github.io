@@ -73,7 +73,7 @@
   <li><code>Authenticate</code> classes are used by CakePHP to denote whether or not a user is logged into your application</li>
   <li><code>Authorize</code> classes are used by CakePHP to see whether an authenticated user has access to a particular controller/action pair.</li>
 </ul>
-<p>Since I am using information set by the webserver in the headers to identify the user, I will call it <code>HeaderAuthenticate</code> and have it extend <code>BasicAuthenticate</code> <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>. Here is the class skeleton:</p>
+<p>Since I am using information set by the webserver in the headers to identify the user, I will call it <code>HeaderAuthenticate</code> and have it extend <code>BasicAuthenticate</code> <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote">1</a></sup>. Here is the class skeleton:</p>
 <pre><code class="language-php">&lt;?php
 namespace App\Auth;
 use Cake\Auth\BasicAuthenticate;
@@ -314,10 +314,10 @@ class AllowNullableGithubIdOnUsers extends AbstractMigration
 <p>That doesn’t help anyone else though. We never created a user, nor do we have a method of registration. My next post will cover creating a test user from the command-line, cleaning up our views a bit, and the first part of asset uploading.</p>
 <p>Until then, you can see the results of today’s work at <a href="https://github.com/josegonzalez/media-manager/commit/5b605243dbff7f272cdc2940bdab4f5f023c4b32">this github url</a>.</p>
 <hr />
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
-      <p>The <code>BasicAuthenticate</code> core Authenticate class handles authenticate based on Basic Auth, so I figured a lot of the plumbing would be similar. If it’s not, we can always switch it up. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    <li id="fn:1" role="doc-endnote">
+      <p>The <code>BasicAuthenticate</code> core Authenticate class handles authenticate based on Basic Auth, so I figured a lot of the plumbing would be similar. If it’s not, we can always switch it up. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
 </div>
