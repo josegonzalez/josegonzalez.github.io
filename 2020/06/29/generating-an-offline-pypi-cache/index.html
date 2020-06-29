@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Generating an offline PyPI cache</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2020/06/29/generating-an-offline-pypi-cache/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="deployment" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Generating an offline PyPI cache" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2020/06/29/generating-an-offline-pypi-cache/" />
+    <meta property="og:description" content="" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Generating an offline PyPI cache" />
+    <meta name="twitter:description" content="" />
+    <link rel="alternate" type="application/rss+xml" title="Generating an offline PyPI cache » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5 class="no-print"><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Generating an offline PyPI cache</h2>
+    <div class="post-content">
+        <p>When deploying Python applications to airgapped environments, it becomes necessary to ship application dependencies either with the app or provide a PyPI-like repository. I typically do this by using <code>pip2pi</code> within a docker container.</p>
+<p>We start with a <code>Dockerfile</code>:</p>
+<pre><code class="language-Dockerfile">FROM python:3.6.6-slim-stretch
+</code></pre>
+<p>One unfortunate thing is that certain dependencies will require a specific Python version, so it is necessary to pin that version as shown above. The <code>pip2pi</code> tool will only download the dependency for the current python version, so you may need to re-run this for a separate python version.</p>
+<p>Next, I set both the <code>WORKDIR</code> and <code>PYTHONUNBUFFERED</code>. I’ve set the former because of cargo-culting - honestly I can’t remember why at the moment - while the latter is set so that running a python <code>http.server</code> doesn’t buffer logs until container exit.</p>
+<pre><code class="language-Dockerfile">WORKDIR /usr/src/app
+ENV PYTHONUNBUFFERED=1
+</code></pre>
+<p>Next, we isntall pip2pi. As of the time of writing, currently has a bug wherein it doesn’t work for versions of <code>pip&gt;=19.3</code>, so I’ve pinned to <code>pip==19.2.3</code>.</p>
+<pre><code class="language-Dockerfile">RUN pip install pip==19.2.3 &amp;&amp; \
+    pip install pip2pi
+</code></pre>
+<p>The <code>pip2pi</code> tool can be used to install dependencies from either a single package or a <code>requirements.txt</code> file. I’ll use the latter, and copy a bunch at once into <code>/tmp</code>. These files should be placed in the same directory as the Dockerfile.</p>
+<pre><code class="language-Dockerfile">COPY *.txt /tmp/
+</code></pre>
+<p>Because I want to create a repo from two different <code>requirements.txt</code> files, I’ll create separate pypi repositories and then merge them into one super repository using <code>dir2pi</code>, which is included with the <code>pip2pi</code> package. I don’t call <code>pip2pi</code> once for two different files as the <code>requirements.txt</code> files may have conflicting versions. Ideally <code>pip2pi</code> would support installing conflicting versions so we wouldn’t have to manually merge the files, but what can we do.</p>
+<p>Note that I copy both <code>tar.gz</code> and <code>whl</code> files into my super repository.</p>
+<pre><code class="language-Dockerfile">RUN pip2pi /tmp/sample-1 -r /tmp/sample-1-requirements.txt &amp;&amp; \
+    pip2pi /tmp/sample-2 -r /tmp/sample-2-requirements.txt
+RUN rm -rf /tmp/sample-*/simple &amp;&amp; \
+    mkdir -p packages &amp;&amp; \
+    cp -f sample-1/*.tar.gz /tmp/packages &amp;&amp; cp -f sample-1/*.whl /usr/src/app/packages &amp;&amp; \
+    cp -f sample-2/*.tar.gz /tmp/packages &amp;&amp; cp -f sample-2/*.whl /usr/src/app/packages &amp;&amp; \
+    dir2pi packages
+</code></pre>
+<p>Finally, I creeate a tarball of the packages directory, and set the default command to the python <code>http.server</code>. You’ll want to start a slightly different command - <code>SimpleHTTPServer</code> - for Python 2.7.</p>
+<pre><code class="language-Dockerfile">RUN tar -czf packages.tar.gz packages
+CMD ["python", "-m", "http.server", "80"]
+</code></pre>
+<p>Assuming everything is setup, you can now build the docker image and start the container:</p>
+<pre><code class="language-shell">docker image build -t pypiserver .
+docker container run -p 8081:80 --rm pypiserver
+</code></pre>
+<p>I’m exposing the server on port 8081, and am now able to browse to <code>http://localhost:8081/packages.tar.gz</code> to fetch a tarball that contains my pypiserver. This container can also be served directly, in which case the pip index-url would be <code>http://localhost:8081/packages/simple/</code>.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/opschops" title="View all posts in opschops" rel="category">opschops</a> on <a href="http://josediazgonzalez.com/2020/06/29/generating-an-offline-pypi-cache/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2020-06-29 03:04:00 +0000">29 Jun 2020</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook">
+    <h3>Write better CakePHP code today!</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button">Buy now</a></div>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2020/06/29/generating-an-offline-pypi-cache/';
+        var disqus_url        = 'http://josediazgonzalez.com/2020/06/29/generating-an-offline-pypi-cache/';
+        var disqus_title      = "Generating an offline PyPI cache";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>

@@ -5,9 +5,78 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 29 Jun 2020 07:20:57 +0000</pubDate>
-    <lastBuildDate>Mon, 29 Jun 2020 07:20:57 +0000</lastBuildDate>
+    <pubDate>Mon, 29 Jun 2020 07:26:15 +0000</pubDate>
+    <lastBuildDate>Mon, 29 Jun 2020 07:26:15 +0000</lastBuildDate>
     <generator>Jekyll v4.0.1</generator>
+    
+      <item>
+        <title>Generating an offline PyPI cache</title>
+        <description>&lt;p&gt;When deploying Python applications to airgapped environments, it becomes necessary to ship application dependencies either with the app or provide a PyPI-like repository. I typically do this by using &lt;code&gt;pip2pi&lt;/code&gt; within a docker container.&lt;/p&gt;
+
+&lt;p&gt;We start with a &lt;code&gt;Dockerfile&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Dockerfile&quot;&gt;FROM python:3.6.6-slim-stretch
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One unfortunate thing is that certain dependencies will require a specific Python version, so it is necessary to pin that version as shown above. The &lt;code&gt;pip2pi&lt;/code&gt; tool will only download the dependency for the current python version, so you may need to re-run this for a separate python version.&lt;/p&gt;
+
+&lt;p&gt;Next, I set both the &lt;code&gt;WORKDIR&lt;/code&gt; and &lt;code&gt;PYTHONUNBUFFERED&lt;/code&gt;. I’ve set the former because of cargo-culting - honestly I can’t remember why at the moment - while the latter is set so that running a python &lt;code&gt;http.server&lt;/code&gt; doesn’t buffer logs until container exit.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Dockerfile&quot;&gt;WORKDIR /usr/src/app
+
+ENV PYTHONUNBUFFERED=1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we isntall pip2pi. As of the time of writing, currently has a bug wherein it doesn’t work for versions of &lt;code&gt;pip&amp;gt;=19.3&lt;/code&gt;, so I’ve pinned to &lt;code&gt;pip==19.2.3&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Dockerfile&quot;&gt;RUN pip install pip==19.2.3 &amp;amp;&amp;amp; \
+    pip install pip2pi
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;pip2pi&lt;/code&gt; tool can be used to install dependencies from either a single package or a &lt;code&gt;requirements.txt&lt;/code&gt; file. I’ll use the latter, and copy a bunch at once into &lt;code&gt;/tmp&lt;/code&gt;. These files should be placed in the same directory as the Dockerfile.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Dockerfile&quot;&gt;COPY *.txt /tmp/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Because I want to create a repo from two different &lt;code&gt;requirements.txt&lt;/code&gt; files, I’ll create separate pypi repositories and then merge them into one super repository using &lt;code&gt;dir2pi&lt;/code&gt;, which is included with the &lt;code&gt;pip2pi&lt;/code&gt; package. I don’t call &lt;code&gt;pip2pi&lt;/code&gt; once for two different files as the &lt;code&gt;requirements.txt&lt;/code&gt; files may have conflicting versions. Ideally &lt;code&gt;pip2pi&lt;/code&gt; would support installing conflicting versions so we wouldn’t have to manually merge the files, but what can we do.&lt;/p&gt;
+
+&lt;p&gt;Note that I copy both &lt;code&gt;tar.gz&lt;/code&gt; and &lt;code&gt;whl&lt;/code&gt; files into my super repository.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Dockerfile&quot;&gt;RUN pip2pi /tmp/sample-1 -r /tmp/sample-1-requirements.txt &amp;amp;&amp;amp; \
+    pip2pi /tmp/sample-2 -r /tmp/sample-2-requirements.txt
+
+RUN rm -rf /tmp/sample-*/simple &amp;amp;&amp;amp; \
+    mkdir -p packages &amp;amp;&amp;amp; \
+    cp -f sample-1/*.tar.gz /tmp/packages &amp;amp;&amp;amp; cp -f sample-1/*.whl /usr/src/app/packages &amp;amp;&amp;amp; \
+    cp -f sample-2/*.tar.gz /tmp/packages &amp;amp;&amp;amp; cp -f sample-2/*.whl /usr/src/app/packages &amp;amp;&amp;amp; \
+    dir2pi packages
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, I creeate a tarball of the packages directory, and set the default command to the python &lt;code&gt;http.server&lt;/code&gt;. You’ll want to start a slightly different command - &lt;code&gt;SimpleHTTPServer&lt;/code&gt; - for Python 2.7.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Dockerfile&quot;&gt;RUN tar -czf packages.tar.gz packages
+
+CMD [&quot;python&quot;, &quot;-m&quot;, &quot;http.server&quot;, &quot;80&quot;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Assuming everything is setup, you can now build the docker image and start the container:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;docker image build -t pypiserver .
+docker container run -p 8081:80 --rm pypiserver
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’m exposing the server on port 8081, and am now able to browse to &lt;code&gt;http://localhost:8081/packages.tar.gz&lt;/code&gt; to fetch a tarball that contains my pypiserver. This container can also be served directly, in which case the pip index-url would be &lt;code&gt;http://localhost:8081/packages/simple/&lt;/code&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 29 Jun 2020 03:04:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2020/06/29/generating-an-offline-pypi-cache/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2020/06/29/generating-an-offline-pypi-cache/</guid>
+        
+        <category>deployment</category>
+        
+        
+        <category>opschops</category>
+        
+      </item>
     
       <item>
         <title>Deploying our application</title>
@@ -2240,164 +2309,6 @@ git commit -m &quot;Persist validation errors when saving forms&quot;
         <category>application-rules</category>
         
         <category>validation</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Theming our CMS</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;setting-up-a-theme&quot;&gt;Setting up a Theme&lt;/h2&gt;
-
-&lt;p&gt;As much as I love the default CakePHP css, I’d like the default installation to look a bit different. To do so, I’ll distribute a custom theme with the Cms called &lt;code&gt;DefaultTheme&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;In CakePHP 3, themes are distributed as plugins. This makes it pretty easy to create an installer or similar for your themes, as well as scaffold them :)&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;bin/cake bake plugin DefaultTheme -f
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’ve scaffolded a theme, but we’ll want to modify a few things:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;You remove the &lt;code&gt;plugins/DefaultTheme/config/routes.php&lt;/code&gt; file as we wont need it&lt;/li&gt;
-  &lt;li&gt;Remove &lt;code&gt;plugins/DefaultTheme/src&lt;/code&gt; as we won’t be using the AppController that is created&lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Modify your &lt;code&gt;config/bootstrap.php&lt;/code&gt; to &lt;em&gt;not&lt;/em&gt; load the plugin’s bootstrap or routes. It should look like so:&lt;/p&gt;
-
-    &lt;p&gt;Plugin::load(‘DefaultTheme’);&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;To load a theme, we’ll modify our &lt;code&gt;AppView&lt;/code&gt; - located in &lt;code&gt;src/View/AppView.php&lt;/code&gt; - to be the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function initialize()
-{
-    $this-&amp;gt;theme('DefaultTheme');
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let’s save our work and move on:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add composer.json config/bootstrap.php plugins/DefaultTheme src/View/AppView.php
-git commit -m &quot;Add a dummy DefaultTheme&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;cakephp-theme-internals&quot;&gt;CakePHP Theme internals&lt;/h2&gt;
-
-&lt;p&gt;CakePHP themes are a bit weird. Here are some general guidelines:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Using a theme will inject it’s template files into the cake template search paths &lt;em&gt;first&lt;/em&gt;. If a file is not found in a theme, it will default to any other search paths (so the main &lt;code&gt;src/Template&lt;/code&gt; dir, or other plugins).&lt;/li&gt;
-  &lt;li&gt;General template files, elements, and layouts can all be overriden from a theme.&lt;/li&gt;
-  &lt;li&gt;Assets referenced from a theme will be loaded from that theme. If they aren’t found, CakePHP will try and load them from the main repo.&lt;/li&gt;
-  &lt;li&gt;Assets - css, images, javascript files - will be proxied via PHP unless you symlink the theme’s webroot directory into place.&lt;/li&gt;
-  &lt;li&gt;There is no way to override a file provided by a theme.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I’m not going to include all of my theme code, but I will show some interesting bits.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The theme is based on the &lt;a href=&quot;https://github.com/bencentra/centrarium&quot;&gt;Centrarium Jekyll Theme&lt;/a&gt;, and uses a logo by Kassy from &lt;a href=&quot;https://www.sketchport.com/drawing/1782016/camera&quot;&gt;sketchport&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I’ll commit my theme so you can take a look at the changes.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add plugins/DefaultTheme
-git commit -m &quot;Implement DefaultTheme&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;custom-helper-templates&quot;&gt;Custom Helper Templates&lt;/h3&gt;
-
-&lt;p&gt;In CakePHP 3, all helpers output html fragments based on a simple templating language. It uses string fragments to specify what the “template” should be for an html element, such as a &lt;code&gt;link&lt;/code&gt; or &lt;code&gt;image&lt;/code&gt; tag. It’s used throughout CakePHP, which is good as in our case, we’re going to modify what pagination looks like.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Templates use &lt;code&gt;{{var}}&lt;/code&gt; style placeholders. It is important to not add any spaces around the &lt;code&gt;{{}}&lt;/code&gt; or the replacements will not work.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Here is what I’ve placed in my theme’s &lt;code&gt;home.ctp&lt;/code&gt; to customize what the &lt;code&gt;PaginatorHelper&lt;/code&gt; uses for building next/previous links:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-$this-&amp;gt;Paginator-&amp;gt;templates([
-    'nextDisabled' =&amp;gt; implode(' ', [
-        '&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;',
-            '&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;',
-            '&amp;lt;i class=&quot;fa fa-angle-double-right fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;',
-        '&amp;lt;/span&amp;gt;',
-    ]),
-    'nextActive' =&amp;gt; implode(' ', [
-        '&amp;lt;a rel=&quot;prev&quot; href=&quot;&quot;&amp;gt;',
-            '&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;',
-                '&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;',
-                '&amp;lt;i class=&quot;fa fa-angle-double-right fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;',
-            '&amp;lt;/span&amp;gt;',
-        '&amp;lt;/a&amp;gt;',
-    ]),
-    'prevDisabled' =&amp;gt; implode(' ', [
-        '&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;',
-            '&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;',
-            '&amp;lt;i class=&quot;fa fa-angle-double-left fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;',
-        '&amp;lt;/span&amp;gt;',
-    ]),
-    'prevActive' =&amp;gt; implode(' ', [
-        '&amp;lt;a rel=&quot;prev&quot; href=&quot;&quot;&amp;gt;',
-            '&amp;lt;span class=&quot;fa-stack fa-lg&quot;&amp;gt;',
-                '&amp;lt;i class=&quot;fa fa-square fa-stack-2x&quot;&amp;gt;&amp;lt;/i&amp;gt;',
-                '&amp;lt;i class=&quot;fa fa-angle-double-left fa-stack-1x fa-inverse&quot;&amp;gt;&amp;lt;/i&amp;gt;',
-            '&amp;lt;/span&amp;gt;',
-        '&amp;lt;/a&amp;gt;',
-    ]),
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can also customize templates for the &lt;code&gt;FormHelper&lt;/code&gt; and &lt;code&gt;HtmlHelper&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h3 id=&quot;custom-theme-elements&quot;&gt;Custom Theme Elements&lt;/h3&gt;
-
-&lt;p&gt;I’ve overriden what the post types will display as in my theme. If I hadn’t, we’d be using the default elements from the respective post type plugin. Here is what my &lt;code&gt;plugins/DefaultTheme/src/Template/Element/post_type/photo-index.ctp&lt;/code&gt; looks like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;h2&amp;gt;&amp;lt;?= $this-&amp;gt;Html-&amp;gt;link($post-&amp;gt;get('title'), $post-&amp;gt;get('url')) ?&amp;gt;&amp;lt;/h2&amp;gt;
-&amp;lt;section class=&quot;post-meta&quot;&amp;gt;
-    &amp;lt;div class=&quot;post-date&quot;&amp;gt;&amp;lt;?= $this-&amp;gt;Time-&amp;gt;nice($post-&amp;gt;get('published_date')) ?&amp;gt;&amp;lt;/div&amp;gt;
-&amp;lt;/section&amp;gt;
-&amp;lt;section class=&quot;post-excerpt&quot; itemprop=&quot;description&quot;&amp;gt;
-    &amp;lt;?= $this-&amp;gt;Html-&amp;gt;image('../' . $post-&amp;gt;get('photo_path')) ?&amp;gt;
-&amp;lt;/section&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that my image link works as normal, and displays the original post image as desired.&lt;/p&gt;
-
-&lt;h3 id=&quot;theme-links&quot;&gt;Theme Links&lt;/h3&gt;
-
-&lt;p&gt;One thing I’m doing in my theme is linking to custom pages, such as &lt;code&gt;/about&lt;/code&gt;, and also using the post urls as links. These aren’t currently routed by the CMS, so we’ll want to handle that next.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.15&quot;&gt;0.0.15&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;The frontend of our site is in decent shape, though now we have some routing work to do. None of our custom post types have their own user-reachable urls, so in our next post, we’ll update the CakePHP routing to understand our routing schema.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 15 Dec 2016 03:20:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/15/theming-our-cms/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/15/theming-our-cms/</guid>
-        
-        <category>themes</category>
-        
-        <category>views</category>
         
         <category>cakeadvent-2016</category>
         

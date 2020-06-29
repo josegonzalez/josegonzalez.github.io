@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Generating an offline PyPI cache",
+    "url": "/2020/06/29/generating-an-offline-pypi-cache/",
+    "description": "",
+    "tokens": ["cache","generating","offline","pypi"]
+  },
+  {
+    "type": "post",
     "title": "Deploying our application",
     "url": "/2016/12/24/deploying-our-application/",
     "description": "Part 24 of a series of posts that will help you build out a personal CMS",
