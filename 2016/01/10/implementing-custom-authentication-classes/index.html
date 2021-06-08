@@ -73,7 +73,7 @@
   <li><code>Authenticate</code> classes are used by CakePHP to denote whether or not a user is logged into your application</li>
   <li><code>Authorize</code> classes are used by CakePHP to see whether an authenticated user has access to a particular controller/action pair.</li>
 </ul>
-<p>Since I am using information set by the webserver in the headers to identify the user, I will call it <code>HeaderAuthenticate</code> and have it extend <code>BasicAuthenticate</code> <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote">1</a></sup>. Here is the class skeleton:</p>
+<p>Since I am using information set by the webserver in the headers to identify the user, I will call it <code>HeaderAuthenticate</code> and have it extend <code>BasicAuthenticate</code> <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>. Here is the class skeleton:</p>
 <pre><code class="language-php">&lt;?php
 namespace App\Auth;
 use Cake\Auth\BasicAuthenticate;
