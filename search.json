@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "rotating-aws-credentials",
+    "url": "/2022/04/24/rotating-aws-credentials/",
+    "description": "",
+    "tokens": ["aws","credentials","rotating"]
+  },
+  {
+    "type": "post",
     "title": "Generating an offline PyPI cache",
     "url": "/2020/06/29/generating-an-offline-pypi-cache/",
     "description": "",
@@ -1666,15 +1673,9 @@
   },
   {
     "type": "tag",
-    "title": "entity",
-    "url": "/tags/entity/",
-    "tokens": ["entity"]
-  },
-  {
-    "type": "tag",
-    "title": "upload",
-    "url": "/tags/upload/",
-    "tokens": ["upload"]
+    "title": "uploads",
+    "url": "/tags/uploads/",
+    "tokens": ["uploads"]
   },
   {
     "type": "tag",
@@ -1885,12 +1886,6 @@
     "title": "viewblocks",
     "url": "/tags/viewblocks/",
     "tokens": ["viewblocks"]
-  },
-  {
-    "type": "tag",
-    "title": "uploads",
-    "url": "/tags/uploads/",
-    "tokens": ["uploads"]
   },
   {
     "type": "tag",

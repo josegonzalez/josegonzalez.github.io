@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2022-04-24T20:04:03+00:00</updated>
+ <updated>2022-04-24T20:21:13+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[rotating-aws-credentials]]></title>
+   <link href="http://josediazgonzalez.com/2022/04/24/rotating-aws-credentials/"/>
+   <updated>2022-04-24T16:04:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2022/04/24/rotating-aws-credentials/</id>
+   <content type="html"><![CDATA[]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Generating an offline PyPI cache]]></title>

@@ -5,9 +5,42 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 24 Apr 2022 20:04:03 +0000</pubDate>
-    <lastBuildDate>Sun, 24 Apr 2022 20:04:03 +0000</lastBuildDate>
+    <pubDate>Sun, 24 Apr 2022 20:21:13 +0000</pubDate>
+    <lastBuildDate>Sun, 24 Apr 2022 20:21:13 +0000</lastBuildDate>
     <generator>Jekyll v4.2.2</generator>
+    
+      <item>
+        <title>rotating-aws-credentials</title>
+        <description>&lt;p&gt;I recently picked up managing my infrastructure again and found that I had… ancient AWS credentials for my personal AWS account. While I did want to write a new tool for this, I found &lt;a href=&quot;https://github.com/stefansundin/aws-rotate-key&quot;&gt;stefansundin/aws-rotate-key&lt;/a&gt; which appears to handle this quite well.&lt;/p&gt;
+
+&lt;p&gt;Installing was easy (on a mac):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;brew install aws-rotate-key
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After which I was able to rotate my key:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;aws-rotate-key --profile my-aws-personal
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The nice thing here is that it allowed me to specify a profile and also prompted me before deleting any keys.&lt;/p&gt;
+
+&lt;p&gt;AWS has a &lt;a href=&quot;https://aws.amazon.com/blogs/security/how-to-rotate-access-keys-for-iam-users/&quot;&gt;blog post&lt;/a&gt; on how to do this with the aws-cli, but honestly I’m not very enthused about the idea of manually running a ton of commands, so I think I’ll continue with the &lt;code&gt;aws-rotate-key&lt;/code&gt; method for now.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 24 Apr 2022 16:04:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2022/04/24/rotating-aws-credentials/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2022/04/24/rotating-aws-credentials/</guid>
+        
+        <category>aws</category>
+        
+        <category>cli</category>
+        
+        <category>os-x</category>
+        
+        
+        <category>installation</category>
+        
+      </item>
     
       <item>
         <title>Generating an offline PyPI cache</title>
@@ -2051,264 +2084,6 @@ git commit -m &quot;Implement custom routing for blog posts&quot;
         <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/</guid>
         
         <category>routing</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Ensuring Posts properly handle custom urls</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;validating-custom-urls&quot;&gt;Validating custom urls&lt;/h2&gt;
-
-&lt;p&gt;Each one of our posts can be assigned a url. Previously, this could be any non-empty string. Let’s put in some ground rules:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;It should be unique in our database.&lt;/li&gt;
-  &lt;li&gt;The url will be automatically generated from the &lt;code&gt;title&lt;/code&gt; field if not otherwise specified&lt;/li&gt;
-  &lt;li&gt;It should start with a forward slash.&lt;/li&gt;
-  &lt;li&gt;It should not end with a forward slash.&lt;/li&gt;
-  &lt;li&gt;All special characters should be replaced with dashes.&lt;/li&gt;
-  &lt;li&gt;It must be lowercase.&lt;/li&gt;
-  &lt;li&gt;It cannot be within a specific set of whitelisted urls.&lt;/li&gt;
-  &lt;li&gt;It cannot be prefixed with a specific set of strings.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Lets start with the first item:&lt;/p&gt;
-
-&lt;h3 id=&quot;application-rules&quot;&gt;Application Rules&lt;/h3&gt;
-
-&lt;p&gt;Application Rules differ from Validation rules. Validation rules should be stateless - that is, they are not affected by datastore lookups or similar. You can use them to check types or values. Application Rules &lt;em&gt;are&lt;/em&gt; stateful, and are typically used for stuff like “this field must be unique” or “the state change of this field is invalid”. We’re going to use the former and modify our &lt;code&gt;PostsTable::buildRules()&lt;/code&gt; method to be the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Returns a rules checker object that will be used for validating
- * application integrity.
- *
- * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
- * @return \Cake\ORM\RulesChecker
- */
-public function buildRules(RulesChecker $rules)
-{
-    $rules-&amp;gt;add($rules-&amp;gt;existsIn([&apos;user_id&apos;], &apos;Users&apos;));
-    $rules-&amp;gt;add($rules-&amp;gt;isUnique([&apos;url&apos;]));
-
-    return $rules;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’ll commit here:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Table/PostsTable.php
-git commit -m &quot;Force the url field to be unique&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;auto-generating-urls&quot;&gt;Auto-generating urls&lt;/h3&gt;
-
-&lt;p&gt;First, we’ll need to allow fields to be “empty” in the form. Remove the following from &lt;code&gt;AbstractPostType::_buildValidator()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;notEmpty(&apos;url&apos;, &apos;Please fill this field&apos;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, lets generate the url when empty! I’ve added the following class to our use statements at the top of my &lt;code&gt;AbstractPostType&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use Cake\Utility\Hash;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Right after we call &lt;code&gt;AbstractPostType::transformData()&lt;/code&gt; inside of &lt;code&gt;AbstractPostType::_execute()&lt;/code&gt;, I call the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$data[&apos;url&apos;] = $this-&amp;gt;ensureUrl($data);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here is the body of &lt;code&gt;AbstractPostType::ensureUrl()&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;protected function ensureUrl(array $data)
-{
-    $url = trim(Hash::get($data, &apos;url&apos;, &apos;&apos;), &apos;/&apos;);
-    if (strlen($url) !== 0) {
-        return $url;
-    }
-
-    return Hash::get($data, &apos;title&apos;, &apos;&apos;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We leave the url alone if the user has specified one, and otherwise return the contents of the &lt;code&gt;title&lt;/code&gt; field.&lt;/p&gt;
-
-&lt;p&gt;Finally, we can strip values from the url by adding a &lt;code&gt;_setUrl()&lt;/code&gt; method to our Post entity. This ensures that it is properly massaged whenever that value is set, without requiring extra work at other layers. I’ve created a &lt;code&gt;UrlSettingTrait&lt;/code&gt; in &lt;code&gt;src/Model/Entity/Traits/UrlSettingTrait.php&lt;/code&gt; that contains the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Model\Entity\Traits;
-
-use Cake\Utility\Text;
-
-trait UrlSettingTrait
-{
-    /**
-     * Trims slashes and prepends the url with a slash
-     * If the input is invalid - such as an empty string - the url will become null.
-     *
-     * @param string $url The url that is to be set
-     * @return string
-     */
-    public function _setUrl($url)
-    {
-        if (strlen($url) === 0) {
-            return &apos;&apos;;
-        }
-
-        $url = Text::slug($url, [
-            &apos;lowercase&apos; =&amp;gt; true,
-            &apos;replacement&apos; =&amp;gt; &apos;-&apos;,
-        ]);
-        $url = &apos;/&apos; . trim($url, &apos;/&apos;);
-        if ($url === &apos;/&apos;) {
-            $url = null;
-        }
-
-        return $url;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You’ll need to &lt;code&gt;use&lt;/code&gt; this class within your &lt;code&gt;Post&lt;/code&gt; entity as well.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;use \App\Model\Entity\Traits\UrlSettingTrait;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’ll save our progress now:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Entity/Post.php src/Model/Entity/Traits/UrlSettingTrait.php src/PostType/AbstractPostType.php
-git commit -m &quot;Automatically generate urls from the title field&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;validating-the-url-field&quot;&gt;Validating the &lt;code&gt;url&lt;/code&gt; field&lt;/h3&gt;
-
-&lt;p&gt;We’ll want to ensure we don’t set invalid urls. For instance, shadowing an existing route would potentially break stuff like the admin or similar. In our next post, I’ll cover how to use admin routing for our dashboard, as well as custom routes for all other pages, but just assuming that the following urls are to be whitelisted:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;/&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;/about&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;/home&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;/contact&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;/login&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;/logout&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;/forgot-password&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I’ll add the following to my &lt;code&gt;PostsTable::validationDefault()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add(&apos;url&apos;, &apos;notInList&apos;, [
-    &apos;rule&apos; =&amp;gt; function ($value, $context) {
-        $list = [&apos;/&apos;, &apos;/about&apos;, &apos;/home&apos;, &apos;/contact&apos;, &apos;/login&apos;, &apos;/logout&apos;, &apos;/forgot-password&apos;];
-        $list = array_map(&apos;strval&apos;, $list);
-        return !in_array((string)$value, $list, true);
-    },
-    &apos;message&apos; =&amp;gt; &apos;Reserved urls cannot be specified&apos;,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;We may want to expand this list later, but for now this seems adequate.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We have to use a custom rule here because the built-in CakePHP rules cannot be negated, otherwise we would use `inList.&lt;/p&gt;
-
-&lt;p&gt;Urls must also not be prefixed with any of the following:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;/admin&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;/reset-password&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;/verify&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We’ll use another custom validation rule for this.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$validator-&amp;gt;add(&apos;url&apos;, &apos;withoutPrefix&apos;, [
-    &apos;rule&apos; =&amp;gt; function ($value, $context) {
-        if (preg_match(&quot;/^\/(admin|reset-password|verify)/&quot;, $value)) {
-            return false;
-        }
-        if (preg_match(&quot;/^(admin|reset-password|verify)/&quot;, $value)) {
-            return false;
-        }
-        return true;
-    },
-    &apos;message&apos; =&amp;gt; &apos;Urls cannot start with &quot;/admin&quot;, &quot;/reset-password&quot;, or &quot;/verify&quot;&apos;,
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’ve used two regex matches because urls can be set with a starting forward slash or not, and the &lt;code&gt;Post&lt;/code&gt; entity setter will ensure they start with one. Allowing both makes it easier for users to reason about what the url will look like, as we’ll handle it correctly on our end.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Validation rules can contain inline functions, which are useful in a pinch but also more difficult to test&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Remember to save your work.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Model/Table/PostsTable.php
-git commit -m &quot;Properly validate a submitted url&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;persisting-error-messages&quot;&gt;Persisting error messages&lt;/h3&gt;
-
-&lt;p&gt;One thing you might notice when saving a post is that the validation errors from the &lt;code&gt;PostsTable&lt;/code&gt; are not shown. This is because we are overwriting the template’s entity in our &lt;code&gt;PostsListener::_setPostType()&lt;/code&gt; method. I’ve added the following right before I update the template entity in that method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$postType-&amp;gt;mergeErrors($event-&amp;gt;subject-&amp;gt;entity-&amp;gt;errors());
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here is the code for &lt;code&gt;AbstractPostType::mergeErrors()&lt;/code&gt;. We want to ensure any existing errors from other places are properly persisted, so we need to merge our post errors &lt;em&gt;onto&lt;/em&gt; the post type:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;public function mergeErrors(array $errors)
-{
-    foreach ($errors as $field =&amp;gt; $err) {
-        if (!isset($this-&amp;gt;_errors[$field])) {
-            $this-&amp;gt;_errors[$field] = $err;
-            continue;
-        }
-        foreach ($err as $name =&amp;gt; $message) {
-            $this-&amp;gt;_errors[$field][$name] = $message;
-        }
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;This code is not unit tested, and error handling is a place where you may want to dive into unit testing to ensure you get it right. We may end up revisiting this implementation at a later date.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;If you try out the form now, you’ll see that we now have all the errors from our Post instance validation. I’ll save my work for now:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add src/Listener/PostsListener.php src/PostType/AbstractPostType.php
-git commit -m &quot;Persist validation errors when saving forms&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.16&quot;&gt;0.0.16&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;We have now placed some mitigations in place for ensuring our users do not set invalid urls. We can now look into the routing layer portion of this, which will make the user-facing portion of our site much more usable.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 16 Dec 2016 04:16:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/16/ensuring-blog-posts-properly-handle-custom-urls/</guid>
-        
-        <category>application-rules</category>
-        
-        <category>validation</category>
         
         <category>cakeadvent-2016</category>
         
