@@ -4,7 +4,7 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2022-04-24T20:21:13+00:00</updated>
+ <updated>2022-04-24T20:23:35+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
@@ -13,11 +13,11 @@
 
 
  <entry>
-   <title type="html"><![CDATA[rotating-aws-credentials]]></title>
+   <title type="html"><![CDATA[Rotating AWS Credentials]]></title>
    <link href="http://josediazgonzalez.com/2022/04/24/rotating-aws-credentials/"/>
    <updated>2022-04-24T16:04:00+00:00</updated>
    <id>http://josediazgonzalez.com/2022/04/24/rotating-aws-credentials/</id>
-   <content type="html"><![CDATA[]]></content>
+   <content type="html"><![CDATA[Keeping your credentials fresh for general infra hygiene]]></content>
  </entry>
 
  <entry>

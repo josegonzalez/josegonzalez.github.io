@@ -5,12 +5,12 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 24 Apr 2022 20:21:13 +0000</pubDate>
-    <lastBuildDate>Sun, 24 Apr 2022 20:21:13 +0000</lastBuildDate>
+    <pubDate>Sun, 24 Apr 2022 20:23:35 +0000</pubDate>
+    <lastBuildDate>Sun, 24 Apr 2022 20:23:35 +0000</lastBuildDate>
     <generator>Jekyll v4.2.2</generator>
     
       <item>
-        <title>rotating-aws-credentials</title>
+        <title>Rotating AWS Credentials</title>
         <description>&lt;p&gt;I recently picked up managing my infrastructure again and found that I had… ancient AWS credentials for my personal AWS account. While I did want to write a new tool for this, I found &lt;a href=&quot;https://github.com/stefansundin/aws-rotate-key&quot;&gt;stefansundin/aws-rotate-key&lt;/a&gt; which appears to handle this quite well.&lt;/p&gt;
 
 &lt;p&gt;Installing was easy (on a mac):&lt;/p&gt;

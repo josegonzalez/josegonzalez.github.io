@@ -1,10 +1,10 @@
 [
   {
     "type": "post",
-    "title": "rotating-aws-credentials",
+    "title": "Rotating AWS Credentials",
     "url": "/2022/04/24/rotating-aws-credentials/",
-    "description": "",
-    "tokens": ["aws","credentials","rotating"]
+    "description": "Keeping your credentials fresh for general infra hygiene",
+    "tokens": ["aws","credentials","fresh","general","hygiene","infra","keeping","rotating"]
   },
   {
     "type": "post",
