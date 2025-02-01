@@ -44,7 +44,7 @@
               <article class="post">
         <h2>Debugging Data in CakePHP 3</h2>
     <div class="post-content">
-        <p>Since upgrading to CakePHP 3, you may have noticed a few changes. Yes, it’s faster, better for your cholesterol, and likely good for your Vitamin D intake <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>. However, what I’m referring to is the nicer debugging output.</p>
+        <p>Since upgrading to CakePHP 3, you may have noticed a few changes. Yes, it’s faster, better for your cholesterol, and likely good for your Vitamin D intake <sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>. However, what I’m referring to is the nicer debugging output.</p>
 <p>Typically when you debug an object in PHP, you use something like <code>print_r()</code> or <code>var_dump()</code>. With scalar types - <code>int</code>, <code>float</code>, <code>string</code> and <code>bool</code> - you’ll get a pretty simple representation:</p>
 <pre><code class="language-php">php &gt; $i = 1;
 php &gt; var_dump($i);
@@ -100,14 +100,14 @@ object Person#1 (1) {
   <li><code>Cell</code> objects will output the environment in which they were created (view layer as well as the current request/response objects).</li>
   <li><code>Entities</code> will output a plethora of data regarding the current state of the entity. Useful for seeing if the entity is new or has been changed.</li>
 </ul>
-<p>You’re also quite welcome to add your own <code>__debugInfo()</code> methods to custom classes. For those of you who are curious, I definitely recommend looking at the list of <a href="https://secure.php.net/manual/en/language.oop5.magic.php">PHP Magic Methods</a>, which might just be handy <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> in a pinch!</p>
+<p>You’re also quite welcome to add your own <code>__debugInfo()</code> methods to custom classes. For those of you who are curious, I definitely recommend looking at the list of <a href="https://secure.php.net/manual/en/language.oop5.magic.php">PHP Magic Methods</a>, which might just be handy <sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup> in a pinch!</p>
 <hr />
 <div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1" role="doc-endnote">
+    <li id="fn:1">
       <p>If you work less because you are working smarter, you are more likely to go outside and get some Sun. Remember to do that every so often! <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
-    <li id="fn:2" role="doc-endnote">
+    <li id="fn:2">
       <p>My current favorite magic method is the <code>__invoke()</code> method :) <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
