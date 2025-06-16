@@ -5,9 +5,238 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 08 Jun 2025 03:06:16 +0000</pubDate>
-    <lastBuildDate>Sun, 08 Jun 2025 03:06:16 +0000</lastBuildDate>
+    <pubDate>Mon, 16 Jun 2025 05:36:10 +0000</pubDate>
+    <lastBuildDate>Mon, 16 Jun 2025 05:36:10 +0000</lastBuildDate>
     <generator>Jekyll v4.4.1</generator>
+    
+      <item>
+        <title>Writing a Pak for the MinUI and NextUI launchers</title>
+        <description>&lt;p&gt;This post is a collection of notes on how to create Paks for the MinUI libretro frontend and it’s forks, such as NextUI. Some of this material may be useful for other platforms, such as OnionOS. I’ll be adding to this document from time to time.&lt;/p&gt;
+
+&lt;h2 id=&quot;some-background&quot;&gt;Some background&lt;/h2&gt;
+
+&lt;p&gt;MinUI is a custom launcher for a variety of handhelds - notably the Anbernic RGNNXX, Trimui, and Miyoo devices, amongst others. It provides a simple interface for launching emulators via &lt;a href=&quot;https://www.libretro.com/&quot;&gt;libretro&lt;/a&gt; cores, allowing for resuse of existing emulators with a (very) sparing interface. Support for various cores depends on the device, but generally speaking MinUI does not support any OpenGL cores, meaning emulators for more modern consoles such as N64, Dreamcast, or Nintendo DS often need to use standalone “paks” that do not integrate as well with MinUI.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note: MinUI has a variety of forks - MyMinUI, FinUI, Corak’s MinUI, and NextUI - which all support the same general emulation functionality, though may add extra features on top such as other devices, button shortcuts, or enhanced emulation support. This post won’t go into the vagaries of each project as that isn’t super important for the topic.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A “pak” is a collection of files in a folder in a specific path on the SD Card which contains a MinUI installation. Paks are nominally device-specific in that the path where they are placed on the SD Card is a hint to MinUI to tell it whether the pak is loadable or not. Paks come in two varieties:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;Emus&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Emu paks are either standalone emulators or wrappers for libretro cores
+        &lt;ul&gt;
+          &lt;li&gt;Standalone: A standalone emulator is &lt;em&gt;generally&lt;/em&gt; a compiled binary for a particular platform and contains everything needed to launch the emulator. These generally do not integrate well with MinUI functionality (such as sleep, save states, etc.) but maintainers may be able to wrap the standalone emulator in such a way as to support some of the built-in MinUI functionality.&lt;/li&gt;
+          &lt;li&gt;Libretro wrappers: All emulators distributed with MinUI are wrappers for libretro cores, and are generally compiled for the device in question using a compatible SDK. Developers may also opt to use a libretro core in a custom emu, though this is usually only done in cases where a developer is not familiar with compiling the core and wishes to use a pre-compiled binary from a Retroarch installation for that device.&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;Community emu paks are stored at &lt;code&gt;/Emus/$PLATFORM/$EMU.pak&lt;/code&gt;, where &lt;code&gt;$PLATFORM&lt;/code&gt; is the device platform (such as &lt;code&gt;tg5040&lt;/code&gt; for the Trimui Brick and TSP) and &lt;code&gt;$EMU&lt;/code&gt; is the short name for the emu (such as &lt;code&gt;N64&lt;/code&gt;).&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;Tools&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Tools are extra utilities that can be launched on a MinUI installation. These can be as mundane as a button testing tool or something more complex, like an artwork scraper.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;A pak &lt;em&gt;always&lt;/em&gt; has a &lt;code&gt;launch.sh&lt;/code&gt; file, which can be either an executable script or a compiled binary. If it is a compiled binary, developers will need to use a toolchain that supports the particular device in order to ensure the compiled binary supports the particular SDK for that device (such as certain sdl versions). The compiled binary can also be &lt;em&gt;launched by&lt;/em&gt; the &lt;code&gt;launch.sh&lt;/code&gt;, which is most common. Due to the need for an SDK and understanding of more complex programming languages, this is generally not the path folks take to write paks.&lt;/p&gt;
+
+&lt;p&gt;The alternative to a compiled binary is to use a shell script for your &lt;code&gt;launch.sh&lt;/code&gt; file. While common shell scripting uses &lt;code&gt;bash&lt;/code&gt; for the execution environment, many devices do not have bash available, and thus it is recommended that users utilize regular &lt;code&gt;sh&lt;/code&gt; for their scripts.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For a shell scripting tutorial, see &lt;a href=&quot;https://www.shellscript.sh/&quot;&gt;this site&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;pak-scaffolding&quot;&gt;Pak scaffolding&lt;/h2&gt;
+
+&lt;p&gt;A &lt;code&gt;launch.sh&lt;/code&gt; shell script starts with the following shebang:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;#!/bin/sh
+
+echo &quot;logic goes here&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I usually start mine with the following (comments are inline to make it easier to understand):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;#!/bin/sh
+# get the pak directory and name
+PAK_DIR=&quot;$(dirname &quot;$0&quot;)&quot;
+PAK_NAME=&quot;$(basename &quot;$PAK_DIR&quot;)&quot;
+PAK_NAME=&quot;${PAK_NAME%.*}&quot;
+# turn on debugging so that I know what my script is executing
+set -x
+
+# optional, but remove the existing log file for the pak
+rm -f &quot;$LOGS_PATH/$PAK_NAME.txt&quot;
+# redirect stdout to the log directory, /.userdata/$PLATFORM/logs/$PAK_NAME.txt folder on your SD card.
+exec &amp;gt;&amp;gt;&quot;$LOGS_PATH/$PAK_NAME.txt&quot;
+# also redirect stderr to the same file
+exec 2&amp;gt;&amp;amp;1
+
+# write the current pak execution to the logs
+echo &quot;$0&quot; &quot;$*&quot;
+# change directories to my pak or error out if not possible
+# if it errors out, something is deeply wrong
+cd &quot;$PAK_DIR&quot; || exit 1
+
+# for paks that support arm and arm64, get the current path
+architecture=arm
+if uname -m | grep -q &apos;64&apos;; then
+    architecture=arm64
+fi
+
+# set the HOME directory to the shared path folder
+# /.userdata/$PLATFORM/$PAK_NAME
+export HOME=&quot;$SHARED_USERDATA_PATH/$PAK_NAME&quot;
+
+# add $PAK_DIR/bin/$PLATFORM, $PAK_DIR/bin/$architecture, and $PAK_DIR/bin/shared directories to the PATH
+# this lets us override binaries on a per-platform or per-architecture basis
+# as well as have shared binaries that span all platforms and architectures
+export PATH=&quot;$PAK_DIR/bin/$PLATFORM:$PAK_DIR/bin/$architecture:$PAK_DIR/bin/shared:$PATH&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Many of these devices run some form of Busybox, and thus the available utilities is pretty lacking. You &lt;em&gt;may&lt;/em&gt; have access to Python, but often you’ll need to distribute other binaries with your pak. I place them in the appropriate path (platform/architecture specific or shared) and ensure they are executable via &lt;code&gt;chmod +x&lt;/code&gt; on the terminal.&lt;/p&gt;
+
+&lt;p&gt;For any persistent data, I place it in the &lt;code&gt;$HOME&lt;/code&gt; directory (as specified above) so that pak updates do not wipe out the data. This includes settings, which I can read and write in my pak like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# write a value to our key, usually as a default
+write_setting() {
+  key=&quot;$1&quot;
+  value=&quot;$2&quot;
+  echo &quot;$value&quot; &amp;gt; &quot;$HOME/$key&quot;
+}
+
+# read a setting out for later usage
+# also add support for a default value
+read_setting() {
+  key=&quot;$1&quot;
+  default_value=&quot;$2&quot;
+
+  if [ -f &quot;$HOME/$key&quot; ]; then
+    cat &quot;$HOME/$key&quot;
+    return
+  fi
+
+  if [ -n &quot;$default_value&quot; ]; then
+    echo &quot;$default_value&quot;
+  fi
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since you are writing shell code, you’ll probably want a way to either display a message, get input from a keyboard, or show a list of items on the screen. More complex packages will sometimes implement this in a single binary, but the following projects exist for interacting with &lt;em&gt;most&lt;/em&gt; platforms supported by MinUI and it’s derivatives:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/josegonzalez/minui-btntest&quot;&gt;minui-btntest&lt;/a&gt;: Allows for listening for a specific button or button combination. This is useful for background processes that wait for gamepad shortcuts.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/josegonzalez/minui-keyboard&quot;&gt;minui-keyboard&lt;/a&gt;: Displays an onscreen keyboard, so that users may input data. Limited to the ASCII character set due to usage of the built-in font used by MinUI.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/josegonzalez/minui-list&quot;&gt;minui-list&lt;/a&gt;: Displays a scrollable list of items on screen, with support for displaying and interacting with the items in various ways.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/josegonzalez/minui-presenter&quot;&gt;minui-presenter&lt;/a&gt;: Displays a message on the screen, and can also be used in a slideshow-like manner, amongst other features.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Generally speaking, you could use the above projects to support a workflow like:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Allowing someone to enable/disable background software&lt;/li&gt;
+  &lt;li&gt;Displaying the current state of the background software&lt;/li&gt;
+  &lt;li&gt;Showing error messages if the software cannot be launched&lt;/li&gt;
+  &lt;li&gt;Showing some input for password collection&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The majority of existing community paks use shell scripting and the above binaries to provide their functionality, though users may use other projects as well.&lt;/p&gt;
+
+&lt;h2 id=&quot;starting-services-on-minui-boot&quot;&gt;Starting services on MinUI boot&lt;/h2&gt;
+
+&lt;p&gt;MinUI supports running a shared &lt;code&gt;auto.sh&lt;/code&gt; file on MinUI start, and that can be abused to provide &lt;code&gt;init&lt;/code&gt;-like behavior for starting services on device boot.&lt;/p&gt;
+
+&lt;p&gt;The following is a pattern I use to start/stop services on boot. I use the following helper functions in my &lt;code&gt;launch.sh&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;# removes the `bin/shared/on-boot` script from auto.sh
+disable_start_on_boot() {
+    sed -i &quot;/${PAK_NAME}.pak-on-boot/d&quot; &quot;$SDCARD_PATH/.userdata/$PLATFORM/auto.sh&quot;
+    sync
+    return 0
+}
+
+# enables running the `bin/shared/on-boot` script on boot
+enable_start_on_boot() {
+    if [ ! -f &quot;$SDCARD_PATH/.userdata/$PLATFORM/auto.sh&quot; ]; then
+        echo &apos;#!/bin/sh&apos; &amp;gt;&quot;$SDCARD_PATH/.userdata/$PLATFORM/auto.sh&quot;
+        echo &apos;&apos; &amp;gt;&amp;gt;&quot;$SDCARD_PATH/.userdata/$PLATFORM/auto.sh&quot;
+    fi
+
+    echo &quot;test -f \&quot;\$SDCARD_PATH/Tools/\$PLATFORM/$PAK_NAME.pak/bin/shared/on-boot\&quot; &amp;amp;&amp;amp; \&quot;\$SDCARD_PATH/Tools/\$PLATFORM/$PAK_NAME.pak/bin/shared/on-boot\&quot; # ${PAK_NAME}.pak-on-boot&quot; &amp;gt;&amp;gt;&quot;$SDCARD_PATH/.userdata/$PLATFORM/auto.sh&quot;
+    chmod +x &quot;$SDCARD_PATH/.userdata/$PLATFORM/auto.sh&quot;
+    sync
+    return 0
+}
+
+# check if the service is going to run on boot
+# useful for displaying status in the ui
+will_start_on_boot() {
+    if grep -q &quot;${PAK_NAME}.pak-on-boot&quot; &quot;$SDCARD_PATH/.userdata/$PLATFORM/auto.sh&quot; &amp;gt;/dev/null 2&amp;gt;&amp;amp;1; then
+        return 0
+    fi
+    return 1
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’ll then typically create a &lt;code&gt;bin/shared/on-boot&lt;/code&gt; file in my pak with the following contents:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;#!/bin/sh
+# some general scaffolding to ensure variables are properly set
+BIN_DIR=&quot;$(dirname &quot;$0&quot;)&quot;
+# get the pak directory and name
+PAK_DIR=&quot;$(dirname &quot;$0&quot;)&quot;
+PAK_NAME=&quot;$(basename &quot;$PAK_DIR&quot;)&quot;
+PAK_NAME=&quot;${PAK_NAME%.*}&quot;
+# turn on debugging so that I know what my script is executing
+set -x
+
+# optional, but remove the existing log file for the pak
+rm -f &quot;$LOGS_PATH/$PAK_NAME.txt&quot;
+# redirect stdout to the log directory, /.userdata/$PLATFORM/logs/$PAK_NAME.txt folder on your SD card.
+exec &amp;gt;&amp;gt;&quot;$LOGS_PATH/$PAK_NAME.txt&quot;
+# also redirect stderr to the same file
+exec 2&amp;gt;&amp;amp;1
+
+# write the current pak execution to the logs
+echo &quot;$0&quot; &quot;$*&quot;
+# change directories to my pak or error out if not possible
+# if it errors out, something is deeply wrong
+cd &quot;$PAK_DIR&quot; || exit 1
+
+# the main script
+main() {
+  # run my bin/shared/service-on script in the background
+  &quot;$BIN_DIR/shared/service-on&quot; &amp;amp;
+}
+
+main &quot;$@&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The important part is the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;&quot;$BIN_DIR/shared/service-on&quot; &amp;amp;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This executes my &lt;code&gt;bin/shared/service-on&lt;/code&gt; script in the background - the &lt;code&gt;&amp;amp;&lt;/code&gt; is used by shell to fork the process into the background and continue on. We do this so as to not potentially block MinUI from starting.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 16 Jun 2025 00:46:00 +0000</pubDate>
+        <link>http://josediazgonzalez.com/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/</link>
+        <guid isPermaLink="true">http://josediazgonzalez.com/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/</guid>
+        
+        <category>minui</category>
+        
+        <category>nextui</category>
+        
+        <category>paks</category>
+        
+        
+        <category>gaming</category>
+        
+      </item>
     
       <item>
         <title>Rotating AWS Credentials</title>
@@ -1880,210 +2109,6 @@ git commit -m &quot;Send emails via a background job&quot;
         <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/18/queuing-up-emails/</guid>
         
         <category>queuing</category>
-        
-        <category>cakeadvent-2016</category>
-        
-        <category>cakephp</category>
-        
-        
-        <category>cakephp</category>
-        
-      </item>
-    
-      <item>
-        <title>Routing Blog Posts to custom urls</title>
-        <description>&lt;p&gt;A friend of mine asked for a custom website, so here I am, writing a custom cms. I know, there are plenty of systems out there that would handle his needs, but it’s also a good excuse to play around with CakePHP 3, so here we are.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For the lazy, the codebase we’ll be working on will be available on &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016&quot;&gt;GitHub&lt;/a&gt;. I will be pushing each set of changes on the date when each blog post in this series is published. No cheating!&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;routing-built-in-urls&quot;&gt;Routing built-in urls&lt;/h2&gt;
-
-&lt;p&gt;One thing you may have noticed is that we haven’t really touched our routing files. Up till now, we’ve relied on the default CakePHP routes to handle where our requests are sent. Because we have allowed users to specify arbitrary urls, we’ll need to create custom routes to handle both our existing urls &lt;em&gt;as well as&lt;/em&gt; the custom routes we’ve specified for each post.&lt;/p&gt;
-
-&lt;p&gt;I’ve updated my &lt;code&gt;config/routes.php&lt;/code&gt; to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-use Cake\Core\Plugin;
-use Cake\Routing\RouteBuilder;
-use Cake\Routing\Router;
-use Cake\Routing\Route\DashedRoute;
-
-Router::defaultRouteClass(DashedRoute::class);
-
-Router::scope(&apos;/&apos;, function (RouteBuilder $routes) {
-    $routes-&amp;gt;connect(&apos;/&apos;, [&apos;controller&apos; =&amp;gt; &apos;Posts&apos;, &apos;action&apos; =&amp;gt; &apos;home&apos;]);
-    $routes-&amp;gt;connect(&apos;/login&apos;, [&apos;controller&apos; =&amp;gt; &apos;Users&apos;, &apos;action&apos; =&amp;gt; &apos;login&apos;]);
-    $routes-&amp;gt;connect(&apos;/logout&apos;, [&apos;controller&apos; =&amp;gt; &apos;Users&apos;, &apos;action&apos; =&amp;gt; &apos;logout&apos;]);
-    $routes-&amp;gt;connect(&apos;/forgot-password&apos;, [&apos;controller&apos; =&amp;gt; &apos;Users&apos;, &apos;action&apos; =&amp;gt; &apos;forgot-password&apos;]);
-    $routes-&amp;gt;connect(&apos;/reset-password/*&apos;, [&apos;controller&apos; =&amp;gt; &apos;Users&apos;, &apos;action&apos; =&amp;gt; &apos;forgot-password&apos;]);
-});
-
-Router::scope(&apos;/admin&apos;, function (RouteBuilder $routes) {
-    $routes-&amp;gt;scope(&apos;/posts&apos;, [&apos;controller&apos; =&amp;gt; &apos;Posts&apos;], function (RouteBuilder $routes) {
-        $routes-&amp;gt;connect(&apos;/&apos;, [&apos;action&apos; =&amp;gt; &apos;index&apos;]);
-        $routes-&amp;gt;fallbacks();
-    });
-    $routes-&amp;gt;connect(&apos;/profile&apos;, [&apos;controller&apos; =&amp;gt; &apos;Users&apos;, &apos;action&apos; =&amp;gt; &apos;edit&apos;]);
-});
-
-Plugin::routes();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A few notes:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;You can specify a “default route class”. This is used for inflecting urls correctly, and I’m using the CakePHP default of &lt;code&gt;DashedRoute&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;You can specify one or more route “scopes”, which are kinda like route prefixes. Routes specified within a scope have that scope prefixed onto any matching urls.&lt;/li&gt;
-  &lt;li&gt;Route scopes can have default values specified, as we do for anything in &lt;code&gt;/admin/posts&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;Route scopes can be embedded.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Now you can use the new url patterns for any of the existing pages.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/routes.php
-git commit -m &quot;Specify all hardcoded app routes&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;routing-custom-urls&quot;&gt;Routing Custom Urls&lt;/h2&gt;
-
-&lt;p&gt;This part is a bit more complex. We need to do the following:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Match a custom &lt;code&gt;/:url&lt;/code&gt; catch-all pattern &lt;em&gt;only&lt;/em&gt; when there is a matching url in the &lt;code&gt;posts&lt;/code&gt; table.&lt;/li&gt;
-  &lt;li&gt;Allow access to &lt;code&gt;PostsController::view()&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;Ensure the correct variables are set for the &lt;code&gt;PostsController::view()&lt;/code&gt; template layer.&lt;/li&gt;
-  &lt;li&gt;Add templates for &lt;code&gt;PostsController::view()&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;Set default views for the &lt;code&gt;PostsController::view()&lt;/code&gt; action.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We’ll do this piecemeal.&lt;/p&gt;
-
-&lt;h3 id=&quot;custom-route-classes&quot;&gt;Custom Route Classes&lt;/h3&gt;
-
-&lt;p&gt;In order to match our catch-all route, we’ll need a &lt;code&gt;PostRoute&lt;/code&gt;. Lets first connect the route in our &lt;code&gt;config/routes.php&lt;/code&gt; under the &lt;code&gt;/&lt;/code&gt; scope:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$routes-&amp;gt;connect(
-    &apos;/:url&apos;,
-    [&apos;controller&apos; =&amp;gt; &apos;Posts&apos;, &apos;action&apos; =&amp;gt; &apos;view&apos;],
-    [&apos;routeClass&apos; =&amp;gt; &apos;PostRoute&apos;]
-);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next, we’ll add the following to our &lt;code&gt;PostRoute&lt;/code&gt; class, located in &lt;code&gt;src/Routing/Route/PostRoute.php&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;?php
-namespace App\Routing\Route;
-
-use Cake\ORM\TableRegistry;
-use Cake\Routing\Route\Route;
-
-class PostRoute extends Route
-{
-    public function parse($url, $method = &apos;&apos;)
-    {
-        $params = parent::parse($url, $method);
-        if (empty($params)) {
-            return false;
-        }
-
-        $PostsTable = TableRegistry::get(&apos;Posts&apos;);
-        $post = $PostsTable-&amp;gt;find()-&amp;gt;where([&apos;url&apos; =&amp;gt; &apos;/&apos; . $params[&apos;url&apos;]])-&amp;gt;first();
-        if (empty($post)) {
-            return false;
-        }
-
-        $params[&apos;pass&apos;] = [$post-&amp;gt;id];
-        return $params;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will perform a lookup for all urls that do not match another route. If the url doesn’t exist in our table, we simply don’t parse that request. If it does, we set the post id as the first passed argument.&lt;/p&gt;
-
-&lt;p&gt;Next, we need to modify our &lt;code&gt;PostsController::initialize()&lt;/code&gt; method to allow access to the &lt;code&gt;PostsController::view()&lt;/code&gt; action:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;$this-&amp;gt;Auth-&amp;gt;allow([&apos;home&apos;, &apos;view&apos;]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that this is set, we can use the &lt;code&gt;Crud.beforeFind&lt;/code&gt; event to modify the finder to return related post data from the &lt;code&gt;post_attributes&lt;/code&gt; database table. Add the following to your &lt;code&gt;PostsListener::implementedEvents()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&apos;Crud.beforeFind&apos; =&amp;gt; &apos;beforeFind&apos;,
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here is the logic for the new &lt;code&gt;PostsListener::beforeFind()&lt;/code&gt; and friends:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;/**
- * Before Find
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeFind(Event $event)
-{
-    if ($this-&amp;gt;_request()-&amp;gt;action === &apos;view&apos;) {
-        $this-&amp;gt;beforeFindView($event);
-
-        return;
-    }
-}
-
-/**
- * Before Find View Action
- *
- * @param \Cake\Event\Event $event Event
- * @return void
- */
-public function beforeFindView(Event $event)
-{
-    $event-&amp;gt;subject-&amp;gt;query-&amp;gt;contain([&apos;PostAttributes&apos;]);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty straightforward. I also created a &lt;code&gt;src/Template/Posts/view.ctp&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;posts index large-12 medium-12 columns content&quot;&amp;gt;
-    &amp;lt;?php $postType = $post-&amp;gt;getPostType(); ?&amp;gt;
-    &amp;lt;?= $this-&amp;gt;element($postType-&amp;gt;viewTemplate(), [&apos;post&apos; =&amp;gt; $postType]); ?&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And one for the &lt;code&gt;DefaultTheme&lt;/code&gt; plugin in &lt;code&gt;plugins/DefaultTheme/src/Template/Posts/view.ctp&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-php&quot;&gt;&amp;lt;div class=&quot;wrapper&quot;&amp;gt;
-    &amp;lt;ul class=&quot;post-list&quot;&amp;gt;
-        &amp;lt;li&amp;gt;
-            &amp;lt;?php $postType = $post-&amp;gt;getPostType(); ?&amp;gt;
-            &amp;lt;?= $this-&amp;gt;element($postType-&amp;gt;viewTemplate(), [&apos;post&apos; =&amp;gt; $postType]); ?&amp;gt;
-        &amp;lt;/li&amp;gt;
-    &amp;lt;/ul&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you browse to the homepage of the CMS and click any of the URLs, you should now see content :)&lt;/p&gt;
-
-&lt;p&gt;Let’s stop here for today.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;git add config/routes.php plugins/DefaultTheme/src/Template/Posts/view.ctp src/Controller/PostsController.php src/Listener/PostsListener.php src/Routing/Route/PostRoute.php src/Template/Posts/view.ctp
-git commit -m &quot;Implement custom routing for blog posts&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For those that may just want to ensure their codebase matches what has been done so far, the codebase is available on GitHub and tagged as &lt;a href=&quot;https://github.com/josegonzalez/cakeadvent-2016/tree/0.0.17&quot;&gt;0.0.17&lt;/a&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Awh yis, our custom application routing layer is complete, and our blog is looking a bit sharper now. We still have a few more features to fill in, but for our next post, we’ll take a look optimizing email sends for password resets.&lt;/p&gt;
-
-&lt;p&gt;Be sure to follow along via twitter on &lt;a href=&quot;https://twitter.com/savant&quot;&gt;@savant&lt;/a&gt;. If you’d like to subscribe to this blog, you may follow the &lt;a href=&quot;/atom.xml&quot;&gt;rss feed here&lt;/a&gt;. Also, all posts in the series will be conveniently linked on the sidebar of every post in the 2016 CakeAdvent Calendar. Come back tomorrow for more delicious content.&lt;/p&gt;
-</description>
-        <pubDate>Sat, 17 Dec 2016 05:21:00 +0000</pubDate>
-        <link>http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/</link>
-        <guid isPermaLink="true">http://josediazgonzalez.com/2016/12/17/routing-blog-posts-to-custom-urls/</guid>
-        
-        <category>routing</category>
         
         <category>cakeadvent-2016</category>
         

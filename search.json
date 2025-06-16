@@ -1,6 +1,13 @@
 [
   {
     "type": "post",
+    "title": "Writing a Pak for the MinUI and NextUI launchers",
+    "url": "/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/",
+    "description": "",
+    "tokens": ["launchers","minui","nextui","pak","writing"]
+  },
+  {
+    "type": "post",
     "title": "Rotating AWS Credentials",
     "url": "/2022/04/24/rotating-aws-credentials/",
     "description": "Keeping your credentials fresh for general infra hygiene",
@@ -988,6 +995,12 @@
     "tokens": ["rant"]
   },
   {
+    "type": "category",
+    "title": "gaming",
+    "url": "/categories/gaming/",
+    "tokens": ["gaming"]
+  },
+  {
     "type": "tag",
     "title": "blog",
     "url": "/tags/blog/",
@@ -1922,6 +1935,24 @@
     "title": "orders",
     "url": "/tags/orders/",
     "tokens": ["orders"]
+  },
+  {
+    "type": "tag",
+    "title": "minui",
+    "url": "/tags/minui/",
+    "tokens": ["minui"]
+  },
+  {
+    "type": "tag",
+    "title": "nextui",
+    "url": "/tags/nextui/",
+    "tokens": ["nextui"]
+  },
+  {
+    "type": "tag",
+    "title": "paks",
+    "url": "/tags/paks/",
+    "tokens": ["paks"]
   },
   {
     "type": "null",

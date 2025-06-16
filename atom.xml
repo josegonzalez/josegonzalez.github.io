@@ -4,13 +4,21 @@
  <title><![CDATA[Jose Diaz-Gonzalez]]></title>
  <link href="http://josediazgonzalez.com/atom.xml" rel="self"/>
  <link href="http://josediazgonzalez.com/"/>
- <updated>2025-06-08T03:06:16+00:00</updated>
+ <updated>2025-06-16T05:36:10+00:00</updated>
  <id>http://josediazgonzalez.com/</id>
  <author>
    <name><![CDATA[Jose Diaz-Gonzalez]]></name>
    <email><![CDATA[support@savant.be]]></email>
  </author>
 
+
+ <entry>
+   <title type="html"><![CDATA[Writing a Pak for the MinUI and NextUI launchers]]></title>
+   <link href="http://josediazgonzalez.com/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/"/>
+   <updated>2025-06-16T00:46:00+00:00</updated>
+   <id>http://josediazgonzalez.com/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/</id>
+   <content type="html"><![CDATA[]]></content>
+ </entry>
 
  <entry>
    <title type="html"><![CDATA[Rotating AWS Credentials]]></title>

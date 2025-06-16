@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Writing a Pak for the MinUI and NextUI launchers</title>
+    <link rel="canonical" href="http://josediazgonzalez.com/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <meta name="robots" content="all" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="version" content="1.0" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="minui, nextui, paks" />
+    <meta property="fb:app_id" content="775202682501320" />
+    <meta property="og:title" content="Writing a Pak for the MinUI and NextUI launchers" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://josediazgonzalez.com/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/" />
+    <meta property="og:description" content="" />
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@savant">
+    <meta name="twitter:creator" content="@savant">
+    <meta name="twitter:title" content="Writing a Pak for the MinUI and NextUI launchers" />
+    <meta name="twitter:description" content="" />
+    <link rel="alternate" type="application/rss+xml" title="Writing a Pak for the MinUI and NextUI launchers » Feed" href="/atom.xml">
+    <link rel="stylesheet" href="/css/base.min.css" type="text/css" media="all">
+    <link rel="stylesheet" href="/css/milligram-style.css" type="text/css" media="all">
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-8668344-3']);
+            _gaq.push(['_trackPageview']);
+        </script>
+</head>
+  <body class="home  ">
+    <div class="container">
+      <header class="site-header">
+        <h1>
+            <a href="/" title="Jose Diaz-Gonzalez" rel="home">Jose Diaz-Gonzalez</a>
+        </h1>
+        <h5 class="no-print"><a href="/about/" title="About me">CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</a></h5>
+      </header>
+          <div class="row">
+            <div class="column column-80">
+              <article class="post">
+        <h2>Writing a Pak for the MinUI and NextUI launchers</h2>
+    <div class="post-content">
+        <p>This post is a collection of notes on how to create Paks for the MinUI libretro frontend and it’s forks, such as NextUI. Some of this material may be useful for other platforms, such as OnionOS. I’ll be adding to this document from time to time.</p>
+<h2 id="some-background">Some background</h2>
+<p>MinUI is a custom launcher for a variety of handhelds - notably the Anbernic RGNNXX, Trimui, and Miyoo devices, amongst others. It provides a simple interface for launching emulators via <a href="https://www.libretro.com/">libretro</a> cores, allowing for resuse of existing emulators with a (very) sparing interface. Support for various cores depends on the device, but generally speaking MinUI does not support any OpenGL cores, meaning emulators for more modern consoles such as N64, Dreamcast, or Nintendo DS often need to use standalone “paks” that do not integrate as well with MinUI.</p>
+<blockquote>
+  <p>Note: MinUI has a variety of forks - MyMinUI, FinUI, Corak’s MinUI, and NextUI - which all support the same general emulation functionality, though may add extra features on top such as other devices, button shortcuts, or enhanced emulation support. This post won’t go into the vagaries of each project as that isn’t super important for the topic.</p>
+</blockquote>
+<p>A “pak” is a collection of files in a folder in a specific path on the SD Card which contains a MinUI installation. Paks are nominally device-specific in that the path where they are placed on the SD Card is a hint to MinUI to tell it whether the pak is loadable or not. Paks come in two varieties:</p>
+<ul>
+  <li><code>Emus</code>
+    <ul>
+      <li>Emu paks are either standalone emulators or wrappers for libretro cores
+        <ul>
+          <li>Standalone: A standalone emulator is <em>generally</em> a compiled binary for a particular platform and contains everything needed to launch the emulator. These generally do not integrate well with MinUI functionality (such as sleep, save states, etc.) but maintainers may be able to wrap the standalone emulator in such a way as to support some of the built-in MinUI functionality.</li>
+          <li>Libretro wrappers: All emulators distributed with MinUI are wrappers for libretro cores, and are generally compiled for the device in question using a compatible SDK. Developers may also opt to use a libretro core in a custom emu, though this is usually only done in cases where a developer is not familiar with compiling the core and wishes to use a pre-compiled binary from a Retroarch installation for that device.</li>
+        </ul>
+      </li>
+      <li>Community emu paks are stored at <code>/Emus/$PLATFORM/$EMU.pak</code>, where <code>$PLATFORM</code> is the device platform (such as <code>tg5040</code> for the Trimui Brick and TSP) and <code>$EMU</code> is the short name for the emu (such as <code>N64</code>).</li>
+    </ul>
+  </li>
+  <li><code>Tools</code>
+    <ul>
+      <li>Tools are extra utilities that can be launched on a MinUI installation. These can be as mundane as a button testing tool or something more complex, like an artwork scraper.</li>
+    </ul>
+  </li>
+</ul>
+<p>A pak <em>always</em> has a <code>launch.sh</code> file, which can be either an executable script or a compiled binary. If it is a compiled binary, developers will need to use a toolchain that supports the particular device in order to ensure the compiled binary supports the particular SDK for that device (such as certain sdl versions). The compiled binary can also be <em>launched by</em> the <code>launch.sh</code>, which is most common. Due to the need for an SDK and understanding of more complex programming languages, this is generally not the path folks take to write paks.</p>
+<p>The alternative to a compiled binary is to use a shell script for your <code>launch.sh</code> file. While common shell scripting uses <code>bash</code> for the execution environment, many devices do not have bash available, and thus it is recommended that users utilize regular <code>sh</code> for their scripts.</p>
+<blockquote>
+  <p>For a shell scripting tutorial, see <a href="https://www.shellscript.sh/">this site</a>.</p>
+</blockquote>
+<h2 id="pak-scaffolding">Pak scaffolding</h2>
+<p>A <code>launch.sh</code> shell script starts with the following shebang:</p>
+<pre><code class="language-shell">#!/bin/sh
+echo "logic goes here"
+</code></pre>
+<p>I usually start mine with the following (comments are inline to make it easier to understand):</p>
+<pre><code class="language-shell">#!/bin/sh
+# get the pak directory and name
+PAK_DIR="$(dirname "$0")"
+PAK_NAME="$(basename "$PAK_DIR")"
+PAK_NAME="${PAK_NAME%.*}"
+# turn on debugging so that I know what my script is executing
+set -x
+# optional, but remove the existing log file for the pak
+rm -f "$LOGS_PATH/$PAK_NAME.txt"
+# redirect stdout to the log directory, /.userdata/$PLATFORM/logs/$PAK_NAME.txt folder on your SD card.
+exec &gt;&gt;"$LOGS_PATH/$PAK_NAME.txt"
+# also redirect stderr to the same file
+exec 2&gt;&amp;1
+# write the current pak execution to the logs
+echo "$0" "$*"
+# change directories to my pak or error out if not possible
+# if it errors out, something is deeply wrong
+cd "$PAK_DIR" || exit 1
+# for paks that support arm and arm64, get the current path
+architecture=arm
+if uname -m | grep -q '64'; then
+    architecture=arm64
+fi
+# set the HOME directory to the shared path folder
+# /.userdata/$PLATFORM/$PAK_NAME
+export HOME="$SHARED_USERDATA_PATH/$PAK_NAME"
+# add $PAK_DIR/bin/$PLATFORM, $PAK_DIR/bin/$architecture, and $PAK_DIR/bin/shared directories to the PATH
+# this lets us override binaries on a per-platform or per-architecture basis
+# as well as have shared binaries that span all platforms and architectures
+export PATH="$PAK_DIR/bin/$PLATFORM:$PAK_DIR/bin/$architecture:$PAK_DIR/bin/shared:$PATH"
+</code></pre>
+<p>Many of these devices run some form of Busybox, and thus the available utilities is pretty lacking. You <em>may</em> have access to Python, but often you’ll need to distribute other binaries with your pak. I place them in the appropriate path (platform/architecture specific or shared) and ensure they are executable via <code>chmod +x</code> on the terminal.</p>
+<p>For any persistent data, I place it in the <code>$HOME</code> directory (as specified above) so that pak updates do not wipe out the data. This includes settings, which I can read and write in my pak like so:</p>
+<pre><code class="language-shell"># write a value to our key, usually as a default
+write_setting() {
+  key="$1"
+  value="$2"
+  echo "$value" &gt; "$HOME/$key"
+}
+# read a setting out for later usage
+# also add support for a default value
+read_setting() {
+  key="$1"
+  default_value="$2"
+  if [ -f "$HOME/$key" ]; then
+    cat "$HOME/$key"
+    return
+  fi
+  if [ -n "$default_value" ]; then
+    echo "$default_value"
+  fi
+}
+</code></pre>
+<p>Since you are writing shell code, you’ll probably want a way to either display a message, get input from a keyboard, or show a list of items on the screen. More complex packages will sometimes implement this in a single binary, but the following projects exist for interacting with <em>most</em> platforms supported by MinUI and it’s derivatives:</p>
+<ul>
+  <li><a href="https://github.com/josegonzalez/minui-btntest">minui-btntest</a>: Allows for listening for a specific button or button combination. This is useful for background processes that wait for gamepad shortcuts.</li>
+  <li><a href="https://github.com/josegonzalez/minui-keyboard">minui-keyboard</a>: Displays an onscreen keyboard, so that users may input data. Limited to the ASCII character set due to usage of the built-in font used by MinUI.</li>
+  <li><a href="https://github.com/josegonzalez/minui-list">minui-list</a>: Displays a scrollable list of items on screen, with support for displaying and interacting with the items in various ways.</li>
+  <li><a href="https://github.com/josegonzalez/minui-presenter">minui-presenter</a>: Displays a message on the screen, and can also be used in a slideshow-like manner, amongst other features.</li>
+</ul>
+<p>Generally speaking, you could use the above projects to support a workflow like:</p>
+<ul>
+  <li>Allowing someone to enable/disable background software</li>
+  <li>Displaying the current state of the background software</li>
+  <li>Showing error messages if the software cannot be launched</li>
+  <li>Showing some input for password collection</li>
+</ul>
+<p>The majority of existing community paks use shell scripting and the above binaries to provide their functionality, though users may use other projects as well.</p>
+<h2 id="starting-services-on-minui-boot">Starting services on MinUI boot</h2>
+<p>MinUI supports running a shared <code>auto.sh</code> file on MinUI start, and that can be abused to provide <code>init</code>-like behavior for starting services on device boot.</p>
+<p>The following is a pattern I use to start/stop services on boot. I use the following helper functions in my <code>launch.sh</code>:</p>
+<pre><code class="language-shell"># removes the `bin/shared/on-boot` script from auto.sh
+disable_start_on_boot() {
+    sed -i "/${PAK_NAME}.pak-on-boot/d" "$SDCARD_PATH/.userdata/$PLATFORM/auto.sh"
+    sync
+    return 0
+}
+# enables running the `bin/shared/on-boot` script on boot
+enable_start_on_boot() {
+    if [ ! -f "$SDCARD_PATH/.userdata/$PLATFORM/auto.sh" ]; then
+        echo '#!/bin/sh' &gt;"$SDCARD_PATH/.userdata/$PLATFORM/auto.sh"
+        echo '' &gt;&gt;"$SDCARD_PATH/.userdata/$PLATFORM/auto.sh"
+    fi
+    echo "test -f \"\$SDCARD_PATH/Tools/\$PLATFORM/$PAK_NAME.pak/bin/shared/on-boot\" &amp;&amp; \"\$SDCARD_PATH/Tools/\$PLATFORM/$PAK_NAME.pak/bin/shared/on-boot\" # ${PAK_NAME}.pak-on-boot" &gt;&gt;"$SDCARD_PATH/.userdata/$PLATFORM/auto.sh"
+    chmod +x "$SDCARD_PATH/.userdata/$PLATFORM/auto.sh"
+    sync
+    return 0
+}
+# check if the service is going to run on boot
+# useful for displaying status in the ui
+will_start_on_boot() {
+    if grep -q "${PAK_NAME}.pak-on-boot" "$SDCARD_PATH/.userdata/$PLATFORM/auto.sh" &gt;/dev/null 2&gt;&amp;1; then
+        return 0
+    fi
+    return 1
+}
+</code></pre>
+<p>I’ll then typically create a <code>bin/shared/on-boot</code> file in my pak with the following contents:</p>
+<pre><code class="language-shell">#!/bin/sh
+# some general scaffolding to ensure variables are properly set
+BIN_DIR="$(dirname "$0")"
+# get the pak directory and name
+PAK_DIR="$(dirname "$0")"
+PAK_NAME="$(basename "$PAK_DIR")"
+PAK_NAME="${PAK_NAME%.*}"
+# turn on debugging so that I know what my script is executing
+set -x
+# optional, but remove the existing log file for the pak
+rm -f "$LOGS_PATH/$PAK_NAME.txt"
+# redirect stdout to the log directory, /.userdata/$PLATFORM/logs/$PAK_NAME.txt folder on your SD card.
+exec &gt;&gt;"$LOGS_PATH/$PAK_NAME.txt"
+# also redirect stderr to the same file
+exec 2&gt;&amp;1
+# write the current pak execution to the logs
+echo "$0" "$*"
+# change directories to my pak or error out if not possible
+# if it errors out, something is deeply wrong
+cd "$PAK_DIR" || exit 1
+# the main script
+main() {
+  # run my bin/shared/service-on script in the background
+  "$BIN_DIR/shared/service-on" &amp;
+}
+main "$@"
+</code></pre>
+<p>The important part is the following:</p>
+<pre><code class="language-shell">"$BIN_DIR/shared/service-on" &amp;
+</code></pre>
+<p>This executes my <code>bin/shared/service-on</code> script in the background - the <code>&amp;</code> is used by shell to fork the process into the background and continue on. We do this so as to not potentially block MinUI from starting.</p>
+    </div>
+    <footer class="entry-meta">
+      This entry was posted in <a href="/categories/gaming" title="View all posts in gaming" rel="category">gaming</a> on <a href="http://josediazgonzalez.com/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/" title="10:40 pm" rel="bookmark"><time class="entry-date" datetime="2025-06-16 00:46:00 +0000">16 Jun 2025</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="/about/" title="See more info on Jose Diaz-Gonzalez" rel="author">Jose Diaz-Gonzalez</a></span></span>.
+    </footer>
+</article>
+  <div id="comments">
+    <div id="disqus_thread" name="#comments"></div>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+  </div>
+            </div>
+            <div class="column">
+              <div class="widget-area" role="complementary">
+    <aside class="sidebar widget widget_categories widget_search">
+            <input class="typeahead tt-query" type="text" placeholder="search for articles" autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top; background-color: transparent; width: 94%">
+        <div class="ebook">
+    <h3>Write better CakePHP code today!</h3>
+    <p><a href="/cakephp-book/"><img src="/images/title_page-preview.png"></a>Is CakePHP confusing? What if you could master it? Learn how a CakePHP Core Dev writes apps!</p>
+    <div class="ebook-link"><a href="/cakephp-book/" class="button">Buy now</a></div>
+</div>
+<h3 class="widget-title">Categories</h3>
+        <ul>
+                <li class="cat-item"><a href="/categories/cakephp"title="View all posts filed under Cakephp">Cakephp</a></li>
+                <li class="cat-item"><a href="/categories/dev-log"title="View all posts filed under Dev Log">Dev Log</a></li>
+                <li class="cat-item"><a href="/categories/gaming"title="View all posts filed under Gaming">Gaming</a></li>
+                <li class="cat-item"><a href="/categories/installation"title="View all posts filed under Installation">Installation</a></li>
+                <li class="cat-item"><a href="/categories/opschops"title="View all posts filed under Opschops">Opschops</a></li>
+                <li class="cat-item"><a href="/categories/other"title="View all posts filed under Other">Other</a></li>
+                <li class="cat-item"><a href="/categories/rant"title="View all posts filed under Rant">Rant</a></li>
+        </ul>
+    </aside>
+</div>
+            </div>
+          </div>
+      <script type="text/javascript" src="/javascripts/base.min.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+<script type="text/javascript">
+    if ($('#disqus_thread').length) {
+        var disqus_shortname  = 'josediazgonzalez';
+        var disqus_identifier = '/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/';
+        var disqus_url        = 'http://josediazgonzalez.com/2025/06/16/writing-a-pak-for-the-minui-and-nextui-launchers/';
+        var disqus_title      = "Writing a Pak for the MinUI and NextUI launchers";
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + 'josediazgonzalez' + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    }
+        (function() {
+            var ga = document.createElement('script');     ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+</script>
+    </div>
+  </body>
+</html>
