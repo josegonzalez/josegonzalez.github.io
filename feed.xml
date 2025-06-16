@@ -5,20 +5,20 @@
     <description>CakePHP Core Developer, Accidental Ops Guy, and Occasional Blogger</description>
     <link>http://josediazgonzalez.com/</link>
     <atom:link href="http://josediazgonzalez.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 16 Jun 2025 05:36:10 +0000</pubDate>
-    <lastBuildDate>Mon, 16 Jun 2025 05:36:10 +0000</lastBuildDate>
+    <pubDate>Mon, 16 Jun 2025 05:39:03 +0000</pubDate>
+    <lastBuildDate>Mon, 16 Jun 2025 05:39:03 +0000</lastBuildDate>
     <generator>Jekyll v4.4.1</generator>
     
       <item>
         <title>Writing a Pak for the MinUI and NextUI launchers</title>
-        <description>&lt;p&gt;This post is a collection of notes on how to create Paks for the MinUI libretro frontend and it’s forks, such as NextUI. Some of this material may be useful for other platforms, such as OnionOS. I’ll be adding to this document from time to time.&lt;/p&gt;
+        <description>&lt;p&gt;This post is a collection of notes on how to create Paks for the MinUI libretro frontend and it’s forks, such as &lt;a href=&quot;https://github.com/LoveRetro/NextUI&quot;&gt;NextUI&lt;/a&gt;. Some of this material may be useful for other platforms, such as OnionOS. I’ll be adding to this document from time to time.&lt;/p&gt;
 
 &lt;h2 id=&quot;some-background&quot;&gt;Some background&lt;/h2&gt;
 
 &lt;p&gt;MinUI is a custom launcher for a variety of handhelds - notably the Anbernic RGNNXX, Trimui, and Miyoo devices, amongst others. It provides a simple interface for launching emulators via &lt;a href=&quot;https://www.libretro.com/&quot;&gt;libretro&lt;/a&gt; cores, allowing for resuse of existing emulators with a (very) sparing interface. Support for various cores depends on the device, but generally speaking MinUI does not support any OpenGL cores, meaning emulators for more modern consoles such as N64, Dreamcast, or Nintendo DS often need to use standalone “paks” that do not integrate as well with MinUI.&lt;/p&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;Note: MinUI has a variety of forks - MyMinUI, FinUI, Corak’s MinUI, and NextUI - which all support the same general emulation functionality, though may add extra features on top such as other devices, button shortcuts, or enhanced emulation support. This post won’t go into the vagaries of each project as that isn’t super important for the topic.&lt;/p&gt;
+  &lt;p&gt;Note: MinUI has a variety of forks - &lt;a href=&quot;https://github.com/Turro75/MyMinUI&quot;&gt;MyMinUI&lt;/a&gt;, &lt;a href=&quot;https://github.com/robshape/FinUI&quot;&gt;FinUI&lt;/a&gt;, Corak’s MinUI, and NextUI - which all support the same general emulation functionality, though may add extra features on top such as other devices, button shortcuts, or enhanced emulation support. This post won’t go into the vagaries of each project as that isn’t super important for the topic.&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;A “pak” is a collection of files in a folder in a specific path on the SD Card which contains a MinUI installation. Paks are nominally device-specific in that the path where they are placed on the SD Card is a hint to MinUI to tell it whether the pak is loadable or not. Paks come in two varieties:&lt;/p&gt;
